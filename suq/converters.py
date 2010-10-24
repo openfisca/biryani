@@ -412,7 +412,7 @@ def url_name_from_clean_unicode(ctx, value):
         for character in u'\n\r/?#':
             value = value.replace(character, u' ')
         value = strings.normalize(value, separator = u'_')
-        return value, None
+        return value or None, None
 
 
 # Compound simple filtering functions
