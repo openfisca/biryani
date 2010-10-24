@@ -67,7 +67,7 @@ def compose(*filters):
 
 def default(constant):
     """Return a filter that replace missing value by given one."""
-    return lambda value: (constant, None) if value is None else (value, None)
+    return lambda ctx, value: (constant, None) if value is None else (value, None)
 
 
 def greater_or_equal(constant):
