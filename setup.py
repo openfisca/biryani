@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-"""Toolbox to convert values (in web forms, etc)"""
+"""Toolbox to convert and validate values (for web forms, etc)"""
 
 
 try:
