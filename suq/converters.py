@@ -38,6 +38,8 @@ domain_re = re.compile(r'''
     (?:[a-z0-9][a-z0-9\-]{0,62}\.)+ # (sub)domain - alpha followed by 62max chars (63 total)
     [a-z]{2,}$                      # TLD
     ''', re.I | re.VERBOSE)
+html_id_re = re.compile(r'[A-Za-z][A-Za-z0-9-_:.]+')
+html_name_re = html_id_re
 N_ = lambda s: s
 object_id_re = re.compile(r'[\da-f]{24}$')
 username_re = re.compile(r"[^ \t\n\r@<>()]+$", re.I)
@@ -560,6 +562,8 @@ date_from_iso8601 = compose(date_from_clean_iso8601, name_from_unicode)
 datetime_from_iso8601 = compose(datetime_from_clean_iso8601, name_from_unicode)
 email_from_unicode = compose(email_from_clean_unicode, name_from_unicode)
 float_from_unicode = compose(float_from_python_data, name_from_unicode)
+html_id_from_unicode = compose(match(html_id_re), name_from_unicode)
+html_name_from_unicode = compose(match(html_id_re), name_from_unicode)
 integer_from_unicode = compose(integer_from_python_data, name_from_unicode)
 json_from_unicode = compose(json_from_clean_unicode, clean_empty, strip())
 lang_from_unicode = compose(lang_from_clean_unicode, name_from_unicode)
