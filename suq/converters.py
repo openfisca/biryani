@@ -31,6 +31,7 @@ combined with other converters.
 
 
 import re
+import itertools
 
 
 domain_re = re.compile(r'''
@@ -47,8 +48,8 @@ username_re = re.compile(r"[^ \t\n\r@<>()]+$", re.I)
 
 def assert_ok(filter):
     """Return a compound filter that applies a filter, raising an assertion error if an error occurs."""
-    def f(ctx, value):
-        value, error = filter(ctx, value)
+    def f(ctx, *args, **kwargs):
+        value, error = filter(ctx, *args, **kwargs)
         assert error is None, error
         return value, error
     return f
@@ -56,11 +57,13 @@ def assert_ok(filter):
 
 def compose(*filters):
     """Return a compound filter that applies each of its filters (in reverse order) till the end or an error occurs."""
-    def f(ctx, value):
+    def f(ctx, *args, **kwargs):
         for filter in reversed(filters):
-            value, error = filter(ctx, value)
+            value, error = filter(ctx, *args, **kwargs)
             if error is not None:
                 return None, error
+            args = [value]
+            kwargs = {}
         return value, None
     return f
 
@@ -89,6 +92,28 @@ def less_or_equal(constant):
         else:
             _ = ctx.translator.ugettext
             return None, _('Value must be less than or equal to %s') % constant
+    return f
+
+
+def map(filter, constructor = list, keep_null_items = False, keep_empty = False):
+    """Return a filter that applies a filter to each value of a list."""
+    def f(self, ctx, values):
+        if values is None:
+            return None, None
+        else:
+            errors = {}
+            filtered_values = []
+            for i, value in enumerate(values):
+                filtered_value, error = filter(ctx, value)
+                if error is not None:
+                    errors[i] = error
+                if keep_null_items or filtered_value is not None:
+                    filtered_values.append(filtered_value)
+            if keep_empty or filtered_values:
+                filtered_values = constructor(filtered_values)
+            else:
+                filtered_values = None
+            return filtered_values, errors or None
     return f
 
 
@@ -121,6 +146,29 @@ def strip(chars = None):
             return None, None
         else:
             return value.strip(chars), None
+    return f
+
+
+def structure(constructor = list, keep_empty = False, *filters):
+    """Return a filter that map a list of filter to a list of values."""
+    def f(self, ctx, values):
+        if values is None:
+            return None, None
+        elif len(values) != len(filters):
+            return None, N_('Wrong values count %d instead of %d') % (len(values), len(filters))
+        else:
+            errors = {}
+            filtered_values = []
+            for i, (filter, value) in enumerate(itertools.izip(filters, values)):
+                filtered_value, error = filter(ctx, value)
+                if error is not None:
+                    errors[i] = error
+                filtered_values.append(filtered_value)
+            if keep_empty or filtered_values:
+                filtered_values = constructor(filtered_values)
+            else:
+                filtered_values = None
+            return filtered_values, errors or None
     return f
 
 
@@ -163,7 +211,19 @@ def url_from_unicode(full = False, remove_fragment = False, schemes = None):
         )
 
 
-# Simple filtering functions (without (value, error) parameter)
+# Filtering functions without (value, error) parameter
+
+
+def balanced_ternary_digit_from_clean_unicode(ctx, value):
+    """Convert a clean unicode string to an integer -1, 0 or 1."""
+    if value is None:
+        return None, None
+    else:
+        try:
+            return cmp(int(value), 0), None
+        except ValueError:
+            _ = ctx.translator.ugettext
+            return None, _('Value must be a balanced ternary digit')
 
 
 def boolean_from_clean_unicode(ctx, value):
@@ -176,6 +236,14 @@ def boolean_from_clean_unicode(ctx, value):
         except ValueError:
             _ = ctx.translator.ugettext
             return None, _('Value must be a boolean')
+
+
+def boolean_from_python_data(ctx, value):
+    """boolean any Python data to a boolean."""
+    if value is None:
+        return None, None
+    else:
+        return bool(value), None
 
 
 def clean_crlf(ctx, value):
@@ -205,6 +273,19 @@ def date_from_clean_iso8601(ctx, value):
             return None, _('Value must be a date in ISO 8601 format')
 
 
+def date_from_timestamp(ctx, value):
+    """Convert a JavaScript timestamp to a date."""
+    if value is None:
+        return None, None
+    else:
+        import datetime
+        try:
+            return datetime.date.fromtimestamp(value / 1000), None
+        except ValueError:
+            _ = ctx.translator.ugettext
+            return None, _('Value must be a timestamp')
+
+
 def datetime_from_clean_iso8601(ctx, value):
     """Convert a clean unicode string in ISO 8601 format to a datetime."""
     if value is None:
@@ -219,6 +300,20 @@ def datetime_from_clean_iso8601(ctx, value):
             return None, _('Value must be a date-time in ISO 8601 format')
 
 
+def datetime_from_timestamp(ctx, value):
+    """Convert a JavaScript timestamp to a datetime."""
+    if value is None:
+        return None, None
+    else:
+        import datetime
+        import pytz
+        try:
+            return datetime.datetime.fromtimestamp(value / 1000, pytz.utc), None
+        except ValueError:
+            _ = ctx.translator.ugettext
+            return None, _('Value must be a timestamp')
+
+
 def email_from_clean_unicode(ctx, value):
     """Convert a clean unicode string to an email address."""
     if value is None:
@@ -228,10 +323,13 @@ def email_from_clean_unicode(ctx, value):
         try:
             username, domain = value.split('@', 1)
         except ValueError:
+            _ = ctx.translator.ugettext
             return None, _('An email must contain exactly one "@".')
         if not username_re.match(username):
+            _ = ctx.translator.ugettext
             return None, _('Invalid username')
         if not domain_re.match(domain) and domain != 'localhost':
+            _ = ctx.translator.ugettext
             return None, _('Invalid domain name')
         return value, None
 
@@ -241,8 +339,8 @@ def empty_string_from_none(ctx, value):
     return u'' if value is None else value, None
 
 
-def float_from_clean_unicode(ctx, value):
-    """Convert a clean unicode string to a float."""
+def float_from_python_data(ctx, value):
+    """Convert any python data to a float."""
     if value is None:
         return None, None
     else:
@@ -253,8 +351,8 @@ def float_from_clean_unicode(ctx, value):
             return None, _('Value must be a float')
 
 
-def integer_from_clean_unicode(ctx, value):
-    """Convert a clean unicode string to an integer."""
+def integer_from_python_data(ctx, value):
+    """Convert any python data to an integer."""
     if value is None:
         return None, None
     else:
@@ -278,7 +376,7 @@ def iso8601_from_datetime(ctx, value):
     if value is None:
         return None, None
     else:
-        unicode(value.strftime('%Y-%m-%d %H:%M:%S')), None
+        return unicode(value.strftime('%Y-%m-%d %H:%M:%S')), None
 
 
 def json_from_clean_unicode(ctx, value):
@@ -385,6 +483,37 @@ def require(ctx, value):
         return value, None
 
 
+def slug_from_clean_unicode(ctx, value):
+    """Convert a clean unicode string to a slug."""
+    if value is None:
+        return None, None
+    else:
+        from suq import strings
+        value = strings.simplify(value)
+        return value or None, None
+
+
+def timestamp_from_date(ctx, value):
+    """Convert a datetime to a JavaScript timestamp."""
+    if value is None:
+        return None, None
+    else:
+        import calendar
+        return int(calendar.timegm(value.timetuple()) * 1000), None
+
+
+def timestamp_from_datetime(ctx, value):
+    """Convert a datetime to a JavaScript timestamp."""
+    if value is None:
+        return None, None
+    else:
+        import calendar
+        utcoffset = value.utcoffset()
+        if utcoffset is not None:
+            value -= utcoffset
+        return int(calendar.timegm(value.timetuple()) * 1000 + value.microsecond / 1000), None
+
+
 def unicode_from_boolean(ctx, value):
     """Convert a boolean to unicode."""
     if value is None:
@@ -415,31 +544,39 @@ def url_name_from_clean_unicode(ctx, value):
         return value or None, None
 
 
-# Compound simple filtering functions
+# Base compound filtering functions
 
 
-boolean_from_unicode = compose(boolean_from_clean_unicode, clean_empty, strip())
-date_from_iso8601 = compose(date_from_clean_iso8601, clean_empty, strip())
-datetime_from_iso8601 = compose(datetime_from_clean_iso8601, clean_empty, strip())
-email_from_unicode = compose(email_from_clean_unicode, clean_empty, strip())
-float_from_unicode = compose(float_from_clean_unicode, clean_empty, strip())
-integer_from_unicode = compose(integer_from_clean_unicode, clean_empty, strip())
+name_from_unicode = compose(clean_empty, strip())
+text_from_unicode = compose(clean_empty, strip(), clean_crlf)
+
+
+# Compound filtering functions
+
+
+balanced_ternary_digit_from_unicode = compose(balanced_ternary_digit_from_clean_unicode, name_from_unicode)
+boolean_from_unicode = compose(boolean_from_clean_unicode, name_from_unicode)
+date_from_iso8601 = compose(date_from_clean_iso8601, name_from_unicode)
+datetime_from_iso8601 = compose(datetime_from_clean_iso8601, name_from_unicode)
+email_from_unicode = compose(email_from_clean_unicode, name_from_unicode)
+float_from_unicode = compose(float_from_python_data, name_from_unicode)
+integer_from_unicode = compose(integer_from_python_data, name_from_unicode)
 json_from_unicode = compose(json_from_clean_unicode, clean_empty, strip())
-lang_from_unicode = compose(lang_from_clean_unicode, clean_empty, strip())
-object_id_from_unicode = compose(object_id_from_clean_unicode, clean_empty, strip())
-phone_from_unicode = compose(phone_from_clean_unicode, clean_empty, strip())
-strictly_positive_integer_from_unicode = compose(greater_or_equal(1), integer_from_clean_unicode, clean_empty, strip())
-text_from_unicode = compose(clean_crlf, strip(), clean_empty, strip(), clean_crlf)
-url_name_from_unicode = compose(url_name_from_clean_unicode, clean_empty, strip())
+lang_from_unicode = compose(lang_from_clean_unicode, name_from_unicode)
+object_id_from_unicode = compose(object_id_from_clean_unicode, name_from_unicode)
+phone_from_unicode = compose(phone_from_clean_unicode, name_from_unicode)
+slug_from_unicode = compose(slug_from_clean_unicode, name_from_unicode)
+strictly_positive_integer_from_unicode = compose(greater_or_equal(1), integer_from_unicode)
+url_name_from_unicode = compose(url_name_from_clean_unicode, name_from_unicode)
 
 
 # Constructors that return functions using filters.
 
 
 def to_value(filter):
-    """Return a function that calls a filtersand returns its result value, ignoring any error."""
-    def f(ctx, value):
-        value, error = filter(ctx, value)
+    """Return a function that calls a filter and returns its result value, ignoring any error."""
+    def f(ctx, *args, **kwargs):
+        value, error = filter(ctx, *args, **kwargs)
         return value
     return f
 
