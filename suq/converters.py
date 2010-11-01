@@ -63,7 +63,7 @@ def compose(*filters):
         for filter in reversed(filters):
             value, error = filter(ctx, *args, **kwargs)
             if error is not None:
-                return None, error
+                return value, error
             args = [value]
             kwargs = {}
         return value, None
@@ -138,6 +138,25 @@ def restrict(values):
         else:
             _ = ctx.translator.ugettext
             return None, _('Value must be one of %s') % list(values)
+    return f
+
+
+def restrict_json_class_name(values):
+    """Return a filter that accepts only JSON dictionaries with an attribute "class_name" belonging to given set."""
+    def f(ctx, value):
+        if value is None:
+            return value, None
+        if not isinstance(value, dict):
+            _ = ctx.translator.ugettext
+            return None, _('Invalid value: Not a JSON dictionary')
+        class_name = value.get('class_name')
+        if class_name is None:
+            _ = ctx.translator.ugettext
+            return None, _('Missing class name in JSON dictionary')
+        if values is not None and class_name not in values:
+            _ = ctx.translator.ugettext
+            return None, _('Value must be one of %s') % list(values)
+        return value, None
     return f
 
 
@@ -275,6 +294,14 @@ def date_from_clean_iso8601(ctx, value):
             return None, _('Value must be a date in ISO 8601 format')
 
 
+def date_from_datetime(ctx, value):
+    """Convert a datetime object to a date."""
+    if value is None:
+        return None, None
+    else:
+        return value.date(), None
+
+
 def date_from_timestamp(ctx, value):
     """Convert a JavaScript timestamp to a date."""
     if value is None:
@@ -300,6 +327,15 @@ def datetime_from_clean_iso8601(ctx, value):
         except ValueError:
             _ = ctx.translator.ugettext
             return None, _('Value must be a date-time in ISO 8601 format')
+
+
+def datetime_from_date(ctx, value):
+    """Convert a date object to a datetime."""
+    if value is None:
+        return None, None
+    else:
+        import datetime
+        return datetime.datetime(value.year, value.month, value.day), None
 
 
 def datetime_from_timestamp(ctx, value):
@@ -524,6 +560,14 @@ def unicode_from_boolean(ctx, value):
         return unicode(int(bool(value))), None
 
 
+def unicode_from_object_id(ctx, value):
+    """Convert a MongoDB ObjectId to unicode."""
+    if value is None:
+        return None, None
+    else:
+        return unicode(value), None
+
+
 def unicode_from_python_data(ctx, value):
     """Convert any Python data to unicode."""
     if value is None:
@@ -557,6 +601,7 @@ text_from_unicode = compose(clean_empty, strip(), clean_crlf)
 
 
 balanced_ternary_digit_from_unicode = compose(balanced_ternary_digit_from_clean_unicode, name_from_unicode)
+boolean_from_form_data = compose(default(False), boolean_from_clean_unicode, name_from_unicode)
 boolean_from_unicode = compose(boolean_from_clean_unicode, name_from_unicode)
 date_from_iso8601 = compose(date_from_clean_iso8601, name_from_unicode)
 datetime_from_iso8601 = compose(datetime_from_clean_iso8601, name_from_unicode)
