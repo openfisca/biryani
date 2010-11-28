@@ -87,6 +87,17 @@ def default(constant):
     return lambda ctx, value: (constant, None) if value is None else (value, None)
 
 
+def is_instance(class_or_classes):
+    """Return a filter that accepts only an instance of given classes."""
+    def f(ctx, value):
+        if class_or_classes is None or value is None or isinstance(value, class_or_classes):
+            return value, None
+        else:
+            _ = ctx.translator.ugettext
+            return None, _('Value is not an instance of {0}').format(class_or_classes)
+    return f
+
+
 def greater_or_equal(constant):
     """Return a filter that accepts only values greater than or equal to given constant."""
     def f(ctx, value):
