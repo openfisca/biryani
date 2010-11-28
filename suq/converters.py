@@ -142,6 +142,37 @@ def map(filter, constructor = list, keep_null_items = False, keep_empty = False)
     return f
 
 
+def mapping(filters, ignore_extras = False, constructor = dict, keep_empty = False):
+    """Return a filter that maps a mapping of filters to a mapping (ie dict, etc) of values."""
+    filters = dict(
+        (name, filter)
+        for name, filter in (filters or {}).iteritems()
+        if filter is not None
+        )
+    def f(ctx, values):
+        if values is None:
+            return None, None
+        errors = {}
+        filtered_values = {}
+        if not ignore_extras and not set(values.iterkeys()).issubset(filters.iterkeys()):
+            _ = ctx.translator.ugettext
+            for name in values:
+                if name not in filters:
+                    errors[name] = _('Unexpected item')
+        for name, filter in filters.iteritems():
+            filtered_value, error = filter(ctx, values.get(name))
+            if error is not None:
+                errors[name] = error
+            elif filtered_value is not None:
+                filtered_values[name] = filtered_value
+        if keep_empty or filtered_values:
+            filtered_values = constructor(filtered_values)
+        else:
+            filtered_values = None
+        return filtered_values, errors or None
+    return f
+
+
 def match(regex):
     """Return a filter that accepts only values that match given (compiled) regular expression."""
     def f(ctx, value):
