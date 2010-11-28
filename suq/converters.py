@@ -282,23 +282,22 @@ def url_from_clean_unicode(full = False, remove_fragment = False, schemes = ('ht
             if full and not scheme:
                 _ = ctx.translator.ugettext
                 return None, _('URL must be complete"')
-            elif schemes is not None and scheme not in schemes:
+            if scheme and schemes is not None and scheme not in schemes:
                 _ = ctx.translator.ugettext
-                return None, _('Scheme must belongs to %s') % sorted(schemes)
-            else:
-                network_location = split_url[1]
-                if network_location != network_location.lower():
-                    split_url[1] = network_location = network_location.lower()
-                if scheme in ('http', 'https') and not split_url[2]:
-                    # By convention a full HTTP URL must always have at least a "/" in its path.
-                    split_url[2] = '/'
-                if remove_fragment and split_url[4]:
-                    split_url[4] = ''
-                return unicode(urlparse.urlunsplit(split_url)), None
+                return None, _('Scheme must belong to {0}').format(sorted(schemes))
+            network_location = split_url[1]
+            if network_location != network_location.lower():
+                split_url[1] = network_location = network_location.lower()
+            if scheme in ('http', 'https') and not split_url[2]:
+                # By convention a full HTTP URL must always have at least a "/" in its path.
+                split_url[2] = '/'
+            if remove_fragment and split_url[4]:
+                split_url[4] = ''
+            return unicode(urlparse.urlunsplit(split_url)), None
     return f
 
 
-def url_from_unicode(full = False, remove_fragment = False, schemes = None):
+def url_from_unicode(full = False, remove_fragment = False, schemes = ('http', 'https')):
     """Return a filter that converts an unicode string to an URL."""
     return compose(
         url_from_clean_unicode(full = full, remove_fragment = remove_fragment, schemes = schemes),
