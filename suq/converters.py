@@ -184,6 +184,20 @@ def match(regex):
     return f
 
 
+def object_from_id(object_class):
+    def f(ctx, value):
+        """Convert an ID to an object wrapped to a MongoDB document."""
+        if value is None:
+            return None, None
+        else:
+            instance = object_class.find_one(value)
+            if instance is None:
+                _ = ctx.translator.ugettext
+                return None, _('No document with ID: {0}').format(value)
+            return instance, None
+    return f
+
+
 def restrict(values):
     """Return a filter that accepts only values belonging to a given set (or list or...)."""
     def f(ctx, value):
