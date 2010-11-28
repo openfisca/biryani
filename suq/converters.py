@@ -71,6 +71,8 @@ def compose(*filters):
     """Return a compound filter that applies each of its filters (in reverse order) till the end or an error occurs."""
     def f(ctx, *args, **kwargs):
         for filter in reversed(filters):
+            if filter is None:
+                continue
             value, error = filter(ctx, *args, **kwargs)
             if error is not None:
                 return value, error
