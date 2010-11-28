@@ -105,7 +105,7 @@ def greater_or_equal(constant):
             return value, None
         else:
             _ = ctx.translator.ugettext
-            return None, _('Value must be greater than or equal to %s') % constant
+            return None, _('Value must be greater than or equal to {0}').format(constant)
     return f
 
 
@@ -116,7 +116,7 @@ def less_or_equal(constant):
             return value, None
         else:
             _ = ctx.translator.ugettext
-            return None, _('Value must be less than or equal to %s') % constant
+            return None, _('Value must be less than or equal to {0}').format(constant)
     return f
 
 
@@ -205,7 +205,7 @@ def restrict(values):
             return value, None
         else:
             _ = ctx.translator.ugettext
-            return None, _('Value must be one of %s') % list(values)
+            return None, _('Value must be one of {0}').format(values)
     return f
 
 
@@ -223,7 +223,7 @@ def restrict_json_class_name(values):
             return None, _('Missing class name in JSON dictionary')
         if values is not None and class_name not in values:
             _ = ctx.translator.ugettext
-            return None, _('Value must be one of %s') % list(values)
+            return None, _('Value must be one of {0}').format(values)
         return value, None
     return f
 
@@ -565,10 +565,10 @@ def phone_from_clean_unicode(ctx, value):
                 }.get(value[2:5])
             if country is not None:
                 if len(value) == 11:
-                    return '+%s %s %s %s' % (value[2:5], value[5:7], value[7:9], value[9:11]), None
+                    return '+{0} {1} {2} {3}'.format(value[2:5], value[5:7], value[7:9], value[9:11]), None
                 else:
                     _ = ctx.translator.ugettext
-                    return None, _('Wrong number of digits for phone number of %s') % _(country)
+                    return None, _('Wrong number of digits for phone number of {0}').format(_(country))
             else:
                 _ = ctx.translator.ugettext
                 return None, _('Unknown international phone number')
@@ -577,10 +577,10 @@ def phone_from_clean_unicode(ctx, value):
         elif len(value) == 10:
             if value[0] != '0':
                 _ = ctx.translator.ugettext
-                return None, _('Unexpected first digit in phone number: %s instead of 0') % value[0]
+                return None, _('Unexpected first digit in phone number: {0} instead of 0').format(value[0])
             else:
-                mask = '+33 %s%s %s %s %s' if value[1] == '8' else '+33 %s %s %s %s %s'
-                return mask % (value[1], value[2:4], value[4:6], value[6:8], value[8:10]), None
+                mask = '+33 {0}{1} {2} {3} {4}' if value[1] == '8' else '+33 {0} {1} {2} {3} {4}'
+                return mask.format(value[1], value[2:4], value[4:6], value[6:8], value[8:10]), None
         else:
             _ = ctx.translator.ugettext
             return None, _('Wrong number of digits in phone number')
