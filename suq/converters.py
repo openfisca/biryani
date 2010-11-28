@@ -121,8 +121,8 @@ def less_or_equal(constant):
 
 
 def map(filter, constructor = list, keep_null_items = False, keep_empty = False):
-    """Return a filter that applies a filter to each value of a list."""
-    def f(self, ctx, values):
+    """Return a filter that applies the same filter to each value of a list."""
+    def f(ctx, values):
         if values is None:
             return None, None
         else:
