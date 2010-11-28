@@ -57,6 +57,16 @@ def assert_ok(filter):
     return f
 
 
+def attribute(name):
+    """Return a filter that retrieve an existing attribute from an object."""
+    def f(ctx, value):
+        if value is None or name is None:
+            return value, None
+        # It assumes that an attribute is always declared in its class, so it always exists.
+        return getattr(value, name)
+    return f
+
+
 def compose(*filters):
     """Return a compound filter that applies each of its filters (in reverse order) till the end or an error occurs."""
     def f(ctx, *args, **kwargs):
