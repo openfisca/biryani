@@ -228,27 +228,24 @@ def restrict_json_class_name(values):
     return f
 
 
-def strip(chars = None):
-    """Returns a filter that removes leading and trailing characters from string."""
-    def f(ctx, value):
-        if value is None:
-            return None, None
-        else:
-            return value.strip(chars), None
-    return f
-
-
-def structure(constructor = list, keep_empty = False, *filters):
-    """Return a filter that map a list of filter to a list of values."""
-    def f(self, ctx, values):
+def sequence(constructor = list, ignore_extras = False, keep_empty = False, *filters):
+    """Return a filter that map a sequence of filters to a sequence of values."""
+    filters = [
+        filter
+        for filter in filters or []
+        if filter is not None
+        ]
+    def f(ctx, values):
         if values is None:
             return None, None
-        elif len(values) != len(filters):
-            return None, N_('Wrong values count %d instead of %d') % (len(values), len(filters))
+        elif len(values) > len(filters) and not ignore_extras:
+            _ = ctx.translator.ugettext
+            return None, _('Too much values: {0} instead of {1}').format(len(values), len(filters))
         else:
             errors = {}
             filtered_values = []
-            for i, (filter, value) in enumerate(itertools.izip(filters, values)):
+            for i, (filter, value) in enumerate(itertools.izip_longuest(
+                    filters, itertools.islice(values, len(filters)))):
                 filtered_value, error = filter(ctx, value)
                 if error is not None:
                     errors[i] = error
@@ -258,6 +255,16 @@ def structure(constructor = list, keep_empty = False, *filters):
             else:
                 filtered_values = None
             return filtered_values, errors or None
+    return f
+
+
+def strip(chars = None):
+    """Returns a filter that removes leading and trailing characters from string."""
+    def f(ctx, value):
+        if value is None:
+            return None, None
+        else:
+            return value.strip(chars), None
     return f
 
 
