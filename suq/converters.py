@@ -244,7 +244,7 @@ def sequence(filters, constructor = list, ignore_extras = False, keep_empty = Fa
         else:
             errors = {}
             filtered_values = []
-            for i, (filter, value) in enumerate(itertools.izip_longuest(
+            for i, (filter, value) in enumerate(itertools.izip_longest(
                     filters, itertools.islice(values, len(filters)))):
                 filtered_value, error = filter(ctx, value)
                 if error is not None:
