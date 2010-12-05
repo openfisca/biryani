@@ -228,7 +228,7 @@ def restrict_json_class_name(values):
     return f
 
 
-def sequence(constructor = list, ignore_extras = False, keep_empty = False, *filters):
+def sequence(filters, constructor = list, ignore_extras = False, keep_empty = False):
     """Return a filter that map a sequence of filters to a sequence of values."""
     filters = [
         filter
