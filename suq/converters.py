@@ -656,12 +656,12 @@ def unicode_from_python_data(ctx, value):
 
 
 def url_name_from_clean_unicode(ctx, value):
-    """Convert a clean unicode string to a normalized string that can be used as a part of an URL path."""
+    """Convert a clean unicode string to a normalized string that can be used in an URL path or a query parameter."""
     if value is None:
         return None, None
     else:
         from suq import strings
-        for character in u'\n\r/?#':
+        for character in u'\n\r/?&#':
             value = value.replace(character, u' ')
         value = strings.normalize(value, separator = u'_')
         return value or None, None
