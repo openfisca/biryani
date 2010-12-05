@@ -684,6 +684,14 @@ date_from_iso8601 = compose(date_from_clean_iso8601, name_from_unicode)
 datetime_from_iso8601 = compose(datetime_from_clean_iso8601, name_from_unicode)
 email_from_unicode = compose(email_from_clean_unicode, name_from_unicode)
 float_from_unicode = compose(float_from_python_data, name_from_unicode)
+geo_from_python_data = compose(
+    sequence([
+        compose(greater_or_equal(-90), less_or_equal(90), float_from_python_data), # latitude
+        compose(greater_or_equal(-180), less_or_equal(180), float_from_python_data), # longitude
+        compose(greater_or_equal(0), less_or_equal(9), integer_from_python_data), # accuracy
+        ], ignore_extras = True),
+    is_instance((list, tuple)),
+    )
 html_id_from_unicode = compose(match(html_id_re), name_from_unicode)
 html_name_from_unicode = compose(match(html_id_re), name_from_unicode)
 integer_from_unicode = compose(integer_from_python_data, name_from_unicode)
