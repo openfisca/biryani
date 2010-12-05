@@ -446,7 +446,7 @@ def email_from_clean_unicode(ctx, value):
         return value, None
 
 
-def empty_string_from_none(ctx, value):
+def empty_unicode_from_none(ctx, value):
     """Replace None value with empty string."""
     return u'' if value is None else value, None
 
