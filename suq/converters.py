@@ -120,7 +120,7 @@ def less_or_equal(constant):
     return f
 
 
-def map(filter, constructor = list, keep_null_items = False, keep_empty = False):
+def map(filter, constructor = list, keep_empty = False, keep_null_items = False):
     """Return a filter that applies the same filter to each value of a list."""
     def f(ctx, values):
         if values is None:
