@@ -497,6 +497,9 @@ def json_from_clean_unicode(ctx, value):
         return None, None
     else:
         import simplejson as json
+        if isinstance(value, str):
+            # Ensure that json.loads() uses unicode strings.
+            value = value.decode('utf-8')
         try:
             return json.loads(value), None
         except json.JSONDecodeError, e:
