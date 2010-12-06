@@ -258,6 +258,26 @@ def sequence(filters, constructor = list, ignore_extras = False, keep_empty = Fa
     return f
 
 
+def sort(cmp = None, key = None, reverse = False):
+    """Return a filter that sorts an iterable."""
+    def f(ctx, values):
+        if values is None:
+            return None, None
+        else:
+            return sorted(values, cmp = cmp, key = key, reverse = reverse), None
+    return f
+
+
+def split(separator = None):
+    """Returns a filter that splits a string."""
+    def f(ctx, value):
+        if value is None:
+            return None, None
+        else:
+            return value.split(separator), None
+    return f
+
+
 def strip(chars = None):
     """Returns a filter that removes leading and trailing characters from string."""
     def f(ctx, value):
