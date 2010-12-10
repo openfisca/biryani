@@ -63,7 +63,7 @@ def attribute(name):
         if value is None or name is None:
             return value, None
         # It assumes that an attribute is always declared in its class, so it always exists.
-        return getattr(value, name)
+        return getattr(value, name), None
     return f
 
 
