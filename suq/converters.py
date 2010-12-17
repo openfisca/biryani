@@ -288,6 +288,16 @@ def strip(chars = None):
     return f
 
 
+def translate(conversions):
+    """Return a filter that converts values found in given dictionary and keep others as is."""
+    def f(ctx, value):
+        if value is None or conversions is None or value not in conversions:
+            return value, None
+        else:
+            return conversions[value], None
+    return f
+
+
 def url_from_clean_unicode(full = False, remove_fragment = False, schemes = ('http', 'https')):
     """Return a filter that converts a clean unicode string to an URL."""
     def f(ctx, value):
