@@ -30,6 +30,7 @@ combined with other converters.
 """
 
 
+import gettext
 import re
 import itertools
 
@@ -43,6 +44,15 @@ html_name_re = html_id_re
 N_ = lambda s: s
 object_id_re = re.compile(r'[\da-f]{24}$')
 username_re = re.compile(r"[^ \t\n\r@<>()]+$", re.I)
+
+
+# Minimal context, usable with converters
+
+
+class Context(object):
+    translator = gettext.NullTranslations()
+
+ctx = Context()
 
 
 # Constructors that return filters
