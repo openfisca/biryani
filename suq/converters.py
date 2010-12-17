@@ -193,7 +193,7 @@ def object_from_id(object_class):
             instance = object_class.find_one(value)
             if instance is None:
                 _ = ctx.translator.ugettext
-                return None, _('No document with ID: {0}').format(value)
+                return None, _('No document of class {0} with ID {1}').format(object_class.__name__, value)
             return instance, None
     return f
 
