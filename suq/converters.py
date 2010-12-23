@@ -34,6 +34,11 @@ import gettext
 import re
 import itertools
 
+try:
+    import pymongo
+except ImportError:
+    pymongo = None
+
 
 domain_re = re.compile(r'''
     (?:[a-z0-9][a-z0-9\-]{0,62}\.)+ # (sub)domain - alpha followed by 62max chars (63 total)
@@ -42,7 +47,8 @@ domain_re = re.compile(r'''
 html_id_re = re.compile(r'[A-Za-z][A-Za-z0-9-_:.]+')
 html_name_re = html_id_re
 N_ = lambda s: s
-object_id_re = re.compile(r'[\da-f]{24}$')
+if pymongo is not None:
+    object_id_re = re.compile(r'[\da-f]{24}$')
 username_re = re.compile(r"[^ \t\n\r@<>()]+$", re.I)
 
 
@@ -554,17 +560,17 @@ def noop(ctx, value):
     return value, None
 
 
-def object_id_from_clean_unicode(ctx, value):
-    """Convert a clean unicode string to MongoDB ObjectId."""
-    if value is None:
-        return None, None
-    else:
-        import pymongo
-        id = value.lower()
-        if object_id_re.match(id) is None:
-            _ = ctx.translator.ugettext
-            return None, _('Invalid value')
-        return pymongo.objectid.ObjectId(id), None
+if pymongo is not None:
+    def object_id_from_clean_unicode(ctx, value):
+        """Convert a clean unicode string to MongoDB ObjectId."""
+        if value is None:
+            return None, None
+        else:
+            id = value.lower()
+            if object_id_re.match(id) is None:
+                _ = ctx.translator.ugettext
+                return None, _('Invalid value')
+            return pymongo.objectid.ObjectId(id), None
 
 
 def phone_from_clean_unicode(ctx, value):
@@ -668,12 +674,13 @@ def unicode_from_boolean(ctx, value):
         return unicode(int(bool(value))), None
 
 
-def unicode_from_object_id(ctx, value):
-    """Convert a MongoDB ObjectId to unicode."""
-    if value is None:
-        return None, None
-    else:
-        return unicode(value), None
+if pymongo is not None:
+    def unicode_from_object_id(ctx, value):
+        """Convert a MongoDB ObjectId to unicode."""
+        if value is None:
+            return None, None
+        else:
+            return unicode(value), None
 
 
 def unicode_from_python_data(ctx, value):
@@ -728,7 +735,13 @@ html_name_from_unicode = compose(match(html_id_re), name_from_unicode)
 integer_from_unicode = compose(integer_from_python_data, name_from_unicode)
 json_from_unicode = compose(json_from_clean_unicode, clean_empty, strip())
 lang_from_unicode = compose(lang_from_clean_unicode, name_from_unicode)
-object_id_from_unicode = compose(object_id_from_clean_unicode, name_from_unicode)
+if pymongo is not None:
+    object_id_from_unicode = compose(object_id_from_clean_unicode, name_from_unicode)
+    object_id_from_python_data = condition(
+        is_instance(pymongo.objectid.ObjectId),
+        noop,
+        compose(object_id_from_unicode, is_instance(basestring)),
+        )
 phone_from_unicode = compose(phone_from_clean_unicode, name_from_unicode)
 slug_from_unicode = compose(slug_from_clean_unicode, name_from_unicode)
 strictly_positive_integer_from_unicode = compose(greater_or_equal(1), integer_from_unicode)
