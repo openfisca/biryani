@@ -105,6 +105,15 @@ def default(constant):
     return lambda ctx, value: (constant, None) if value is None else (value, None)
 
 
+def function(function):
+    """Return a filter that applies a function to value and returns a new value."""
+    def f(ctx, value):
+        if value is None or function is None:
+            return value, None
+        return function(value), None
+    return f
+
+
 def is_instance(class_or_classes):
     """Return a filter that accepts only an instance of given classes."""
     def f(ctx, value):
