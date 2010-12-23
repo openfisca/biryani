@@ -65,7 +65,7 @@ ctx = Context()
 
 
 def attribute(name):
-    """Return a filter that retrieve an existing attribute from an object."""
+    """Return a filter that retrieves an existing attribute from an object."""
     def f(ctx, value):
         if value is None or name is None:
             return value, None
