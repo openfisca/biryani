@@ -58,15 +58,6 @@ ctx = Context()
 # Constructors that return filters
 
 
-def assert_ok(filter):
-    """Return a compound filter that applies a filter, raising an assertion error if an error occurs."""
-    def f(ctx, *args, **kwargs):
-        value, error = filter(ctx, *args, **kwargs)
-        assert error is None, error
-        return value, error
-    return f
-
-
 def attribute(name):
     """Return a filter that retrieve an existing attribute from an object."""
     def f(ctx, value):
@@ -747,10 +738,12 @@ url_name_from_unicode = compose(url_name_from_clean_unicode, name_from_unicode)
 # Constructors that return functions using filters.
 
 
-def to_value(filter):
-    """Return a function that calls a filter and returns its result value, ignoring any error."""
+def to_value(filter, ignore_error = False):
+    """Return a function that calls a filter and returns its result value."""
     def f(ctx, *args, **kwargs):
         value, error = filter(ctx, *args, **kwargs)
+        if not ignore_error and error is not None:
+            raise ValueError(error)
         return value
     return f
 
