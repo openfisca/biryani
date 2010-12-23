@@ -89,6 +89,17 @@ def compose(*filters):
     return f
 
 
+def condition(test_filter, ok_filter, error_filter):
+    """When ``test_filter`` succeeds (ie no error), then applies ``ok_filter``, otherwise applies ``error_filter``."""
+    def f(ctx, value):
+        test, error = test_filter(ctx, value)
+        if error is None:
+            return ok_filter(ctx, value)
+        else:
+            return error_filter(ctx, value)
+    return f
+
+
 def default(constant):
     """Return a filter that replace missing value by given one."""
     return lambda ctx, value: (constant, None) if value is None else (value, None)
