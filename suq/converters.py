@@ -147,56 +147,12 @@ def less_or_equal(constant):
     return f
 
 
-def map(filter, constructor = list, keep_empty = False, keep_null_items = False):
-    """Return a filter that applies the same filter to each value of a list."""
-    def f(ctx, values):
-        if values is None:
+def mapping_value(key, default = None):
+    """Return a filter that retrieves an item value from a mapping."""
+    def f(ctx, value):
+        if value is None:
             return None, None
-        else:
-            errors = {}
-            filtered_values = []
-            for i, value in enumerate(values):
-                filtered_value, error = filter(ctx, value)
-                if error is not None:
-                    errors[i] = error
-                if keep_null_items or filtered_value is not None:
-                    filtered_values.append(filtered_value)
-            if keep_empty or filtered_values:
-                filtered_values = constructor(filtered_values)
-            else:
-                filtered_values = None
-            return filtered_values, errors or None
-    return f
-
-
-def mapping(filters, ignore_extras = False, constructor = dict, keep_empty = False):
-    """Return a filter that maps a mapping of filters to a mapping (ie dict, etc) of values."""
-    filters = dict(
-        (name, filter)
-        for name, filter in (filters or {}).iteritems()
-        if filter is not None
-        )
-    def f(ctx, values):
-        if values is None:
-            return None, None
-        errors = {}
-        filtered_values = {}
-        if not ignore_extras and not set(values.iterkeys()).issubset(filters.iterkeys()):
-            _ = ctx.translator.ugettext
-            for name in values:
-                if name not in filters:
-                    errors[name] = _('Unexpected item')
-        for name, filter in filters.iteritems():
-            filtered_value, error = filter(ctx, values.get(name))
-            if error is not None:
-                errors[name] = error
-            elif filtered_value is not None:
-                filtered_values[name] = filtered_value
-        if keep_empty or filtered_values:
-            filtered_values = constructor(filtered_values)
-        else:
-            filtered_values = None
-        return filtered_values, errors or None
+        return value.get(key, default), None
     return f
 
 
@@ -255,36 +211,6 @@ def restrict_json_class_name(values):
     return f
 
 
-def sequence(filters, constructor = list, ignore_extras = False, keep_empty = False):
-    """Return a filter that map a sequence of filters to a sequence of values."""
-    filters = [
-        filter
-        for filter in filters or []
-        if filter is not None
-        ]
-    def f(ctx, values):
-        if values is None:
-            return None, None
-        elif len(values) > len(filters) and not ignore_extras:
-            _ = ctx.translator.ugettext
-            return None, _('Too much values: {0} instead of {1}').format(len(values), len(filters))
-        else:
-            errors = {}
-            filtered_values = []
-            for i, (filter, value) in enumerate(itertools.izip_longest(
-                    filters, itertools.islice(values, len(filters)))):
-                filtered_value, error = filter(ctx, value)
-                if error is not None:
-                    errors[i] = error
-                filtered_values.append(filtered_value)
-            if keep_empty or filtered_values:
-                filtered_values = constructor(filtered_values)
-            else:
-                filtered_values = None
-            return filtered_values, errors or None
-    return f
-
-
 def sort(cmp = None, key = None, reverse = False):
     """Return a filter that sorts an iterable."""
     def f(ctx, values):
@@ -315,6 +241,67 @@ def strip(chars = None):
     return f
 
 
+def structured_mapping(filters, ignore_extras = False, constructor = dict, keep_empty = False):
+    """Return a filter that maps a mapping of filters to a mapping (ie dict, etc) of values."""
+    filters = dict(
+        (name, filter)
+        for name, filter in (filters or {}).iteritems()
+        if filter is not None
+        )
+    def f(ctx, values):
+        if values is None:
+            return None, None
+        errors = {}
+        filtered_values = {}
+        if not ignore_extras and not set(values.iterkeys()).issubset(filters.iterkeys()):
+            _ = ctx.translator.ugettext
+            for name in values:
+                if name not in filters:
+                    errors[name] = _('Unexpected item')
+        for name, filter in filters.iteritems():
+            filtered_value, error = filter(ctx, values.get(name))
+            if error is not None:
+                errors[name] = error
+            elif filtered_value is not None:
+                filtered_values[name] = filtered_value
+        if keep_empty or filtered_values:
+            filtered_values = constructor(filtered_values)
+        else:
+            filtered_values = None
+        return filtered_values, errors or None
+    return f
+
+
+def structured_sequence(filters, constructor = list, ignore_extras = False, keep_empty = False):
+    """Return a filter that map a sequence of filters to a sequence of values."""
+    filters = [
+        filter
+        for filter in filters or []
+        if filter is not None
+        ]
+    def f(ctx, values):
+        if values is None:
+            return None, None
+        elif len(values) > len(filters) and not ignore_extras:
+            _ = ctx.translator.ugettext
+            return None, _('Too much values: {0} instead of {1}').format(len(values), len(filters))
+        else:
+            errors = {}
+            filtered_values = []
+            for i, (filter, value) in enumerate(itertools.izip_longest(
+                    filters, itertools.islice(values, len(filters)))):
+                filtered_value, error = filter(ctx, value)
+                if error is not None:
+                    errors[i] = error
+                filtered_values.append(filtered_value)
+            if keep_empty or filtered_values:
+                filtered_values = constructor(filtered_values)
+            else:
+                filtered_values = None
+            return filtered_values, errors or None
+    return f
+
+
 def translate(conversions):
     """Return a filter that converts values found in given dictionary and keep others as is."""
     def f(ctx, value):
@@ -322,6 +309,56 @@ def translate(conversions):
             return value, None
         else:
             return conversions[value], None
+    return f
+
+
+def uniform_mapping(key_filter, value_filter, constructor = dict, keep_empty = False, keep_null_keys = False,
+        keep_null_values = False):
+    """Return a filter that applies a unique filter to each key and another unique filter to each value of a mapping."""
+    def f(ctx, values):
+        if values is None:
+            return None, None
+        errors = {}
+        filtered_values = {}
+        for key, value in values.iteritems():
+            filtered_key, error = key_filter(ctx, key)
+            if error is not None:
+                errors[key] = error
+                continue
+            if filtered_key is None and not keep_null_keys:
+                continue
+            filtered_value, error = value_filter(ctx, value)
+            if error is not None:
+                errors[key] = error
+            if filtered_value is None and not keep_null_values:
+                continue
+            filtered_values[filtered_key] = filtered_value
+        if keep_empty or filtered_values:
+            filtered_values = constructor(filtered_values)
+        else:
+            filtered_values = None
+        return filtered_values, errors or None
+    return f
+
+
+def uniform_sequence(filter, constructor = list, keep_empty = False, keep_null_items = False):
+    """Return a filter that applies the same filter to each value of a list."""
+    def f(ctx, values):
+        if values is None:
+            return None, None
+        errors = {}
+        filtered_values = []
+        for i, value in enumerate(values):
+            filtered_value, error = filter(ctx, value)
+            if error is not None:
+                errors[i] = error
+            if keep_null_items or filtered_value is not None:
+                filtered_values.append(filtered_value)
+        if keep_empty or filtered_values:
+            filtered_values = constructor(filtered_values)
+        else:
+            filtered_values = None
+        return filtered_values, errors or None
     return f
 
 
@@ -743,7 +780,7 @@ datetime_from_iso8601 = compose(datetime_from_clean_iso8601, name_from_unicode)
 email_from_unicode = compose(email_from_clean_unicode, name_from_unicode)
 float_from_unicode = compose(float_from_python_data, name_from_unicode)
 geo_from_python_data = compose(
-    sequence([
+    structured_sequence([
         compose(greater_or_equal(-90), less_or_equal(90), float_from_python_data), # latitude
         compose(greater_or_equal(-180), less_or_equal(180), float_from_python_data), # longitude
         compose(greater_or_equal(0), less_or_equal(9), integer_from_python_data), # accuracy
