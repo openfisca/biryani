@@ -780,12 +780,6 @@ python_data_to_geo = pipe(
         pipe(python_data_to_integer, greater_or_equal(0), less_or_equal(9)), # accuracy
         ], ignore_extras = True),
     )
-if pymongo is not None:
-    python_data_to_object_id = condition(
-        is_instance(pymongo.objectid.ObjectId),
-        noop,
-        pipe(is_instance(basestring), unicode_to_object_id),
-        )
 strictly_positive_unicode_to_integer = pipe(unicode_to_integer, greater_or_equal(1))
 unicode_to_balanced_ternary_digit = pipe(cleanup_unicode_line, clean_unicode_to_balanced_ternary_digit)
 unicode_to_boolean = pipe(cleanup_unicode_line, clean_unicode_to_boolean)
@@ -801,6 +795,17 @@ if pymongo is not None:
 unicode_to_phone = pipe(cleanup_unicode_line, clean_unicode_to_phone)
 unicode_to_slug = pipe(cleanup_unicode_line, clean_unicode_to_slug)
 unicode_to_url_name = pipe(cleanup_unicode_line, clean_unicode_to_url_name)
+
+
+# Level-4 Converters
+
+
+if pymongo is not None:
+    python_data_to_object_id = condition(
+        is_instance(pymongo.objectid.ObjectId),
+        noop,
+        pipe(is_instance(basestring), unicode_to_object_id),
+        )
 
 
 # Utility Functions
