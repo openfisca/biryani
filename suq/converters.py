@@ -479,7 +479,7 @@ if pymongo is not None:
 def pipe(*filters):
     """Return a compound filter that applies each of its filters till the end or an error occurs."""
     def f(ctx, *args, **kwargs):
-        for filter in reversed(filters):
+        for filter in filters:
             if filter is None:
                 continue
             value, error = filter(ctx, *args, **kwargs)
