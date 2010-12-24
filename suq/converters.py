@@ -61,7 +61,7 @@ class Context(object):
 ctx = Context()
 
 
-# Constructors that return filters
+# Level-1 Converters
 
 
 def attribute(name):
@@ -74,19 +74,241 @@ def attribute(name):
     return f
 
 
-def compose(*filters):
-    """Return a compound filter that applies each of its filters (in reverse order) till the end or an error occurs."""
-    def f(ctx, *args, **kwargs):
-        for filter in reversed(filters):
-            if filter is None:
-                continue
-            value, error = filter(ctx, *args, **kwargs)
-            if error is not None:
-                return value, error
-            args = [value]
-            kwargs = {}
+def boolean_to_unicode(ctx, value):
+    """Convert a boolean to unicode."""
+    if value is None:
+        return None, None
+    else:
+        return unicode(int(bool(value))), None
+
+
+def clean_iso8601_to_date(ctx, value):
+    """Convert a clean unicode string in ISO 8601 format to a date."""
+    if value is None:
+        return None, None
+    else:
+        import datetime
+        import mx.DateTime
+        try:
+            return datetime.date.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
+        except ValueError:
+            _ = ctx.translator.ugettext
+            return None, _('Value must be a date in ISO 8601 format')
+
+
+def clean_iso8601_to_datetime(ctx, value):
+    """Convert a clean unicode string in ISO 8601 format to a datetime."""
+    if value is None:
+        return None, None
+    else:
+        import datetime
+        import mx.DateTime
+        try:
+            return datetime.datetime.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
+        except ValueError:
+            _ = ctx.translator.ugettext
+            return None, _('Value must be a date-time in ISO 8601 format')
+
+
+def clean_unicode_to_balanced_ternary_digit(ctx, value):
+    """Convert a clean unicode string to an integer -1, 0 or 1."""
+    if value is None:
+        return None, None
+    else:
+        try:
+            return cmp(int(value), 0), None
+        except ValueError:
+            _ = ctx.translator.ugettext
+            return None, _('Value must be a balanced ternary digit')
+
+
+def clean_unicode_to_boolean(ctx, value):
+    """Convert a clean unicode string to a boolean."""
+    if value is None:
+        return None, None
+    else:
+        try:
+            return bool(int(value)), None
+        except ValueError:
+            _ = ctx.translator.ugettext
+            return None, _('Value must be a boolean')
+
+
+def clean_unicode_to_email(ctx, value):
+    """Convert a clean unicode string to an email address."""
+    if value is None:
+        return None, None
+    else:
+        value = value.lower()
+        try:
+            username, domain = value.split('@', 1)
+        except ValueError:
+            _ = ctx.translator.ugettext
+            return None, _('An email must contain exactly one "@".')
+        if not username_re.match(username):
+            _ = ctx.translator.ugettext
+            return None, _('Invalid username')
+        if not domain_re.match(domain) and domain != 'localhost':
+            _ = ctx.translator.ugettext
+            return None, _('Invalid domain name')
         return value, None
+
+
+def clean_unicode_to_json(ctx, value):
+    """Convert a clean unicode string to a JSON value."""
+    if value is None:
+        return None, None
+    else:
+        import simplejson as json
+        if isinstance(value, str):
+            # Ensure that json.loads() uses unicode strings.
+            value = value.decode('utf-8')
+        try:
+            return json.loads(value), None
+        except json.JSONDecodeError, e:
+            return None, unicode(e)
+
+
+def clean_unicode_to_lang(ctx, value):
+    """Convert a clean unicode string to a language code."""
+    if value is None:
+        return None, None
+    else:
+        import babel
+        if not babel.localedata.exists(value):
+            _ = ctx.translator.ugettext
+            return None, _('Invalid value')
+        return value, None
+
+
+if pymongo is not None:
+    def clean_unicode_to_object_id(ctx, value):
+        """Convert a clean unicode string to MongoDB ObjectId."""
+        if value is None:
+            return None, None
+        else:
+            id = value.lower()
+            if object_id_re.match(id) is None:
+                _ = ctx.translator.ugettext
+                return None, _('Invalid value')
+            return pymongo.objectid.ObjectId(id), None
+
+
+def clean_unicode_to_phone(ctx, value):
+    """Convert a clean unicode string to an email address."""
+    if value is None:
+        return None, None
+    else:
+        from suq import strings
+        if value.startswith('+'):
+            value = value.replace('+', '00', 1)
+        value = unicode(strings.simplify(value, separator = ''))
+        if not value:
+            return None, None
+        elif not value.isdigit():
+            _ = ctx.translator.ugettext
+            return None, _('Unexpected non numerical characters in phone number')
+
+        if value.startswith('0033'):
+            value = value[2:]
+        if value.startswith('330'):
+            value = value[2:]
+        elif value.startswith('33'):
+            value = '0' + value[2:]
+
+        if value.startswith('00'):
+            # International phone number
+            country = {
+                '594': N_('French Guyana'),
+                '681': N_('Wallis and Futuna'),
+                '687': N_('New Caledonia'),
+                '689': N_('French Polynesia'),
+                }.get(value[2:5])
+            if country is not None:
+                if len(value) == 11:
+                    return '+{0} {1} {2} {3}'.format(value[2:5], value[5:7], value[7:9], value[9:11]), None
+                else:
+                    _ = ctx.translator.ugettext
+                    return None, _('Wrong number of digits for phone number of {0}').format(_(country))
+            else:
+                _ = ctx.translator.ugettext
+                return None, _('Unknown international phone number')
+        elif len(value) == 4:
+            return value, None
+        elif len(value) == 10:
+            if value[0] != '0':
+                _ = ctx.translator.ugettext
+                return None, _('Unexpected first digit in phone number: {0} instead of 0').format(value[0])
+            else:
+                mask = '+33 {0}{1} {2} {3} {4}' if value[1] == '8' else '+33 {0} {1} {2} {3} {4}'
+                return mask.format(value[1], value[2:4], value[4:6], value[6:8], value[8:10]), None
+        else:
+            _ = ctx.translator.ugettext
+            return None, _('Wrong number of digits in phone number')
+
+
+def clean_unicode_to_slug(ctx, value):
+    """Convert a clean unicode string to a slug."""
+    if value is None:
+        return None, None
+    else:
+        from suq import strings
+        value = strings.simplify(value)
+        return value or None, None
+
+
+def clean_unicode_to_uri(full = False, remove_fragment = False, schemes = ('http', 'https')):
+    """Return a filter that converts a clean unicode string to an URI."""
+    def f(ctx, value):
+        if value is None:
+            return None, None
+        else:
+            import urlparse
+            split_uri = list(urlparse.urlsplit(value))
+            scheme = split_uri[0]
+            if scheme != scheme.lower():
+                split_uri[0] = scheme = scheme.lower()
+            if full and not scheme:
+                _ = ctx.translator.ugettext
+                return None, _('URI must be complete"')
+            if scheme and schemes is not None and scheme not in schemes:
+                _ = ctx.translator.ugettext
+                return None, _('Scheme must belong to {0}').format(sorted(schemes))
+            network_location = split_uri[1]
+            if network_location != network_location.lower():
+                split_uri[1] = network_location = network_location.lower()
+            if scheme in ('http', 'https') and not split_uri[2]:
+                # By convention a full HTTP URI must always have at least a "/" in its path.
+                split_uri[2] = '/'
+            if remove_fragment and split_uri[4]:
+                split_uri[4] = ''
+            return unicode(urlparse.urlunsplit(split_uri)), None
     return f
+
+
+def clean_unicode_to_url_name(ctx, value):
+    """Convert a clean unicode string to a normalized string that can be used in an URL path or a query parameter."""
+    if value is None:
+        return None, None
+    else:
+        from suq import strings
+        for character in u'\n\r/?&#':
+            value = value.replace(character, u' ')
+        value = strings.normalize(value, separator = u'_')
+        return value or None, None
+
+
+def cleanup_crlf(ctx, value):
+    """Replace CR+LF or CR with CR."""
+    if value is None:
+        return None, None
+    else:
+        return value.replace('\r\n', '\n').replace('\r', '\n'), None
+
+
+def cleanup_empty(ctx, value):
+    """When value is comparable to False (ie None, 0 , '', etc) replace it with None else keep it as is."""
+    return value if value else None, None
 
 
 def condition(test_filter, ok_filter, error_filter):
@@ -98,6 +320,60 @@ def condition(test_filter, ok_filter, error_filter):
         else:
             return error_filter(ctx, value)
     return f
+
+
+def date_to_datetime(ctx, value):
+    """Convert a date object to a datetime."""
+    if value is None:
+        return None, None
+    else:
+        import datetime
+        return datetime.datetime(value.year, value.month, value.day), None
+
+
+def date_to_iso8601(ctx, value):
+    """Convert a date to unicode string using ISO 8601 format."""
+    if value is None:
+        return None, None
+    else:
+        return unicode(value.strftime('%Y-%m-%d')), None
+
+
+def date_to_timestamp(ctx, value):
+    """Convert a datetime to a JavaScript timestamp."""
+    if value is None:
+        return None, None
+    else:
+        import calendar
+        return int(calendar.timegm(value.timetuple()) * 1000), None
+
+
+def datetime_to_date(ctx, value):
+    """Convert a datetime object to a date."""
+    if value is None:
+        return None, None
+    else:
+        return value.date(), None
+
+
+def datetime_to_iso8601(ctx, value):
+    """Convert a datetime to unicode string using ISO 8601 format."""
+    if value is None:
+        return None, None
+    else:
+        return unicode(value.strftime('%Y-%m-%d %H:%M:%S')), None
+
+
+def datetime_to_timestamp(ctx, value):
+    """Convert a datetime to a JavaScript timestamp."""
+    if value is None:
+        return None, None
+    else:
+        import calendar
+        utcoffset = value.utcoffset()
+        if utcoffset is not None:
+            value -= utcoffset
+        return int(calendar.timegm(value.timetuple()) * 1000 + value.microsecond / 1000), None
 
 
 def default(constant):
@@ -167,18 +443,103 @@ def match(regex):
     return f
 
 
-def object_from_id(object_class):
-    def f(ctx, value):
-        """Convert an ID to an object wrapped to a MongoDB document."""
+def none_to_empty_unicode(ctx, value):
+    """Replace None value with empty string."""
+    return u'' if value is None else value, None
+
+
+def noop(ctx, value):
+    """Return value as is."""
+    return value, None
+
+
+if pymongo is not None:
+    def object_id_to_object(object_class):
+        def f(ctx, value):
+            """Convert an ID to an object wrapped to a MongoDB document."""
+            if value is None:
+                return None, None
+            else:
+                instance = object_class.find_one(value)
+                if instance is None:
+                    _ = ctx.translator.ugettext
+                    return None, _('No document of class {0} with ID {1}').format(object_class.__name__, value)
+                return instance, None
+        return f
+
+
+    def object_id_to_unicode(ctx, value):
+        """Convert a MongoDB ObjectId to unicode."""
         if value is None:
             return None, None
         else:
-            instance = object_class.find_one(value)
-            if instance is None:
-                _ = ctx.translator.ugettext
-                return None, _('No document of class {0} with ID {1}').format(object_class.__name__, value)
-            return instance, None
+            return unicode(value), None
+
+
+def pipe(*filters):
+    """Return a compound filter that applies each of its filters till the end or an error occurs."""
+    def f(ctx, *args, **kwargs):
+        for filter in reversed(filters):
+            if filter is None:
+                continue
+            value, error = filter(ctx, *args, **kwargs)
+            if error is not None:
+                return value, error
+            args = [value]
+            kwargs = {}
+        return value, None
     return f
+
+
+def python_data_to_boolean(ctx, value):
+    """boolean any Python data to a boolean."""
+    if value is None:
+        return None, None
+    else:
+        return bool(value), None
+
+
+def python_data_to_float(ctx, value):
+    """Convert any python data to a float."""
+    if value is None:
+        return None, None
+    else:
+        try:
+            return float(value), None
+        except ValueError:
+            _ = ctx.translator.ugettext
+            return None, _('Value must be a float')
+
+
+def python_data_to_integer(ctx, value):
+    """Convert any python data to an integer."""
+    if value is None:
+        return None, None
+    else:
+        try:
+            return int(value), None
+        except ValueError:
+            _ = ctx.translator.ugettext
+            return None, _('Value must be an integer')
+
+
+def python_data_to_unicode(ctx, value):
+    """Convert any Python data to unicode."""
+    if value is None:
+        return None, None
+    elif isinstance(value, str):
+        return value.decode('utf-8'), None
+    else:
+        return unicode(value), None
+
+
+def require(ctx, value):
+    """Filter missing value."""
+    if value is None:
+        _ = ctx.translator.ugettext
+        return None, _('Missing value')
+    else:
+        return value, None
 
 
 def restrict(values):
@@ -302,6 +663,33 @@ def structured_sequence(filters, constructor = list, ignore_extras = False, keep
     return f
 
 
+def timestamp_to_date(ctx, value):
+    """Convert a JavaScript timestamp to a date."""
+    if value is None:
+        return None, None
+    else:
+        import datetime
+        try:
+            return datetime.date.fromtimestamp(value / 1000), None
+        except ValueError:
+            _ = ctx.translator.ugettext
+            return None, _('Value must be a timestamp')
+
+
+def timestamp_to_datetime(ctx, value):
+    """Convert a JavaScript timestamp to a datetime."""
+    if value is None:
+        return None, None
+    else:
+        import datetime
+        import pytz
+        try:
+            return datetime.datetime.fromtimestamp(value / 1000, pytz.utc), None
+        except ValueError:
+            _ = ctx.translator.ugettext
+            return None, _('Value must be a timestamp')
+
+
 def translate(conversions):
     """Return a filter that converts values found in given dictionary and keep others as is."""
     def f(ctx, value):
@@ -310,6 +698,15 @@ def translate(conversions):
         else:
             return conversions[value], None
     return f
+
+
+def unicode_to_uri(full = False, remove_fragment = False, schemes = ('http', 'https')):
+    """Return a filter that converts an unicode string to an URI."""
+    return pipe(
+        strip(),
+        cleanup_empty,
+        clean_unicode_to_uri(full = full, remove_fragment = remove_fragment, schemes = schemes),
+        )
 
 
 def uniform_mapping(key_filter, value_filter, constructor = dict, keep_empty = False, keep_null_keys = False,
@@ -362,450 +759,51 @@ def uniform_sequence(filter, constructor = list, keep_empty = False, keep_null_i
     return f
 
 
-def url_from_clean_unicode(full = False, remove_fragment = False, schemes = ('http', 'https')):
-    """Return a filter that converts a clean unicode string to an URL."""
-    def f(ctx, value):
-        if value is None:
-            return None, None
-        else:
-            import urlparse
-            split_url = list(urlparse.urlsplit(value))
-            scheme = split_url[0]
-            if scheme != scheme.lower():
-                split_url[0] = scheme = scheme.lower()
-            if full and not scheme:
-                _ = ctx.translator.ugettext
-                return None, _('URL must be complete"')
-            if scheme and schemes is not None and scheme not in schemes:
-                _ = ctx.translator.ugettext
-                return None, _('Scheme must belong to {0}').format(sorted(schemes))
-            network_location = split_url[1]
-            if network_location != network_location.lower():
-                split_url[1] = network_location = network_location.lower()
-            if scheme in ('http', 'https') and not split_url[2]:
-                # By convention a full HTTP URL must always have at least a "/" in its path.
-                split_url[2] = '/'
-            if remove_fragment and split_url[4]:
-                split_url[4] = ''
-            return unicode(urlparse.urlunsplit(split_url)), None
-    return f
+# Level-2 Converters
 
 
-def url_from_unicode(full = False, remove_fragment = False, schemes = ('http', 'https')):
-    """Return a filter that converts an unicode string to an URL."""
-    return compose(
-        url_from_clean_unicode(full = full, remove_fragment = remove_fragment, schemes = schemes),
-        clean_empty,
-        strip(),
-        )
+cleanup_unicode_line = pipe(strip(), cleanup_empty)
+cleanup_unicode_text = pipe(cleanup_crlf, cleanup_unicode_line)
 
 
-# Filtering functions without (value, error) parameter
+# Level-3 Converters
 
 
-def balanced_ternary_digit_from_clean_unicode(ctx, value):
-    """Convert a clean unicode string to an integer -1, 0 or 1."""
-    if value is None:
-        return None, None
-    else:
-        try:
-            return cmp(int(value), 0), None
-        except ValueError:
-            _ = ctx.translator.ugettext
-            return None, _('Value must be a balanced ternary digit')
-
-
-def boolean_from_clean_unicode(ctx, value):
-    """Convert a clean unicode string to a boolean."""
-    if value is None:
-        return None, None
-    else:
-        try:
-            return bool(int(value)), None
-        except ValueError:
-            _ = ctx.translator.ugettext
-            return None, _('Value must be a boolean')
-
-
-def boolean_from_python_data(ctx, value):
-    """boolean any Python data to a boolean."""
-    if value is None:
-        return None, None
-    else:
-        return bool(value), None
-
-
-def clean_crlf(ctx, value):
-    """Replace CR+LF or CR with CR."""
-    if value is None:
-        return None, None
-    else:
-        return value.replace('\r\n', '\n').replace('\r', '\n'), None
-
-
-def clean_empty(ctx, value):
-    """When value is comparable to False (ie None, 0 , '', etc) replace it with None else keep it as is."""
-    return value if value else None, None
-
-
-def date_from_clean_iso8601(ctx, value):
-    """Convert a clean unicode string in ISO 8601 format to a date."""
-    if value is None:
-        return None, None
-    else:
-        import datetime
-        import mx.DateTime
-        try:
-            return datetime.date.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
-        except ValueError:
-            _ = ctx.translator.ugettext
-            return None, _('Value must be a date in ISO 8601 format')
-
-
-def date_from_datetime(ctx, value):
-    """Convert a datetime object to a date."""
-    if value is None:
-        return None, None
-    else:
-        return value.date(), None
-
-
-def date_from_timestamp(ctx, value):
-    """Convert a JavaScript timestamp to a date."""
-    if value is None:
-        return None, None
-    else:
-        import datetime
-        try:
-            return datetime.date.fromtimestamp(value / 1000), None
-        except ValueError:
-            _ = ctx.translator.ugettext
-            return None, _('Value must be a timestamp')
-
-
-def datetime_from_clean_iso8601(ctx, value):
-    """Convert a clean unicode string in ISO 8601 format to a datetime."""
-    if value is None:
-        return None, None
-    else:
-        import datetime
-        import mx.DateTime
-        try:
-            return datetime.datetime.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
-        except ValueError:
-            _ = ctx.translator.ugettext
-            return None, _('Value must be a date-time in ISO 8601 format')
-
-
-def datetime_from_date(ctx, value):
-    """Convert a date object to a datetime."""
-    if value is None:
-        return None, None
-    else:
-        import datetime
-        return datetime.datetime(value.year, value.month, value.day), None
-
-
-def datetime_from_timestamp(ctx, value):
-    """Convert a JavaScript timestamp to a datetime."""
-    if value is None:
-        return None, None
-    else:
-        import datetime
-        import pytz
-        try:
-            return datetime.datetime.fromtimestamp(value / 1000, pytz.utc), None
-        except ValueError:
-            _ = ctx.translator.ugettext
-            return None, _('Value must be a timestamp')
-
-
-def email_from_clean_unicode(ctx, value):
-    """Convert a clean unicode string to an email address."""
-    if value is None:
-        return None, None
-    else:
-        value = value.lower()
-        try:
-            username, domain = value.split('@', 1)
-        except ValueError:
-            _ = ctx.translator.ugettext
-            return None, _('An email must contain exactly one "@".')
-        if not username_re.match(username):
-            _ = ctx.translator.ugettext
-            return None, _('Invalid username')
-        if not domain_re.match(domain) and domain != 'localhost':
-            _ = ctx.translator.ugettext
-            return None, _('Invalid domain name')
-        return value, None
-
-
-def empty_unicode_from_none(ctx, value):
-    """Replace None value with empty string."""
-    return u'' if value is None else value, None
-
-
-def float_from_python_data(ctx, value):
-    """Convert any python data to a float."""
-    if value is None:
-        return None, None
-    else:
-        try:
-            return float(value), None
-        except ValueError:
-            _ = ctx.translator.ugettext
-            return None, _('Value must be a float')
-
-
-def integer_from_python_data(ctx, value):
-    """Convert any python data to an integer."""
-    if value is None:
-        return None, None
-    else:
-        try:
-            return int(value), None
-        except ValueError:
-            _ = ctx.translator.ugettext
-            return None, _('Value must be an integer')
-
-
-def iso8601_from_date(ctx, value):
-    """Convert a date to unicode string using ISO 8601 format."""
-    if value is None:
-        return None, None
-    else:
-        return unicode(value.strftime('%Y-%m-%d')), None
-
-
-def iso8601_from_datetime(ctx, value):
-    """Convert a datetime to unicode string using ISO 8601 format."""
-    if value is None:
-        return None, None
-    else:
-        return unicode(value.strftime('%Y-%m-%d %H:%M:%S')), None
-
-
-def json_from_clean_unicode(ctx, value):
-    """Convert a clean unicode string to a JSON value."""
-    if value is None:
-        return None, None
-    else:
-        import simplejson as json
-        if isinstance(value, str):
-            # Ensure that json.loads() uses unicode strings.
-            value = value.decode('utf-8')
-        try:
-            return json.loads(value), None
-        except json.JSONDecodeError, e:
-            return None, unicode(e)
-
-
-def lang_from_clean_unicode(ctx, value):
-    """Convert a clean unicode string to a language code."""
-    if value is None:
-        return None, None
-    else:
-        import babel
-        if not babel.localedata.exists(value):
-            _ = ctx.translator.ugettext
-            return None, _('Invalid value')
-        return value, None
-
-
-def noop(ctx, value):
-    """Return value as is."""
-    return value, None
-
-
-if pymongo is not None:
-    def object_id_from_clean_unicode(ctx, value):
-        """Convert a clean unicode string to MongoDB ObjectId."""
-        if value is None:
-            return None, None
-        else:
-            id = value.lower()
-            if object_id_re.match(id) is None:
-                _ = ctx.translator.ugettext
-                return None, _('Invalid value')
-            return pymongo.objectid.ObjectId(id), None
-
-
-def phone_from_clean_unicode(ctx, value):
-    """Convert a clean unicode string to an email address."""
-    if value is None:
-        return None, None
-    else:
-        from suq import strings
-        if value.startswith('+'):
-            value = value.replace('+', '00', 1)
-        value = unicode(strings.simplify(value, separator = ''))
-        if not value:
-            return None, None
-        elif not value.isdigit():
-            _ = ctx.translator.ugettext
-            return None, _('Unexpected non numerical characters in phone number')
-
-        if value.startswith('0033'):
-            value = value[2:]
-        if value.startswith('330'):
-            value = value[2:]
-        elif value.startswith('33'):
-            value = '0' + value[2:]
-
-        if value.startswith('00'):
-            # International phone number
-            country = {
-                '594': N_('French Guyana'),
-                '681': N_('Wallis and Futuna'),
-                '687': N_('New Caledonia'),
-                '689': N_('French Polynesia'),
-                }.get(value[2:5])
-            if country is not None:
-                if len(value) == 11:
-                    return '+{0} {1} {2} {3}'.format(value[2:5], value[5:7], value[7:9], value[9:11]), None
-                else:
-                    _ = ctx.translator.ugettext
-                    return None, _('Wrong number of digits for phone number of {0}').format(_(country))
-            else:
-                _ = ctx.translator.ugettext
-                return None, _('Unknown international phone number')
-        elif len(value) == 4:
-            return value, None
-        elif len(value) == 10:
-            if value[0] != '0':
-                _ = ctx.translator.ugettext
-                return None, _('Unexpected first digit in phone number: {0} instead of 0').format(value[0])
-            else:
-                mask = '+33 {0}{1} {2} {3} {4}' if value[1] == '8' else '+33 {0} {1} {2} {3} {4}'
-                return mask.format(value[1], value[2:4], value[4:6], value[6:8], value[8:10]), None
-        else:
-            _ = ctx.translator.ugettext
-            return None, _('Wrong number of digits in phone number')
-
-
-def require(ctx, value):
-    """Filter missing value."""
-    if value is None:
-        _ = ctx.translator.ugettext
-        return None, _('Missing value')
-    else:
-        return value, None
-
-
-def slug_from_clean_unicode(ctx, value):
-    """Convert a clean unicode string to a slug."""
-    if value is None:
-        return None, None
-    else:
-        from suq import strings
-        value = strings.simplify(value)
-        return value or None, None
-
-
-def timestamp_from_date(ctx, value):
-    """Convert a datetime to a JavaScript timestamp."""
-    if value is None:
-        return None, None
-    else:
-        import calendar
-        return int(calendar.timegm(value.timetuple()) * 1000), None
-
-
-def timestamp_from_datetime(ctx, value):
-    """Convert a datetime to a JavaScript timestamp."""
-    if value is None:
-        return None, None
-    else:
-        import calendar
-        utcoffset = value.utcoffset()
-        if utcoffset is not None:
-            value -= utcoffset
-        return int(calendar.timegm(value.timetuple()) * 1000 + value.microsecond / 1000), None
-
-
-def unicode_from_boolean(ctx, value):
-    """Convert a boolean to unicode."""
-    if value is None:
-        return None, None
-    else:
-        return unicode(int(bool(value))), None
-
-
-if pymongo is not None:
-    def unicode_from_object_id(ctx, value):
-        """Convert a MongoDB ObjectId to unicode."""
-        if value is None:
-            return None, None
-        else:
-            return unicode(value), None
-
-
-def unicode_from_python_data(ctx, value):
-    """Convert any Python data to unicode."""
-    if value is None:
-        return None, None
-    elif isinstance(value, str):
-        return value.decode('utf-8'), None
-    else:
-        return unicode(value), None
-
-
-def url_name_from_clean_unicode(ctx, value):
-    """Convert a clean unicode string to a normalized string that can be used in an URL path or a query parameter."""
-    if value is None:
-        return None, None
-    else:
-        from suq import strings
-        for character in u'\n\r/?&#':
-            value = value.replace(character, u' ')
-        value = strings.normalize(value, separator = u'_')
-        return value or None, None
-
-
-# Base compound filtering functions
-
-
-name_from_unicode = compose(clean_empty, strip())
-text_from_unicode = compose(clean_empty, strip(), clean_crlf)
-
-
-# Compound filtering functions
-
-
-balanced_ternary_digit_from_unicode = compose(balanced_ternary_digit_from_clean_unicode, name_from_unicode)
-boolean_from_form_data = compose(default(False), boolean_from_clean_unicode, name_from_unicode)
-boolean_from_unicode = compose(boolean_from_clean_unicode, name_from_unicode)
-date_from_iso8601 = compose(date_from_clean_iso8601, name_from_unicode)
-datetime_from_iso8601 = compose(datetime_from_clean_iso8601, name_from_unicode)
-email_from_unicode = compose(email_from_clean_unicode, name_from_unicode)
-float_from_unicode = compose(float_from_python_data, name_from_unicode)
-geo_from_python_data = compose(
-    structured_sequence([
-        compose(greater_or_equal(-90), less_or_equal(90), float_from_python_data), # latitude
-        compose(greater_or_equal(-180), less_or_equal(180), float_from_python_data), # longitude
-        compose(greater_or_equal(0), less_or_equal(9), integer_from_python_data), # accuracy
-        ], ignore_extras = True),
+form_data_to_boolean = pipe(cleanup_unicode_line, clean_unicode_to_boolean, default(False))
+iso8601_to_date = pipe(cleanup_unicode_line, clean_iso8601_to_date)
+iso8601_to_datetime = pipe(cleanup_unicode_line, clean_iso8601_to_datetime)
+python_data_to_geo = pipe(
     is_instance((list, tuple)),
+    structured_sequence([
+        pipe(python_data_to_float, greater_or_equal(-90), less_or_equal(90)), # latitude
+        pipe(python_data_to_float, greater_or_equal(-180), less_or_equal(180)), # longitude
+        pipe(python_data_to_integer, greater_or_equal(0), less_or_equal(9)), # accuracy
+        ], ignore_extras = True),
     )
-html_id_from_unicode = compose(match(html_id_re), name_from_unicode)
-html_name_from_unicode = compose(match(html_id_re), name_from_unicode)
-integer_from_unicode = compose(integer_from_python_data, name_from_unicode)
-json_from_unicode = compose(json_from_clean_unicode, clean_empty, strip())
-lang_from_unicode = compose(lang_from_clean_unicode, name_from_unicode)
 if pymongo is not None:
-    object_id_from_unicode = compose(object_id_from_clean_unicode, name_from_unicode)
-    object_id_from_python_data = condition(
+    python_data_to_object_id = condition(
         is_instance(pymongo.objectid.ObjectId),
         noop,
-        compose(object_id_from_unicode, is_instance(basestring)),
+        pipe(is_instance(basestring), unicode_to_object_id),
         )
-phone_from_unicode = compose(phone_from_clean_unicode, name_from_unicode)
-slug_from_unicode = compose(slug_from_clean_unicode, name_from_unicode)
-strictly_positive_integer_from_unicode = compose(greater_or_equal(1), integer_from_unicode)
-url_name_from_unicode = compose(url_name_from_clean_unicode, name_from_unicode)
+strictly_positive_unicode_to_integer = pipe(unicode_to_integer, greater_or_equal(1))
+unicode_to_balanced_ternary_digit = pipe(cleanup_unicode_line, clean_unicode_to_balanced_ternary_digit)
+unicode_to_boolean = pipe(cleanup_unicode_line, clean_unicode_to_boolean)
+unicode_to_email = pipe(cleanup_unicode_line, clean_unicode_to_email)
+unicode_to_float = pipe(cleanup_unicode_line, python_data_to_float)
+unicode_to_html_id = pipe(cleanup_unicode_line, match(html_id_re))
+unicode_to_html_name = pipe(cleanup_unicode_line, match(html_id_re))
+unicode_to_integer = pipe(cleanup_unicode_line, python_data_to_integer)
+unicode_to_json = pipe(cleanup_unicode_line, clean_unicode_to_json)
+unicode_to_lang = pipe(cleanup_unicode_line, clean_unicode_to_lang)
+if pymongo is not None:
+    unicode_to_object_id = pipe(cleanup_unicode_line, clean_unicode_to_object_id)
+unicode_to_phone = pipe(cleanup_unicode_line, clean_unicode_to_phone)
+unicode_to_slug = pipe(cleanup_unicode_line, clean_unicode_to_slug)
+unicode_to_url_name = pipe(cleanup_unicode_line, clean_unicode_to_url_name)
 
 
-# Constructors that return functions using filters.
+# Utility Functions
 
 
 def to_value(filter, ignore_error = False):
