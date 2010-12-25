@@ -762,16 +762,16 @@ def uniform_sequence(filter, constructor = list, keep_empty = False, keep_null_i
 # Level-2 Converters
 
 
-cleanup_unicode_line = pipe(strip(), cleanup_empty)
-cleanup_unicode_text = pipe(cleanup_crlf, cleanup_unicode_line)
+cleanup_line = pipe(strip(), cleanup_empty)
+cleanup_text = pipe(cleanup_crlf, cleanup_line)
 
 
 # Level-3 Converters
 
 
-form_data_to_boolean = pipe(cleanup_unicode_line, clean_unicode_to_boolean, default(False))
-iso8601_to_date = pipe(cleanup_unicode_line, clean_iso8601_to_date)
-iso8601_to_datetime = pipe(cleanup_unicode_line, clean_iso8601_to_datetime)
+form_data_to_boolean = pipe(cleanup_line, clean_unicode_to_boolean, default(False))
+iso8601_to_date = pipe(cleanup_line, clean_iso8601_to_date)
+iso8601_to_datetime = pipe(cleanup_line, clean_iso8601_to_datetime)
 python_data_to_geo = pipe(
     is_instance((list, tuple)),
     structured_sequence([
@@ -780,20 +780,20 @@ python_data_to_geo = pipe(
         pipe(python_data_to_integer, greater_or_equal(0), less_or_equal(9)), # accuracy
         ], ignore_extras = True),
     )
-unicode_to_balanced_ternary_digit = pipe(cleanup_unicode_line, clean_unicode_to_balanced_ternary_digit)
-unicode_to_boolean = pipe(cleanup_unicode_line, clean_unicode_to_boolean)
-unicode_to_email = pipe(cleanup_unicode_line, clean_unicode_to_email)
-unicode_to_float = pipe(cleanup_unicode_line, python_data_to_float)
-unicode_to_html_id = pipe(cleanup_unicode_line, match(html_id_re))
-unicode_to_html_name = pipe(cleanup_unicode_line, match(html_id_re))
-unicode_to_integer = pipe(cleanup_unicode_line, python_data_to_integer)
-unicode_to_json = pipe(cleanup_unicode_line, clean_unicode_to_json)
-unicode_to_lang = pipe(cleanup_unicode_line, clean_unicode_to_lang)
+unicode_to_balanced_ternary_digit = pipe(cleanup_line, clean_unicode_to_balanced_ternary_digit)
+unicode_to_boolean = pipe(cleanup_line, clean_unicode_to_boolean)
+unicode_to_email = pipe(cleanup_line, clean_unicode_to_email)
+unicode_to_float = pipe(cleanup_line, python_data_to_float)
+unicode_to_html_id = pipe(cleanup_line, match(html_id_re))
+unicode_to_html_name = pipe(cleanup_line, match(html_id_re))
+unicode_to_integer = pipe(cleanup_line, python_data_to_integer)
+unicode_to_json = pipe(cleanup_line, clean_unicode_to_json)
+unicode_to_lang = pipe(cleanup_line, clean_unicode_to_lang)
 if pymongo is not None:
-    unicode_to_object_id = pipe(cleanup_unicode_line, clean_unicode_to_object_id)
-unicode_to_phone = pipe(cleanup_unicode_line, clean_unicode_to_phone)
-unicode_to_slug = pipe(cleanup_unicode_line, clean_unicode_to_slug)
-unicode_to_url_name = pipe(cleanup_unicode_line, clean_unicode_to_url_name)
+    unicode_to_object_id = pipe(cleanup_line, clean_unicode_to_object_id)
+unicode_to_phone = pipe(cleanup_line, clean_unicode_to_phone)
+unicode_to_slug = pipe(cleanup_line, clean_unicode_to_slug)
+unicode_to_url_name = pipe(cleanup_line, clean_unicode_to_url_name)
 
 
 # Level-4 Converters
