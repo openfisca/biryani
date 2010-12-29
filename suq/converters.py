@@ -583,6 +583,14 @@ def restrict_json_class_name(values):
     return f
 
 
+def set(constant):
+    """Return a filter that replaces any non-null value by given one.
+
+    This is the opposite behaviour of function ``default``.
+    """
+    return lambda ctx, value: (constant, None) if value is not None else (None, None)
+
+
 def sort(cmp = None, key = None, reverse = False):
     """Return a filter that sorts an iterable."""
     def f(ctx, values):
