@@ -465,11 +465,13 @@ def noop(ctx, value):
 
 
 if pymongo is not None:
-    def object_id_to_object(object_class):
+    def object_id_to_object(object_class, cache = None):
         def f(ctx, value):
             """Convert an ID to an object wrapped to a MongoDB document."""
             if value is None:
                 return None, None
+            elif cache is not None and value in cache:
+                return cache[value], None
             else:
                 instance = object_class.find_one(value)
                 if instance is None:
