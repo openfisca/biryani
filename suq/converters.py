@@ -381,6 +381,17 @@ def default(constant):
     return lambda ctx, value: (constant, None) if value is None else (value, None)
 
 
+def equals(constant):
+    """Return a filter that accepts only values equals to given constant."""
+    def f(ctx, value):
+        if constant is None or value is None or value == constant:
+            return value, None
+        else:
+            _ = ctx.translator.ugettext
+            return None, _('Value must be equal to {0}').format(constant)
+    return f
+
+
 def function(function):
     """Return a filter that applies a function to value and returns a new value."""
     def f(ctx, value):
