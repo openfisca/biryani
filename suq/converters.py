@@ -585,7 +585,7 @@ def restrict_json_class_name(values):
     return f
 
 
-def set(constant):
+def set_value(constant):
     """Return a filter that replaces any non-null value by given one.
 
     This is the opposite behaviour of function ``default``.
