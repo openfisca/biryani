@@ -470,14 +470,14 @@ if pymongo is not None:
             """Convert an ID to an object wrapped to a MongoDB document."""
             if value is None:
                 return None, None
-            elif cache is not None and value in cache:
+            assert isinstance(value, pymongo.objectid.ObjectId)
+            if cache is not None and value in cache:
                 return cache[value], None
-            else:
-                instance = object_class.find_one(value)
-                if instance is None:
-                    _ = ctx.translator.ugettext
-                    return None, _('No document of class {0} with ID {1}').format(object_class.__name__, value)
-                return instance, None
+            instance = object_class.find_one(value)
+            if instance is None:
+                _ = ctx.translator.ugettext
+                return None, _('No document of class {0} with ID {1}').format(object_class.__name__, value)
+            return instance, None
         return f
 
 
