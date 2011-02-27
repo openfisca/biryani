@@ -686,6 +686,21 @@ def structured_sequence(filters, constructor = list, ignore_extras = False, keep
     return f
 
 
+def test(function):
+    """Return a filter that applies a test function to value and returns True when test succeeds or None when it fails.
+    """
+    def f(ctx, value):
+        if value is None or function is None:
+            return value, None
+        if function(value):
+            return True, None
+        else:
+            _ = ctx.translator.ugettext
+            return False, _('Value test failed')
+        return bool(function(value)) or None, None
+    return f
+
+
 def timestamp_to_date(ctx, value):
     """Convert a JavaScript timestamp to a date."""
     if value is None:
