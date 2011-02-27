@@ -311,12 +311,14 @@ def cleanup_empty(ctx, value):
     return value if value else None, None
 
 
-def condition(test_filter, ok_filter, error_filter):
+def condition(test_filter, ok_filter, error_filter = None):
     """When ``test_filter`` succeeds (ie no error), then applies ``ok_filter``, otherwise applies ``error_filter``."""
     def f(ctx, value):
         test, error = test_filter(ctx, value)
         if error is None:
             return ok_filter(ctx, value)
+        elif error_filter is None:
+            return value, None
         else:
             return error_filter(ctx, value)
     return f
