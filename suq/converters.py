@@ -472,7 +472,7 @@ if pymongo is not None:
             """Convert an ID to an object wrapped to a MongoDB document."""
             if value is None:
                 return None, None
-            assert isinstance(value, pymongo.objectid.ObjectId)
+            assert isinstance(value, pymongo.objectid.ObjectId), str((value,))
             if cache is not None and value in cache:
                 return cache[value], None
             instance = object_class.find_one(value)
