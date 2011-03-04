@@ -425,6 +425,19 @@ def greater_or_equal(constant):
     return f
 
 
+def item_or_sequence(filter, constructor = list, keep_empty = False, keep_null_items = False):
+    """Return a filter that accepts either an item or a sequence of items."""
+    return condition(
+        is_instance(constructor),
+        pipe(
+            uniform_sequence(filter, constructor = constructor, keep_empty = keep_empty,
+                keep_null_items = keep_null_items),
+            extract_if_singleton,
+            ),
+        filter,
+        )
+
+
 def less_or_equal(constant):
     """Return a filter that accepts only values less than or equal to given constant."""
     def f(ctx, value):
@@ -802,6 +815,12 @@ def uniform_sequence(filter, constructor = list, keep_empty = False, keep_null_i
 
 cleanup_line = pipe(strip(), cleanup_empty)
 cleanup_text = pipe(cleanup_crlf, cleanup_line)
+# Extract first item of sequence when it is a singleton and it is not itself a sequence, otherwise keep it unchanged.
+extract_if_singleton = condition(
+    test(lambda value: len(value) == 1 and not isinstance(value[0], (list, set, tuple))),
+    function(lambda value: list(value)[0]),
+    noop,
+    )
 
 
 # Level-3 Converters
