@@ -558,7 +558,10 @@ def python_data_to_unicode(ctx, value):
     elif isinstance(value, str):
         return value.decode('utf-8'), None
     else:
-        return unicode(value), None
+        try:
+            return unicode(value), None
+        except UnicodeDecodeError:
+            return str(value).decode('utf-8'), None
 
 
 def require(ctx, value):
