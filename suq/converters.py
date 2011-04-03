@@ -35,9 +35,9 @@ import re
 import itertools
 
 try:
-    import pymongo
+    import bson
 except ImportError:
-    pymongo = None
+    bson = None
 
 
 domain_re = re.compile(r'''
@@ -47,7 +47,7 @@ domain_re = re.compile(r'''
 html_id_re = re.compile(r'[A-Za-z][A-Za-z0-9-_:.]+')
 html_name_re = html_id_re
 N_ = lambda s: s
-if pymongo is not None:
+if bson is not None:
     object_id_re = re.compile(r'[\da-f]{24}$')
 username_re = re.compile(r"[^ \t\n\r@<>()]+$", re.I)
 
@@ -181,7 +181,7 @@ def clean_unicode_to_lang(ctx, value):
         return value, None
 
 
-if pymongo is not None:
+if bson is not None:
     def clean_unicode_to_object_id(ctx, value):
         """Convert a clean unicode string to MongoDB ObjectId."""
         if value is None:
@@ -191,7 +191,7 @@ if pymongo is not None:
             if object_id_re.match(id) is None:
                 _ = ctx.translator.ugettext
                 return None, _('Invalid value')
-            return pymongo.objectid.ObjectId(id), None
+            return bson.objectid.ObjectId(id), None
 
 
 def clean_unicode_to_phone(ctx, value):
@@ -479,13 +479,13 @@ def noop(ctx, value):
     return value, None
 
 
-if pymongo is not None:
+if bson is not None:
     def object_id_to_object(object_class, cache = None):
         def f(ctx, value):
             """Convert an ID to an object wrapped to a MongoDB document."""
             if value is None:
                 return None, None
-            assert isinstance(value, pymongo.objectid.ObjectId), str((value,))
+            assert isinstance(value, bson.objectid.ObjectId), str((value,))
             if cache is not None and value in cache:
                 return cache[value], None
             instance = object_class.find_one(value)
@@ -703,7 +703,7 @@ def structured_sequence(filters, constructor = list, ignore_extras = False, keep
 
 
 def test(function):
-    """Return a filter that applies a test function to value and returns True when test succeeds or None when it fails.
+    """Return a filter that applies a test function and returns True when test succeeds or an error when it fails.
     """
     def f(ctx, value):
         if value is None or function is None:
@@ -849,7 +849,7 @@ unicode_to_html_name = pipe(cleanup_line, match(html_id_re))
 unicode_to_integer = pipe(cleanup_line, python_data_to_integer)
 unicode_to_json = pipe(cleanup_line, clean_unicode_to_json)
 unicode_to_lang = pipe(cleanup_line, clean_unicode_to_lang)
-if pymongo is not None:
+if bson is not None:
     unicode_to_object_id = pipe(cleanup_line, clean_unicode_to_object_id)
 unicode_to_phone = pipe(cleanup_line, clean_unicode_to_phone)
 unicode_to_slug = pipe(cleanup_line, clean_unicode_to_slug)
@@ -859,9 +859,9 @@ unicode_to_url_name = pipe(cleanup_line, clean_unicode_to_url_name)
 # Level-4 Converters
 
 
-if pymongo is not None:
+if bson is not None:
     python_data_to_object_id = condition(
-        is_instance(pymongo.objectid.ObjectId),
+        is_instance(bson.objectid.ObjectId),
         noop,
         pipe(is_instance(basestring), unicode_to_object_id),
         )
