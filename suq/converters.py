@@ -195,7 +195,7 @@ if bson is not None:
 
 
 def clean_unicode_to_phone(ctx, value):
-    """Convert a clean unicode string to an email address."""
+    """Convert a clean unicode string to phone number."""
     if value is None:
         return None, None
     else:
