@@ -286,6 +286,21 @@ def clean_unicode_to_uri(full = False, remove_fragment = False, schemes = ('http
     return f
 
 
+def clean_unicode_to_uri_path_and_query(ctx, value):
+    """Converts a clean unicode string to the path and query of an URI."""
+    if value is None:
+        return None, None
+    else:
+        import urlparse
+        split_uri = list(urlparse.urlsplit(value))
+        if split_uri[0] or split_uri[1]:
+            _ = ctx.translator.ugettext
+            return None, _('URI must not be complete"')
+        if split_uri[4]:
+            split_uri[4] = ''
+        return unicode(urlparse.urlunsplit(split_uri)), None
+
+
 def clean_unicode_to_url_name(ctx, value):
     """Convert a clean unicode string to a normalized string that can be used in an URL path or a query parameter."""
     if value is None:
