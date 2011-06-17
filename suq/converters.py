@@ -498,6 +498,19 @@ def noop(ctx, value):
 
 
 if bson is not None:
+    def mongodb_query_to_object(object_class):
+        def f(ctx, value):
+            """Convert a MongoDB query expression to an object wrapped to a MongoDB document."""
+            if value is None:
+                return None, None
+            instance = object_class.find_one(value)
+            if instance is None:
+                _ = ctx.translator.ugettext
+                return None, _('No document of class {0} for query {1}').format(object_class.__name__, value)
+            return instance, None
+        return f
+
+
     def object_id_to_object(object_class, cache = None):
         def f(ctx, value):
             """Convert an ID to an object wrapped to a MongoDB document."""
