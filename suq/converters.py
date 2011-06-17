@@ -257,7 +257,7 @@ def clean_unicode_to_slug(ctx, value):
         return value or None, None
 
 
-def clean_unicode_to_uri(full = False, remove_fragment = False, schemes = ('http', 'https')):
+def clean_unicode_to_uri(add_prefix = 'http://', full = False, remove_fragment = False, schemes = ('http', 'https')):
     """Return a filter that converts a clean unicode string to an URI."""
     def f(ctx, value):
         if value is None:
@@ -265,12 +265,15 @@ def clean_unicode_to_uri(full = False, remove_fragment = False, schemes = ('http
         else:
             import urlparse
             split_uri = list(urlparse.urlsplit(value))
+            if full and add_prefix and not split_uri[0] and not split_uri[1] and split_uri[2] \
+                    and not split_uri[2].startswith('/'):
+                split_uri = list(urlparse.urlsplit(add_prefix + value))
             scheme = split_uri[0]
             if scheme != scheme.lower():
                 split_uri[0] = scheme = scheme.lower()
             if full and not scheme:
                 _ = ctx.translator.ugettext
-                return None, _('URI must be complete"')
+                return None, _('URI must be complete')
             if scheme and schemes is not None and scheme not in schemes:
                 _ = ctx.translator.ugettext
                 return None, _('Scheme must belong to {0}').format(sorted(schemes))
@@ -769,12 +772,13 @@ def translate(conversions):
     return f
 
 
-def unicode_to_uri(full = False, remove_fragment = False, schemes = ('http', 'https')):
+def unicode_to_uri(add_prefix = 'http://', full = False, remove_fragment = False, schemes = ('http', 'https')):
     """Return a filter that converts an unicode string to an URI."""
     return pipe(
         strip(),
         cleanup_empty,
-        clean_unicode_to_uri(full = full, remove_fragment = remove_fragment, schemes = schemes),
+        clean_unicode_to_uri(add_prefix = add_prefix, full = full, remove_fragment = remove_fragment,
+            schemes = schemes),
         )
 
 
