@@ -200,53 +200,50 @@ def clean_unicode_to_phone(ctx, value):
     """Convert a clean unicode string to phone number."""
     if value is None:
         return None, None
-    else:
-        from suq import strings
-        if value.startswith('+'):
-            value = value.replace('+', '00', 1)
-        value = unicode(strings.simplify(value, separator = ''))
-        if not value:
-            return None, None
-        elif not value.isdigit():
-            _ = ctx.translator.ugettext
-            return None, _('Unexpected non numerical characters in phone number')
+    from suq import strings
+    if value.startswith('+'):
+        value = value.replace('+', '00', 1)
+    value = unicode(strings.simplify(value, separator = ''))
+    if not value:
+        return None, None
+    if not value.isdigit():
+        _ = ctx.translator.ugettext
+        return None, _('Unexpected non numerical characters in phone number')
 
-        if value.startswith('0033'):
-            value = value[2:]
-        if value.startswith('330'):
-            value = value[2:]
-        elif value.startswith('33'):
-            value = '0' + value[2:]
+    if value.startswith('0033'):
+        value = value[2:]
+    if value.startswith('330'):
+        value = value[2:]
+    elif value.startswith('33'):
+        value = '0' + value[2:]
 
-        if value.startswith('00'):
-            # International phone number
-            country = {
-                '594': N_('French Guyana'),
-                '681': N_('Wallis and Futuna'),
-                '687': N_('New Caledonia'),
-                '689': N_('French Polynesia'),
-                }.get(value[2:5])
-            if country is not None:
-                if len(value) == 11:
-                    return '+{0} {1} {2} {3}'.format(value[2:5], value[5:7], value[7:9], value[9:11]), None
-                else:
-                    _ = ctx.translator.ugettext
-                    return None, _('Wrong number of digits for phone number of {0}').format(_(country))
-            else:
-                _ = ctx.translator.ugettext
-                return None, _('Unknown international phone number')
-        elif len(value) == 4:
-            return value, None
-        elif len(value) == 10:
-            if value[0] != '0':
-                _ = ctx.translator.ugettext
-                return None, _('Unexpected first digit in phone number: {0} instead of 0').format(value[0])
-            else:
-                mask = '+33 {0}{1} {2} {3} {4}' if value[1] == '8' else '+33 {0} {1} {2} {3} {4}'
-                return mask.format(value[1], value[2:4], value[4:6], value[6:8], value[8:10]), None
-        else:
+    if value.startswith('00'):
+        # International phone number
+        country = {
+            '594': N_('French Guyana'),
+            '681': N_('Wallis and Futuna'),
+            '687': N_('New Caledonia'),
+            '689': N_('French Polynesia'),
+            }.get(value[2:5])
+        if country is not None:
+            if len(value) == 11:
+                return '+{0} {1} {2} {3}'.format(value[2:5], value[5:7], value[7:9], value[9:11]), None
             _ = ctx.translator.ugettext
-            return None, _('Wrong number of digits in phone number')
+            return None, _('Wrong number of digits for phone number of {0}').format(_(country))
+        _ = ctx.translator.ugettext
+        return None, _('Unknown international phone number')
+    if len(value) == 4:
+        return value, None
+    if len(value) == 9 and value[0] != '0':
+        value = u'0{0}'.format(value)
+    if len(value) == 10:
+        if value[0] != '0':
+            _ = ctx.translator.ugettext
+            return None, _('Unexpected first digit in phone number: {0} instead of 0').format(value[0])
+        mask = '+33 {0}{1} {2} {3} {4}' if value[1] == '8' else '+33 {0} {1} {2} {3} {4}'
+        return mask.format(value[1], value[2:4], value[4:6], value[6:8], value[8:10]), None
+    _ = ctx.translator.ugettext
+    return None, _('Wrong number of digits in phone number')
 
 
 def clean_unicode_to_slug(ctx, value):
