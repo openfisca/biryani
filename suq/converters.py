@@ -140,6 +140,8 @@ def clean_unicode_to_email(ctx, value):
         return None, None
     else:
         value = value.lower()
+        if value.startswith(u'mailto:'):
+            value = value.replace(u'mailto:', u'')
         try:
             username, domain = value.split('@', 1)
         except ValueError:
