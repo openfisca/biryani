@@ -329,7 +329,7 @@ def cleanup_empty(ctx, value):
 
 
 def condition(test_filter, ok_filter, error_filter = None):
-    """When ``test_filter`` succeeds (ie no error), then applies ``ok_filter``, otherwise applies ``error_filter``."""
+    """When ``test_filter`` succeeds (ie no error), then apply ``ok_filter``, otherwise applies ``error_filter``."""
     def f(ctx, value):
         test, error = test_filter(ctx, value)
         if error is None:
@@ -408,6 +408,19 @@ def equals(constant):
         else:
             _ = ctx.translator.ugettext
             return None, _('Value must be equal to {0}').format(constant)
+    return f
+
+
+def first_valid(*filters):
+    """Try each filter successively until one succeeds. When every filter fail, return the result of the last one."""
+    def f(ctx, value):
+        filtered_value = value
+        error = None
+        for filter in filters:
+            filtered_value, error = filter(ctx, value)
+            if error is None:
+                return filtered_value, error
+        return filtered_value, error
     return f
 
 
@@ -853,7 +866,6 @@ cleanup_text = pipe(cleanup_crlf, cleanup_line)
 extract_if_singleton = condition(
     test(lambda value: len(value) == 1 and not isinstance(value[0], (list, set, tuple))),
     function(lambda value: list(value)[0]),
-    noop,
     )
 
 
@@ -891,9 +903,8 @@ unicode_to_url_name = pipe(cleanup_line, clean_unicode_to_url_name)
 
 
 if bson is not None:
-    python_data_to_object_id = condition(
+    python_data_to_object_id = first_valid(
         is_instance(bson.objectid.ObjectId),
-        noop,
         pipe(is_instance(basestring), unicode_to_object_id),
         )
 strictly_positive_unicode_to_integer = pipe(unicode_to_integer, greater_or_equal(1))
