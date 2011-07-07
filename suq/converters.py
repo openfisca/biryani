@@ -89,8 +89,16 @@ def clean_iso8601_to_date(ctx, value):
     else:
         import datetime
         import mx.DateTime
+        # mx.DateTime.ISO.ParseDateTimeUTC fails when time zone is preceded with a space. For example,
+        # mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03 +01:00') raises a"ValueError: wrong format,
+        # use YYYY-MM-DD HH:MM:SS" while mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03+01:00') works.
+        # So we remove space before "+" and "-".
+        while u' +' in value:
+            value = value.replace(u' +', '+')
+        while u' -' in value:
+            value = value.replace(u' -', '-')
         try:
-            return datetime.date.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
+            return datetime.date.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC()), None
         except ValueError:
             _ = ctx.translator.ugettext
             return None, _('Value must be a date in ISO 8601 format')
@@ -103,6 +111,14 @@ def clean_iso8601_to_datetime(ctx, value):
     else:
         import datetime
         import mx.DateTime
+        # mx.DateTime.ISO.ParseDateTimeUTC fails when time zone is preceded with a space. For example,
+        # mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03 +01:00') raises a"ValueError: wrong format,
+        # use YYYY-MM-DD HH:MM:SS" while mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03+01:00') works.
+        # So we remove space before "+" and "-".
+        while u' +' in value:
+            value = value.replace(u' +', '+')
+        while u' -' in value:
+            value = value.replace(u' -', '-')
         try:
             return datetime.datetime.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
         except ValueError:
