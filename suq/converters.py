@@ -98,7 +98,7 @@ def clean_iso8601_to_date(ctx, value):
         while u' -' in value:
             value = value.replace(u' -', '-')
         try:
-            return datetime.date.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC()), None
+            return datetime.date.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
         except ValueError:
             _ = ctx.translator.ugettext
             return None, _('Value must be a date in ISO 8601 format')
