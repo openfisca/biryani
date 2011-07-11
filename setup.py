@@ -49,7 +49,7 @@ doc_lines = __doc__.split('\n')
 
 setup(
     name = 'Suq-Conversion',
-    version = '0.3',
+    version = '0.4',
 
     author = 'Emmanuel Raviart',
     author_email = 'eraviart@easter-eggs.com',

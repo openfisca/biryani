@@ -438,6 +438,14 @@ def equals(constant):
     return f
 
 
+def fail(msg):
+    """Return a filter that always returns an error."""
+    def fail_filter(ctx, value):
+        _ = ctx.translator.ugettext
+        return None, _(msg)
+    return error_filter
+
+
 def first_valid(*filters):
     """Try each filter successively until one succeeds. When every filter fail, return the result of the last one."""
     def f(ctx, value):
@@ -711,7 +719,7 @@ def strip(chars = None):
     return f
 
 
-def structured_mapping(filters, ignore_extras = False, constructor = dict, keep_empty = False):
+def structured_mapping(filters, constructor = dict, default = None, keep_empty = False):
     """Return a filter that maps a mapping of filters to a mapping (ie dict, etc) of values."""
     filters = dict(
         (name, filter)
@@ -721,14 +729,16 @@ def structured_mapping(filters, ignore_extras = False, constructor = dict, keep_
     def f(ctx, values):
         if values is None:
             return None, None
+        if default == 'ignore':
+            values_filter = filters
+        else:
+            values_filter = filters.copy()
+            for name in values:
+                if name not in values_filter:
+                    values_filter[name] = default if default is not None else fail(N_('Unexpected item'))
         errors = {}
         filtered_values = {}
-        if not ignore_extras and not set(values.iterkeys()).issubset(filters.iterkeys()):
-            _ = ctx.translator.ugettext
-            for name in values:
-                if name not in filters:
-                    errors[name] = _('Unexpected item')
-        for name, filter in filters.iteritems():
+        for name, filter in values_filter.iteritems():
             filtered_value, error = filter(ctx, values.get(name))
             if error is not None:
                 errors[name] = error
@@ -742,7 +752,7 @@ def structured_mapping(filters, ignore_extras = False, constructor = dict, keep_
     return f
 
 
-def structured_sequence(filters, constructor = list, ignore_extras = False, keep_empty = False):
+def structured_sequence(filters, constructor = list, default = None, keep_empty = False):
     """Return a filter that map a sequence of filters to a sequence of values."""
     filters = [
         filter
@@ -752,23 +762,25 @@ def structured_sequence(filters, constructor = list, ignore_extras = False, keep
     def f(ctx, values):
         if values is None:
             return None, None
-        elif len(values) > len(filters) and not ignore_extras:
-            _ = ctx.translator.ugettext
-            return None, _('Too much values: {0} instead of {1}').format(len(values), len(filters))
+        if default == 'ignore':
+            values_filter = filters
         else:
-            errors = {}
-            filtered_values = []
-            for i, (filter, value) in enumerate(itertools.izip_longest(
-                    filters, itertools.islice(values, len(filters)))):
-                filtered_value, error = filter(ctx, value)
-                if error is not None:
-                    errors[i] = error
-                filtered_values.append(filtered_value)
-            if keep_empty or filtered_values:
-                filtered_values = constructor(filtered_values)
-            else:
-                filtered_values = None
-            return filtered_values, errors or None
+            values_filter = filters[:]
+            while len(values) > len(values_filter):
+                values_filter.append(default if default is not None else fail(N_('Unexpected item')))
+        errors = {}
+        filtered_values = []
+        for i, (filter, value) in enumerate(itertools.izip_longest(
+                values_filter, itertools.islice(values, len(values_filter)))):
+            filtered_value, error = filter(ctx, value)
+            if error is not None:
+                errors[i] = error
+            filtered_values.append(filtered_value)
+        if keep_empty or filtered_values:
+            filtered_values = constructor(filtered_values)
+        else:
+            filtered_values = None
+        return filtered_values, errors or None
     return f
 
 
@@ -904,11 +916,13 @@ iso8601_to_date = pipe(cleanup_line, clean_iso8601_to_date)
 iso8601_to_datetime = pipe(cleanup_line, clean_iso8601_to_datetime)
 python_data_to_geo = pipe(
     is_instance((list, tuple)),
-    structured_sequence([
-        pipe(python_data_to_float, greater_or_equal(-90), less_or_equal(90)), # latitude
-        pipe(python_data_to_float, greater_or_equal(-180), less_or_equal(180)), # longitude
-        pipe(python_data_to_integer, greater_or_equal(0), less_or_equal(9)), # accuracy
-        ], ignore_extras = True),
+    structured_sequence(
+        [
+            pipe(python_data_to_float, greater_or_equal(-90), less_or_equal(90)), # latitude
+            pipe(python_data_to_float, greater_or_equal(-180), less_or_equal(180)), # longitude
+            pipe(python_data_to_integer, greater_or_equal(0), less_or_equal(9)), # accuracy
+            ],
+        default = 'ignore'),
     )
 unicode_to_balanced_ternary_digit = pipe(cleanup_line, clean_unicode_to_balanced_ternary_digit)
 unicode_to_boolean = pipe(cleanup_line, clean_unicode_to_boolean)
