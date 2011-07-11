@@ -648,7 +648,7 @@ def rename_item(old_key, new_key):
         if value is None:
             return None, None
         if old_key in value:
-            value[new_key] = old_key.pop(old_key)
+            value[new_key] = value.pop(old_key)
         return value, None
     return rename_item_filter
 
