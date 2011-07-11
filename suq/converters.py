@@ -416,6 +416,17 @@ def default(constant):
     return lambda ctx, value: (constant, None) if value is None else (value, None)
 
 
+def dict_to_instance(cls):
+    """Return a filter that creates in instance of a class from a dictionary."""
+    def dict_to_instance_filter(ctx, value):
+        if value is None:
+            return None, None
+        instance = cls()
+        instance.__dict__ = value
+        return instance, None
+    return dict_to_instance_filter
+
+
 def equals(constant):
     """Return a filter that accepts only values equals to given constant."""
     def f(ctx, value):
