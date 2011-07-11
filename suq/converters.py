@@ -642,6 +642,17 @@ def python_data_to_unicode(ctx, value):
             return str(value).decode('utf-8'), None
 
 
+def rename_item(old_key, new_key):
+    """Return a filter that renames a key of a mapping."""
+    def rename_item_filter(ctx, value):
+        if value is None:
+            return None, None
+        if old_key in value:
+            value[new_key] = old_key.pop(old_key)
+        return value, None
+    return rename_item_filter
+
+
 def require(ctx, value):
     """Filter missing value."""
     if value is None:
