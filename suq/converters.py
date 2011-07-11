@@ -66,12 +66,12 @@ ctx = Context()
 
 def attribute(name):
     """Return a filter that retrieves an existing attribute from an object."""
-    def f(ctx, value):
+    def attribute_filter(ctx, value):
         if value is None or name is None:
             return value, None
         # It assumes that an attribute is always declared in its class, so it always exists.
         return getattr(value, name), None
-    return f
+    return attribute_filter
 
 
 def boolean_to_unicode(ctx, value):
@@ -274,7 +274,7 @@ def clean_unicode_to_slug(ctx, value):
 
 def clean_unicode_to_uri(add_prefix = 'http://', full = False, remove_fragment = False, schemes = ('http', 'https')):
     """Return a filter that converts a clean unicode string to an URI."""
-    def f(ctx, value):
+    def clean_unicode_to_uri_filter(ctx, value):
         if value is None:
             return None, None
         else:
@@ -301,7 +301,7 @@ def clean_unicode_to_uri(add_prefix = 'http://', full = False, remove_fragment =
             if remove_fragment and split_uri[4]:
                 split_uri[4] = ''
             return unicode(urlparse.urlunsplit(split_uri)), None
-    return f
+    return clean_unicode_to_uri_filter
 
 
 def clean_unicode_to_uri_path_and_query(ctx, value):
@@ -346,7 +346,7 @@ def cleanup_empty(ctx, value):
 
 def condition(test_filter, ok_filter, error_filter = None):
     """When ``test_filter`` succeeds (ie no error), then apply ``ok_filter``, otherwise applies ``error_filter``."""
-    def f(ctx, value):
+    def condition_filter(ctx, value):
         test, error = test_filter(ctx, value)
         if error is None:
             return ok_filter(ctx, value)
@@ -354,7 +354,7 @@ def condition(test_filter, ok_filter, error_filter = None):
             return value, None
         else:
             return error_filter(ctx, value)
-    return f
+    return condition_filter
 
 
 def date_to_datetime(ctx, value):
@@ -429,13 +429,13 @@ def dict_to_instance(cls):
 
 def equals(constant):
     """Return a filter that accepts only values equals to given constant."""
-    def f(ctx, value):
+    def equals_filter(ctx, value):
         if constant is None or value is None or value == constant:
             return value, None
         else:
             _ = ctx.translator.ugettext
             return None, _('Value must be equal to {0}').format(constant)
-    return f
+    return equals_filter
 
 
 def fail(msg):
@@ -448,7 +448,7 @@ def fail(msg):
 
 def first_valid(*filters):
     """Try each filter successively until one succeeds. When every filter fail, return the result of the last one."""
-    def f(ctx, value):
+    def first_valid_filter(ctx, value):
         filtered_value = value
         error = None
         for filter in filters:
@@ -456,38 +456,38 @@ def first_valid(*filters):
             if error is None:
                 return filtered_value, error
         return filtered_value, error
-    return f
+    return first_valid_filter
 
 
 def function(function):
     """Return a filter that applies a function to value and returns a new value."""
-    def f(ctx, value):
+    def function_filter(ctx, value):
         if value is None or function is None:
             return value, None
         return function(value), None
-    return f
+    return function_filter
 
 
 def is_instance(class_or_classes):
     """Return a filter that accepts only an instance of given classes."""
-    def f(ctx, value):
+    def is_instance_filter(ctx, value):
         if class_or_classes is None or value is None or isinstance(value, class_or_classes):
             return value, None
         else:
             _ = ctx.translator.ugettext
             return None, _('Value is not an instance of {0}').format(class_or_classes)
-    return f
+    return is_instance_filter
 
 
 def greater_or_equal(constant):
     """Return a filter that accepts only values greater than or equal to given constant."""
-    def f(ctx, value):
+    def greater_or_equal_filter(ctx, value):
         if constant is None or value is None or value >= constant:
             return value, None
         else:
             _ = ctx.translator.ugettext
             return None, _('Value must be greater than or equal to {0}').format(constant)
-    return f
+    return greater_or_equal_filter
 
 
 def item_or_sequence(filter, constructor = list, keep_empty = False, keep_null_items = False):
@@ -505,33 +505,33 @@ def item_or_sequence(filter, constructor = list, keep_empty = False, keep_null_i
 
 def less_or_equal(constant):
     """Return a filter that accepts only values less than or equal to given constant."""
-    def f(ctx, value):
+    def less_or_equal_filter(ctx, value):
         if constant is None or value is None or value <= constant:
             return value, None
         else:
             _ = ctx.translator.ugettext
             return None, _('Value must be less than or equal to {0}').format(constant)
-    return f
+    return less_or_equal_filter
 
 
 def mapping_value(key, default = None):
     """Return a filter that retrieves an item value from a mapping."""
-    def f(ctx, value):
+    def mapping_value_filter(ctx, value):
         if value is None:
             return None, None
         return value.get(key, default), None
-    return f
+    return mapping_value_filter
 
 
 def match(regex):
     """Return a filter that accepts only values that match given (compiled) regular expression."""
-    def f(ctx, value):
+    def match_filter(ctx, value):
         if regex is None or value is None or regex.match(value):
             return value, None
         else:
             _ = ctx.translator.ugettext
             return None, _('Invalid value format')
-    return f
+    return match_filter
 
 
 def none_to_empty_unicode(ctx, value):
@@ -546,7 +546,7 @@ def noop(ctx, value):
 
 if bson is not None:
     def mongodb_query_to_object(object_class):
-        def f(ctx, value):
+        def mongodb_query_to_object_filter(ctx, value):
             """Convert a MongoDB query expression to an object wrapped to a MongoDB document."""
             if value is None:
                 return None, None
@@ -555,11 +555,11 @@ if bson is not None:
                 _ = ctx.translator.ugettext
                 return None, _('No document of class {0} for query {1}').format(object_class.__name__, value)
             return instance, None
-        return f
+        return mongodb_query_to_object_filter
 
 
     def object_id_to_object(object_class, cache = None):
-        def f(ctx, value):
+        def object_id_to_object_filter(ctx, value):
             """Convert an ID to an object wrapped to a MongoDB document."""
             if value is None:
                 return None, None
@@ -571,7 +571,7 @@ if bson is not None:
                 _ = ctx.translator.ugettext
                 return None, _('No document of class {0} with ID {1}').format(object_class.__name__, value)
             return instance, None
-        return f
+        return object_id_to_object_filter
 
 
     def object_id_to_unicode(ctx, value):
@@ -584,7 +584,7 @@ if bson is not None:
 
 def pipe(*filters):
     """Return a compound filter that applies each of its filters till the end or an error occurs."""
-    def f(ctx, *args, **kwargs):
+    def pipe_filter(ctx, *args, **kwargs):
         for filter in filters:
             if filter is None:
                 continue
@@ -594,7 +594,7 @@ def pipe(*filters):
             args = [value]
             kwargs = {}
         return value, None
-    return f
+    return pipe_filter
 
 
 def python_data_to_boolean(ctx, value):
@@ -653,18 +653,18 @@ def require(ctx, value):
 
 def restrict(values):
     """Return a filter that accepts only values belonging to a given set (or list or...)."""
-    def f(ctx, value):
+    def restrict_filter(ctx, value):
         if value is None or values is None or value in values:
             return value, None
         else:
             _ = ctx.translator.ugettext
             return None, _('Value must be one of {0}').format(values)
-    return f
+    return restrict_filter
 
 
 def restrict_json_class_name(values):
     """Return a filter that accepts only JSON dictionaries with an attribute "class_name" belonging to given set."""
-    def f(ctx, value):
+    def restrict_json_class_name_filter(ctx, value):
         if value is None:
             return value, None
         if not isinstance(value, dict):
@@ -678,7 +678,7 @@ def restrict_json_class_name(values):
             _ = ctx.translator.ugettext
             return None, _('Value must be one of {0}').format(values)
         return value, None
-    return f
+    return restrict_json_class_name_filter
 
 
 def set_value(constant):
@@ -691,32 +691,32 @@ def set_value(constant):
 
 def sort(cmp = None, key = None, reverse = False):
     """Return a filter that sorts an iterable."""
-    def f(ctx, values):
+    def sort_filter(ctx, values):
         if values is None:
             return None, None
         else:
             return sorted(values, cmp = cmp, key = key, reverse = reverse), None
-    return f
+    return sort_filter
 
 
 def split(separator = None):
     """Returns a filter that splits a string."""
-    def f(ctx, value):
+    def split_filter(ctx, value):
         if value is None:
             return None, None
         else:
             return value.split(separator), None
-    return f
+    return split_filter
 
 
 def strip(chars = None):
     """Returns a filter that removes leading and trailing characters from string."""
-    def f(ctx, value):
+    def strip_filter(ctx, value):
         if value is None:
             return None, None
         else:
             return value.strip(chars), None
-    return f
+    return strip_filter
 
 
 def structured_mapping(filters, constructor = dict, default = None, keep_empty = False):
@@ -726,7 +726,7 @@ def structured_mapping(filters, constructor = dict, default = None, keep_empty =
         for name, filter in (filters or {}).iteritems()
         if filter is not None
         )
-    def f(ctx, values):
+    def structured_mapping_filter(ctx, values):
         if values is None:
             return None, None
         if default == 'ignore':
@@ -749,7 +749,7 @@ def structured_mapping(filters, constructor = dict, default = None, keep_empty =
         else:
             filtered_values = None
         return filtered_values, errors or None
-    return f
+    return structured_mapping_filter
 
 
 def structured_sequence(filters, constructor = list, default = None, keep_empty = False):
@@ -759,7 +759,7 @@ def structured_sequence(filters, constructor = list, default = None, keep_empty 
         for filter in filters or []
         if filter is not None
         ]
-    def f(ctx, values):
+    def structured_sequence_filter(ctx, values):
         if values is None:
             return None, None
         if default == 'ignore':
@@ -781,13 +781,13 @@ def structured_sequence(filters, constructor = list, default = None, keep_empty 
         else:
             filtered_values = None
         return filtered_values, errors or None
-    return f
+    return structured_sequence_filter
 
 
 def test(function):
     """Return a filter that applies a test function and returns True when test succeeds or an error when it fails.
     """
-    def f(ctx, value):
+    def test_filter(ctx, value):
         if value is None or function is None:
             return value, None
         if function(value):
@@ -796,7 +796,7 @@ def test(function):
             _ = ctx.translator.ugettext
             return False, _('Value test failed')
         return bool(function(value)) or None, None
-    return f
+    return test_filter
 
 
 def timestamp_to_date(ctx, value):
@@ -828,12 +828,12 @@ def timestamp_to_datetime(ctx, value):
 
 def translate(conversions):
     """Return a filter that converts values found in given dictionary and keep others as is."""
-    def f(ctx, value):
+    def translate_filter(ctx, value):
         if value is None or conversions is None or value not in conversions:
             return value, None
         else:
             return conversions[value], None
-    return f
+    return translate_filter
 
 
 def unicode_to_uri(add_prefix = 'http://', full = False, remove_fragment = False, schemes = ('http', 'https')):
@@ -849,7 +849,7 @@ def unicode_to_uri(add_prefix = 'http://', full = False, remove_fragment = False
 def uniform_mapping(key_filter, value_filter, constructor = dict, keep_empty = False, keep_null_keys = False,
         keep_null_values = False):
     """Return a filter that applies a unique filter to each key and another unique filter to each value of a mapping."""
-    def f(ctx, values):
+    def uniform_mapping_filter(ctx, values):
         if values is None:
             return None, None
         errors = {}
@@ -872,12 +872,12 @@ def uniform_mapping(key_filter, value_filter, constructor = dict, keep_empty = F
         else:
             filtered_values = None
         return filtered_values, errors or None
-    return f
+    return uniform_mapping_filter
 
 
 def uniform_sequence(filter, constructor = list, keep_empty = False, keep_null_items = False):
     """Return a filter that applies the same filter to each value of a list."""
-    def f(ctx, values):
+    def uniform_sequence_filter(ctx, values):
         if values is None:
             return None, None
         errors = {}
@@ -893,7 +893,7 @@ def uniform_sequence(filter, constructor = list, keep_empty = False, keep_null_i
         else:
             filtered_values = None
         return filtered_values, errors or None
-    return f
+    return uniform_sequence_filter
 
 
 # Level-2 Converters
@@ -956,10 +956,10 @@ strictly_positive_unicode_to_integer = pipe(unicode_to_integer, greater_or_equal
 
 def to_value(filter, ignore_error = False):
     """Return a function that calls a filter and returns its result value."""
-    def f(ctx, *args, **kwargs):
+    def to_value_filter(ctx, *args, **kwargs):
         value, error = filter(ctx, *args, **kwargs)
         if not ignore_error and error is not None:
             raise ValueError(error)
         return value
-    return f
+    return to_value_filter
 
