@@ -443,7 +443,7 @@ def fail(msg):
     def fail_filter(ctx, value):
         _ = ctx.translator.ugettext
         return None, _(msg)
-    return error_filter
+    return fail_filter
 
 
 def first_valid(*filters):
