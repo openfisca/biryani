@@ -661,34 +661,15 @@ def require(ctx, value):
         return value, None
 
 
-def restrict(values):
+def one_of(values):
     """Return a filter that accepts only values belonging to a given set (or list or...)."""
-    def restrict_filter(ctx, value):
+    def one_of_filter(ctx, value):
         if value is None or values is None or value in values:
             return value, None
         else:
             _ = ctx.translator.ugettext
             return None, _('Value must be one of {0}').format(values)
-    return restrict_filter
-
-
-def restrict_json_class_name(values):
-    """Return a filter that accepts only JSON dictionaries with an attribute "class_name" belonging to given set."""
-    def restrict_json_class_name_filter(ctx, value):
-        if value is None:
-            return value, None
-        if not isinstance(value, dict):
-            _ = ctx.translator.ugettext
-            return None, _('Invalid value: Not a JSON dictionary')
-        class_name = value.get('class_name')
-        if class_name is None:
-            _ = ctx.translator.ugettext
-            return None, _('Missing class name in JSON dictionary')
-        if values is not None and class_name not in values:
-            _ = ctx.translator.ugettext
-            return None, _('Value must be one of {0}').format(values)
-        return value, None
-    return restrict_json_class_name_filter
+    return one_of_filter
 
 
 def set_value(constant):
@@ -959,6 +940,31 @@ if bson is not None:
         pipe(is_instance(basestring), unicode_to_object_id),
         )
 strictly_positive_unicode_to_integer = pipe(unicode_to_integer, greater_or_equal(1))
+
+
+# Deprecated Converters
+
+
+restrict = one_of
+
+
+def restrict_json_class_name(values):
+    """Return a filter that accepts only JSON dictionaries with an attribute "class_name" belonging to given set."""
+    def restrict_json_class_name_filter(ctx, value):
+        if value is None:
+            return value, None
+        if not isinstance(value, dict):
+            _ = ctx.translator.ugettext
+            return None, _('Invalid value: Not a JSON dictionary')
+        class_name = value.get('class_name')
+        if class_name is None:
+            _ = ctx.translator.ugettext
+            return None, _('Missing class name in JSON dictionary')
+        if values is not None and class_name not in values:
+            _ = ctx.translator.ugettext
+            return None, _('Value must be one of {0}').format(values)
+        return value, None
+    return restrict_json_class_name_filter
 
 
 # Utility Functions
