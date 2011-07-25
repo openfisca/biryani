@@ -60,3 +60,11 @@ else:
     # Don't export pymongo module.
     del pymongo
 
+try:
+    from suq import strings
+except ImportError:
+    from suqstringsconv import *
+else:
+    # Don't export strings module.
+    del strings
+
