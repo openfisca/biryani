@@ -23,7 +23,7 @@
 # limitations under the License.
 
 
-"""Toolbox to convert and validate values (for web forms, etc)"""
+"""Toolbox to convert and validate data (for web forms, CSV files, XML files, etc)"""
 
 
 try:
@@ -37,10 +37,11 @@ except ImportError:
 classifiers = """\
 Development Status :: 3 - Alpha
 Environment :: Web Environment
-Intended Audience :: Information Technology
+Intended Audience :: Developers
 License :: OSI Approved :: Apache Software License
 Operating System :: OS Independent
 Programming Language :: Python
+Topic :: Text Processing
 """
 
 doc_lines = __doc__.split('\n')
