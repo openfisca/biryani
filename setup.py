@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 
 
-# Suq -- Python Toolbox
+# Biryani -- A conversion and validation toolbox
 # By: Emmanuel Raviart <eraviart@easter-eggs.com>
 #
 # Copyright (C) 2009, 2010, 2011 Easter-eggs
-# http://wiki.infos-pratiques.org/wiki/Suq
+# http://packages.python.org/biryani/
 #
-# This file is part of Suq.
+# This file is part of Biryani.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,8 +47,8 @@ doc_lines = __doc__.split('\n')
 
 
 setup(
-    name = 'Suq-Conversion',
-    version = '0.4',
+    name = 'Biryani',
+    version = '0.5',
 
     author = 'Emmanuel Raviart',
     author_email = 'eraviart@easter-eggs.com',
@@ -57,10 +57,9 @@ setup(
     keywords = 'conversion form python validation web',
     license = 'http://www.apache.org/licenses/LICENSE-2.0',
     long_description = '\n'.join(doc_lines[2:]),
-    url = 'http://wiki.infos-pratiques.org/wiki/Suq',
+    url = 'http://packages.python.org/biryani/',
 
     install_requires = [],
-    namespace_packages = ['suq'],
     packages = find_packages(exclude = ['ez_setup']),
     zip_safe = False,
     )
