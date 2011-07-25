@@ -50,8 +50,8 @@ username_re = re.compile(r"[^ \t\n\r@<>()]+$", re.I)
 
 def boolean_to_unicode(value, state = states.default_state):
     """Convert a boolean to unicode.
-    
-    Like most converters, a ``None`` value is not converted.
+
+    Like most converters, a missing (ie ``None``) value is not converted.
 
     >>> boolean_to_unicode(False)
     (u'0', None)
@@ -84,15 +84,23 @@ def clean_unicode_to_balanced_ternary_digit(value, state = states.default_state)
     except ValueError:
         return None, state._('Value must be a balanced ternary digit')
 
+    Like most converters, a missing (ie ``None``) value is not converted.
 
-def clean_unicode_to_boolean(value, state = states.default_state):
-    """Convert a clean unicode string to a boolean."""
+    >>> clean_unicode_to_boolean(u'0')
+    (False, None)
+    >>> clean_unicode_to_boolean(u'1')
+    (True, None)
+    >>> clean_unicode_to_boolean(None)
+    (None, None)
+    >>> clean_unicode_to_boolean(u'true')
+    (None, 'Value must be a boolean number')
+    """
     if value is None:
         return None, None
     try:
         return bool(int(value)), None
     except ValueError:
-        return None, state._('Value must be a boolean')
+        return None, state._('Value must be a boolean number')
 
 
 def clean_unicode_to_email(value, state = states.default_state):
