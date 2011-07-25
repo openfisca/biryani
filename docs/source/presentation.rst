@@ -4,7 +4,7 @@ Presentation
 
 Biryani is a Python library to convert and validate data (for web forms, CSV files, XML files, etc).
 
-To convert a value into another, you first create the ad-hoc converter by chaining conversion functions. Each conversion function (aka a converter) takes a value as input and outputs a couple containing the converted value and an eventual error message.
+To convert a value into another, you first create the ad-hoc converter by chaining conversion functions. Each conversion function (aka a converter) takes a value as input and outputs a couple containing the converted value and an optional error message.
 
 First examples
 ==============
