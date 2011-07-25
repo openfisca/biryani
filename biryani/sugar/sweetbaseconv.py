@@ -32,6 +32,9 @@ your application.
 from .. import baseconv as conv
 
 
+N_ = conv.N_
+
+
 def attribute(name):
     """Return a converter that retrieves an existing attribute from an object.
 

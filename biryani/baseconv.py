@@ -319,16 +319,6 @@ def function(function, handle_none = False):
     return function_converter
 
 
-def is_instance(class_or_classes):
-    """Return a converter that accepts only an instance of given classes."""
-    def is_instance_converter(value, state = states.default_state):
-        if class_or_classes is None or value is None or isinstance(value, class_or_classes):
-            return value, None
-        else:
-            return None, state._('Value is not an instance of {0}').format(class_or_classes)
-    return is_instance_converter
-
-
 def greater_or_equal(constant):
     """Return a converter that accepts only values greater than or equal to given constant."""
     def greater_or_equal_converter(value, state = states.default_state):
@@ -342,7 +332,7 @@ def greater_or_equal(constant):
 def item_or_sequence(converter, constructor = list, keep_empty = False, keep_null_items = False):
     """Return a converter that accepts either an item or a sequence of items."""
     return condition(
-        is_instance(constructor),
+        test_isinstance(constructor),
         pipe(
             uniform_sequence(converter, constructor = constructor, keep_empty = keep_empty,
                 keep_null_items = keep_null_items),
@@ -389,6 +379,16 @@ def none_to_empty_unicode(value, state = states.default_state):
 def noop(value, state = states.default_state):
     """Return value as is."""
     return value, None
+
+
+def one_of(values):
+    """Return a converter that accepts only values belonging to a given set (or list or...)."""
+    def one_of_converter(value, state = states.default_state):
+        if value is None or values is None or value in values:
+            return value, None
+        else:
+            return None, state._('Value must be one of {0}').format(values)
+    return one_of_converter
 
 
 def pipe(*converters):
@@ -466,16 +466,6 @@ def require(value, state = states.default_state):
         return None, state._('Missing value')
     else:
         return value, None
-
-
-def one_of(values):
-    """Return a converter that accepts only values belonging to a given set (or list or...)."""
-    def one_of_converter(value, state = states.default_state):
-        if value is None or values is None or value in values:
-            return value, None
-        else:
-            return None, state._('Value must be one of {0}').format(values)
-    return one_of_converter
 
 
 def set_value(constant):
@@ -600,6 +590,20 @@ def test(function, error = 'Test failed', handle_none = False):
     return test_converter
 
 
+def test_isinstance(class_or_classes):
+    """Return a converter that accepts only an instance of given class (or tuple of classes).
+
+    >>> test_isinstance(basestring)('This is a string')
+    ('This is a string', None)
+    >>> test_isinstance(basestring)(42)
+    (42, "Value is not an instance of <type 'basestring'>")
+    >>> test_isinstance((float, int))(42)
+    (42, None)
+    """
+    return test(lambda value: isinstance(value, class_or_classes),
+        error = N_('Value is not an instance of {0}').format(class_or_classes))
+
+
 def translate(conversions):
     """Return a converter that converts values found in given dictionary and keep others as is."""
     def translate_converter(value, state = states.default_state):
@@ -687,7 +691,7 @@ extract_if_singleton = condition(
 
 form_data_to_boolean = pipe(cleanup_line, clean_unicode_to_boolean, default(False))
 python_data_to_geo = pipe(
-    is_instance((list, tuple)),
+    test_isinstance((list, tuple)),
     structured_sequence(
         [
             pipe(python_data_to_float, greater_or_equal(-90), less_or_equal(90)), # latitude

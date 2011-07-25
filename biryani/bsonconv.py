@@ -74,9 +74,9 @@ unicode_to_object_id = conv.pipe(conv.cleanup_line, clean_unicode_to_object_id)
 
 
 python_data_to_object_id = conv.first_valid(
-    conv.is_instance(bson.objectid.ObjectId),
+    conv.test_isinstance(bson.objectid.ObjectId),
     conv.pipe(
-        conv.is_instance(basestring),
+        conv.test_isinstance(basestring),
         unicode_to_object_id,
         ),
     )
