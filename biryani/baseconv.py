@@ -527,6 +527,24 @@ def test(function, error = 'Test failed', handle_none = False):
     return test_converter
 
 
+def test_between(min_value, max_value):
+    """Return a converter that accepts only values between the two given bounds (included).
+
+    >>> test_between(0, 9)(5)
+    (5, None)
+    >>> test_between(0, 9)(0)
+    (0, None)
+    >>> test_between(0, 9)(9)
+    (9, None)
+    >>> test_between(0, 9)(10)
+    (10, 'Value must be between 0 and 9')
+    >>> test_between(0, 9)(None)
+    (None, None)
+    """
+    return test(lambda value: min_value <= value <= max_value,
+        error = N_('Value must be between {0} and {1}').format(min_value, max_value))
+
+
 def test_isinstance(class_or_classes):
     """Return a converter that accepts only an instance of given class (or tuple of classes).
 
