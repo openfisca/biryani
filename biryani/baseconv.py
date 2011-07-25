@@ -75,14 +75,8 @@ def boolean_to_unicode(value, state = states.default_state):
     return unicode(int(bool(value))), None
 
 
-def clean_unicode_to_balanced_ternary_digit(value, state = states.default_state):
-    """Convert a clean unicode string to an integer -1, 0 or 1."""
-    if value is None:
-        return None, None
-    try:
-        return cmp(int(value), 0), None
-    except ValueError:
-        return None, state._('Value must be a balanced ternary digit')
+def clean_unicode_to_boolean(value, state = states.default_state):
+    """Convert a clean unicode string to a boolean.
 
     Like most converters, a missing (ie ``None``) value is not converted.
 
@@ -641,7 +635,6 @@ python_data_to_geo = pipe(
             ],
         default = 'ignore'),
     )
-unicode_to_balanced_ternary_digit = pipe(cleanup_line, clean_unicode_to_balanced_ternary_digit)
 unicode_to_boolean = pipe(cleanup_line, clean_unicode_to_boolean)
 unicode_to_email = pipe(cleanup_line, clean_unicode_to_email)
 unicode_to_float = pipe(cleanup_line, python_data_to_float)
