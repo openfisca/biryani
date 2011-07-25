@@ -78,6 +78,8 @@ def boolean_to_unicode(value, state = states.default_state):
 def clean_unicode_to_boolean(value, state = states.default_state):
     """Convert a clean unicode string to a boolean.
 
+    .. note:: For a converter that doesn't require a clean unicode string, see :func:`unicode_to_boolean`.
+
     Like most converters, a missing (ie ``None``) value is not converted.
 
     >>> clean_unicode_to_boolean(u'0')
@@ -625,6 +627,24 @@ extract_if_singleton = condition(
 
 
 form_data_to_boolean = pipe(cleanup_line, clean_unicode_to_boolean, default(False))
+"""Convert an unicode string to a boolean.
+
+Like most converters, a missing (ie ``None``) value is not converted.
+
+>>> unicode_to_boolean(u'0')
+(False, None)
+>>> unicode_to_boolean(u'1')
+(True, None)
+>>> unicode_to_boolean(u'  0  ')
+(False, None)
+>>> unicode_to_boolean(None)
+(None, None)
+>>> unicode_to_boolean(u'    ')
+(None, None)
+>>> unicode_to_boolean(u'true')
+(None, 'Value must be a boolean number')
+"""
+
 python_data_to_geo = pipe(
     test_isinstance((list, tuple)),
     structured_sequence(

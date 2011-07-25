@@ -40,8 +40,8 @@ def attribute(name):
 
     This converter is non-standard, because:
 
-      * It is a simple one-liner.
-      * It needs an option to specify what to do when attribute doesn't exist.
+    * It is a simple one-liner.
+    * It needs an option to specify what to do when attribute doesn't exist.
     """
     return conv.function(lambda value: getattr(value, name))
 

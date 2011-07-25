@@ -28,6 +28,17 @@
 class State(object):
     _ = staticmethod(lambda s: s)
 
-# Minimal context, usable with converters
+    def __repr__(self):
+        """Hack to improve ``default_state`` aspect in Sphinx autodoc
+        
+        A state doesn't not need to implement this method.
+        """
+        if self is default_state:
+            return '{0}.default_state'.format(__name__)
+        else:
+            return super(State, self).__repr__(self)
+
+
+#: Minimal context, usable with converters
 default_state = State()
 
