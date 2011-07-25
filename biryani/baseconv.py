@@ -318,16 +318,6 @@ def noop(value, state = states.default_state):
     return value, None
 
 
-def one_of(values):
-    """Return a converter that accepts only values belonging to a given set (or list or...)."""
-    def one_of_converter(value, state = states.default_state):
-        if value is None or values is None or value in values:
-            return value, None
-        else:
-            return None, state._('Value must be one of {0}').format(values)
-    return one_of_converter
-
-
 def pipe(*converters):
     """Return a compound converter that applies each of its converters till the end or an error occurs."""
     def pipe_converter(*args, **kwargs):
@@ -545,6 +535,21 @@ def test_between(min_value, max_value):
         error = N_('Value must be between {0} and {1}').format(min_value, max_value))
 
 
+def test_in(values):
+    """Return a converter that accepts only values belonging to a given set (or list or...).
+
+    >>> test_in('abcd')('a')
+    ('a', None)
+    >>> test_in(['a', 'b', 'c', 'd'])('a')
+    ('a', None)
+    >>> test_in(['a', 'b', 'c', 'd'])('z')
+    ('z', "Value must be one of ['a', 'b', 'c', 'd']")
+    >>> test_in(['a', 'b', 'c', 'd'])(None)
+    (None, None)
+    """
+    return test(lambda value: value in values, error = N_('Value must be one of {0}').format(values))
+
+
 def test_isinstance(class_or_classes):
     """Return a converter that accepts only an instance of given class (or tuple of classes).
 
@@ -691,7 +696,8 @@ strictly_positive_unicode_to_integer = pipe(unicode_to_integer, greater_or_equal
 # Deprecated Converters
 
 
-restrict = one_of
+one_of = test_in
+restrict = test_in
 
 
 def restrict_json_class_name(values):
