@@ -22,7 +22,7 @@
 # limitations under the License.
 
 
-"""Babel related Converters"""
+"""Suq-String related Converters"""
 
 
 from suq import strings

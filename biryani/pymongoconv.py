@@ -27,12 +27,14 @@
 
 import bson
 
+from . import baseconv as conv
 from . import states
 
 
 __all__ = [
     'mongodb_query_to_object',
     'object_id_to_object',
+    'python_data_to_geo',
     ]
 
 
@@ -61,4 +63,16 @@ def object_id_to_object(object_class, cache = None):
             return None, state._('No document of class {0} with ID {1}').format(object_class.__name__, value)
         return instance, None
     return object_id_to_object_converter
+
+
+python_data_to_geo = conv.pipe(
+    conv.test_isinstance((list, tuple)),
+    conv.structured_sequence(
+        [
+            conv.pipe(conv.python_data_to_float, conv.test_between(-90, 90)), # latitude
+            conv.pipe(conv.python_data_to_float, conv.test_between(-180, 180)), # longitude
+            conv.pipe(conv.python_data_to_integer, conv.test_between(0, 9)), # accuracy
+            ],
+        default = 'ignore'),
+    )
 

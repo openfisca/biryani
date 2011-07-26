@@ -73,7 +73,7 @@ unicode_to_object_id = conv.pipe(conv.cleanup_line, clean_unicode_to_object_id)
 # Level-2 Converters
 
 
-python_data_to_object_id = conv.first_valid(
+python_data_to_object_id = conv.first_match(
     conv.test_isinstance(bson.objectid.ObjectId),
     conv.pipe(
         conv.test_isinstance(basestring),

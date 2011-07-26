@@ -49,7 +49,7 @@ doc_lines = __doc__.split('\n')
 
 setup(
     name = 'Biryani',
-    version = '0.5',
+    version = '0.6',
 
     author = 'Emmanuel Raviart',
     author_email = 'eraviart@easter-eggs.com',

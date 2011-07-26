@@ -6,8 +6,8 @@ Biryani is a Python library to convert and validate data (for web forms, CSV fil
 
 To convert a value into another, you first create the ad-hoc converter by chaining conversion functions. Each conversion function (aka a converter) takes a value as input and outputs a couple containing the converted value and an optional error message.
 
-First examples
-==============
+Tutorial
+========
 
     >>> from biryani import allconv as conv
     >>> input_value = u'42'
@@ -66,6 +66,21 @@ Add a custom function to convert string to unicode when needed, and store result
     (42.0, None)
     >>> any_string_to_float(u'42')
     (42.0, None)
+
+.. note:: The builtin converter :func:`biryani.baseconv.string_to_unicode`: does the same thing as the conversion
+   function above.
+
+   So the converter could be simplified to::
+
+        >>> anything_to_float = conv.pipe(
+        ...     conv.string_to_unicode(),
+        ...     conv.test_isinstance(unicode),
+        ...     conv.unicode_to_float,
+        ...     )
+        >>> any_string_to_float('42')
+        (42.0, None)
+        >>> any_string_to_float(u'42')
+        (42.0, None)
 
 We can harden the custom function to convert anything to unicode::
 
