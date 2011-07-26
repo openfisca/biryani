@@ -23,7 +23,7 @@ Converters usually don't test their input value::
     Traceback (most recent call last):
     AttributeError: 'int' object has no attribute 'strip'
 
-To ensure that input value is an unicode string, we need to chain several converters::
+So, to ensure that input value is an unicode string, we need to chain several converters::
 
     >>> conv.pipe(
     ...     conv.test_isinstance(unicode),
@@ -148,6 +148,23 @@ Generalize the converter to a function that accepts any bound::
     ...         )
     >>> anything_to_bounded_float(-180, 180)(90)
     (90.0, None)
+
+.. note:: The builtin converter :func:`biryani.baseconv.test_between`: does the same thing as the test on bounds above.
+
+   So the converter could be simplified to::
+
+        >>> def anything_to_bounded_float(min_bound, max_bound):
+        ...     return conv.pipe(
+        ...         conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
+        ...         conv.test_isinstance(unicode),
+        ...         conv.cleanup_line,
+        ...         conv.unicode_to_float,
+        ...         conv.test_between(min_bound, max_bound),
+        ...         conv.require,
+        ...         )
+        >>> anything_to_bounded_float(-180, 180)(90)
+        (90.0, None)
+
 
 Use the generalized function to convert a dictionary containing both a latitude and a longitude::
 
