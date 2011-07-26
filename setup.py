@@ -6,7 +6,7 @@
 # By: Emmanuel Raviart <eraviart@easter-eggs.com>
 #
 # Copyright (C) 2009, 2010, 2011 Easter-eggs
-# http://packages.python.org/biryani/
+# http://packages.python.org/Biryani/
 #
 # This file is part of Biryani.
 #
@@ -58,7 +58,7 @@ setup(
     keywords = 'conversion form python validation web',
     license = 'http://www.apache.org/licenses/LICENSE-2.0',
     long_description = '\n'.join(doc_lines[2:]),
-    url = 'http://packages.python.org/biryani/',
+    url = 'http://packages.python.org/Biryani/',
 
     install_requires = [],
     packages = find_packages(exclude = ['ez_setup']),
