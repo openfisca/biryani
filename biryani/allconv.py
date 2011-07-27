@@ -30,41 +30,46 @@ from baseconv import *
 try:
     import babel
 except ImportError:
-    from babelconv import *
+    pass
 else:
     # Don't export babel module.
     del babel
+    from babelconv import *
 
 try:
     import bson
 except ImportError:
-    from bsonconv import *
+    pass
 else:
     # Don't export bson module.
     del bson
+    from bsonconv import *
 
 try:
     import mx.DateTime, pytz
 except ImportError:
-    from datetimeconv import *
+    pass
 else:
     # Don't export modules.
     del mx
     del pytz
+    from datetimeconv import *
 
 try:
     import pymongo
 except ImportError:
-    from pymongoconv import *
+    pass
 else:
     # Don't export pymongo module.
     del pymongo
+    from pymongoconv import *
 
 try:
     from suq import strings
 except ImportError:
-    from suqstringsconv import *
+    pass
 else:
     # Don't export strings module.
     del strings
+    from suqstringsconv import *
 
