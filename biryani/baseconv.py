@@ -51,6 +51,7 @@ __all__ = [
     'decode_str',
     'default',
     'dict_to_instance',
+    'encode_str',
     'extract_when_singleton',
     'fail',
     'first_match',
@@ -334,6 +335,8 @@ def decode_str(encoding = 'utf-8'):
 
     >>> decode_str()('   Hello world!   ')
     (u'   Hello world!   ', None)
+    >>> decode_str()(u'   Hello world!   ')
+    (u'   Hello world!   ', None)
     >>> decode_str()(42)
     (42, None)
     >>> decode_str()(None)
@@ -379,6 +382,21 @@ def dict_to_instance(cls):
         instance.__dict__ = value
         return instance, None
     return dict_to_instance_converter
+
+
+def encode_str(encoding = 'utf-8'):
+    """Return a unicode to string converter that uses given *encoding*.
+
+    >>> encode_str()(u'   Hello world!   ')
+    ('   Hello world!   ', None)
+    >>> encode_str()('   Hello world!   ')
+    ('   Hello world!   ', None)
+    >>> encode_str()(42)
+    (42, None)
+    >>> encode_str()(None)
+    (None, None)
+    """
+    return function(lambda value: value.encode(encoding) if isinstance(value, unicode) else value)
 
 
 def fail(msg = N_('An error occured')):
