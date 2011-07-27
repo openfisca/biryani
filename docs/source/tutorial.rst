@@ -34,7 +34,7 @@ So, to ensure that input value is an unicode string, we need to chain several co
     ...     )('42')
     ('42', "Value is not an instance of <type 'unicode'>")
 
-Use ``conv.to_value`` to extract value from conversion result or raise an exception when an error occurs:
+Use :func:`conv.to_value <biryani.baseconv.to_value>` to extract value from conversion result or raise an exception when an error occurs:
 
     >>> conv.to_value(conv.pipe(
     ...     conv.test_isinstance(unicode),
@@ -85,7 +85,7 @@ We can harden the custom function to convert anything to unicode::
     >>> anything_to_float(42)
     (42.0, None)
 
-Add ``conv.cleanup_line`` to strip spaces from string and convert it to None when empty::
+Add :func:`conv.cleanup_line <biryani.baseconv.cleanup_line>` to strip spaces from string and convert it to None when empty::
 
     >>> anything_to_float = conv.pipe(
     ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
@@ -98,7 +98,7 @@ Add ``conv.cleanup_line`` to strip spaces from string and convert it to None whe
     >>> anything_to_float(u'     ')
     (None, None)
 
-Add ``conv.require`` to generate an error when value is missing (ie is ``None``)::
+Add :func:`conv.require <biryani.baseconv.require>` to generate an error when value is missing (ie is ``None``)::
 
     >>> anything_to_float = conv.pipe(
     ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
@@ -110,7 +110,7 @@ Add ``conv.require`` to generate an error when value is missing (ie is ``None``)
     >>> anything_to_float(u'     ')
     (None, 'Missing value')
 
-Use a custom ``test`` to ensure that float is a valid latitude::
+Use a custom :func:`test <biryani.baseconv.test>` to ensure that float is a valid latitude::
 
     >>> anything_to_latitude = conv.pipe(
     ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
