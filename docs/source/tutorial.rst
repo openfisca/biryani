@@ -1,13 +1,6 @@
-============
-Presentation
-============
-
-Biryani is a Python library to convert and validate data (for web forms, CSV files, XML files, etc).
-
-To convert a value into another, you first create the ad-hoc converter by chaining conversion functions. Each conversion function (aka a converter) takes a value as input and outputs a couple containing the converted value and an optional error message.
-
+********
 Tutorial
-========
+********
 
     >>> from biryani import allconv as conv
     >>> input_value = u'42'
@@ -214,81 +207,4 @@ Converters working on complex structures can be chained too::
     (['-12.34', u'45'], "Value is not an instance of <type 'dict'>")
     >>> dict_to_lat_long(None)
     (None, 'Missing value')
-
-
-Comparison with FormEncode
-==========================
-
-TODO
-
-
-Howto to use in a project
-=========================
-
-
-Simple project
---------------
-
-::
-
-    from biryani import allconv as conv
-
-    # Use the converters. For example:
-    s = '5'
-    i = conv.to_value(conv.unicode_to_integer, conv.require)(s)
-    assert i == 5
-    ...
-
-
-Multi-modules project
----------------------
-
-In your project, create a module named ``conv.py``.
-
-In this file, either import every converter, all in once::
-
-    from biryani.allconv import *
-    from biryani import states
-
-
-Or specify the converters you want::
-
-    from biryani.babelconv import *
-    from biryani.baseconv import *
-    from biryani.bsonconv import *
-    from biryani.datetimeconv import *
-    from biryani.pymongoconv import *
-    from biryani.suqstringsconv import *
-    ...
-    from biryani import states
-
-Append your own converters in this file.
-
-In your others modules add::
-
-    from . import conv
-
-    # Use the converters. For example:
-    s = '5'
-    i = conv.to_value(conv.unicode_to_integer, conv.require)(s)
-    assert i == 5
-    ...
-
-
-Howto use with WebOb
-====================
-
-TODO
-
-
-How to use with lxml
-====================
-
-TODO
-
-
-How to import a CSV file
-========================
-
-TODO
 
