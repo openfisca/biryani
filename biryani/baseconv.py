@@ -659,9 +659,8 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
     ({'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', age = None, email = u'spam@easter-eggs.com'))
     ({'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
-    >>> strict_converter(dict(name = u'John Doe', age = u'72', email = u'spam@easter-eggs.com',
-    ...     phone = u'   +33 9 12 34 56 78   '))
-    ({'age': 72, 'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, {'phone': 'Unexpected item'})
+    >>> strict_converter(dict(name = u'John Doe', age = u'72', phone = u'   +33 9 12 34 56 78   '))
+    ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'name': u'John Doe'}, {'phone': 'Unexpected item'})
     >>> non_strict_converter = structured_mapping(
     ...     dict(
     ...         name = pipe(cleanup_line, require),
@@ -715,11 +714,11 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
         errors = {}
         convertered_values = {}
         for name, converter in values_converter.iteritems():
-            convertered_value, error = converter(values.get(name), state = state)
+            value, error = converter(values.get(name), state = state)
+            if value is not None:
+                convertered_values[name] = value
             if error is not None:
                 errors[name] = error
-            elif convertered_value is not None:
-                convertered_values[name] = convertered_value
         if keep_empty or convertered_values:
             convertered_values = constructor(convertered_values)
         else:
@@ -780,10 +779,10 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
         convertered_values = []
         for i, (converter, value) in enumerate(itertools.izip_longest(
                 values_converter, itertools.islice(values, len(values_converter)))):
-            convertered_value, error = converter(value, state = state)
+            value, error = converter(value, state = state)
+            convertered_values.append(value)
             if error is not None:
                 errors[i] = error
-            convertered_values.append(convertered_value)
         if keep_empty or convertered_values:
             convertered_values = constructor(convertered_values)
         else:
@@ -1001,18 +1000,16 @@ def unicode_to_url(add_prefix = 'http://', full = False, remove_fragment = False
 #        errors = {}
 #        convertered_values = {}
 #        for key, value in values.iteritems():
-#            convertered_key, error = key_converter(key, state = state)
+#            key, error = key_converter(key, state = state)
 #            if error is not None:
 #                errors[key] = error
+#            if key is None and not keep_null_keys:
 #                continue
-#            if convertered_key is None and not keep_null_keys:
-#                continue
-#            convertered_value, error = value_converter(value, state = state)
+#            value, error = value_converter(value, state = state)
+#            if value is not None or keep_null_values:
+#                convertered_values[key] = value
 #            if error is not None:
 #                errors[key] = error
-#            if convertered_value is None and not keep_null_values:
-#                continue
-#            convertered_values[convertered_key] = convertered_value
 #        if keep_empty or convertered_values:
 #            convertered_values = constructor(convertered_values)
 #        else:
@@ -1051,11 +1048,11 @@ def uniform_sequence(converter, constructor = list, keep_empty = False, keep_nul
         errors = {}
         convertered_values = []
         for i, value in enumerate(values):
-            convertered_value, error = converter(value, state = state)
+            value, error = converter(value, state = state)
+            if keep_null_items or value is not None:
+                convertered_values.append(value)
             if error is not None:
                 errors[i] = error
-            if keep_null_items or convertered_value is not None:
-                convertered_values.append(convertered_value)
         if keep_empty or convertered_values:
             convertered_values = constructor(convertered_values)
         else:
