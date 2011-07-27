@@ -57,7 +57,7 @@ __all__ = [
 def clean_iso8601_to_date(value, state = states.default_state):
     """Convert a clean unicode string in ISO 8601 format to a date."""
     if value is None:
-        return None, None
+        return value, None
     # mx.DateTime.ISO.ParseDateTimeUTC fails when time zone is preceded with a space. For example,
     # mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03 +01:00') raises a"ValueError: wrong format,
     # use YYYY-MM-DD HH:MM:SS" while mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03+01:00') works.
@@ -69,13 +69,13 @@ def clean_iso8601_to_date(value, state = states.default_state):
     try:
         return datetime.date.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
     except ValueError:
-        return None, state._('Value must be a date in ISO 8601 format')
+        return value, state._('Value must be a date in ISO 8601 format')
 
 
 def clean_iso8601_to_datetime(value, state = states.default_state):
     """Convert a clean unicode string in ISO 8601 format to a datetime."""
     if value is None:
-        return None, None
+        return value, None
     # mx.DateTime.ISO.ParseDateTimeUTC fails when time zone is preceded with a space. For example,
     # mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03 +01:00') raises a"ValueError: wrong format,
     # use YYYY-MM-DD HH:MM:SS" while mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03+01:00') works.
@@ -87,48 +87,48 @@ def clean_iso8601_to_datetime(value, state = states.default_state):
     try:
         return datetime.datetime.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
     except ValueError:
-        return None, state._('Value must be a date-time in ISO 8601 format')
+        return value, state._('Value must be a date-time in ISO 8601 format')
 
 
 def date_to_datetime(value, state = states.default_state):
     """Convert a date object to a datetime."""
     if value is None:
-        return None, None
+        return value, None
     return datetime.datetime(value.year, value.month, value.day), None
 
 
 def date_to_iso8601(value, state = states.default_state):
     """Convert a date to unicode string using ISO 8601 format."""
     if value is None:
-        return None, None
+        return value, None
     return unicode(value.strftime('%Y-%m-%d')), None
 
 
 def date_to_timestamp(value, state = states.default_state):
     """Convert a datetime to a JavaScript timestamp."""
     if value is None:
-        return None, None
+        return value, None
     return int(calendar.timegm(value.timetuple()) * 1000), None
 
 
 def datetime_to_date(value, state = states.default_state):
     """Convert a datetime object to a date."""
     if value is None:
-        return None, None
+        return value, None
     return value.date(), None
 
 
 def datetime_to_iso8601(value, state = states.default_state):
     """Convert a datetime to unicode string using ISO 8601 format."""
     if value is None:
-        return None, None
+        return value, None
     return unicode(value.strftime('%Y-%m-%d %H:%M:%S')), None
 
 
 def datetime_to_timestamp(value, state = states.default_state):
     """Convert a datetime to a JavaScript timestamp."""
     if value is None:
-        return None, None
+        return value, None
     utcoffset = value.utcoffset()
     if utcoffset is not None:
         value -= utcoffset
@@ -138,21 +138,21 @@ def datetime_to_timestamp(value, state = states.default_state):
 def timestamp_to_date(value, state = states.default_state):
     """Convert a JavaScript timestamp to a date."""
     if value is None:
-        return None, None
+        return value, None
     try:
         return datetime.date.fromtimestamp(value / 1000), None
     except ValueError:
-        return None, state._('Value must be a timestamp')
+        return value, state._('Value must be a timestamp')
 
 
 def timestamp_to_datetime(value, state = states.default_state):
     """Convert a JavaScript timestamp to a datetime."""
     if value is None:
-        return None, None
+        return value, None
     try:
         return datetime.datetime.fromtimestamp(value / 1000, pytz.utc), None
     except ValueError:
-        return None, state._('Value must be a timestamp')
+        return value, state._('Value must be a timestamp')
 
 
 # Level-2 Converters

@@ -124,7 +124,7 @@ def boolean_to_unicode(value, state = states.default_state):
     (u'0', None)
     """
     if value is None:
-        return None, None
+        return value, None
     return unicode(int(bool(value))), None
 
 
@@ -142,14 +142,14 @@ def clean_unicode_to_boolean(value, state = states.default_state):
     >>> clean_unicode_to_boolean(None)
     (None, None)
     >>> clean_unicode_to_boolean(u'true')
-    (None, 'Value must be a boolean number')
+    (u'true', 'Value must be a boolean number')
     """
     if value is None:
-        return None, None
+        return value, None
     try:
         return bool(int(value)), None
     except ValueError:
-        return None, state._('Value must be a boolean number')
+        return value, state._('Value must be a boolean number')
 
 
 def clean_unicode_to_email(value, state = states.default_state):
@@ -164,23 +164,23 @@ def clean_unicode_to_email(value, state = states.default_state):
     >>> clean_unicode_to_email(u'root@localhost')
     (u'root@localhost', None)
     >>> clean_unicode_to_email(u'root@127.0.0.1')
-    (None, 'Invalid domain name')
+    (u'root@127.0.0.1', 'Invalid domain name')
     >>> clean_unicode_to_email(u'root')
-    (None, 'An email must contain exactly one "@"')
+    (u'root', 'An email must contain exactly one "@"')
     """
     if value is None:
-        return None, None
+        return value, None
     value = value.lower()
     if value.startswith(u'mailto:'):
         value = value.replace(u'mailto:', u'')
     try:
         username, domain = value.split('@', 1)
     except ValueError:
-        return None, state._('An email must contain exactly one "@"')
+        return value, state._('An email must contain exactly one "@"')
     if not username_re.match(username):
-        return None, state._('Invalid username')
+        return value, state._('Invalid username')
     if not domain_re.match(domain) and domain != 'localhost':
-        return None, state._('Invalid domain name')
+        return value, state._('Invalid domain name')
     return value, None
 
 
@@ -199,7 +199,7 @@ def clean_unicode_to_json(value, state = states.default_state):
     (None, None)
     """
     if value is None:
-        return None, None
+        return value, None
     try:
         import simplejson as json
     except ImportError:
@@ -210,7 +210,7 @@ def clean_unicode_to_json(value, state = states.default_state):
     try:
         return json.loads(value), None
     except json.JSONDecodeError, e:
-        return None, unicode(e)
+        return value, unicode(e)
 
 
 def clean_unicode_to_url(add_prefix = 'http://', full = False, remove_fragment = False, schemes = ('http', 'https')):
@@ -225,13 +225,13 @@ def clean_unicode_to_url(add_prefix = 'http://', full = False, remove_fragment =
     >>> clean_unicode_to_url()(u'/Biryani/presentation.html#tutorial')
     (u'/Biryani/presentation.html#tutorial', None)
     >>> clean_unicode_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
-    (None, 'URL must be complete')
+    (u'/Biryani/presentation.html#tutorial', 'URL must be complete')
     >>> clean_unicode_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
     (u'http://packages.python.org/Biryani/presentation.html', None)
     """
     def clean_unicode_to_url_converter(value, state = states.default_state):
         if value is None:
-            return None, None
+            return value, None
         import urlparse
         split_url = list(urlparse.urlsplit(value))
         if full and add_prefix and not split_url[0] and not split_url[1] and split_url[2] \
@@ -241,9 +241,9 @@ def clean_unicode_to_url(add_prefix = 'http://', full = False, remove_fragment =
         if scheme != scheme.lower():
             split_url[0] = scheme = scheme.lower()
         if full and not scheme:
-            return None, state._('URL must be complete')
+            return value, state._('URL must be complete')
         if scheme and schemes is not None and scheme not in schemes:
-            return None, state._('Scheme must belong to {0}').format(sorted(schemes))
+            return value, state._('Scheme must belong to {0}').format(sorted(schemes))
         network_location = split_url[1]
         if network_location != network_location.lower():
             split_url[1] = network_location = network_location.lower()
@@ -264,7 +264,7 @@ def clean_unicode_to_url_path_and_query(value, state = states.default_state):
     >>> clean_unicode_to_url_path_and_query(u'/Biryani/search.html?q=pipe')
     (u'/Biryani/search.html?q=pipe', None)
     >>> clean_unicode_to_url_path_and_query(u'http://packages.python.org/Biryani/search.html?q=pipe')
-    (None, 'URL must not be complete')
+    (u'http://packages.python.org/Biryani/search.html?q=pipe', 'URL must not be complete')
     >>> import urlparse
     >>> pipe(
     ...     clean_unicode_to_url(),
@@ -274,11 +274,11 @@ def clean_unicode_to_url_path_and_query(value, state = states.default_state):
     (u'/Biryani/search.html?q=pipe', None)
     """
     if value is None:
-        return None, None
+        return value, None
     import urlparse
     split_url = list(urlparse.urlsplit(value))
     if split_url[0] or split_url[1]:
-        return None, state._('URL must not be complete')
+        return value, state._('URL must not be complete')
     if split_url[4]:
         split_url[4] = ''
     return unicode(urlparse.urlunsplit(split_url)), None
@@ -361,7 +361,7 @@ def dict_to_instance(cls):
     """
     def dict_to_instance_converter(value, state = states.default_state):
         if value is None:
-            return None, None
+            return value, None
         instance = cls()
         instance.__dict__ = value
         return instance, None
@@ -372,12 +372,12 @@ def fail(msg = N_('An error occured')):
     """Return a converter that always returns an error.
 
     >>> fail('Wrong answer')(42)
-    (None, 'Wrong answer')
+    (42, 'Wrong answer')
     >>> fail()(42)
-    (None, 'An error occured')
+    (42, 'An error occured')
     """
     def fail_converter(value, state = states.default_state):
-        return None, state._(msg)
+        return value, state._(msg)
     return fail_converter
 
 
@@ -389,7 +389,7 @@ def first_match(*converters):
     >>> first_match(test_equals(u'NaN'), unicode_to_integer)(u'42')
     (42, None)
     >>> first_match(test_equals(u'NaN'), unicode_to_integer)(u'abc')
-    (None, 'Value must be an integer')
+    (u'abc', 'Value must be an integer')
     >>> first_match(test_equals(u'NaN'), unicode_to_integer, set_value(0))(u'Hello world!')
     (0, None)
     >>> first_match()(u'Hello world!')
@@ -448,7 +448,7 @@ def item_or_sequence(converter, constructor = list, keep_null_items = False):
     >>> item_or_sequence(unicode_to_integer)([u'42', u'43'])
     ([42, 43], None)
     >>> item_or_sequence(unicode_to_integer)([u'42', u'43', u'Hello world!'])
-    ([42, 43], {2: 'Value must be an integer'})
+    ([42, 43, u'Hello world!'], {2: 'Value must be an integer'})
     >>> item_or_sequence(unicode_to_integer)([u'42', None, u'43'])
     ([42, 43], None)
     >>> item_or_sequence(unicode_to_integer)([None, None])
@@ -458,7 +458,7 @@ def item_or_sequence(converter, constructor = list, keep_null_items = False):
     >>> item_or_sequence(unicode_to_integer, keep_null_items = True)([u'42', None, u'43'])
     ([42, None, 43], None)
     >>> item_or_sequence(unicode_to_integer, keep_null_items = True)([u'42', u'43', u'Hello world!'])
-    ([42, 43, None], {2: 'Value must be an integer'})
+    ([42, 43, u'Hello world!'], {2: 'Value must be an integer'})
     >>> item_or_sequence(unicode_to_integer, constructor = set)(set([u'42', u'43']))
     (set([42, 43]), None)
     """
@@ -493,7 +493,7 @@ def pipe(*converters):
     Traceback (most recent call last):
     AttributeError: 'int' object has no attribute 'strip'
     >>> pipe(test_isinstance(unicode), unicode_to_boolean)(42)
-    (None, "Value is not an instance of <type 'unicode'>")
+    (42, "Value is not an instance of <type 'unicode'>")
     >>> pipe(python_data_to_unicode, test_isinstance(unicode), unicode_to_boolean)(42)
     (True, None)
     >>> pipe()(42)
@@ -531,11 +531,11 @@ def python_data_to_float(value, state = states.default_state):
     (None, None)
     """
     if value is None:
-        return None, None
+        return value, None
     try:
         return float(value), None
     except ValueError:
-        return None, state._('Value must be a float')
+        return value, state._('Value must be a float')
 
 
 def python_data_to_integer(value, state = states.default_state):
@@ -555,11 +555,11 @@ def python_data_to_integer(value, state = states.default_state):
     (None, None)
     """
     if value is None:
-        return None, None
+        return value, None
     try:
         return int(value), None
     except ValueError:
-        return None, state._('Value must be an integer')
+        return value, state._('Value must be an integer')
 
 
 def python_data_to_unicode(value, state = states.default_state):
@@ -575,7 +575,7 @@ def python_data_to_unicode(value, state = states.default_state):
     (None, None)
     """
     if value is None:
-        return None, None
+        return value, None
     if isinstance(value, str):
         return value.decode('utf-8'), None
     try:
@@ -596,7 +596,7 @@ def rename_item(old_key, new_key):
     """
     def rename_item_converter(value, state = states.default_state):
         if value is None:
-            return None, None
+            return value, None
         if old_key in value:
             value[new_key] = value.pop(old_key)
         return value, None
@@ -614,7 +614,7 @@ def require(value, state = states.default_state):
     (None, 'Missing value')
     """
     if value is None:
-        return None, state._('Missing value')
+        return value, state._('Missing value')
     else:
         return value, None
 
@@ -704,7 +704,7 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
         )
     def structured_mapping_converter(values, state = states.default_state):
         if values is None:
-            return None, None
+            return values, None
         if default == 'ignore':
             values_converter = converters
         else:
@@ -739,11 +739,11 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     >>> strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com'])
     ([u'John Doe', 72, u'spam@easter-eggs.com'], None)
     >>> strict_converter([u'John Doe', u'spam@easter-eggs.com'])
-    ([u'John Doe', None, None], {1: 'Value must be an integer'})
+    ([u'John Doe', u'spam@easter-eggs.com', None], {1: 'Value must be an integer'})
     >>> strict_converter([u'John Doe', None, u'spam@easter-eggs.com'])
     ([u'John Doe', None, u'spam@easter-eggs.com'], None)
     >>> strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com', u'   +33 9 12 34 56 78   '])
-    ([u'John Doe', 72, u'spam@easter-eggs.com', None], {3: 'Unexpected item'})
+    ([u'John Doe', 72, u'spam@easter-eggs.com', u'   +33 9 12 34 56 78   '], {3: 'Unexpected item'})
     >>> non_strict_converter = structured_sequence(
     ...     [
     ...         pipe(cleanup_line, require),
@@ -755,7 +755,7 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     >>> non_strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com'])
     ([u'John Doe', 72, u'spam@easter-eggs.com'], None)
     >>> non_strict_converter([u'John Doe', u'spam@easter-eggs.com'])
-    ([u'John Doe', None, None], {1: 'Value must be an integer'})
+    ([u'John Doe', u'spam@easter-eggs.com', None], {1: 'Value must be an integer'})
     >>> non_strict_converter([u'John Doe', None, u'spam@easter-eggs.com'])
     ([u'John Doe', None, u'spam@easter-eggs.com'], None)
     >>> non_strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com', u'   +33 9 12 34 56 78   '])
@@ -768,7 +768,7 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
         ]
     def structured_sequence_converter(values, state = states.default_state):
         if values is None:
-            return None, None
+            return values, None
         if default == 'ignore':
             values_converter = converters
         else:
@@ -800,14 +800,14 @@ def test(function, error = 'Test failed', handle_none = False):
     >>> test(lambda value: isinstance(value, basestring))('hello')
     ('hello', None)
     >>> test(lambda value: isinstance(value, basestring))(1)
-    (None, 'Test failed')
+    (1, 'Test failed')
     >>> test(lambda value: isinstance(value, basestring), error = 'Value is not a string')(1)
-    (None, 'Value is not a string')
+    (1, 'Value is not a string')
     """
     def test_converter(value, state = states.default_state):
         if value is None and not handle_none or function is None or function(value):
             return value, None
-        return None, state._(error)
+        return value, state._(error)
     return test_converter
 
 
@@ -823,7 +823,7 @@ def test_between(min_value, max_value):
     >>> test_between(0, 9)(9)
     (9, None)
     >>> test_between(0, 9)(10)
-    (None, 'Value must be between 0 and 9')
+    (10, 'Value must be between 0 and 9')
     >>> test_between(0, 9)(None)
     (None, None)
     """
@@ -842,7 +842,7 @@ def test_equals(constant):
     >>> test_equals(dict(a = 1, b = 2))(dict(a = 1, b = 2))
     ({'a': 1, 'b': 2}, None)
     >>> test_equals(41)(42)
-    (None, 'Value must be equal to 41')
+    (42, 'Value must be equal to 41')
     >>> test_equals(None)(42)
     (42, None)
     >>> test_equals(42)(None)
@@ -860,7 +860,7 @@ def test_greater_or_equal(constant):
     >>> test_greater_or_equal(0)(5)
     (5, None)
     >>> test_greater_or_equal(9)(5)
-    (None, 'Value must be greater than or equal to 9')
+    (5, 'Value must be greater than or equal to 9')
     >>> test_greater_or_equal(9)(None)
     (None, None)
     >>> test_greater_or_equal(None)(5)
@@ -881,9 +881,9 @@ def test_in(values):
     >>> test_in(['a', 'b', 'c', 'd'])('a')
     ('a', None)
     >>> test_in(['a', 'b', 'c', 'd'])('z')
-    (None, "Value must be one of ['a', 'b', 'c', 'd']")
+    ('z', "Value must be one of ['a', 'b', 'c', 'd']")
     >>> test_in([])('z')
-    (None, 'Value must be one of []')
+    ('z', 'Value must be one of []')
     >>> test_in(None)('z')
     ('z', None)
     >>> test_in(['a', 'b', 'c', 'd'])(None)
@@ -902,9 +902,9 @@ def test_is(constant):
     >>> test_is(42)(42)
     (42, None)
     >>> test_is(dict(a = 1, b = 2))(dict(a = 1, b = 2))
-    (None, "Value must be {'a': 1, 'b': 2}")
+    ({'a': 1, 'b': 2}, "Value must be {'a': 1, 'b': 2}")
     >>> test_is(41)(42)
-    (None, 'Value must be 41')
+    (42, 'Value must be 41')
     >>> test_is(None)(42)
     (42, None)
     >>> test_is(42)(None)
@@ -920,7 +920,7 @@ def test_isinstance(class_or_classes):
     >>> test_isinstance(basestring)('This is a string')
     ('This is a string', None)
     >>> test_isinstance(basestring)(42)
-    (None, "Value is not an instance of <type 'basestring'>")
+    (42, "Value is not an instance of <type 'basestring'>")
     >>> test_isinstance((float, int))(42)
     (42, None)
     """
@@ -936,7 +936,7 @@ def test_less_or_equal(constant):
     >>> test_less_or_equal(9)(5)
     (5, None)
     >>> test_less_or_equal(0)(5)
-    (None, 'Value must be less than or equal to 0')
+    (5, 'Value must be less than or equal to 0')
     >>> test_less_or_equal(9)(None)
     (None, None)
     >>> test_less_or_equal(None)(5)
@@ -979,7 +979,7 @@ def unicode_to_url(add_prefix = 'http://', full = False, remove_fragment = False
     >>> unicode_to_url()(u'/Biryani/presentation.html#tutorial')
     (u'/Biryani/presentation.html#tutorial', None)
     >>> unicode_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
-    (None, 'URL must be complete')
+    (u'/Biryani/presentation.html#tutorial', 'URL must be complete')
     >>> unicode_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
     (u'http://packages.python.org/Biryani/presentation.html', None)
     >>> unicode_to_url()(u'    http://packages.python.org/Biryani/   ')
@@ -997,7 +997,7 @@ def unicode_to_url(add_prefix = 'http://', full = False, remove_fragment = False
 #    """Return a converter that applies a unique converter to each key and another unique converter to each value of a mapping."""
 #    def uniform_mapping_converter(values, state = states.default_state):
 #        if values is None:
-#            return None, None
+#            return values, None
 #        errors = {}
 #        convertered_values = {}
 #        for key, value in values.iteritems():
@@ -1029,7 +1029,7 @@ def uniform_sequence(converter, constructor = list, keep_empty = False, keep_nul
     >>> uniform_sequence(unicode_to_integer)([u'42', u'43'])
     ([42, 43], None)
     >>> uniform_sequence(unicode_to_integer)([u'42', u'43', u'Hello world!'])
-    ([42, 43], {2: 'Value must be an integer'})
+    ([42, 43, u'Hello world!'], {2: 'Value must be an integer'})
     >>> uniform_sequence(unicode_to_integer)([u'42', None, u'43'])
     ([42, 43], None)
     >>> uniform_sequence(unicode_to_integer)([None, None])
@@ -1041,13 +1041,13 @@ def uniform_sequence(converter, constructor = list, keep_empty = False, keep_nul
     >>> uniform_sequence(unicode_to_integer, keep_null_items = True)([u'42', None, u'43'])
     ([42, None, 43], None)
     >>> uniform_sequence(unicode_to_integer, keep_null_items = True)([u'42', u'43', u'Hello world!'])
-    ([42, 43, None], {2: 'Value must be an integer'})
+    ([42, 43, u'Hello world!'], {2: 'Value must be an integer'})
     >>> uniform_sequence(unicode_to_integer, constructor = set)(set([u'42', u'43']))
     (set([42, 43]), None)
     """
     def uniform_sequence_converter(values, state = states.default_state):
         if values is None:
-            return None, None
+            return values, None
         errors = {}
         convertered_values = []
         for i, value in enumerate(values):
@@ -1133,7 +1133,7 @@ form_data_to_boolean = pipe(cleanup_line, clean_unicode_to_boolean, default(Fals
     >>> form_data_to_boolean(u'    ')
     (False, None)
     >>> form_data_to_boolean(u'true')
-    (None, 'Value must be a boolean number')
+    (u'true', 'Value must be a boolean number')
 """
 
 python_data_to_boolean = function(lambda value: bool(value))
@@ -1177,7 +1177,7 @@ unicode_to_boolean = pipe(cleanup_line, clean_unicode_to_boolean)
     >>> unicode_to_boolean(u'    ')
     (None, None)
     >>> unicode_to_boolean(u'true')
-    (None, 'Value must be a boolean number')
+    (u'true', 'Value must be a boolean number')
 """
 
 unicode_to_email = pipe(cleanup_line, clean_unicode_to_email)
@@ -1190,9 +1190,9 @@ unicode_to_email = pipe(cleanup_line, clean_unicode_to_email)
     >>> unicode_to_email(u'root@localhost')
     (u'root@localhost', None)
     >>> unicode_to_email('root@127.0.0.1')
-    (None, 'Invalid domain name')
+    ('root@127.0.0.1', 'Invalid domain name')
     >>> unicode_to_email(u'root')
-    (None, 'An email must contain exactly one "@"')
+    (u'root', 'An email must contain exactly one "@"')
     >>> unicode_to_email(u'    spam@easter-eggs.com  ')
     (u'spam@easter-eggs.com', None)
     >>> unicode_to_email(None)
@@ -1209,7 +1209,7 @@ unicode_to_float = pipe(cleanup_line, python_data_to_float)
     >>> unicode_to_float(u'   42.25   ')
     (42.25, None)
     >>> unicode_to_float(u'hello world')
-    (None, 'Value must be a float')
+    (u'hello world', 'Value must be a float')
     >>> unicode_to_float(None)
     (None, None)
     """
@@ -1223,7 +1223,7 @@ unicode_to_integer = pipe(cleanup_line, python_data_to_integer)
     >>> unicode_to_integer(u'   42   ')
     (42, None)
     >>> unicode_to_integer(u'42.75')
-    (None, 'Value must be an integer')
+    (u'42.75', 'Value must be an integer')
     >>> unicode_to_integer(None)
     (None, None)
     """

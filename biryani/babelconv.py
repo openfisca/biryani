@@ -40,9 +40,9 @@ __all__ = [
 def clean_unicode_to_lang(value, state = states.default_state):
     """Convert a clean unicode string to a language code."""
     if value is None:
-        return None, None
+        return value, None
     if not babel.localedata.exists(value):
-        return None, state._('Invalid value')
+        return value, state._('Invalid value')
     return value, None
 
 

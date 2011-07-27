@@ -51,20 +51,18 @@ object_id_re = re.compile(r'[\da-f]{24}$')
 def clean_unicode_to_object_id(value, state = states.default_state):
     """Convert a clean unicode string to MongoDB ObjectId."""
     if value is None:
-        return None, None
-    else:
-        id = value.lower()
-        if object_id_re.match(id) is None:
-            return None, state._('Invalid value')
-        return bson.objectid.ObjectId(id), None
+        return value, None
+    id = value.lower()
+    if object_id_re.match(id) is None:
+        return value, state._('Invalid value')
+    return bson.objectid.ObjectId(id), None
 
 
 def object_id_to_unicode(value, state = states.default_state):
     """Convert a MongoDB ObjectId to unicode."""
     if value is None:
-        return None, None
-    else:
-        return unicode(value), None
+        return value, None
+    return unicode(value), None
 
 
 unicode_to_object_id = conv.pipe(conv.cleanup_line, clean_unicode_to_object_id)

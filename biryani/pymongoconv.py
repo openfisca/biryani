@@ -42,10 +42,10 @@ def mongodb_query_to_object(object_class):
     def mongodb_query_to_object_converter(value, state = states.default_state):
         """Convert a MongoDB query expression to an object wrapped to a MongoDB document."""
         if value is None:
-            return None, None
+            return value, None
         instance = object_class.find_one(value)
         if instance is None:
-            return None, state._('No document of class {0} for query {1}').format(object_class.__name__, value)
+            return value, state._('No document of class {0} for query {1}').format(object_class.__name__, value)
         return instance, None
     return mongodb_query_to_object_converter
 
@@ -54,13 +54,13 @@ def object_id_to_object(object_class, cache = None):
     def object_id_to_object_converter(value, state = states.default_state):
         """Convert an ID to an object wrapped to a MongoDB document."""
         if value is None:
-            return None, None
+            return value, None
         assert isinstance(value, bson.objectid.ObjectId), str((value,))
         if cache is not None and value in cache:
             return cache[value], None
         instance = object_class.find_one(value)
         if instance is None:
-            return None, state._('No document of class {0} with ID {1}').format(object_class.__name__, value)
+            return value, state._('No document of class {0} with ID {1}').format(object_class.__name__, value)
         return instance, None
     return object_id_to_object_converter
 

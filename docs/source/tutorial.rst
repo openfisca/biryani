@@ -8,7 +8,7 @@ Tutorial
     >>> output_value, error
     (42.0, None)
     >>> conv.unicode_to_float('forty two')
-    (None, 'Value must be a float')
+    ('forty two', 'Value must be a float')
 
 Converters usually don't test their input value::
 

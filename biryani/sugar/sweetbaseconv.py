@@ -133,7 +133,7 @@ def test_match(regex, error = N_('Invalid value format')):
     >>> test_match(re.compile(u'OK$'))(u'OK')
     (u'OK', None)
     >>> test_match(re.compile(u'ok$'))(u'not OK')
-    (None, 'Invalid value format')
+    (u'not OK', 'Invalid value format')
     """
     return conv.test(lambda value: regex.match(value), error = error)
 
