@@ -4,15 +4,15 @@ Tutorial
 
     >>> from biryani import allconv as conv
     >>> input_value = u'42'
-    >>> output_value, error = conv.unicode_to_float(input_value)
+    >>> output_value, error = conv.str_to_float(input_value)
     >>> output_value, error
     (42.0, None)
-    >>> conv.unicode_to_float('forty two')
+    >>> conv.str_to_float('forty two')
     ('forty two', 'Value must be a float')
 
 Converters usually don't test their input value::
 
-    >>> conv.unicode_to_float(42)
+    >>> conv.str_to_float(42)
     Traceback (most recent call last):
     AttributeError: 'int' object has no attribute 'strip'
 
@@ -20,17 +20,17 @@ So, to ensure that input value is an unicode string, we need to chain several co
 
     >>> conv.pipe(
     ...     conv.test_isinstance(unicode),
-    ...     conv.unicode_to_float,
+    ...     conv.str_to_float,
     ...     )(u'42')
     (42.0, None)
     >>> conv.pipe(
     ...     conv.test_isinstance(unicode),
-    ...     conv.unicode_to_float,
+    ...     conv.str_to_float,
     ...     )(42)
     (42, "Value is not an instance of <type 'unicode'>")
     >>> conv.pipe(
     ...     conv.test_isinstance(unicode),
-    ...     conv.unicode_to_float,
+    ...     conv.str_to_float,
     ...     )('42')
     ('42', "Value is not an instance of <type 'unicode'>")
 
@@ -38,12 +38,12 @@ Use :func:`conv.to_value <biryani.baseconv.to_value>` to extract value from conv
 
     >>> conv.to_value(conv.pipe(
     ...     conv.test_isinstance(unicode),
-    ...     conv.unicode_to_float,
+    ...     conv.str_to_float,
     ...     ))(u'42')
     42.0
     >>> conv.to_value(conv.pipe(
     ...     conv.test_isinstance(unicode),
-    ...     conv.unicode_to_float,
+    ...     conv.str_to_float,
     ...     ))(42)
     Traceback (most recent call last):
     ValueError: Value is not an instance of <type 'unicode'>
@@ -53,22 +53,22 @@ Add a custom function to convert string to unicode when needed, and store result
     >>> any_string_to_float = conv.pipe(
     ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else value),
     ...     conv.test_isinstance(unicode),
-    ...     conv.unicode_to_float,
+    ...     conv.str_to_float,
     ...     )
     >>> any_string_to_float('42')
     (42.0, None)
     >>> any_string_to_float(u'42')
     (42.0, None)
 
-.. note:: The builtin converter :func:`biryani.baseconv.string_to_unicode`: does the same thing as the conversion
+.. note:: The builtin converter :func:`biryani.baseconv.decode`: does the same thing as the conversion
    function above.
 
    So the converter could be simplified to::
 
         >>> anything_to_float = conv.pipe(
-        ...     conv.string_to_unicode(),
+        ...     conv.decode(),
         ...     conv.test_isinstance(unicode),
-        ...     conv.unicode_to_float,
+        ...     conv.str_to_float,
         ...     )
         >>> any_string_to_float('42')
         (42.0, None)
@@ -80,7 +80,7 @@ We can harden the custom function to convert anything to unicode::
     >>> anything_to_float = conv.pipe(
     ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
     ...     conv.test_isinstance(unicode),
-    ...     conv.unicode_to_float,
+    ...     conv.str_to_float,
     ...     )
     >>> anything_to_float(42)
     (42.0, None)
@@ -91,7 +91,7 @@ Add :func:`conv.cleanup_line <biryani.baseconv.cleanup_line>` to strip spaces fr
     ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
     ...     conv.test_isinstance(unicode),
     ...     conv.cleanup_line,
-    ...     conv.unicode_to_float,
+    ...     conv.str_to_float,
     ...     )
     >>> anything_to_float('  42   ')
     (42.0, None)
@@ -104,7 +104,7 @@ Add :func:`conv.require <biryani.baseconv.require>` to generate an error when va
     ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
     ...     conv.test_isinstance(unicode),
     ...     conv.cleanup_line,
-    ...     conv.unicode_to_float,
+    ...     conv.str_to_float,
     ...     conv.require,
     ...     )
     >>> anything_to_float(u'     ')
@@ -116,7 +116,7 @@ Use a custom :func:`test <biryani.baseconv.test>` to ensure that float is a vali
     ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
     ...     conv.test_isinstance(unicode),
     ...     conv.cleanup_line,
-    ...     conv.unicode_to_float,
+    ...     conv.str_to_float,
     ...     conv.test(lambda value: -180 <= value <= 180),
     ...     conv.require,
     ...     )
@@ -135,7 +135,7 @@ Add an explicit error message when latitude is not between -180 and 180 degrees:
     ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
     ...     conv.test_isinstance(unicode),
     ...     conv.cleanup_line,
-    ...     conv.unicode_to_float,
+    ...     conv.str_to_float,
     ...     conv.test(lambda value: -180 <= value <= 180, error = 'Latitude must be between -180 and 180'),
     ...     conv.require,
     ...     )
@@ -149,7 +149,7 @@ Generalize the converter to a function that accepts any bound::
     ...         conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
     ...         conv.test_isinstance(unicode),
     ...         conv.cleanup_line,
-    ...         conv.unicode_to_float,
+    ...         conv.str_to_float,
     ...         conv.test(lambda value: min_bound <= value <= max_bound,
     ...             error = 'Value must be between {0} and {1}'.format(min_bound, max_bound)),
     ...         conv.require,
@@ -166,7 +166,7 @@ Generalize the converter to a function that accepts any bound::
         ...         conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
         ...         conv.test_isinstance(unicode),
         ...         conv.cleanup_line,
-        ...         conv.unicode_to_float,
+        ...         conv.str_to_float,
         ...         conv.test_between(min_bound, max_bound),
         ...         conv.require,
         ...         )

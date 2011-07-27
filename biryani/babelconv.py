@@ -32,13 +32,13 @@ from . import states
 
 
 __all__ = [
-    'clean_unicode_to_lang',
-    'unicode_to_lang',
+    'clean_str_to_lang',
+    'str_to_lang',
     ]
 
 
-def clean_unicode_to_lang(value, state = states.default_state):
-    """Convert a clean unicode string to a language code."""
+def clean_str_to_lang(value, state = states.default_state):
+    """Convert a clean string to a language code."""
     if value is None:
         return value, None
     if not babel.localedata.exists(value):
@@ -46,6 +46,6 @@ def clean_unicode_to_lang(value, state = states.default_state):
     return value, None
 
 
-unicode_to_lang = conv.pipe(conv.cleanup_line, clean_unicode_to_lang)
+str_to_lang = conv.pipe(conv.cleanup_line, clean_str_to_lang)
 
 

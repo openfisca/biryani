@@ -28,7 +28,7 @@
    must be combined with other converters.
 
 .. note:: Most converters work on unicode strings. To use them you must first convert your strings to unicode. By using
-   converter :func:`string_to_unicode`, for example.
+   converter :func:`decode`, for example.
 """
 
 
@@ -38,16 +38,17 @@ from . import states
 
 
 __all__ = [
-    'boolean_to_unicode',
-    'clean_unicode_to_boolean',
-    'clean_unicode_to_email',
-    'clean_unicode_to_json',
-    'clean_unicode_to_url',
-    'clean_unicode_to_url_path_and_query',
+    'boolean_to_str',
+    'clean_str_to_boolean',
+    'clean_str_to_email',
+    'clean_str_to_json',
+    'clean_str_to_url',
+    'clean_str_to_url_path_and_query',
     'cleanup_empty',
     'cleanup_line',
     'cleanup_text',
     'condition',
+    'decode',
     'default',
     'dict_to_instance',
     'extract_when_singleton',
@@ -60,12 +61,17 @@ __all__ = [
     'pipe',
     'python_data_to_boolean',
     'python_data_to_float',
-    'python_data_to_integer',
-    'python_data_to_unicode',
+    'python_data_to_int',
+    'python_data_to_str',
     'rename_item',
     'require',
     'set_value',
-    'string_to_unicode',
+    'str_to_boolean',
+    'str_to_email',
+    'str_to_float',
+    'str_to_int',
+    'str_to_json',
+    'str_to_url',
     'structured_mapping',
     'structured_sequence',
     'test',
@@ -78,12 +84,6 @@ __all__ = [
     'test_less_or_equal',
     'to_value',
     'translate',
-    'unicode_to_boolean',
-    'unicode_to_email',
-    'unicode_to_float',
-    'unicode_to_integer',
-    'unicode_to_json',
-    'unicode_to_url',
 #    'uniform_mapping',
     'uniform_sequence',
     ]
@@ -101,26 +101,26 @@ username_re = re.compile(r"[^ \t\n\r@<>()]+$", re.I)
 # Level-1 Converters
 
 
-def boolean_to_unicode(value, state = states.default_state):
-    """Convert a boolean to unicode.
+def boolean_to_str(value, state = states.default_state):
+    """Convert a boolean to a string.
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
 
-    >>> boolean_to_unicode(False)
+    >>> boolean_to_str(False)
     (u'0', None)
-    >>> boolean_to_unicode(True)
+    >>> boolean_to_str(True)
     (u'1', None)
-    >>> boolean_to_unicode(0)
+    >>> boolean_to_str(0)
     (u'0', None)
-    >>> boolean_to_unicode('')
+    >>> boolean_to_str('')
     (u'0', None)
-    >>> boolean_to_unicode('any non-empty string')
+    >>> boolean_to_str('any non-empty string')
     (u'1', None)
-    >>> boolean_to_unicode('0')
+    >>> boolean_to_str('0')
     (u'1', None)
-    >>> boolean_to_unicode(None)
+    >>> boolean_to_str(None)
     (None, None)
-    >>> pipe(default(False), boolean_to_unicode)(None)
+    >>> pipe(default(False), boolean_to_str)(None)
     (u'0', None)
     """
     if value is None:
@@ -128,20 +128,20 @@ def boolean_to_unicode(value, state = states.default_state):
     return unicode(int(bool(value))), None
 
 
-def clean_unicode_to_boolean(value, state = states.default_state):
-    """Convert a clean unicode string to a boolean.
+def clean_str_to_boolean(value, state = states.default_state):
+    """Convert a clean string to a boolean.
 
-    .. note:: For a converter that doesn't require a clean unicode string, see :func:`unicode_to_boolean`.
+    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_boolean`.
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
 
-    >>> clean_unicode_to_boolean(u'0')
+    >>> clean_str_to_boolean(u'0')
     (False, None)
-    >>> clean_unicode_to_boolean(u'1')
+    >>> clean_str_to_boolean(u'1')
     (True, None)
-    >>> clean_unicode_to_boolean(None)
+    >>> clean_str_to_boolean(None)
     (None, None)
-    >>> clean_unicode_to_boolean(u'true')
+    >>> clean_str_to_boolean(u'true')
     (u'true', 'Value must be a boolean number')
     """
     if value is None:
@@ -152,20 +152,20 @@ def clean_unicode_to_boolean(value, state = states.default_state):
         return value, state._('Value must be a boolean number')
 
 
-def clean_unicode_to_email(value, state = states.default_state):
-    """Convert a clean unicode string to an email address.
+def clean_str_to_email(value, state = states.default_state):
+    """Convert a clean string to an email address.
 
-    .. note:: For a converter that doesn't require a clean unicode string, see :func:`unicode_to_email`.
+    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_email`.
 
-    >>> clean_unicode_to_email(u'spam@easter-eggs.com')
+    >>> clean_str_to_email(u'spam@easter-eggs.com')
     (u'spam@easter-eggs.com', None)
-    >>> clean_unicode_to_email(u'mailto:spam@easter-eggs.com')
+    >>> clean_str_to_email(u'mailto:spam@easter-eggs.com')
     (u'spam@easter-eggs.com', None)
-    >>> clean_unicode_to_email(u'root@localhost')
+    >>> clean_str_to_email(u'root@localhost')
     (u'root@localhost', None)
-    >>> clean_unicode_to_email(u'root@127.0.0.1')
+    >>> clean_str_to_email(u'root@127.0.0.1')
     (u'root@127.0.0.1', 'Invalid domain name')
-    >>> clean_unicode_to_email(u'root')
+    >>> clean_str_to_email(u'root')
     (u'root', 'An email must contain exactly one "@"')
     """
     if value is None:
@@ -184,18 +184,18 @@ def clean_unicode_to_email(value, state = states.default_state):
     return value, None
 
 
-def clean_unicode_to_json(value, state = states.default_state):
-    """Convert a clean unicode string to a JSON value.
+def clean_str_to_json(value, state = states.default_state):
+    """Convert a clean string to a JSON value.
 
-    .. note:: For a converter that doesn't require a clean unicode string, see :func:`unicode_to_json`.
+    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_json`.
 
     .. note:: This converter uses module ``simplejson``  when it is available, or module ``json`` otherwise.
 
-    >>> clean_unicode_to_json(u'{"a": 1, "b": 2}')
+    >>> clean_str_to_json(u'{"a": 1, "b": 2}')
     ({u'a': 1, u'b': 2}, None)
-    >>> clean_unicode_to_json(u'null')
+    >>> clean_str_to_json(u'null')
     (None, None)
-    >>> clean_unicode_to_json(None)
+    >>> clean_str_to_json(None)
     (None, None)
     """
     if value is None:
@@ -213,23 +213,23 @@ def clean_unicode_to_json(value, state = states.default_state):
         return value, unicode(e)
 
 
-def clean_unicode_to_url(add_prefix = 'http://', full = False, remove_fragment = False, schemes = ('http', 'https')):
-    """Return a converter that converts a clean unicode string to an URL.
+def clean_str_to_url(add_prefix = 'http://', full = False, remove_fragment = False, schemes = ('http', 'https')):
+    """Return a converter that converts a clean string to an URL.
 
-    .. note:: For a converter that doesn't require a clean unicode string, see :func:`unicode_to_url`.
+    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_url`.
 
-    >>> clean_unicode_to_url()(u'http://packages.python.org/Biryani/')
+    >>> clean_str_to_url()(u'http://packages.python.org/Biryani/')
     (u'http://packages.python.org/Biryani/', None)
-    >>> clean_unicode_to_url(full = True)(u'packages.python.org/Biryani/')
+    >>> clean_str_to_url(full = True)(u'packages.python.org/Biryani/')
     (u'http://packages.python.org/Biryani/', None)
-    >>> clean_unicode_to_url()(u'/Biryani/presentation.html#tutorial')
+    >>> clean_str_to_url()(u'/Biryani/presentation.html#tutorial')
     (u'/Biryani/presentation.html#tutorial', None)
-    >>> clean_unicode_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
+    >>> clean_str_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
     (u'/Biryani/presentation.html#tutorial', 'URL must be complete')
-    >>> clean_unicode_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
+    >>> clean_str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
     (u'http://packages.python.org/Biryani/presentation.html', None)
     """
-    def clean_unicode_to_url_converter(value, state = states.default_state):
+    def clean_str_to_url_converter(value, state = states.default_state):
         if value is None:
             return value, None
         import urlparse
@@ -253,23 +253,23 @@ def clean_unicode_to_url(add_prefix = 'http://', full = False, remove_fragment =
         if remove_fragment and split_url[4]:
             split_url[4] = ''
         return unicode(urlparse.urlunsplit(split_url)), None
-    return clean_unicode_to_url_converter
+    return clean_str_to_url_converter
 
 
-def clean_unicode_to_url_path_and_query(value, state = states.default_state):
-    """Convert a clean unicode string to the path and query of an URL.
+def clean_str_to_url_path_and_query(value, state = states.default_state):
+    """Convert a clean string to the path and query of an URL.
 
-    >>> clean_unicode_to_url_path_and_query(u'/Biryani/presentation.html#tutorial')
+    >>> clean_str_to_url_path_and_query(u'/Biryani/presentation.html#tutorial')
     (u'/Biryani/presentation.html', None)
-    >>> clean_unicode_to_url_path_and_query(u'/Biryani/search.html?q=pipe')
+    >>> clean_str_to_url_path_and_query(u'/Biryani/search.html?q=pipe')
     (u'/Biryani/search.html?q=pipe', None)
-    >>> clean_unicode_to_url_path_and_query(u'http://packages.python.org/Biryani/search.html?q=pipe')
+    >>> clean_str_to_url_path_and_query(u'http://packages.python.org/Biryani/search.html?q=pipe')
     (u'http://packages.python.org/Biryani/search.html?q=pipe', 'URL must not be complete')
     >>> import urlparse
     >>> pipe(
-    ...     clean_unicode_to_url(),
+    ...     clean_str_to_url(),
     ...     function(lambda value: urlparse.urlunsplit(['', ''] + list(urlparse.urlsplit(value))[2:])),
-    ...     clean_unicode_to_url_path_and_query,
+    ...     clean_str_to_url_path_and_query,
     ...     )(u'http://packages.python.org/Biryani/search.html?q=pipe')
     (u'/Biryani/search.html?q=pipe', None)
     """
@@ -329,6 +329,19 @@ def condition(test_converter, ok_converter, error_converter = None):
     return condition_converter
 
 
+def decode(encoding = 'utf-8'):
+    """Return a string to unicode converter that uses given *encoding*.
+
+    >>> decode()('   Hello world!   ')
+    (u'   Hello world!   ', None)
+    >>> decode()(42)
+    (42, None)
+    >>> decode()(None)
+    (None, None)
+    """
+    return function(lambda value: value.decode(encoding) if isinstance(value, str) else value)
+
+
 def default(constant):
     """Return a converter that replace a missing value (aka ``None``) by given one.
 
@@ -336,11 +349,11 @@ def default(constant):
     (42, None)
     >>> default(42)(u'1234')
     (u'1234', None)
-    >>> pipe(unicode_to_integer, default(42))(u'1234')
+    >>> pipe(str_to_int, default(42))(u'1234')
     (1234, None)
-    >>> pipe(unicode_to_integer, default(42))(u'    ')
+    >>> pipe(str_to_int, default(42))(u'    ')
     (42, None)
-    >>> pipe(unicode_to_integer, default(42))(None)
+    >>> pipe(str_to_int, default(42))(None)
     (42, None)
     """
     return lambda value, state = states.default_state: (constant, None) if value is None else (value, None)
@@ -384,13 +397,13 @@ def fail(msg = N_('An error occured')):
 def first_match(*converters):
     """Try each converter successively until one succeeds. When every converter fail, return the result of the last one.
 
-    >>> first_match(test_equals(u'NaN'), unicode_to_integer)(u'NaN')
+    >>> first_match(test_equals(u'NaN'), str_to_int)(u'NaN')
     (u'NaN', None)
-    >>> first_match(test_equals(u'NaN'), unicode_to_integer)(u'42')
+    >>> first_match(test_equals(u'NaN'), str_to_int)(u'42')
     (42, None)
-    >>> first_match(test_equals(u'NaN'), unicode_to_integer)(u'abc')
+    >>> first_match(test_equals(u'NaN'), str_to_int)(u'abc')
     (u'abc', 'Value must be an integer')
-    >>> first_match(test_equals(u'NaN'), unicode_to_integer, set_value(0))(u'Hello world!')
+    >>> first_match(test_equals(u'NaN'), str_to_int, set_value(0))(u'Hello world!')
     (0, None)
     >>> first_match()(u'Hello world!')
     (u'Hello world!', None)
@@ -441,25 +454,25 @@ def function(function, handle_none = False):
 def item_or_sequence(converter, constructor = list, keep_null_items = False):
     """Return a converter that accepts either an item or a sequence of items and applies a converter to them.
 
-    >>> item_or_sequence(unicode_to_integer)(u'42')
+    >>> item_or_sequence(str_to_int)(u'42')
     (42, None)
-    >>> item_or_sequence(unicode_to_integer)([u'42'])
+    >>> item_or_sequence(str_to_int)([u'42'])
     (42, None)
-    >>> item_or_sequence(unicode_to_integer)([u'42', u'43'])
+    >>> item_or_sequence(str_to_int)([u'42', u'43'])
     ([42, 43], None)
-    >>> item_or_sequence(unicode_to_integer)([u'42', u'43', u'Hello world!'])
+    >>> item_or_sequence(str_to_int)([u'42', u'43', u'Hello world!'])
     ([42, 43, u'Hello world!'], {2: 'Value must be an integer'})
-    >>> item_or_sequence(unicode_to_integer)([u'42', None, u'43'])
+    >>> item_or_sequence(str_to_int)([u'42', None, u'43'])
     ([42, 43], None)
-    >>> item_or_sequence(unicode_to_integer)([None, None])
+    >>> item_or_sequence(str_to_int)([None, None])
     (None, None)
-    >>> item_or_sequence(unicode_to_integer, keep_null_items = True)([None, None])
+    >>> item_or_sequence(str_to_int, keep_null_items = True)([None, None])
     ([None, None], None)
-    >>> item_or_sequence(unicode_to_integer, keep_null_items = True)([u'42', None, u'43'])
+    >>> item_or_sequence(str_to_int, keep_null_items = True)([u'42', None, u'43'])
     ([42, None, 43], None)
-    >>> item_or_sequence(unicode_to_integer, keep_null_items = True)([u'42', u'43', u'Hello world!'])
+    >>> item_or_sequence(str_to_int, keep_null_items = True)([u'42', u'43', u'Hello world!'])
     ([42, 43, u'Hello world!'], {2: 'Value must be an integer'})
-    >>> item_or_sequence(unicode_to_integer, constructor = set)(set([u'42', u'43']))
+    >>> item_or_sequence(str_to_int, constructor = set)(set([u'42', u'43']))
     (set([42, 43]), None)
     """
     return condition(
@@ -486,15 +499,15 @@ def noop(value, state = states.default_state):
 def pipe(*converters):
     """Return a compound converter that applies each of its converters till the end or an error occurs.
 
-    >>> unicode_to_boolean(42)
+    >>> str_to_boolean(42)
     Traceback (most recent call last):
     AttributeError: 'int' object has no attribute 'strip'
-    >>> pipe(unicode_to_boolean)(42)
+    >>> pipe(str_to_boolean)(42)
     Traceback (most recent call last):
     AttributeError: 'int' object has no attribute 'strip'
-    >>> pipe(test_isinstance(unicode), unicode_to_boolean)(42)
+    >>> pipe(test_isinstance(unicode), str_to_boolean)(42)
     (42, "Value is not an instance of <type 'unicode'>")
-    >>> pipe(python_data_to_unicode, test_isinstance(unicode), unicode_to_boolean)(42)
+    >>> pipe(python_data_to_str, test_isinstance(unicode), str_to_boolean)(42)
     (True, None)
     >>> pipe()(42)
     (42, None)
@@ -538,20 +551,20 @@ def python_data_to_float(value, state = states.default_state):
         return value, state._('Value must be a float')
 
 
-def python_data_to_integer(value, state = states.default_state):
+def python_data_to_int(value, state = states.default_state):
     """Convert any python data to an integer.
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
 
-    >>> python_data_to_integer(42)
+    >>> python_data_to_int(42)
     (42, None)
-    >>> python_data_to_integer('42')
+    >>> python_data_to_int('42')
     (42, None)
-    >>> python_data_to_integer(u'42')
+    >>> python_data_to_int(u'42')
     (42, None)
-    >>> python_data_to_integer(42.75)
+    >>> python_data_to_int(42.75)
     (42, None)
-    >>> python_data_to_integer(None)
+    >>> python_data_to_int(None)
     (None, None)
     """
     if value is None:
@@ -562,16 +575,16 @@ def python_data_to_integer(value, state = states.default_state):
         return value, state._('Value must be an integer')
 
 
-def python_data_to_unicode(value, state = states.default_state):
+def python_data_to_str(value, state = states.default_state):
     """Convert any Python data to unicode.
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
 
-    >>> python_data_to_unicode(42)
+    >>> python_data_to_str(42)
     (u'42', None)
-    >>> python_data_to_unicode('42')
+    >>> python_data_to_str('42')
     (u'42', None)
-    >>> python_data_to_unicode(None)
+    >>> python_data_to_str(None)
     (None, None)
     """
     if value is None:
@@ -632,26 +645,13 @@ def set_value(constant):
     return lambda value, state = states.default_state: (constant, None) if value is not None else (None, None)
 
 
-def string_to_unicode(encoding = 'utf-8'):
-    """Return a string to unicode converter that uses given *encoding*.
-
-    >>> string_to_unicode()('   Hello world!   ')
-    (u'   Hello world!   ', None)
-    >>> string_to_unicode()(42)
-    (42, None)
-    >>> string_to_unicode()(None)
-    (None, None)
-    """
-    return function(lambda value: value.decode(encoding) if isinstance(value, str) else value)
-
-
 def structured_mapping(converters, constructor = dict, default = None, keep_empty = False):
     """Return a converter that maps a mapping of converters to a mapping (ie dict, etc) of values.
 
     >>> strict_converter = structured_mapping(dict(
     ...     name = pipe(cleanup_line, require),
-    ...     age = unicode_to_integer,
-    ...     email = unicode_to_email,
+    ...     age = str_to_int,
+    ...     email = str_to_email,
     ...     ))
     >>> strict_converter(dict(name = u'John Doe', age = u'72', email = u'spam@easter-eggs.com'))
     ({'age': 72, 'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
@@ -664,8 +664,8 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
     >>> non_strict_converter = structured_mapping(
     ...     dict(
     ...         name = pipe(cleanup_line, require),
-    ...         age = unicode_to_integer,
-    ...         email = unicode_to_email,
+    ...         age = str_to_int,
+    ...         email = str_to_email,
     ...         ),
     ...     default = cleanup_line,
     ...     )
@@ -679,8 +679,8 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
     >>> structured_mapping(
     ...     dict(
     ...         name = cleanup_line,
-    ...         age = unicode_to_integer,
-    ...         email = unicode_to_email,
+    ...         age = str_to_int,
+    ...         email = str_to_email,
     ...         ),
     ...     default = cleanup_line,
     ...     )(dict(name = u'   ', email = None))
@@ -688,8 +688,8 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
     >>> structured_mapping(
     ...     dict(
     ...         name = cleanup_line,
-    ...         age = unicode_to_integer,
-    ...         email = unicode_to_email,
+    ...         age = str_to_int,
+    ...         email = str_to_email,
     ...         ),
     ...     default = cleanup_line,
     ...     keep_empty = True,
@@ -732,8 +732,8 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
 
     >>> strict_converter = structured_sequence([
     ...     pipe(cleanup_line, require),
-    ...     unicode_to_integer,
-    ...     unicode_to_email,
+    ...     str_to_int,
+    ...     str_to_email,
     ...     ])
     >>> strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com'])
     ([u'John Doe', 72, u'spam@easter-eggs.com'], None)
@@ -746,8 +746,8 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     >>> non_strict_converter = structured_sequence(
     ...     [
     ...         pipe(cleanup_line, require),
-    ...         unicode_to_integer,
-    ...         unicode_to_email,
+    ...         str_to_int,
+    ...         str_to_email,
     ...         ],
     ...     default = cleanup_line,
     ...     )
@@ -968,25 +968,25 @@ def translate(conversions):
         else conversions[value])
 
 
-def unicode_to_url(add_prefix = 'http://', full = False, remove_fragment = False, schemes = ('http', 'https')):
-    """Return a converter that converts an unicode string to an URL.
+def str_to_url(add_prefix = 'http://', full = False, remove_fragment = False, schemes = ('http', 'https')):
+    """Return a converter that converts an string to an URL.
 
-    >>> unicode_to_url()(u'http://packages.python.org/Biryani/')
+    >>> str_to_url()(u'http://packages.python.org/Biryani/')
     (u'http://packages.python.org/Biryani/', None)
-    >>> unicode_to_url(full = True)(u'packages.python.org/Biryani/')
+    >>> str_to_url(full = True)(u'packages.python.org/Biryani/')
     (u'http://packages.python.org/Biryani/', None)
-    >>> unicode_to_url()(u'/Biryani/presentation.html#tutorial')
+    >>> str_to_url()(u'/Biryani/presentation.html#tutorial')
     (u'/Biryani/presentation.html#tutorial', None)
-    >>> unicode_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
+    >>> str_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
     (u'/Biryani/presentation.html#tutorial', 'URL must be complete')
-    >>> unicode_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
+    >>> str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
     (u'http://packages.python.org/Biryani/presentation.html', None)
-    >>> unicode_to_url()(u'    http://packages.python.org/Biryani/   ')
+    >>> str_to_url()(u'    http://packages.python.org/Biryani/   ')
     (u'http://packages.python.org/Biryani/', None)
     """
     return pipe(
         cleanup_line,
-        clean_unicode_to_url(add_prefix = add_prefix, full = full, remove_fragment = remove_fragment,
+        clean_str_to_url(add_prefix = add_prefix, full = full, remove_fragment = remove_fragment,
             schemes = schemes),
         )
 
@@ -1021,25 +1021,25 @@ def unicode_to_url(add_prefix = 'http://', full = False, remove_fragment = False
 def uniform_sequence(converter, constructor = list, keep_empty = False, keep_null_items = False):
     """Return a converter that applies the same converter to each value of a list.
 
-    >>> uniform_sequence(unicode_to_integer)([u'42'])
+    >>> uniform_sequence(str_to_int)([u'42'])
     ([42], None)
-    >>> uniform_sequence(unicode_to_integer)([u'42', u'43'])
+    >>> uniform_sequence(str_to_int)([u'42', u'43'])
     ([42, 43], None)
-    >>> uniform_sequence(unicode_to_integer)([u'42', u'43', u'Hello world!'])
+    >>> uniform_sequence(str_to_int)([u'42', u'43', u'Hello world!'])
     ([42, 43, u'Hello world!'], {2: 'Value must be an integer'})
-    >>> uniform_sequence(unicode_to_integer)([u'42', None, u'43'])
+    >>> uniform_sequence(str_to_int)([u'42', None, u'43'])
     ([42, 43], None)
-    >>> uniform_sequence(unicode_to_integer)([None, None])
+    >>> uniform_sequence(str_to_int)([None, None])
     (None, None)
-    >>> uniform_sequence(unicode_to_integer, keep_empty = True)([None, None])
+    >>> uniform_sequence(str_to_int, keep_empty = True)([None, None])
     ([], None)
-    >>> uniform_sequence(unicode_to_integer, keep_empty = True, keep_null_items = True)([None, None])
+    >>> uniform_sequence(str_to_int, keep_empty = True, keep_null_items = True)([None, None])
     ([None, None], None)
-    >>> uniform_sequence(unicode_to_integer, keep_null_items = True)([u'42', None, u'43'])
+    >>> uniform_sequence(str_to_int, keep_null_items = True)([u'42', None, u'43'])
     ([42, None, 43], None)
-    >>> uniform_sequence(unicode_to_integer, keep_null_items = True)([u'42', u'43', u'Hello world!'])
+    >>> uniform_sequence(str_to_int, keep_null_items = True)([u'42', u'43', u'Hello world!'])
     ([42, 43, u'Hello world!'], {2: 'Value must be an integer'})
-    >>> uniform_sequence(unicode_to_integer, constructor = set)(set([u'42', u'43']))
+    >>> uniform_sequence(str_to_int, constructor = set)(set([u'42', u'43']))
     (set([42, 43]), None)
     """
     def uniform_sequence_converter(values, state = states.default_state):
@@ -1114,10 +1114,10 @@ extract_when_singleton = condition(
 # Level-3 Converters
 
 
-form_data_to_boolean = pipe(cleanup_line, clean_unicode_to_boolean, default(False))
-"""Convert an unicode string submitted by an HTML form to a boolean.
+form_data_to_boolean = pipe(cleanup_line, clean_str_to_boolean, default(False))
+"""Convert a string submitted by an HTML form to a boolean.
 
-    Like :data:`unicode_to_boolean`, but when value is missing, ``False`` is returned instead of ``None``.
+    Like :data:`str_to_boolean`, but when value is missing, ``False`` is returned instead of ``None``.
 
     >>> form_data_to_boolean(u'0')
     (False, None)
@@ -1158,87 +1158,87 @@ python_data_to_boolean = function(lambda value: bool(value))
     (None, None)
     """
 
-unicode_to_boolean = pipe(cleanup_line, clean_unicode_to_boolean)
-"""Convert an unicode string to a boolean.
+str_to_boolean = pipe(cleanup_line, clean_str_to_boolean)
+"""Convert a string to a boolean.
 
     Like most converters, a missing value (aka ``None``) is not converted.
 
-    >>> unicode_to_boolean(u'0')
+    >>> str_to_boolean(u'0')
     (False, None)
-    >>> unicode_to_boolean(u'1')
+    >>> str_to_boolean(u'1')
     (True, None)
-    >>> unicode_to_boolean(u'  0  ')
+    >>> str_to_boolean(u'  0  ')
     (False, None)
-    >>> unicode_to_boolean(None)
+    >>> str_to_boolean(None)
     (None, None)
-    >>> unicode_to_boolean(u'    ')
+    >>> str_to_boolean(u'    ')
     (None, None)
-    >>> unicode_to_boolean(u'true')
+    >>> str_to_boolean(u'true')
     (u'true', 'Value must be a boolean number')
 """
 
-unicode_to_email = pipe(cleanup_line, clean_unicode_to_email)
-"""Convert an unicode string to an email address.
+str_to_email = pipe(cleanup_line, clean_str_to_email)
+"""Convert a string to an email address.
 
-    >>> unicode_to_email(u'spam@easter-eggs.com')
+    >>> str_to_email(u'spam@easter-eggs.com')
     (u'spam@easter-eggs.com', None)
-    >>> unicode_to_email(u'mailto:spam@easter-eggs.com')
+    >>> str_to_email(u'mailto:spam@easter-eggs.com')
     (u'spam@easter-eggs.com', None)
-    >>> unicode_to_email(u'root@localhost')
+    >>> str_to_email(u'root@localhost')
     (u'root@localhost', None)
-    >>> unicode_to_email('root@127.0.0.1')
+    >>> str_to_email('root@127.0.0.1')
     ('root@127.0.0.1', 'Invalid domain name')
-    >>> unicode_to_email(u'root')
+    >>> str_to_email(u'root')
     (u'root', 'An email must contain exactly one "@"')
-    >>> unicode_to_email(u'    spam@easter-eggs.com  ')
+    >>> str_to_email(u'    spam@easter-eggs.com  ')
     (u'spam@easter-eggs.com', None)
-    >>> unicode_to_email(None)
+    >>> str_to_email(None)
     (None, None)
-    >>> unicode_to_email(u'    ')
+    >>> str_to_email(u'    ')
     (None, None)
     """
 
-unicode_to_float = pipe(cleanup_line, python_data_to_float)
-"""Convert an unicode string to float.
+str_to_float = pipe(cleanup_line, python_data_to_float)
+"""Convert a string to float.
 
-    >>> unicode_to_float('42')
+    >>> str_to_float('42')
     (42.0, None)
-    >>> unicode_to_float(u'   42.25   ')
+    >>> str_to_float(u'   42.25   ')
     (42.25, None)
-    >>> unicode_to_float(u'hello world')
+    >>> str_to_float(u'hello world')
     (u'hello world', 'Value must be a float')
-    >>> unicode_to_float(None)
+    >>> str_to_float(None)
     (None, None)
     """
 
 
-unicode_to_integer = pipe(cleanup_line, python_data_to_integer)
-"""Convert an unicode string to an integer.
+str_to_int = pipe(cleanup_line, python_data_to_int)
+"""Convert a string to an integer.
 
-    >>> unicode_to_integer('42')
+    >>> str_to_int('42')
     (42, None)
-    >>> unicode_to_integer(u'   42   ')
+    >>> str_to_int(u'   42   ')
     (42, None)
-    >>> unicode_to_integer(u'42.75')
+    >>> str_to_int(u'42.75')
     (u'42.75', 'Value must be an integer')
-    >>> unicode_to_integer(None)
+    >>> str_to_int(None)
     (None, None)
     """
 
-unicode_to_json = pipe(cleanup_line, clean_unicode_to_json)
-"""Convert an unicode string to a JSON value.
+str_to_json = pipe(cleanup_line, clean_str_to_json)
+"""Convert a string to a JSON value.
 
     .. note:: This converter uses module ``simplejson``  when it is available, or module ``json`` otherwise.
 
-    >>> unicode_to_json(u'{"a": 1, "b": 2}')
+    >>> str_to_json(u'{"a": 1, "b": 2}')
     ({u'a': 1, u'b': 2}, None)
-    >>> unicode_to_json(u'null')
+    >>> str_to_json(u'null')
     (None, None)
-    >>> unicode_to_json(u'   {"a": 1, "b": 2}    ')
+    >>> str_to_json(u'   {"a": 1, "b": 2}    ')
     ({u'a': 1, u'b': 2}, None)
-    >>> unicode_to_json(None)
+    >>> str_to_json(None)
     (None, None)
-    >>> unicode_to_json(u'    ')
+    >>> str_to_json(u'    ')
     (None, None)
     """
 
@@ -1249,12 +1249,12 @@ unicode_to_json = pipe(cleanup_line, clean_unicode_to_json)
 def to_value(converter, ignore_error = False):
     """Return a function that calls given converter and returns its result or raises an exception when an error occurs.
 
-    >>> to_value(unicode_to_integer)(u'42')
+    >>> to_value(str_to_int)(u'42')
     42
-    >>> to_value(unicode_to_integer)(u'hello world')
+    >>> to_value(str_to_int)(u'hello world')
     Traceback (most recent call last):
     ValueError: Value must be an integer
-    >>> to_value(pipe(python_data_to_unicode, test_isinstance(unicode), unicode_to_boolean))(42)
+    >>> to_value(pipe(python_data_to_str, test_isinstance(unicode), str_to_boolean))(42)
     True
     """
     def to_value_converter(*args, **kwargs):

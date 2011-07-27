@@ -71,7 +71,7 @@ python_data_to_geo = conv.pipe(
         [
             conv.pipe(conv.python_data_to_float, conv.test_between(-90, 90)), # latitude
             conv.pipe(conv.python_data_to_float, conv.test_between(-180, 180)), # longitude
-            conv.pipe(conv.python_data_to_integer, conv.test_between(0, 9)), # accuracy
+            conv.pipe(conv.python_data_to_int, conv.test_between(0, 9)), # accuracy
             ],
         default = 'ignore'),
     )

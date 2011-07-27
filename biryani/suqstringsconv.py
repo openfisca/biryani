@@ -32,19 +32,19 @@ from . import states
 
 
 __all__ = [
-    'clean_unicode_to_phone',
-    'clean_unicode_to_slug',
-    'clean_unicode_to_url_name',
-    'unicode_to_phone',
-    'unicode_to_slug',
-    'unicode_to_url_name',
+    'clean_str_to_phone',
+    'clean_str_to_slug',
+    'clean_str_to_url_name',
+    'str_to_phone',
+    'str_to_slug',
+    'str_to_url_name',
     ]
 
 N_ = conv.N_
 
 
-def clean_unicode_to_phone(value, state = states.default_state):
-    """Convert a clean unicode string to phone number."""
+def clean_str_to_phone(value, state = states.default_state):
+    """Convert a clean string to a phone number."""
     if value is None:
         return value, None
     if value.startswith('+'):
@@ -87,16 +87,16 @@ def clean_unicode_to_phone(value, state = states.default_state):
     return value, state._('Wrong number of digits in phone number')
 
 
-def clean_unicode_to_slug(value, state = states.default_state):
-    """Convert a clean unicode string to a slug."""
+def clean_str_to_slug(value, state = states.default_state):
+    """Convert a clean string to a slug."""
     if value is None:
         return value, None
     value = strings.simplify(value)
     return value or None, None
 
 
-def clean_unicode_to_url_name(value, state = states.default_state):
-    """Convert a clean unicode string to a normalized string that can be used in an URL path or a query parameter."""
+def clean_str_to_url_name(value, state = states.default_state):
+    """Convert a clean string to a normalized string that can be used in an URL path or a query parameter."""
     if value is None:
         return value, None
     for character in u'\n\r/?&#':
@@ -105,7 +105,7 @@ def clean_unicode_to_url_name(value, state = states.default_state):
     return value or None, None
 
 
-unicode_to_phone = conv.pipe(conv.cleanup_line, clean_unicode_to_phone)
-unicode_to_slug = conv.pipe(conv.cleanup_line, clean_unicode_to_slug)
-unicode_to_url_name = conv.pipe(conv.cleanup_line, clean_unicode_to_url_name)
+str_to_phone = conv.pipe(conv.cleanup_line, clean_str_to_phone)
+str_to_slug = conv.pipe(conv.cleanup_line, clean_str_to_slug)
+str_to_url_name = conv.pipe(conv.cleanup_line, clean_str_to_url_name)
 

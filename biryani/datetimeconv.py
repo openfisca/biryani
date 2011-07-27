@@ -55,7 +55,7 @@ __all__ = [
 
 
 def clean_iso8601_to_date(value, state = states.default_state):
-    """Convert a clean unicode string in ISO 8601 format to a date."""
+    """Convert a clean string in ISO 8601 format to a date."""
     if value is None:
         return value, None
     # mx.DateTime.ISO.ParseDateTimeUTC fails when time zone is preceded with a space. For example,
@@ -73,7 +73,7 @@ def clean_iso8601_to_date(value, state = states.default_state):
 
 
 def clean_iso8601_to_datetime(value, state = states.default_state):
-    """Convert a clean unicode string in ISO 8601 format to a datetime."""
+    """Convert a clean string in ISO 8601 format to a datetime."""
     if value is None:
         return value, None
     # mx.DateTime.ISO.ParseDateTimeUTC fails when time zone is preceded with a space. For example,
@@ -98,7 +98,7 @@ def date_to_datetime(value, state = states.default_state):
 
 
 def date_to_iso8601(value, state = states.default_state):
-    """Convert a date to unicode string using ISO 8601 format."""
+    """Convert a date to a string using ISO 8601 format."""
     if value is None:
         return value, None
     return unicode(value.strftime('%Y-%m-%d')), None
@@ -119,7 +119,7 @@ def datetime_to_date(value, state = states.default_state):
 
 
 def datetime_to_iso8601(value, state = states.default_state):
-    """Convert a datetime to unicode string using ISO 8601 format."""
+    """Convert a datetime to a string using ISO 8601 format."""
     if value is None:
         return value, None
     return unicode(value.strftime('%Y-%m-%d %H:%M:%S')), None

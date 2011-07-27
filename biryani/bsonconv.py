@@ -34,11 +34,11 @@ from . import states
 
 
 __all__ = [
-    'clean_unicode_to_object_id',
+    'clean_str_to_object_id',
     'object_id_re',
-    'object_id_to_unicode',
+    'object_id_to_str',
     'python_data_to_object_id',
-    'unicode_to_object_id',
+    'str_to_object_id',
     ]
 
 
@@ -48,8 +48,8 @@ object_id_re = re.compile(r'[\da-f]{24}$')
 # Level-1 Converters
 
 
-def clean_unicode_to_object_id(value, state = states.default_state):
-    """Convert a clean unicode string to MongoDB ObjectId."""
+def clean_str_to_object_id(value, state = states.default_state):
+    """Convert a clean string to MongoDB ObjectId."""
     if value is None:
         return value, None
     id = value.lower()
@@ -58,14 +58,14 @@ def clean_unicode_to_object_id(value, state = states.default_state):
     return bson.objectid.ObjectId(id), None
 
 
-def object_id_to_unicode(value, state = states.default_state):
+def object_id_to_str(value, state = states.default_state):
     """Convert a MongoDB ObjectId to unicode."""
     if value is None:
         return value, None
     return unicode(value), None
 
 
-unicode_to_object_id = conv.pipe(conv.cleanup_line, clean_unicode_to_object_id)
+str_to_object_id = conv.pipe(conv.cleanup_line, clean_str_to_object_id)
 
 
 # Level-2 Converters
@@ -75,7 +75,7 @@ python_data_to_object_id = conv.first_match(
     conv.test_isinstance(bson.objectid.ObjectId),
     conv.pipe(
         conv.test_isinstance(basestring),
-        unicode_to_object_id,
+        str_to_object_id,
         ),
     )
 
