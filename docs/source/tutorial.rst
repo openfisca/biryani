@@ -60,13 +60,13 @@ Add a custom function to convert string to unicode when needed, and store result
     >>> any_string_to_float(u'42')
     (42.0, None)
 
-.. note:: The builtin converter :func:`biryani.baseconv.decode`: does the same thing as the conversion
+.. note:: The builtin converter :func:`biryani.baseconv.decode_str`: does the same thing as the conversion
    function above.
 
    So the converter could be simplified to::
 
         >>> anything_to_float = conv.pipe(
-        ...     conv.decode(),
+        ...     conv.decode_str(),
         ...     conv.test_isinstance(unicode),
         ...     conv.str_to_float,
         ...     )

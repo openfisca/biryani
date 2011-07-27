@@ -28,7 +28,7 @@
    must be combined with other converters.
 
 .. note:: Most converters work on unicode strings. To use them you must first convert your strings to unicode. By using
-   converter :func:`decode`, for example.
+   converter :func:`decode_str`, for example.
 """
 
 
@@ -48,7 +48,7 @@ __all__ = [
     'cleanup_line',
     'cleanup_text',
     'condition',
-    'decode',
+    'decode_str',
     'default',
     'dict_to_instance',
     'extract_when_singleton',
@@ -329,14 +329,14 @@ def condition(test_converter, ok_converter, error_converter = None):
     return condition_converter
 
 
-def decode(encoding = 'utf-8'):
+def decode_str(encoding = 'utf-8'):
     """Return a string to unicode converter that uses given *encoding*.
 
-    >>> decode()('   Hello world!   ')
+    >>> decode_str()('   Hello world!   ')
     (u'   Hello world!   ', None)
-    >>> decode()(42)
+    >>> decode_str()(42)
     (42, None)
-    >>> decode()(None)
+    >>> decode_str()(None)
     (None, None)
     """
     return function(lambda value: value.decode(encoding) if isinstance(value, str) else value)
