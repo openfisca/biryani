@@ -22,7 +22,7 @@
 # limitations under the License.
 
 
-"""All Conversion Functions"""
+"""All Conversion Functions, except language specific ones"""
 
 
 from baseconv import *
@@ -63,13 +63,4 @@ else:
     # Don't export pymongo module.
     del pymongo
     from pymongoconv import *
-
-try:
-    from suq import strings
-except ImportError:
-    pass
-else:
-    # Don't export strings module.
-    del strings
-    from suqstringsconv import *
 

@@ -39,6 +39,18 @@ biryani.bsonconv
    :undoc-members:
 
 
+biryani.frconv
+==============
+
+.. testsetup::
+
+   from biryani.frconv import *
+
+.. automodule:: biryani.frconv
+   :members:
+   :undoc-members:
+
+
 biryani.pymongoconv
 ===================
 
@@ -51,18 +63,6 @@ biryani.pymongoconv
    :undoc-members:
 
 
-biryani.suqstringsconv
-======================
-
-.. testsetup::
-
-   from biryani.suqstringsconv import *
-
-.. automodule:: biryani.suqstringsconv
-   :members:
-   :undoc-members:
-
-
 biryani.states
 ==============
 
@@ -71,6 +71,18 @@ biryani.states
    from biryani.states import *
 
 .. automodule:: biryani.states
+   :members:
+   :undoc-members:
+
+
+biryani.strings
+===============
+
+.. testsetup::
+
+   from biryani.strings import *
+
+.. automodule:: biryani.strings
    :members:
    :undoc-members:
 

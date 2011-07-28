@@ -34,7 +34,7 @@
 
 import re
 
-from . import states
+from . import states, strings
 
 
 __all__ = [
@@ -42,7 +42,9 @@ __all__ = [
     'clean_str_to_boolean',
     'clean_str_to_email',
     'clean_str_to_json',
+    'clean_str_to_slug',
     'clean_str_to_url',
+    'clean_str_to_url_name',
     'clean_str_to_url_path_and_query',
     'cleanup_empty',
     'cleanup_line',
@@ -72,7 +74,9 @@ __all__ = [
     'str_to_float',
     'str_to_int',
     'str_to_json',
+    'str_to_slug',
     'str_to_url',
+    'str_to_url_name',
     'structured_mapping',
     'structured_sequence',
     'test',
@@ -214,6 +218,22 @@ def clean_str_to_json(value, state = states.default_state):
         return value, unicode(e)
 
 
+def clean_str_to_slug(value, state = states.default_state):
+    """Convert a clean string to a slug.
+
+    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_slug`.
+
+    >>> clean_str_to_slug(u'Hello world!')
+    ('hello-world', None)
+    >>> clean_str_to_slug(u'')
+    (None, None)
+    """
+    if value is None:
+        return value, None
+    value = strings.slugify(value)
+    return value or None, None
+
+
 def clean_str_to_url(add_prefix = 'http://', full = False, remove_fragment = False, schemes = ('http', 'https')):
     """Return a converter that converts a clean string to an URL.
 
@@ -255,6 +275,24 @@ def clean_str_to_url(add_prefix = 'http://', full = False, remove_fragment = Fal
             split_url[4] = ''
         return unicode(urlparse.urlunsplit(split_url)), None
     return clean_str_to_url_converter
+
+
+def clean_str_to_url_name(value, state = states.default_state):
+    """Convert a clean string to a normalized string that can be used in an URL path or a query parameter.
+
+    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_url_name`.
+
+    >>> clean_str_to_url_name(u'Hello world!')
+    (u'hello_world!', None)
+    >>> clean_str_to_url_name(u'')
+    (None, None)
+    """
+    if value is None:
+        return value, None
+    for character in u'\n\r/?&#':
+        value = value.replace(character, u' ')
+    value = strings.normalize(value, separator = u'_')
+    return value or None, None
 
 
 def clean_str_to_url_path_and_query(value, state = states.default_state):
@@ -1257,6 +1295,26 @@ str_to_json = pipe(cleanup_line, clean_str_to_json)
     >>> str_to_json(None)
     (None, None)
     >>> str_to_json(u'    ')
+    (None, None)
+    """
+
+str_to_slug = pipe(cleanup_line, clean_str_to_slug)
+"""Convert a string to a slug.
+
+    >>> str_to_slug(u'   Hello world!   ')
+    ('hello-world', None)
+    >>> str_to_slug(u'')
+    (None, None)
+    """
+
+str_to_url_name = pipe(cleanup_line, clean_str_to_url_name)
+"""Convert a string to a normalized string that can be used in an URL path or a query parameter.
+
+    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_url_name`.
+
+    >>> str_to_url_name(u'   Hello world!   ')
+    (u'hello_world!', None)
+    >>> str_to_url_name(u'')
     (None, None)
     """
 
