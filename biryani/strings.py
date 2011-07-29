@@ -105,15 +105,15 @@ def deep_decode(value, encoding = 'utf-8'):
     """Convert recursively bytes strings embedded in Python data to unicode strings."""
     return value if isinstance(value, unicode) else value.decode(encoding) if isinstance(value, str) \
         else dict(
-            (to_unicode(name, encoding = encoding), to_unicode(item, encoding = encoding))
+            (deep_decode(name, encoding = encoding), deep_decode(item, encoding = encoding))
             for name, item in value.iteritems()
             ) if isinstance(value, dict) \
         else [
-            to_unicode(item, encoding = encoding)
+            deep_decode(item, encoding = encoding)
             for item in value
             ] if isinstance(value, list) \
         else tuple(
-            to_unicode(item, encoding = encoding)
+            deep_decode(item, encoding = encoding)
             for item in value
             ) if isinstance(value, tuple) \
         else value
@@ -123,15 +123,15 @@ def deep_encode(value, encoding = 'utf-8'):
     """Convert recursively unicode strings embedded in Python data to encoded strings."""
     return value if isinstance(value, str) else value.encode(encoding) if isinstance(value, unicode) \
         else dict(
-            (to_string(name, encoding = encoding), to_string(item, encoding = encoding))
+            (deep_encode(name, encoding = encoding), deep_encode(item, encoding = encoding))
             for name, item in value.iteritems()
             ) if isinstance(value, dict) \
         else [
-            to_string(item, encoding = encoding)
+            deep_encode(item, encoding = encoding)
             for item in value
             ] if isinstance(value, list) \
         else tuple(
-            to_string(item, encoding = encoding)
+            deep_encode(item, encoding = encoding)
             for item in value
             ) if isinstance(value, tuple) \
         else value
