@@ -571,6 +571,7 @@ def pipe(*converters):
     def pipe_converter(*args, **kwargs):
         if not converters:
             return noop(*args, **kwargs)
+        state = kwargs.get('state', UnboundLocalError)
         for converter in converters:
             if converter is None:
                 continue
@@ -579,6 +580,8 @@ def pipe(*converters):
                 return value, error
             args = [value]
             kwargs = {}
+            if state != UnboundLocalError:
+                kwargs['state'] = state
         return value, None
     return pipe_converter
 
