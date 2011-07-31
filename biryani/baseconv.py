@@ -1325,8 +1325,10 @@ str_to_url_name = pipe(cleanup_line, clean_str_to_url_name)
 # Utility Functions
 
 
-def to_value(converter, ignore_error = False):
+def to_value(converter, clear_on_error = False):
     """Return a function that calls given converter and returns its result or raises an exception when an error occurs.
+
+    When *clear_on_error* is ``True``, return None instead of raising and exception.
 
     >>> to_value(str_to_int)(u'42')
     42
@@ -1335,10 +1337,15 @@ def to_value(converter, ignore_error = False):
     ValueError: Value must be an integer
     >>> to_value(pipe(python_data_to_str, test_isinstance(unicode), str_to_boolean))(42)
     True
+    >>> to_value(str_to_int, clear_on_error = True)(u'42')
+    42
+    >>> to_value(str_to_int, clear_on_error = True)(u'hello world')
     """
     def to_value_converter(*args, **kwargs):
         value, error = converter(*args, **kwargs)
-        if not ignore_error and error is not None:
+        if error is not None:
+            if clear_on_error:
+                return None
             raise ValueError(error)
         return value
     return to_value_converter
