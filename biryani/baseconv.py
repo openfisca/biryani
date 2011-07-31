@@ -224,14 +224,16 @@ def clean_str_to_slug(value, state = states.default_state):
     .. note:: For a converter that doesn't require a clean string, see :func:`str_to_slug`.
 
     >>> clean_str_to_slug(u'Hello world!')
-    ('hello-world', None)
+    (u'hello-world', None)
+    >>> clean_str_to_slug('Hello world!')
+    (u'hello-world', None)
     >>> clean_str_to_slug(u'')
     (None, None)
     """
     if value is None:
         return value, None
     value = strings.slugify(value)
-    return value or None, None
+    return unicode(value) if value else None, None
 
 
 def clean_str_to_url(add_prefix = 'http://', full = False, remove_fragment = False, schemes = ('http', 'https')):
@@ -1305,7 +1307,9 @@ str_to_slug = pipe(cleanup_line, clean_str_to_slug)
 """Convert a string to a slug.
 
     >>> str_to_slug(u'   Hello world!   ')
-    ('hello-world', None)
+    (u'hello-world', None)
+    >>> clean_str_to_slug('   Hello world!   ')
+    (u'hello-world', None)
     >>> str_to_slug(u'')
     (None, None)
     """
