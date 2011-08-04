@@ -51,6 +51,18 @@ biryani.frconv
    :undoc-members:
 
 
+biryani.objectconv
+==================
+
+.. testsetup::
+
+   from biryani.objectconv import *
+
+.. automodule:: biryani.objectconv
+   :members:
+   :undoc-members:
+
+
 biryani.pymongoconv
 ===================
 

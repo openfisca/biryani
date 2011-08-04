@@ -55,6 +55,8 @@ else:
     del pytz
     from datetimeconv import *
 
+from objectconv import *
+
 try:
     import pymongo
 except ImportError:
