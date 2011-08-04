@@ -1,7 +1,10 @@
-.. Biryani documentation master file, created by
-   sphinx-quickstart on Tue Jul  5 16:44:13 2011.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. Biryani documentation master file, created by sphinx-quickstart on Tue Jul  5 16:44:13 2011.
+   You can adapt this file completely to your liking, but it should at least contain the root `toctree` directive.
+
+   * To build HTML doc: ``./setup.py build_sphinx``.
+   * To test doctests: ``./setup.py build_sphinx -b doctest``.
+   * To see API documentation coverage: ``./setup.py build_sphinx -b coverage``.
+
 
 Welcome to Biryani
 ==================
