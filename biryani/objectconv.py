@@ -43,6 +43,9 @@ object_to_clean_dict = conv.function(lambda instance: dict(
 """Convert an object's instance to a dictionary, by extracting the attributes whose value differs from the ones defined
     in the object's class.
 
+    .. note:: Use this converter instead of :func:`object_to_dict` when you want to remove defaut values from generated
+       dictionary.
+
     >>> class C(object):
     ...     a = 1
     >>> c = C()
@@ -74,6 +77,9 @@ object_to_clean_dict = conv.function(lambda instance: dict(
 
 object_to_dict = conv.function(lambda instance: getattr(instance, '__dict__'))
 """Convert an object's instance to a dictionary, by returning its ``__dict__`` atribute.
+
+    .. note:: Use converter :func:`object_to_clean_dict` when you want to remove defaut values from generated
+       dictionary.
 
     >>> class C(object):
     ...     a = 1
