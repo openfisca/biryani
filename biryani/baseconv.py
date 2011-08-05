@@ -38,8 +38,8 @@ from . import states, strings
 
 
 __all__ = [
-    'boolean_to_str',
-    'clean_str_to_boolean',
+    'bool_to_str',
+    'clean_str_to_bool',
     'clean_str_to_email',
     'clean_str_to_json',
     'clean_str_to_slug',
@@ -57,19 +57,19 @@ __all__ = [
     'extract_when_singleton',
     'fail',
     'first_match',
-    'form_data_to_boolean',
+    'form_data_to_bool',
     'function',
     'item_or_sequence',
     'noop',
     'pipe',
-    'python_data_to_boolean',
+    'python_data_to_bool',
     'python_data_to_float',
     'python_data_to_int',
     'python_data_to_str',
     'rename_item',
     'require',
     'set_value',
-    'str_to_boolean',
+    'str_to_bool',
     'str_to_email',
     'str_to_float',
     'str_to_int',
@@ -106,26 +106,26 @@ username_re = re.compile(r"[^ \t\n\r@<>()]+$", re.I)
 # Level-1 Converters
 
 
-def boolean_to_str(value, state = states.default_state):
+def bool_to_str(value, state = states.default_state):
     """Convert a boolean to a string.
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
 
-    >>> boolean_to_str(False)
+    >>> bool_to_str(False)
     (u'0', None)
-    >>> boolean_to_str(True)
+    >>> bool_to_str(True)
     (u'1', None)
-    >>> boolean_to_str(0)
+    >>> bool_to_str(0)
     (u'0', None)
-    >>> boolean_to_str('')
+    >>> bool_to_str('')
     (u'0', None)
-    >>> boolean_to_str('any non-empty string')
+    >>> bool_to_str('any non-empty string')
     (u'1', None)
-    >>> boolean_to_str('0')
+    >>> bool_to_str('0')
     (u'1', None)
-    >>> boolean_to_str(None)
+    >>> bool_to_str(None)
     (None, None)
-    >>> pipe(default(False), boolean_to_str)(None)
+    >>> pipe(default(False), bool_to_str)(None)
     (u'0', None)
     """
     if value is None:
@@ -133,20 +133,20 @@ def boolean_to_str(value, state = states.default_state):
     return unicode(int(bool(value))), None
 
 
-def clean_str_to_boolean(value, state = states.default_state):
+def clean_str_to_bool(value, state = states.default_state):
     """Convert a clean string to a boolean.
 
-    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_boolean`.
+    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_bool`.
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
 
-    >>> clean_str_to_boolean(u'0')
+    >>> clean_str_to_bool(u'0')
     (False, None)
-    >>> clean_str_to_boolean(u'1')
+    >>> clean_str_to_bool(u'1')
     (True, None)
-    >>> clean_str_to_boolean(None)
+    >>> clean_str_to_bool(None)
     (None, None)
-    >>> clean_str_to_boolean(u'true')
+    >>> clean_str_to_bool(u'true')
     (u'true', 'Value must be a boolean number')
     """
     if value is None:
@@ -557,15 +557,15 @@ def noop(value, state = states.default_state):
 def pipe(*converters):
     """Return a compound converter that applies each of its converters till the end or an error occurs.
 
-    >>> str_to_boolean(42)
+    >>> str_to_bool(42)
     Traceback (most recent call last):
     AttributeError: 'int' object has no attribute 'strip'
-    >>> pipe(str_to_boolean)(42)
+    >>> pipe(str_to_bool)(42)
     Traceback (most recent call last):
     AttributeError: 'int' object has no attribute 'strip'
-    >>> pipe(test_isinstance(unicode), str_to_boolean)(42)
+    >>> pipe(test_isinstance(unicode), str_to_bool)(42)
     (42, "Value is not an instance of <type 'unicode'>")
-    >>> pipe(python_data_to_str, test_isinstance(unicode), str_to_boolean)(42)
+    >>> pipe(python_data_to_str, test_isinstance(unicode), str_to_bool)(42)
     (True, None)
     >>> pipe()(42)
     (42, None)
@@ -1175,66 +1175,66 @@ extract_when_singleton = condition(
 # Level-3 Converters
 
 
-form_data_to_boolean = pipe(cleanup_line, clean_str_to_boolean, default(False))
+form_data_to_bool = pipe(cleanup_line, clean_str_to_bool, default(False))
 """Convert a string submitted by an HTML form to a boolean.
 
-    Like :data:`str_to_boolean`, but when value is missing, ``False`` is returned instead of ``None``.
+    Like :data:`str_to_bool`, but when value is missing, ``False`` is returned instead of ``None``.
 
-    >>> form_data_to_boolean(u'0')
+    >>> form_data_to_bool(u'0')
     (False, None)
-    >>> form_data_to_boolean(u'1')
+    >>> form_data_to_bool(u'1')
     (True, None)
-    >>> form_data_to_boolean(u'  0  ')
+    >>> form_data_to_bool(u'  0  ')
     (False, None)
-    >>> form_data_to_boolean(None)
+    >>> form_data_to_bool(None)
     (False, None)
-    >>> form_data_to_boolean(u'    ')
+    >>> form_data_to_bool(u'    ')
     (False, None)
-    >>> form_data_to_boolean(u'true')
+    >>> form_data_to_bool(u'true')
     (u'true', 'Value must be a boolean number')
 """
 
-python_data_to_boolean = function(lambda value: bool(value))
+python_data_to_bool = function(lambda value: bool(value))
 """Convert any Python data to a boolean.
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
 
-    >>> python_data_to_boolean(0)
+    >>> python_data_to_bool(0)
     (False, None)
-    >>> python_data_to_boolean(-1)
+    >>> python_data_to_bool(-1)
     (True, None)
-    >>> python_data_to_boolean(u'0')
+    >>> python_data_to_bool(u'0')
     (True, None)
-    >>> python_data_to_boolean(u'1')
+    >>> python_data_to_bool(u'1')
     (True, None)
-    >>> python_data_to_boolean(u'true')
+    >>> python_data_to_bool(u'true')
     (True, None)
-    >>> python_data_to_boolean(u'false')
+    >>> python_data_to_bool(u'false')
     (True, None)
-    >>> python_data_to_boolean(u'  0  ')
+    >>> python_data_to_bool(u'  0  ')
     (True, None)
-    >>> python_data_to_boolean(u'    ')
+    >>> python_data_to_bool(u'    ')
     (True, None)
-    >>> python_data_to_boolean(None)
+    >>> python_data_to_bool(None)
     (None, None)
     """
 
-str_to_boolean = pipe(cleanup_line, clean_str_to_boolean)
+str_to_bool = pipe(cleanup_line, clean_str_to_bool)
 """Convert a string to a boolean.
 
     Like most converters, a missing value (aka ``None``) is not converted.
 
-    >>> str_to_boolean(u'0')
+    >>> str_to_bool(u'0')
     (False, None)
-    >>> str_to_boolean(u'1')
+    >>> str_to_bool(u'1')
     (True, None)
-    >>> str_to_boolean(u'  0  ')
+    >>> str_to_bool(u'  0  ')
     (False, None)
-    >>> str_to_boolean(None)
+    >>> str_to_bool(None)
     (None, None)
-    >>> str_to_boolean(u'    ')
+    >>> str_to_bool(u'    ')
     (None, None)
-    >>> str_to_boolean(u'true')
+    >>> str_to_bool(u'true')
     (u'true', 'Value must be a boolean number')
 """
 
@@ -1339,7 +1339,7 @@ def to_value(converter, clear_on_error = False):
     >>> to_value(str_to_int)(u'hello world')
     Traceback (most recent call last):
     ValueError: Value must be an integer
-    >>> to_value(pipe(python_data_to_str, test_isinstance(unicode), str_to_boolean))(42)
+    >>> to_value(pipe(python_data_to_str, test_isinstance(unicode), str_to_bool))(42)
     True
     >>> to_value(str_to_int, clear_on_error = True)(u'42')
     42
