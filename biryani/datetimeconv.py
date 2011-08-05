@@ -167,7 +167,10 @@ def timestamp_to_datetime(value, state = states.default_state):
     if value is None:
         return value, None
     try:
-        return datetime.datetime.fromtimestamp(value / 1000, pytz.utc), None
+        # Since a timestamp doesn't containe timezone information, the generated datetime has no timezone (ie naive
+        # datetime), so we don't use pytz.utc.
+        # return datetime.datetime.fromtimestamp(value / 1000, pytz.utc), None
+        return datetime.datetime.fromtimestamp(value / 1000), None
     except ValueError:
         return value, state._('Value must be a timestamp')
 
