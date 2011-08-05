@@ -66,7 +66,7 @@ object_to_clean_dict = conv.function(lambda instance: dict(
     >>> f = C()
     >>> f.a = 1
     >>> f.b = 2
-    >>> object_to_clean_dict(e)
+    >>> object_to_clean_dict(f)
     ({'b': 2}, None)
     >>> object_to_clean_dict(None)
     (None, None)
@@ -101,7 +101,7 @@ object_to_dict = conv.function(lambda instance: getattr(instance, '__dict__'))
     >>> f = C()
     >>> f.a = 1
     >>> f.b = 2
-    >>> object_to_dict(e)
+    >>> object_to_dict(f)
     ({'a': 1, 'b': 2}, None)
     >>> object_to_dict(None)
     (None, None)
