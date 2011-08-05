@@ -163,7 +163,24 @@ def timestamp_to_date(value, state = states.default_state):
 
 
 def timestamp_to_datetime(value, state = states.default_state):
-    """Convert a JavaScript timestamp to a datetime."""
+    """Convert a JavaScript timestamp to a datetime.
+    
+    .. note:: Since a timestamp has no timezone, the generated datetime has no *tzinfo* attribute.
+       Use :func:`set_datetime_tzinfo` to add one.
+
+    >>> timestamp_to_datetime(123456789.123)
+    (datetime.datetime(1970, 1, 2, 11, 17, 36, 789123), None)
+    >>> timestamp_to_datetime(None)
+    (None, None)
+    >>> import pytz
+    >>> pipe(timestamp_to_datetime, set_datetime_tzinfo(pytz.utc))(123456789.123)
+    (datetime.datetime(1970, 1, 2, 11, 17, 36, 789123, tzinfo=<UTC>), None)
+    >>> timestamp_to_datetime(u'123456789.123')
+    Traceback (most recent call last):
+    TypeError: unsupported operand type(s) for /: 'unicode' and 'int'
+    >>> pipe(str_to_float, timestamp_to_datetime)(u'123456789.123')
+    (datetime.datetime(1970, 1, 2, 11, 17, 36, 789123), None)
+    """
     if value is None:
         return value, None
     try:
