@@ -9,7 +9,9 @@
 Welcome to Biryani
 ==================
 
-Biryani is a Python library to convert and validate data (for web forms, CSV files, XML files, etc).
+*Biryani* is a Python library to convert and validate data (for web forms, CSV files, XML files, etc).
+
+*Biryani* seeks to provide the same functionality as `FormEncode <http://formencode.org/>`_, while being more easy to use and extend.
 
 To convert a value into another, you first create the ad-hoc converter by chaining conversion functions. Each conversion function takes a value as input and outputs a couple containing the converted value and an optional error message.
 

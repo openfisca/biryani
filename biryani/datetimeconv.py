@@ -137,7 +137,7 @@ def datetime_to_timestamp(value, state = states.default_state):
 
 
 def set_datetime_tzinfo(tzinfo = None):
-    """Return a converter that sets the field tzinfo of a datetime.
+    """Return a converter that sets or clears the field tzinfo of a datetime.
 
     >>> import datetime, pytz
     >>> set_datetime_tzinfo()(datetime.datetime(2011, 1, 2, 3, 4, 5))
