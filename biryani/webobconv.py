@@ -93,7 +93,8 @@ def multidict_getall(key):
 def multidict_getone(key):
     """Return a converter that retrieves one and only one value of a MultiDict item.
 
-    .. note:: When no value exists or several values exists for the same key, an exception is raised.
+    .. note:: When no value exists or several values exists for the same key, an exception is raised. Most of the times,
+       this is not the desired behaviour, so use :func:`multidict_get` instead.
 
     >>> import webob
     >>> req = webob.Request.blank('/?a=1&tag=hello&tag=World!&z=')
