@@ -36,11 +36,11 @@ except ImportError:
 
 classifiers = """\
 Development Status :: 3 - Alpha
-Environment :: Web Environment
 Intended Audience :: Developers
 License :: OSI Approved :: Apache Software License
 Operating System :: OS Independent
 Programming Language :: Python
+Topic :: Software Development :: Libraries :: Python Modules 
 Topic :: Text Processing
 """
 
