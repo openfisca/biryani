@@ -110,3 +110,15 @@ biryani.strings
    :members:
    :undoc-members:
 
+
+biryani.webobconv
+=================
+
+.. testsetup::
+
+   from biryani.webobconv import *
+
+.. automodule:: biryani.webobconv
+   :members:
+   :undoc-members:
+

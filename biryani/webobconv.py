@@ -1,0 +1,102 @@
+# -*- coding: utf-8 -*-
+
+
+# Biryani -- A conversion and validation toolbox
+# By: Emmanuel Raviart <eraviart@easter-eggs.com>
+#
+# Copyright (C) 2009, 2010, 2011 Easter-eggs
+# http://packages.python.org/Biryani/
+#
+# This file is part of Biryani.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+"""WebOb related Converters"""
+
+
+from . import baseconv as conv
+from . import states
+
+
+__all__ = [
+    'multidict_get',
+    'multidict_getall',
+    'multidict_getone',
+    ]
+
+
+def multidict_get(key, default = None):
+    """Return a converter that retrieves the value of a MultiDict item.
+
+    .. note:: When several values exists for the same key, only the last one is returned.
+
+    >>> import webob
+    >>> req = webob.Request.blank('/?a=1&tag=hello&tag=World!')
+    >>> multidict_get('a')(req.GET)
+    (u'1', None)
+    >>> multidict_get('a', default = 2)(req.GET)
+    (u'1', None)
+    >>> multidict_get('b')(req.GET)
+    (None, None)
+    >>> multidict_get('b', default = 2)(req.GET)
+    (2, None)
+    >>> multidict_get('tag')(req.GET)
+    (u'World!', None)
+    >>> mapping(dict(
+    ...     a = multidict_get('a'),
+    ...     b = multidict_get('b'),
+    ...     ))(req.GET)
+    ({'a': u'1'}, None)
+    """
+    return conv.function(lambda multidict: multidict.get(key, default = default))
+
+
+def multidict_getall(key):
+    """Return a converter that retrieves all values of a MultiDict item.
+
+    >>> import webob
+    >>> req = webob.Request.blank('/?a=1&tag=hello&tag=World!')
+    >>> multidict_getall('a')(req.GET)
+    ([u'1'], None)
+    >>> multidict_getall('b')(req.GET)
+    ([], None)
+    >>> multidict_getall('tag')(req.GET)
+    ([u'hello', u'World!'], None)
+    >>> mapping(dict(
+    ...     b = multidict_getall('b'),
+    ...     tags = multidict_getall('tags'),
+    ...     ))(req.GET)
+    ({'b': [], 'tags': []}, None)
+    """
+    return conv.function(lambda multidict: multidict.getall(key))
+
+
+def multidict_getone(key):
+    """Return a converter that retrieves the value of a MultiDict item.
+
+    .. note:: When several values exists for the same key, only the last one is returned.
+
+    >>> import webob
+    >>> req = webob.Request.blank('/?a=1&tag=hello&tag=World!')
+    >>> multidict_getone('a')(req.GET)
+    (u'1', None)
+    >>> multidict_getone('b')(req.GET)
+    Traceback (most recent call last):
+    KeyError: "Key not found: 'b'"
+    >>> multidict_getone('tag')(req.GET)
+    Traceback (most recent call last):
+    KeyError: "Multiple values match 'tag': ['hello', 'World!']"
+    """
+    return conv.function(lambda multidict: multidict.getone(key))
+

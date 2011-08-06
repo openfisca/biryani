@@ -66,3 +66,12 @@ else:
     del pymongo
     from pymongoconv import *
 
+try:
+    import webob
+except ImportError:
+    pass
+else:
+    # Don't export webob module.
+    del webob
+    from webobconv import *
+
