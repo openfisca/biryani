@@ -42,7 +42,7 @@ def multidict_get(key, default = None):
     .. note:: When several values exists for the same key, only the last one is returned.
 
     >>> import webob
-    >>> req = webob.Request.blank('/?a=1&tag=hello&tag=World!')
+    >>> req = webob.Request.blank('/?a=1&tag=hello&tag=World!&z=')
     >>> multidict_get('a')(req.GET)
     (u'1', None)
     >>> multidict_get('a', default = 2)(req.GET)
@@ -51,6 +51,12 @@ def multidict_get(key, default = None):
     (None, None)
     >>> multidict_get('b', default = 2)(req.GET)
     (2, None)
+    >>> multidict_get('z')(req.GET)
+    (u'', None)
+    >>> multidict_get('z', default = 3)(req.GET)
+    (u'', None)
+    >>> pipe(multidict_get('z'), cleanup_line, default(3))(req.GET)
+    (3, None)
     >>> multidict_get('tag')(req.GET)
     (u'World!', None)
     >>> mapping(dict(
@@ -66,11 +72,13 @@ def multidict_getall(key):
     """Return a converter that retrieves all values of a MultiDict item.
 
     >>> import webob
-    >>> req = webob.Request.blank('/?a=1&tag=hello&tag=World!')
+    >>> req = webob.Request.blank('/?a=1&tag=hello&tag=World!&z=')
     >>> multidict_getall('a')(req.GET)
     ([u'1'], None)
     >>> multidict_getall('b')(req.GET)
     ([], None)
+    >>> multidict_getall('z')(req.GET)
+    ([u''], None)
     >>> multidict_getall('tag')(req.GET)
     ([u'hello', u'World!'], None)
     >>> mapping(dict(
@@ -83,17 +91,20 @@ def multidict_getall(key):
 
 
 def multidict_getone(key):
-    """Return a converter that retrieves the value of a MultiDict item.
+    """Return a converter that retrieves one and only one value of a MultiDict item.
 
-    .. note:: When several values exists for the same key, only the last one is returned.
+    .. note:: When no value exists or several values exists for the same key, an exception is raised.
 
     >>> import webob
-    >>> req = webob.Request.blank('/?a=1&tag=hello&tag=World!')
+    >>> req = webob.Request.blank('/?a=1&tag=hello&tag=World!&z=')
     >>> multidict_getone('a')(req.GET)
     (u'1', None)
     >>> multidict_getone('b')(req.GET)
     Traceback (most recent call last):
     KeyError: "Key not found: 'b'"
+    >>> multidict_getone('')(req.GET)
+    Traceback (most recent call last):
+    KeyError: "Key not found: 'z'"
     >>> multidict_getone('tag')(req.GET)
     Traceback (most recent call last):
     KeyError: "Multiple values match 'tag': ['hello', 'World!']"
