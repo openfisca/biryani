@@ -854,6 +854,29 @@ def set_value(constant):
     return lambda value, state = states.default_state: (constant, None) if value is not None else (None, None)
 
 
+def str_to_url(add_prefix = 'http://', full = False, remove_fragment = False, schemes = ('http', 'https')):
+    """Return a converter that converts an string to an URL.
+
+    >>> str_to_url()(u'http://packages.python.org/Biryani/')
+    (u'http://packages.python.org/Biryani/', None)
+    >>> str_to_url(full = True)(u'packages.python.org/Biryani/')
+    (u'http://packages.python.org/Biryani/', None)
+    >>> str_to_url()(u'/Biryani/presentation.html#tutorial')
+    (u'/Biryani/presentation.html#tutorial', None)
+    >>> str_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
+    (u'/Biryani/presentation.html#tutorial', 'URL must be complete')
+    >>> str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
+    (u'http://packages.python.org/Biryani/presentation.html', None)
+    >>> str_to_url()(u'    http://packages.python.org/Biryani/   ')
+    (u'http://packages.python.org/Biryani/', None)
+    """
+    return pipe(
+        cleanup_line,
+        clean_str_to_url(add_prefix = add_prefix, full = full, remove_fragment = remove_fragment,
+            schemes = schemes),
+        )
+
+
 def structured_mapping(converters, constructor = dict, default = None, keep_empty = False):
     """Return a converter that maps a mapping of converters to a mapping (ie dict, etc) of values.
 
@@ -1175,29 +1198,6 @@ def translate(conversions):
     return function(lambda value: value
         if value is None or conversions is None or value not in conversions
         else conversions[value])
-
-
-def str_to_url(add_prefix = 'http://', full = False, remove_fragment = False, schemes = ('http', 'https')):
-    """Return a converter that converts an string to an URL.
-
-    >>> str_to_url()(u'http://packages.python.org/Biryani/')
-    (u'http://packages.python.org/Biryani/', None)
-    >>> str_to_url(full = True)(u'packages.python.org/Biryani/')
-    (u'http://packages.python.org/Biryani/', None)
-    >>> str_to_url()(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html#tutorial', None)
-    >>> str_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html#tutorial', 'URL must be complete')
-    >>> str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
-    (u'http://packages.python.org/Biryani/presentation.html', None)
-    >>> str_to_url()(u'    http://packages.python.org/Biryani/   ')
-    (u'http://packages.python.org/Biryani/', None)
-    """
-    return pipe(
-        cleanup_line,
-        clean_str_to_url(add_prefix = add_prefix, full = full, remove_fragment = remove_fragment,
-            schemes = schemes),
-        )
 
 
 #def uniform_mapping(key_converter, value_converter, constructor = dict, keep_empty = False, keep_null_keys = False,
