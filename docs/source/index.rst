@@ -81,11 +81,11 @@ Documentation
    how-to-use
    api
    sugar
+   for-maintainer-only
 
 .. TODO
 
    Philosophy
-   Comparison with FormEncode
    Howto use with WebOb
    How to use with lxml
    How to import a CSV file
