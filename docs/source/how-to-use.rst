@@ -1,6 +1,6 @@
-**************************
-How to to use in a project
-**************************
+************************************
+How to to use *Biryani* in a project
+************************************
 
 
 Howto use Biryani in a simple project

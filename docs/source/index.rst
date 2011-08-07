@@ -6,8 +6,8 @@
    * To see API documentation coverage: ``./setup.py build_sphinx -b coverage``.
 
 
-Biryani - A Python conversion and validation toolbox
-====================================================
+*Biryani* - A Python conversion and validation toolbox
+======================================================
 
 *Biryani* is a Python library to convert and validate data (for web forms, CSV files, XML files, etc).
 
@@ -94,7 +94,7 @@ Documentation
 Copyright and license
 =====================
 
-Biryani is a free software.
+*Biryani* is a free software.
 
 * Author: Emmanuel Raviart <eraviart@easter-eggs.com>
 * Copyright (C) 2009, 2010, 2011 Easter-eggs
@@ -111,10 +111,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
-Get Biryani
-===========
+Get *Biryani*
+=============
 
-Biryani is available as an easy-installable package on the `Python Package Index <http://pypi.python.org/pypi/Biryani>`_.
+*Biryani* is available as an easy-installable package on the `Python Package Index <http://pypi.python.org/pypi/Biryani>`_.
 
 The code can be found in a Git repository, at http://gitorious.org/biryani.
 
