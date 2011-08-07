@@ -35,7 +35,7 @@ Or specify the converters you want::
     from biryani.bsonconv import *
     from biryani.datetimeconv import *
     from biryani.pymongoconv import *
-    from biryani.suqstringsconv import *
+    from biryani.webobconv import *
     ...
     from biryani import states
 

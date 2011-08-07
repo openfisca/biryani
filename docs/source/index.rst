@@ -26,7 +26,7 @@ A sample validator for a web form containing the following fields:
 * Email
 * Tags (several fields with the same name, each one may contain several tags separated by a comma)
 
-This sample uses `WebOb <http://webob.org/>`_.
+This example uses `WebOb <http://webob.org/>`_.
 
 >>> import webob
 >>> from biryani import allconv as conv
@@ -41,21 +41,21 @@ This sample uses `WebOb <http://webob.org/>`_.
 ...     email = conv.pipe(conv.multidict_get('email'), conv.str_to_email),
 ...     tags = conv.pipe(
 ...         conv.multidict_getall('tag'),
-...         conv.function(u','.join),
-...         conv.function(lambda tags: tags.split(u',')),
+...         conv.function(lambda tags: u','.join(tags).split(u',')),
 ...         conv.uniform_sequence(conv.str_to_slug, constructor = set),
+...         conv.function(sorted),
 ...         ),
 ...     ))
 
->>> req = webob.Request.blank('/?username=   John Doe&password=secret&password=secret&email=john@doe.name&tag=person&tag=user,ADMIN')
+>>> req = webob.Request.blank('/?username=   John Doe&password=secret&password=secret&email=john@doe.name&tag=friend&tag=user,ADMIN')
 >>> result, errors = validate_form(req.GET)
 >>> result
-{'username': u'John Doe', 'password': u'secret', 'email': u'john@doe.name', 'tags': set([u'admin', u'person', u'user'])}
+{'username': u'John Doe', 'password': u'secret', 'email': u'john@doe.name', 'tags': [u'admin', u'friend', u'user']}
 
->>> req = webob.Request.blank('/?password=secret&password=other secret&email=john@doe.name&tag=person&tag=user,ADMIN')
+>>> req = webob.Request.blank('/?password=secret&password=other secret&email=john@doe.name&tag=friend&tag=user,ADMIN')
 >>> result, errors = validate_form(req.GET)
 >>> result
-{'password': [u'secret', u'other secret'], 'email': u'john@doe.name', 'tags': set([u'admin', u'person', u'user'])}
+{'password': [u'secret', u'other secret'], 'email': u'john@doe.name', 'tags': [u'admin', u'friend', u'user']}
 >>> errors
 {'username': u'Missing value', 'password': u'Password mismatch'}
 
@@ -66,7 +66,7 @@ This sample uses `WebOb <http://webob.org/>`_.
 >>> errors
 {'password': u'Password mismatch', 'email': u'An email must contain exactly one "@"'}
 
-See :doc:`web-form-tutorial` for a complete explanation of this example.
+See :doc:`tutorial1-web-form` for a complete explanation of this example.
 
 
 Documentation
@@ -75,17 +75,39 @@ Documentation
 .. toctree::
    :maxdepth: 2
 
-   tutorial
+   tutorial1-web-form
+   tutorial2
    how-to-use
    api
    sugar
 
 .. TODO
 
+   Philosophy
    Comparison with FormEncode
    Howto use with WebOb
    How to use with lxml
    How to import a CSV file
+
+
+Copyright and license
+=====================
+
+Biryani is a free software.
+
+* Author: Emmanuel Raviart <eraviart@easter-eggs.com>
+* Copyright (C) 2009, 2010, 2011 Easter-eggs
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+
+You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 
 
 Get Biryani
@@ -94,12 +116,4 @@ Get Biryani
 Biryani is available as an easy-installable package on the `Python Package Index <http://pypi.python.org/pypi/Biryani>`_.
 
 The code can be found in a Git repository, at http://gitorious.org/biryani.
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
