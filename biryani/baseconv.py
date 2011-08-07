@@ -508,7 +508,7 @@ def first_match(*converters):
     return first_match_converter
 
 
-def function(function, handle_none = False):
+def function(function, handle_none = False, handle_state = False):
     """Return a converter that applies a function to value and returns a new value.
 
     .. note:: Like most converters, by default a missing value (aka ``None``) is not converted (ie function is not
@@ -517,6 +517,8 @@ def function(function, handle_none = False):
     .. note:: When your function doesn't modify value but may generate an error, use a :func:`test` instead.
 
     .. note:: When your function modifies value and may generate an error, write a full converter instead of a function.
+
+    See :doc:`how-to-create-converter` for more informations.
 
     >>> function(int)('42')
     (42, None)
@@ -536,6 +538,8 @@ def function(function, handle_none = False):
     def function_converter(value, state = states.default_state):
         if value is None and not handle_none or function is None:
             return value, None
+        if handle_state:
+            return function(value, state = state), None
         return function(value), None
     return function_converter
 
@@ -1023,10 +1027,12 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     return structured_sequence_converter
 
 
-def test(function, error = N_(u'Test failed'), handle_none = False):
+def test(function, error = N_(u'Test failed'), handle_none = False, handle_state = False):
     """Return a converter that applies a test function to a value and returns an error when test fails.
 
     ``test`` always returns the initial value, even when test fails.
+
+     See :doc:`how-to-create-converter` for more informations.
 
     >>> test(lambda value: isinstance(value, basestring))('hello')
     ('hello', None)
@@ -1036,7 +1042,10 @@ def test(function, error = N_(u'Test failed'), handle_none = False):
     (1, u'Value is not a string')
     """
     def test_converter(value, state = states.default_state):
-        if value is None and not handle_none or function is None or function(value):
+        if value is None and not handle_none or function is None:
+            return value, None
+        ok = function(value, state = state) if handle_none else function(value)
+        if ok:
             return value, None
         return value, state._(error)
     return test_converter
