@@ -73,6 +73,8 @@ str_to_lang = conv.pipe(conv.cleanup_line, clean_str_to_lang)
     (u'fr-FR', u'Invalid value')
     >>> str_to_lang(u'francais')
     (u'francais', u'Invalid value')
+    >>> str_to_lang(u'   ')
+    (None, None)
     >>> str_to_lang(None)
     (None, None)
     """
