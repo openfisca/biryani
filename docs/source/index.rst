@@ -6,8 +6,8 @@
    * To see API documentation coverage: ``./setup.py build_sphinx -b coverage``.
 
 
-Welcome to Biryani
-==================
+Biryani - A Python conversion and validation toolbox
+====================================================
 
 *Biryani* is a Python library to convert and validate data (for web forms, CSV files, XML files, etc).
 
