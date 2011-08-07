@@ -115,7 +115,7 @@ Converting structures
 =====================
 
 Now that username is converted, we need to do the same thing for email. Let's transform function `validate_form` to
-return a dictionary containing username and email, and a dictionary containing the errors (or `None` when there is no
+return a dictionary containing username and email, and a dictionary containing the errors (or ``None`` when there is no
 error):
 
 >>> def validate_form(params):
