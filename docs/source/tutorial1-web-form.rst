@@ -36,8 +36,8 @@ u'   John Doe'
 [u'secret', u'bad']
 
 
-First steps with Biryani
-========================
+First steps with *Biryani*
+==========================
 
 *Biryani* is a Python package split into several modules to allow you to ony import the converters you need for your
 application.

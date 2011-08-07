@@ -3,8 +3,8 @@ How to to use *Biryani* in a project
 ************************************
 
 
-Howto use Biryani in a simple project
-=====================================
+Howto use *Biryani* in a simple project
+=======================================
 
 ::
 
@@ -17,8 +17,8 @@ Howto use Biryani in a simple project
     ...
 
 
-Howto use Biryani in a multi-modules project
-============================================
+Howto use *Biryani* in a multi-modules project
+==============================================
 
 In your project, create a module named ``conv.py``.
 
