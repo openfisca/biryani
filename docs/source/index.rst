@@ -77,6 +77,7 @@ Documentation
 
    tutorial1-web-form
    tutorial2
+   how-to-create-converter
    how-to-use
    api
    sugar
