@@ -45,7 +45,7 @@ def mongodb_query_to_object(object_class):
             return value, None
         instance = object_class.find_one(value)
         if instance is None:
-            return value, state._('No document of class {0} for query {1}').format(object_class.__name__, value)
+            return value, state._(u'No document of class {0} for query {1}').format(object_class.__name__, value)
         return instance, None
     return mongodb_query_to_object_converter
 
@@ -60,7 +60,7 @@ def object_id_to_object(object_class, cache = None):
             return cache[value], None
         instance = object_class.find_one(value)
         if instance is None:
-            return value, state._('No document of class {0} with ID {1}').format(object_class.__name__, value)
+            return value, state._(u'No document of class {0} with ID {1}').format(object_class.__name__, value)
         return instance, None
     return object_id_to_object_converter
 

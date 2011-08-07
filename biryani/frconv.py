@@ -55,7 +55,7 @@ def clean_str_to_phone(value, state = states.default_state):
     if not value:
         return value, None
     if not value.isdigit():
-        return value, state._('Unexpected non numerical characters in phone number')
+        return value, state._(u'Unexpected non numerical characters in phone number')
 
     if value.startswith('0033'):
         value = value[2:]
@@ -67,26 +67,26 @@ def clean_str_to_phone(value, state = states.default_state):
     if value.startswith(u'00'):
         # International phone number
         country = {
-            u'594': N_('French Guyana'),
-            u'681': N_('Wallis and Futuna'),
-            u'687': N_('New Caledonia'),
-            u'689': N_('French Polynesia'),
+            u'594': N_(u'French Guyana'),
+            u'681': N_(u'Wallis and Futuna'),
+            u'687': N_(u'New Caledonia'),
+            u'689': N_(u'French Polynesia'),
             }.get(value[2:5])
         if country is not None:
             if len(value) == 11:
                 return u'+{0} {1} {2} {3}'.format(value[2:5], value[5:7], value[7:9], value[9:11]), None
-            return value, state._('Wrong number of digits for phone number of {0}').format(_(country))
-        return value, state._('Unknown international phone number')
+            return value, state._(u'Wrong number of digits for phone number of {0}').format(_(country))
+        return value, state._(u'Unknown international phone number')
     if len(value) == 4:
         return value, None
     if len(value) == 9 and value[0] != '0':
         value = u'0{0}'.format(value)
     if len(value) == 10:
         if value[0] != '0':
-            return value, state._('Unexpected first digit in phone number: {0} instead of 0').format(value[0])
+            return value, state._(u'Unexpected first digit in phone number: {0} instead of 0').format(value[0])
         mask = u'+33 {0}{1} {2} {3} {4}' if value[1] == '8' else u'+33 {0} {1} {2} {3} {4}'
         return mask.format(value[1], value[2:4], value[4:6], value[6:8], value[8:10]), None
-    return value, state._('Wrong number of digits in phone number')
+    return value, state._(u'Wrong number of digits in phone number')
 
 
 str_to_phone = conv.pipe(conv.cleanup_line, clean_str_to_phone)

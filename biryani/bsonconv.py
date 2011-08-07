@@ -54,7 +54,7 @@ def clean_str_to_object_id(value, state = states.default_state):
         return value, None
     id = value.lower()
     if object_id_re.match(id) is None:
-        return value, state._('Invalid value')
+        return value, state._(u'Invalid value')
     return bson.objectid.ObjectId(id), None
 
 

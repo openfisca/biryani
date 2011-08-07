@@ -173,19 +173,19 @@ def clean_str_to_bool(value, state = states.default_state):
     >>> clean_str_to_bool(None)
     (None, None)
     >>> clean_str_to_bool(u'vrai')
-    (u'vrai', 'Value must be a boolean')
+    (u'vrai', u'Value must be a boolean')
     """
     if value is None:
         return value, None
     lower_value = value.lower()
-    if lower_value in ('f', 'false', 'n', 'no', 'off'):
+    if lower_value in (u'f', u'false', u'n', u'no', u'off'):
         return False, None
-    if lower_value in ('on', 't', 'true', 'y', 'yes'):
+    if lower_value in (u'on', u't', u'true', u'y', u'yes'):
         return True, None
     try:
         return bool(int(value)), None
     except ValueError:
-        return value, state._('Value must be a boolean')
+        return value, state._(u'Value must be a boolean')
 
 
 def clean_str_to_email(value, state = states.default_state):
@@ -200,9 +200,9 @@ def clean_str_to_email(value, state = states.default_state):
     >>> clean_str_to_email(u'root@localhost')
     (u'root@localhost', None)
     >>> clean_str_to_email(u'root@127.0.0.1')
-    (u'root@127.0.0.1', 'Invalid domain name')
+    (u'root@127.0.0.1', u'Invalid domain name')
     >>> clean_str_to_email(u'root')
-    (u'root', 'An email must contain exactly one "@"')
+    (u'root', u'An email must contain exactly one "@"')
     """
     if value is None:
         return value, None
@@ -212,11 +212,11 @@ def clean_str_to_email(value, state = states.default_state):
     try:
         username, domain = value.split('@', 1)
     except ValueError:
-        return value, state._('An email must contain exactly one "@"')
+        return value, state._(u'An email must contain exactly one "@"')
     if not username_re.match(username):
-        return value, state._('Invalid username')
+        return value, state._(u'Invalid username')
     if not domain_re.match(domain) and domain != 'localhost':
-        return value, state._('Invalid domain name')
+        return value, state._(u'Invalid domain name')
     return value, None
 
 
@@ -267,7 +267,7 @@ def clean_str_to_slug(value, state = states.default_state):
     return unicode(value) if value else None, None
 
 
-def clean_str_to_url(add_prefix = 'http://', full = False, remove_fragment = False, schemes = ('http', 'https')):
+def clean_str_to_url(add_prefix = u'http://', full = False, remove_fragment = False, schemes = (u'http', u'https')):
     """Return a converter that converts a clean string to an URL.
 
     .. note:: For a converter that doesn't require a clean string, see :func:`str_to_url`.
@@ -279,7 +279,7 @@ def clean_str_to_url(add_prefix = 'http://', full = False, remove_fragment = Fal
     >>> clean_str_to_url()(u'/Biryani/presentation.html#tutorial')
     (u'/Biryani/presentation.html#tutorial', None)
     >>> clean_str_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html#tutorial', 'URL must be complete')
+    (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
     >>> clean_str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
     (u'http://packages.python.org/Biryani/presentation.html', None)
     """
@@ -289,23 +289,23 @@ def clean_str_to_url(add_prefix = 'http://', full = False, remove_fragment = Fal
         import urlparse
         split_url = list(urlparse.urlsplit(value))
         if full and add_prefix and not split_url[0] and not split_url[1] and split_url[2] \
-                and not split_url[2].startswith('/'):
+                and not split_url[2].startswith(u'/'):
             split_url = list(urlparse.urlsplit(add_prefix + value))
         scheme = split_url[0]
         if scheme != scheme.lower():
             split_url[0] = scheme = scheme.lower()
         if full and not scheme:
-            return value, state._('URL must be complete')
+            return value, state._(u'URL must be complete')
         if scheme and schemes is not None and scheme not in schemes:
-            return value, state._('Scheme must belong to {0}').format(sorted(schemes))
+            return value, state._(u'Scheme must belong to {0}').format(sorted(schemes))
         network_location = split_url[1]
         if network_location != network_location.lower():
             split_url[1] = network_location = network_location.lower()
-        if scheme in ('http', 'https') and not split_url[2]:
+        if scheme in (u'http', u'https') and not split_url[2]:
             # By convention a full HTTP URL must always have at least a "/" in its path.
-            split_url[2] = '/'
+            split_url[2] = u'/'
         if remove_fragment and split_url[4]:
-            split_url[4] = ''
+            split_url[4] = u''
         return unicode(urlparse.urlunsplit(split_url)), None
     return clean_str_to_url_converter
 
@@ -336,11 +336,11 @@ def clean_str_to_url_path_and_query(value, state = states.default_state):
     >>> clean_str_to_url_path_and_query(u'/Biryani/search.html?q=pipe')
     (u'/Biryani/search.html?q=pipe', None)
     >>> clean_str_to_url_path_and_query(u'http://packages.python.org/Biryani/search.html?q=pipe')
-    (u'http://packages.python.org/Biryani/search.html?q=pipe', 'URL must not be complete')
+    (u'http://packages.python.org/Biryani/search.html?q=pipe', u'URL must not be complete')
     >>> import urlparse
     >>> pipe(
     ...     clean_str_to_url(),
-    ...     function(lambda value: urlparse.urlunsplit(['', ''] + list(urlparse.urlsplit(value))[2:])),
+    ...     function(lambda value: urlparse.urlunsplit([u'', u''] + list(urlparse.urlsplit(value))[2:])),
     ...     clean_str_to_url_path_and_query,
     ...     )(u'http://packages.python.org/Biryani/search.html?q=pipe')
     (u'/Biryani/search.html?q=pipe', None)
@@ -350,7 +350,7 @@ def clean_str_to_url_path_and_query(value, state = states.default_state):
     import urlparse
     split_url = list(urlparse.urlsplit(value))
     if split_url[0] or split_url[1]:
-        return value, state._('URL must not be complete')
+        return value, state._(u'URL must not be complete')
     if split_url[4]:
         split_url[4] = ''
     return unicode(urlparse.urlunsplit(split_url)), None
@@ -470,13 +470,13 @@ def encode_str(encoding = 'utf-8'):
     return function(lambda value: value.encode(encoding) if isinstance(value, unicode) else value)
 
 
-def fail(msg = N_('An error occured')):
+def fail(msg = N_(u'An error occured')):
     """Return a converter that always returns an error.
 
-    >>> fail('Wrong answer')(42)
-    (42, 'Wrong answer')
+    >>> fail(u'Wrong answer')(42)
+    (42, u'Wrong answer')
     >>> fail()(42)
-    (42, 'An error occured')
+    (42, u'An error occured')
     """
     def fail_converter(value, state = states.default_state):
         return value, state._(msg)
@@ -491,7 +491,7 @@ def first_match(*converters):
     >>> first_match(test_equals(u'NaN'), str_to_int)(u'42')
     (42, None)
     >>> first_match(test_equals(u'NaN'), str_to_int)(u'abc')
-    (u'abc', 'Value must be an integer')
+    (u'abc', u'Value must be an integer')
     >>> first_match(test_equals(u'NaN'), str_to_int, set_value(0))(u'Hello world!')
     (0, None)
     >>> first_match()(u'Hello world!')
@@ -550,7 +550,7 @@ def item_or_sequence(converter, constructor = list, keep_null_items = False):
     >>> item_or_sequence(str_to_int)([u'42', u'43'])
     ([42, 43], None)
     >>> item_or_sequence(str_to_int)([u'42', u'43', u'Hello world!'])
-    ([42, 43, u'Hello world!'], {2: 'Value must be an integer'})
+    ([42, 43, u'Hello world!'], {2: u'Value must be an integer'})
     >>> item_or_sequence(str_to_int)([u'42', None, u'43'])
     ([42, 43], None)
     >>> item_or_sequence(str_to_int)([None, None])
@@ -560,7 +560,7 @@ def item_or_sequence(converter, constructor = list, keep_null_items = False):
     >>> item_or_sequence(str_to_int, keep_null_items = True)([u'42', None, u'43'])
     ([42, None, 43], None)
     >>> item_or_sequence(str_to_int, keep_null_items = True)([u'42', u'43', u'Hello world!'])
-    ([42, 43, u'Hello world!'], {2: 'Value must be an integer'})
+    ([42, 43, u'Hello world!'], {2: u'Value must be an integer'})
     >>> item_or_sequence(str_to_int, constructor = set)(set([u'42', u'43']))
     (set([42, 43]), None)
     """
@@ -654,7 +654,7 @@ def pipe(*converters):
     Traceback (most recent call last):
     AttributeError: 'int' object has no attribute 'strip'
     >>> pipe(test_isinstance(unicode), str_to_bool)(42)
-    (42, "Value is not an instance of <type 'unicode'>")
+    (42, u"Value is not an instance of <type 'unicode'>")
     >>> pipe(python_data_to_str, test_isinstance(unicode), str_to_bool)(42)
     (True, None)
     >>> pipe()(42)
@@ -699,7 +699,7 @@ def python_data_to_float(value, state = states.default_state):
     try:
         return float(value), None
     except ValueError:
-        return value, state._('Value must be a float')
+        return value, state._(u'Value must be a float')
 
 
 def python_data_to_int(value, state = states.default_state):
@@ -723,7 +723,7 @@ def python_data_to_int(value, state = states.default_state):
     try:
         return int(value), None
     except ValueError:
-        return value, state._('Value must be an integer')
+        return value, state._(u'Value must be an integer')
 
 
 def python_data_to_str(value, state = states.default_state):
@@ -775,10 +775,10 @@ def require(value, state = states.default_state):
     >>> require(u'')
     (u'', None)
     >>> require(None)
-    (None, 'Missing value')
+    (None, u'Missing value')
     """
     if value is None:
-        return value, state._('Missing value')
+        return value, state._(u'Missing value')
     else:
         return value, None
 
@@ -854,7 +854,7 @@ def set_value(constant):
     return lambda value, state = states.default_state: (constant, None) if value is not None else (None, None)
 
 
-def str_to_url(add_prefix = 'http://', full = False, remove_fragment = False, schemes = ('http', 'https')):
+def str_to_url(add_prefix = u'http://', full = False, remove_fragment = False, schemes = (u'http', u'https')):
     """Return a converter that converts an string to an URL.
 
     >>> str_to_url()(u'http://packages.python.org/Biryani/')
@@ -864,7 +864,7 @@ def str_to_url(add_prefix = 'http://', full = False, remove_fragment = False, sc
     >>> str_to_url()(u'/Biryani/presentation.html#tutorial')
     (u'/Biryani/presentation.html#tutorial', None)
     >>> str_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html#tutorial', 'URL must be complete')
+    (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
     >>> str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
     (u'http://packages.python.org/Biryani/presentation.html', None)
     >>> str_to_url()(u'    http://packages.python.org/Biryani/   ')
@@ -892,7 +892,7 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
     >>> strict_converter(dict(name = u'John Doe', age = None, email = u'spam@easter-eggs.com'))
     ({'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', age = u'72', phone = u'   +33 9 12 34 56 78   '))
-    ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'name': u'John Doe'}, {'phone': 'Unexpected item'})
+    ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
     >>> non_strict_converter = structured_mapping(
     ...     dict(
     ...         name = pipe(cleanup_line, require),
@@ -942,7 +942,7 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
             values_converter = converters.copy()
             for name in values:
                 if name not in values_converter:
-                    values_converter[name] = default if default is not None else fail(N_('Unexpected item'))
+                    values_converter[name] = default if default is not None else fail(N_(u'Unexpected item'))
         errors = {}
         convertered_values = {}
         for name, converter in values_converter.iteritems():
@@ -970,11 +970,11 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     >>> strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com'])
     ([u'John Doe', 72, u'spam@easter-eggs.com'], None)
     >>> strict_converter([u'John Doe', u'spam@easter-eggs.com'])
-    ([u'John Doe', u'spam@easter-eggs.com', None], {1: 'Value must be an integer'})
+    ([u'John Doe', u'spam@easter-eggs.com', None], {1: u'Value must be an integer'})
     >>> strict_converter([u'John Doe', None, u'spam@easter-eggs.com'])
     ([u'John Doe', None, u'spam@easter-eggs.com'], None)
     >>> strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com', u'   +33 9 12 34 56 78   '])
-    ([u'John Doe', 72, u'spam@easter-eggs.com', u'   +33 9 12 34 56 78   '], {3: 'Unexpected item'})
+    ([u'John Doe', 72, u'spam@easter-eggs.com', u'   +33 9 12 34 56 78   '], {3: u'Unexpected item'})
     >>> non_strict_converter = structured_sequence(
     ...     [
     ...         pipe(cleanup_line, require),
@@ -986,7 +986,7 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     >>> non_strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com'])
     ([u'John Doe', 72, u'spam@easter-eggs.com'], None)
     >>> non_strict_converter([u'John Doe', u'spam@easter-eggs.com'])
-    ([u'John Doe', u'spam@easter-eggs.com', None], {1: 'Value must be an integer'})
+    ([u'John Doe', u'spam@easter-eggs.com', None], {1: u'Value must be an integer'})
     >>> non_strict_converter([u'John Doe', None, u'spam@easter-eggs.com'])
     ([u'John Doe', None, u'spam@easter-eggs.com'], None)
     >>> non_strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com', u'   +33 9 12 34 56 78   '])
@@ -1005,7 +1005,7 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
         else:
             values_converter = converters[:]
             while len(values) > len(values_converter):
-                values_converter.append(default if default is not None else fail(N_('Unexpected item')))
+                values_converter.append(default if default is not None else fail(N_(u'Unexpected item')))
         import itertools
         errors = {}
         convertered_values = []
@@ -1023,7 +1023,7 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     return structured_sequence_converter
 
 
-def test(function, error = 'Test failed', handle_none = False):
+def test(function, error = N_(u'Test failed'), handle_none = False):
     """Return a converter that applies a test function to a value and returns an error when test fails.
 
     ``test`` always returns the initial value, even when test fails.
@@ -1031,9 +1031,9 @@ def test(function, error = 'Test failed', handle_none = False):
     >>> test(lambda value: isinstance(value, basestring))('hello')
     ('hello', None)
     >>> test(lambda value: isinstance(value, basestring))(1)
-    (1, 'Test failed')
-    >>> test(lambda value: isinstance(value, basestring), error = 'Value is not a string')(1)
-    (1, 'Value is not a string')
+    (1, u'Test failed')
+    >>> test(lambda value: isinstance(value, basestring), error = u'Value is not a string')(1)
+    (1, u'Value is not a string')
     """
     def test_converter(value, state = states.default_state):
         if value is None and not handle_none or function is None or function(value):
@@ -1054,12 +1054,12 @@ def test_between(min_value, max_value):
     >>> test_between(0, 9)(9)
     (9, None)
     >>> test_between(0, 9)(10)
-    (10, 'Value must be between 0 and 9')
+    (10, u'Value must be between 0 and 9')
     >>> test_between(0, 9)(None)
     (None, None)
     """
     return test(lambda value: min_value <= value <= max_value,
-        error = N_('Value must be between {0} and {1}').format(min_value, max_value))
+        error = N_(u'Value must be between {0} and {1}').format(min_value, max_value))
 
 
 def test_equals(constant):
@@ -1073,14 +1073,14 @@ def test_equals(constant):
     >>> test_equals(dict(a = 1, b = 2))(dict(a = 1, b = 2))
     ({'a': 1, 'b': 2}, None)
     >>> test_equals(41)(42)
-    (42, 'Value must be equal to 41')
+    (42, u'Value must be equal to 41')
     >>> test_equals(None)(42)
     (42, None)
     >>> test_equals(42)(None)
     (None, None)
     """
     return test(lambda value: value == constant if constant is not None else True,
-        error = N_('Value must be equal to {0}').format(constant))
+        error = N_(u'Value must be equal to {0}').format(constant))
 
 
 def test_greater_or_equal(constant):
@@ -1091,14 +1091,14 @@ def test_greater_or_equal(constant):
     >>> test_greater_or_equal(0)(5)
     (5, None)
     >>> test_greater_or_equal(9)(5)
-    (5, 'Value must be greater than or equal to 9')
+    (5, u'Value must be greater than or equal to 9')
     >>> test_greater_or_equal(9)(None)
     (None, None)
     >>> test_greater_or_equal(None)(5)
     (5, None)
     """
     return test(lambda value: (value >= constant) if constant is not None else True,
-        error = N_('Value must be greater than or equal to {0}').format(constant))
+        error = N_(u'Value must be greater than or equal to {0}').format(constant))
 
 
 def test_in(values):
@@ -1112,16 +1112,16 @@ def test_in(values):
     >>> test_in(['a', 'b', 'c', 'd'])('a')
     ('a', None)
     >>> test_in(['a', 'b', 'c', 'd'])('z')
-    ('z', "Value must be one of ['a', 'b', 'c', 'd']")
+    ('z', u"Value must be one of ['a', 'b', 'c', 'd']")
     >>> test_in([])('z')
-    ('z', 'Value must be one of []')
+    ('z', u'Value must be one of []')
     >>> test_in(None)('z')
     ('z', None)
     >>> test_in(['a', 'b', 'c', 'd'])(None)
     (None, None)
     """
     return test(lambda value: value in values if values is not None else True,
-        error = N_('Value must be one of {0}').format(values))
+        error = N_(u'Value must be one of {0}').format(values))
 
 
 def test_is(constant):
@@ -1133,16 +1133,16 @@ def test_is(constant):
     >>> test_is(42)(42)
     (42, None)
     >>> test_is(dict(a = 1, b = 2))(dict(a = 1, b = 2))
-    ({'a': 1, 'b': 2}, "Value must be {'a': 1, 'b': 2}")
+    ({'a': 1, 'b': 2}, u"Value must be {'a': 1, 'b': 2}")
     >>> test_is(41)(42)
-    (42, 'Value must be 41')
+    (42, u'Value must be 41')
     >>> test_is(None)(42)
     (42, None)
     >>> test_is(42)(None)
     (None, None)
     """
     return test(lambda value: value is constant if constant is not None else True,
-        error = N_('Value must be {0}').format(constant))
+        error = N_(u'Value must be {0}').format(constant))
 
 
 def test_isinstance(class_or_classes):
@@ -1151,12 +1151,12 @@ def test_isinstance(class_or_classes):
     >>> test_isinstance(basestring)('This is a string')
     ('This is a string', None)
     >>> test_isinstance(basestring)(42)
-    (42, "Value is not an instance of <type 'basestring'>")
+    (42, u"Value is not an instance of <type 'basestring'>")
     >>> test_isinstance((float, int))(42)
     (42, None)
     """
     return test(lambda value: isinstance(value, class_or_classes),
-        error = N_('Value is not an instance of {0}').format(class_or_classes))
+        error = N_(u'Value is not an instance of {0}').format(class_or_classes))
 
 
 def test_less_or_equal(constant):
@@ -1167,14 +1167,14 @@ def test_less_or_equal(constant):
     >>> test_less_or_equal(9)(5)
     (5, None)
     >>> test_less_or_equal(0)(5)
-    (5, 'Value must be less than or equal to 0')
+    (5, u'Value must be less than or equal to 0')
     >>> test_less_or_equal(9)(None)
     (None, None)
     >>> test_less_or_equal(None)(5)
     (5, None)
     """
     return test(lambda value: (value <= constant) if constant is not None else True,
-        error = N_('Value must be less than or equal to {0}').format(constant))
+        error = N_(u'Value must be less than or equal to {0}').format(constant))
 
 
 def translate(conversions):
@@ -1235,7 +1235,7 @@ def uniform_sequence(converter, constructor = list, keep_empty = False, keep_nul
     >>> uniform_sequence(str_to_int)([u'42', u'43'])
     ([42, 43], None)
     >>> uniform_sequence(str_to_int)([u'42', u'43', u'Hello world!'])
-    ([42, 43, u'Hello world!'], {2: 'Value must be an integer'})
+    ([42, 43, u'Hello world!'], {2: u'Value must be an integer'})
     >>> uniform_sequence(str_to_int)([u'42', None, u'43'])
     ([42, 43], None)
     >>> uniform_sequence(str_to_int)([None, None])
@@ -1247,7 +1247,7 @@ def uniform_sequence(converter, constructor = list, keep_empty = False, keep_nul
     >>> uniform_sequence(str_to_int, keep_null_items = True)([u'42', None, u'43'])
     ([42, None, 43], None)
     >>> uniform_sequence(str_to_int, keep_null_items = True)([u'42', u'43', u'Hello world!'])
-    ([42, 43, u'Hello world!'], {2: 'Value must be an integer'})
+    ([42, 43, u'Hello world!'], {2: u'Value must be an integer'})
     >>> uniform_sequence(str_to_int, constructor = set)(set([u'42', u'43']))
     (set([42, 43]), None)
     """
@@ -1288,7 +1288,7 @@ cleanup_line = pipe(
     """
 
 cleanup_text = pipe(
-    function(lambda value: value.replace('\r\n', '\n').replace('\r', '\n')),
+    function(lambda value: value.replace(u'\r\n', u'\n').replace(u'\r', u'\n')),
     cleanup_line,
     )
 """Replaces CR + LF or CR to LF in a string, then strip spaces and remove it when empty.
@@ -1367,7 +1367,7 @@ form_data_to_bool = pipe(cleanup_line, clean_str_to_bool, default(False))
     >>> form_data_to_bool(u'    ')
     (False, None)
     >>> form_data_to_bool(u'vrai')
-    (u'vrai', 'Value must be a boolean')
+    (u'vrai', u'Value must be a boolean')
 """
 
 python_data_to_bool = function(lambda value: bool(value))
@@ -1439,7 +1439,7 @@ str_to_bool = pipe(cleanup_line, clean_str_to_bool)
     >>> str_to_bool(u'    ')
     (None, None)
     >>> str_to_bool(u'vrai')
-    (u'vrai', 'Value must be a boolean')
+    (u'vrai', u'Value must be a boolean')
 """
 
 str_to_email = pipe(cleanup_line, clean_str_to_email)
@@ -1452,9 +1452,9 @@ str_to_email = pipe(cleanup_line, clean_str_to_email)
     >>> str_to_email(u'root@localhost')
     (u'root@localhost', None)
     >>> str_to_email('root@127.0.0.1')
-    ('root@127.0.0.1', 'Invalid domain name')
+    ('root@127.0.0.1', u'Invalid domain name')
     >>> str_to_email(u'root')
-    (u'root', 'An email must contain exactly one "@"')
+    (u'root', u'An email must contain exactly one "@"')
     >>> str_to_email(u'    spam@easter-eggs.com  ')
     (u'spam@easter-eggs.com', None)
     >>> str_to_email(None)
@@ -1471,7 +1471,7 @@ str_to_float = pipe(cleanup_line, python_data_to_float)
     >>> str_to_float(u'   42.25   ')
     (42.25, None)
     >>> str_to_float(u'hello world')
-    (u'hello world', 'Value must be a float')
+    (u'hello world', u'Value must be a float')
     >>> str_to_float(None)
     (None, None)
     """
@@ -1485,7 +1485,7 @@ str_to_int = pipe(cleanup_line, python_data_to_int)
     >>> str_to_int(u'   42   ')
     (42, None)
     >>> str_to_int(u'42.75')
-    (u'42.75', 'Value must be an integer')
+    (u'42.75', u'Value must be an integer')
     >>> str_to_int(None)
     (None, None)
     """

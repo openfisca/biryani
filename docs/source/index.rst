@@ -35,7 +35,7 @@ This sample uses `WebOb <http://webob.org/>`_.
 ...     password = conv.pipe(
 ...         conv.multidict_getall('password'),
 ...         conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
-...             error = 'Password mismatch'),
+...             error = u'Password mismatch'),
 ...         conv.function(lambda passwords: passwords[0]),
 ...         ),
 ...     email = conv.pipe(conv.multidict_get('email'), conv.str_to_email),
@@ -51,22 +51,22 @@ This sample uses `WebOb <http://webob.org/>`_.
 >>> result, errors = validate_form(req.GET)
 >>> result
 {'username': u'John Doe', 'password': u'secret', 'email': u'john@doe.name', 'tags': set([u'admin', u'person', u'user'])}
->>> conv.to_value(validate_form)(req.GET)
-{'username': u'John Doe', 'password': u'secret', 'email': u'john@doe.name', 'tags': set([u'admin', u'person', u'user'])}
 
 >>> req = webob.Request.blank('/?password=secret&password=other secret&email=john@doe.name&tag=person&tag=user,ADMIN')
 >>> result, errors = validate_form(req.GET)
 >>> result
 {'password': [u'secret', u'other secret'], 'email': u'john@doe.name', 'tags': set([u'admin', u'person', u'user'])}
 >>> errors
-{'username': 'Missing value', 'password': 'Password mismatch'}
->>> conv.to_value(validate_form)(req.GET)
-Traceback (most recent call last):
-ValueError: {'username': 'Missing value', 'password': 'Password mismatch'}
+{'username': u'Missing value', 'password': u'Password mismatch'}
 
 >>> req = webob.Request.blank('/?username=John Doe&password=secret&email=john.doe.name')
->>> validate_form(req.GET)
-({'username': u'John Doe', 'password': [u'secret'], 'email': u'john.doe.name'}, {'password': 'Password mismatch', 'email': 'An email must contain exactly one "@"'})
+>>> result, errors = validate_form(req.GET)
+>>> result
+{'username': u'John Doe', 'password': [u'secret'], 'email': u'john.doe.name'}
+>>> errors
+{'password': u'Password mismatch', 'email': u'An email must contain exactly one "@"'}
+
+See :doc:`web-form-tutorial` for a complete explanation of this example.
 
 
 Documentation

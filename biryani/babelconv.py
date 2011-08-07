@@ -42,7 +42,7 @@ def clean_str_to_lang(value, state = states.default_state):
     if value is None:
         return value, None
     if not babel.localedata.exists(value):
-        return value, state._('Invalid value')
+        return value, state._(u'Invalid value')
     return value, None
 
 

@@ -8,7 +8,7 @@ Tutorial
     >>> output_value, error
     (42.0, None)
     >>> conv.str_to_float('forty two')
-    ('forty two', 'Value must be a float')
+    ('forty two', u'Value must be a float')
 
 Converters usually don't test their input value::
 
@@ -183,7 +183,7 @@ Use the generalized function to convert a dictionary containing both a latitude 
     >>> dict_to_lat_long(dict(latitude = '-12.34', longitude = u"45"))
     ({'latitude': -12.34, 'longitude': 45.0}, None)
     >>> dict_to_lat_long(dict(latitude = '-12.34', longitude = u"45,6"))
-    ({'latitude': -12.34}, {'longitude': 'Value must be a float'})
+    ({'latitude': -12.34}, {'longitude': u'Value must be a float'})
     >>> dict_to_lat_long(dict(latitude = None, longitude = ''))
     (None, {'latitude': 'Missing value', 'longitude': 'Missing value'})
     >>> dict_to_lat_long(None)
@@ -202,7 +202,7 @@ Converters working on complex structures can be chained too::
     >>> dict_to_lat_long(dict(latitude = '-12.34', longitude = u"45"))
     ({'latitude': -12.34, 'longitude': 45.0}, None)
     >>> dict_to_lat_long(dict(latitude = '-12.34', longitude = u"45,6"))
-    ({'latitude': -12.34}, {'longitude': 'Value must be a float'})
+    ({'latitude': -12.34}, {'longitude': u'Value must be a float'})
     >>> dict_to_lat_long(['-12.34', u"45"])
     (['-12.34', u'45'], "Value is not an instance of <type 'dict'>")
     >>> dict_to_lat_long(None)

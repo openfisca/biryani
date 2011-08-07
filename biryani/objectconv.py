@@ -129,7 +129,7 @@ def clean_iso8601_to_date(value, state = states.default_state):
     try:
         return datetime.date.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
     except ValueError:
-        return value, state._('Value must be a date in ISO 8601 format')
+        return value, state._(u'Value must be a date in ISO 8601 format')
 
 
 def clean_iso8601_to_datetime(value, state = states.default_state):
@@ -147,7 +147,7 @@ def clean_iso8601_to_datetime(value, state = states.default_state):
     try:
         return datetime.datetime.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
     except ValueError:
-        return value, state._('Value must be a date-time in ISO 8601 format')
+        return value, state._(u'Value must be a date-time in ISO 8601 format')
 
 
 def date_to_datetime(value, state = states.default_state):
@@ -202,7 +202,7 @@ def timestamp_to_date(value, state = states.default_state):
     try:
         return datetime.date.fromtimestamp(value / 1000), None
     except ValueError:
-        return value, state._('Value must be a timestamp')
+        return value, state._(u'Value must be a timestamp')
 
 
 def timestamp_to_datetime(value, state = states.default_state):
@@ -212,7 +212,7 @@ def timestamp_to_datetime(value, state = states.default_state):
     try:
         return datetime.datetime.fromtimestamp(value / 1000, pytz.utc), None
     except ValueError:
-        return value, state._('Value must be a timestamp')
+        return value, state._(u'Value must be a timestamp')
 
 
 # Level-2 Converters
