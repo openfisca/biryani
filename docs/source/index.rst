@@ -81,6 +81,7 @@ Documentation
    how-to-use
    api
    sugar
+   changelog
    for-maintainer-only
 
 .. TODO
