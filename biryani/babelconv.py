@@ -38,7 +38,21 @@ __all__ = [
 
 
 def clean_str_to_lang(value, state = states.default_state):
-    """Convert a clean string to a language code."""
+    """Convert a clean string to a language code.
+
+    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_lang`.
+
+    >>> clean_str_to_lang(u'fr')
+    (u'fr', None)
+    >>> clean_str_to_lang(u'fr_FR')
+    (u'fr_FR', None)
+    >>> clean_str_to_lang(u'fr-FR')
+    (u'fr-FR', u'Invalid value')
+    >>> clean_str_to_lang(u'francais')
+    (u'francais', u'Invalid value')
+    >>> clean_str_to_lang(None)
+    (None, None)
+    """
     if value is None:
         return value, None
     if not babel.localedata.exists(value):
@@ -47,5 +61,20 @@ def clean_str_to_lang(value, state = states.default_state):
 
 
 str_to_lang = conv.pipe(conv.cleanup_line, clean_str_to_lang)
+"""Convert a string to a language code.
+
+    >>> str_to_lang(u'fr')
+    (u'fr', None)
+    >>> str_to_lang(u'fr_FR')
+    (u'fr_FR', None)
+    >>> str_to_lang(u'   fr_FR   ')
+    (u'fr_FR', None)
+    >>> str_to_lang(u'fr-FR')
+    (u'fr-FR', u'Invalid value')
+    >>> str_to_lang(u'francais')
+    (u'francais', u'Invalid value')
+    >>> str_to_lang(None)
+    (None, None)
+    """
 
 
