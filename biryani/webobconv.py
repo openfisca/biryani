@@ -76,18 +76,18 @@ def multidict_getall(key):
     >>> multidict_getall('a')(req.GET)
     ([u'1'], None)
     >>> multidict_getall('b')(req.GET)
-    ([], None)
+    (None, None)
     >>> multidict_getall('z')(req.GET)
     ([u''], None)
     >>> multidict_getall('tag')(req.GET)
     ([u'hello', u'World!'], None)
     >>> mapping(dict(
     ...     b = multidict_getall('b'),
-    ...     tags = multidict_getall('tags'),
+    ...     tags = multidict_getall('tag'),
     ...     ))(req.GET)
-    ({'b': [], 'tags': []}, None)
+    ({'tags': [u'hello', u'World!']}, None)
     """
-    return conv.function(lambda multidict: multidict.getall(key))
+    return conv.function(lambda multidict: multidict.getall(key) or None)
 
 
 def multidict_getone(key):
