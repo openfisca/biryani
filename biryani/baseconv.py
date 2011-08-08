@@ -1688,8 +1688,6 @@ str_to_slug = pipe(cleanup_line, clean_str_to_slug)
 str_to_url_name = pipe(cleanup_line, clean_str_to_url_name)
 """Convert a string to a normalized string that can be used in an URL path or a query parameter.
 
-    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_url_name`.
-
     >>> str_to_url_name(u'   Hello world!   ')
     (u'hello_world!', None)
     >>> str_to_url_name(u'')
