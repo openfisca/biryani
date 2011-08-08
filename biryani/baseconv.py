@@ -57,8 +57,9 @@ __all__ = [
     'extract_when_singleton',
     'fail',
     'first_match',
-    'form_data_to_bool',
     'function',
+    'guess_bool',
+    'guess_bool_default_false',
     'item_or_sequence',
     'mapping',
     'noop',
@@ -141,48 +142,23 @@ def clean_str_to_bool(value, state = states.default_state):
 
     .. note:: For a converter that doesn't require a clean string, see :func:`str_to_bool`.
 
+    .. note:: For a converter that accepts special strings like "f", "off", "no", etc, see :func:`guess_bool`.
+
     .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
 
     >>> clean_str_to_bool(u'0')
     (False, None)
-    >>> clean_str_to_bool(u'f')
-    (False, None)
-    >>> clean_str_to_bool(u'FALSE')
-    (False, None)
-    >>> clean_str_to_bool(u'false')
-    (False, None)
-    >>> clean_str_to_bool(u'n')
-    (False, None)
-    >>> clean_str_to_bool(u'no')
-    (False, None)
-    >>> clean_str_to_bool(u'off')
-    (False, None)
     >>> clean_str_to_bool(u'1')
-    (True, None)
-    >>> clean_str_to_bool(u'on')
-    (True, None)
-    >>> clean_str_to_bool(u't')
-    (True, None)
-    >>> clean_str_to_bool(u'TRUE')
-    (True, None)
-    >>> clean_str_to_bool(u'true')
-    (True, None)
-    >>> clean_str_to_bool(u'y')
-    (True, None)
-    >>> clean_str_to_bool(u'yes')
     (True, None)
     >>> clean_str_to_bool(None)
     (None, None)
     >>> clean_str_to_bool(u'vrai')
     (u'vrai', u'Value must be a boolean')
+    >>> clean_str_to_bool(u'on')
+    (u'on', u'Value must be a boolean')
     """
     if value is None:
         return value, None
-    lower_value = value.lower()
-    if lower_value in (u'f', u'false', u'n', u'no', u'off'):
-        return False, None
-    if lower_value in (u'on', u't', u'true', u'y', u'yes'):
-        return True, None
     try:
         return bool(int(value)), None
     except ValueError:
@@ -543,6 +519,86 @@ def function(function, handle_none = False, handle_state = False):
             return function(value, state = state), None
         return function(value), None
     return function_converter
+
+
+def guess_bool(value, state = states.default_state):
+    """Convert the content of a string (or a number) to a boolean. Do nothing when input value is already a boolean.
+
+    This converter accepts usual values for ``True`` and ``False``: "0", "f", "false", "n", etc.
+
+    .. warning:: Like most converters, a missing value (aka ``None``) is not converted. Use
+       :func:`guess_bool_default_false` when you want ``None`` to be converted to ``False``.
+
+    >>> guess_bool(u'0')
+    (False, None)
+    >>> guess_bool(u'f')
+    (False, None)
+    >>> guess_bool(u'FALSE')
+    (False, None)
+    >>> guess_bool(u'false')
+    (False, None)
+    >>> guess_bool(u'n')
+    (False, None)
+    >>> guess_bool(u'no')
+    (False, None)
+    >>> guess_bool(u'off')
+    (False, None)
+    >>> guess_bool(u'  0  ')
+    (False, None)
+    >>> guess_bool(u'  f  ')
+    (False, None)
+    >>> guess_bool(False)
+    (False, None)
+    >>> guess_bool(0)
+    (False, None)
+    >>> guess_bool(u'1')
+    (True, None)
+    >>> guess_bool(u'on')
+    (True, None)
+    >>> guess_bool(u't')
+    (True, None)
+    >>> guess_bool(u'TRUE')
+    (True, None)
+    >>> guess_bool(u'true')
+    (True, None)
+    >>> guess_bool(u'y')
+    (True, None)
+    >>> guess_bool(u'yes')
+    (True, None)
+    >>> guess_bool(u'  1  ')
+    (True, None)
+    >>> guess_bool(u'  tRuE  ')
+    (True, None)
+    >>> guess_bool(True)
+    (True, None)
+    >>> guess_bool(1)
+    (True, None)
+    >>> guess_bool(2)
+    (True, None)
+    >>> guess_bool(-1)
+    (True, None)
+    >>> guess_bool(u'')
+    (None, None)
+    >>> guess_bool(u'   ')
+    (None, None)
+    >>> guess_bool(None)
+    (None, None)
+    >>> guess_bool(u'vrai')
+    (u'vrai', u'Value must be a boolean')
+    """
+    if value is None:
+        return value, None
+    try:
+        return bool(int(value)), None
+    except ValueError:
+        lower_value = value.strip().lower()
+        if not lower_value:
+            return None, None
+        if lower_value in (u'f', u'false', u'n', u'no', u'off'):
+            return False, None
+        if lower_value in (u'on', u't', u'true', u'y', u'yes'):
+            return True, None
+        return value, state._(u'Value must be a boolean')
 
 
 def item_or_sequence(converter, constructor = list, keep_null_items = False):
@@ -1441,50 +1497,69 @@ extract_when_singleton = condition(
 # Level-3 Converters
 
 
-form_data_to_bool = pipe(cleanup_line, clean_str_to_bool, default(False))
-"""Convert a string submitted by an HTML form to a boolean.
+guess_bool_default_false = pipe(guess_bool, default(False))
+"""Convert the content of a string (or a number) to a boolean. Do nothing when input value is already a boolean.
 
-    Like :data:`str_to_bool`, but when value is missing, ``False`` is returned instead of ``None``.
+    This converter accepts usual values for ``True`` and ``False``: "0", "f", "false", "n", etc.
 
-    >>> form_data_to_bool(u'0')
+    .. warning:: Unlike most converters, a missing value (aka ``None``) is converted (to ``False``). Use
+       :func:`guess_bool` when you don't want to keep ``None`` instead of converting it to ``False``.
+
+    >>> guess_bool_default_false(u'0')
     (False, None)
-    >>> form_data_to_bool(u'f')
+    >>> guess_bool_default_false(u'f')
     (False, None)
-    >>> form_data_to_bool(u'FALSE')
+    >>> guess_bool_default_false(u'FALSE')
     (False, None)
-    >>> form_data_to_bool(u'false')
+    >>> guess_bool_default_false(u'false')
     (False, None)
-    >>> form_data_to_bool(u'n')
+    >>> guess_bool_default_false(u'n')
     (False, None)
-    >>> form_data_to_bool(u'no')
+    >>> guess_bool_default_false(u'no')
     (False, None)
-    >>> form_data_to_bool(u'off')
+    >>> guess_bool_default_false(u'off')
     (False, None)
-    >>> form_data_to_bool(u'1')
+    >>> guess_bool_default_false(u'  0  ')
+    (False, None)
+    >>> guess_bool_default_false(u'  f  ')
+    (False, None)
+    >>> guess_bool_default_false(u'')
+    (False, None)
+    >>> guess_bool_default_false(u'   ')
+    (False, None)
+    >>> guess_bool_default_false(False)
+    (False, None)
+    >>> guess_bool_default_false(0)
+    (False, None)
+    >>> guess_bool_default_false(u'1')
     (True, None)
-    >>> form_data_to_bool(u'on')
+    >>> guess_bool_default_false(u'on')
     (True, None)
-    >>> form_data_to_bool(u't')
+    >>> guess_bool_default_false(u't')
     (True, None)
-    >>> form_data_to_bool(u'TRUE')
+    >>> guess_bool_default_false(u'TRUE')
     (True, None)
-    >>> form_data_to_bool(u'true')
+    >>> guess_bool_default_false(u'true')
     (True, None)
-    >>> form_data_to_bool(u'y')
+    >>> guess_bool_default_false(u'y')
     (True, None)
-    >>> form_data_to_bool(u'yes')
+    >>> guess_bool_default_false(u'yes')
     (True, None)
-    >>> form_data_to_bool(u'  0  ')
+    >>> guess_bool_default_false(u'  1  ')
+    (True, None)
+    >>> guess_bool_default_false(u'  tRuE  ')
+    (True, None)
+    >>> guess_bool_default_false(True)
+    (True, None)
+    >>> guess_bool_default_false(1)
+    (True, None)
+    >>> guess_bool_default_false(2)
+    (True, None)
+    >>> guess_bool_default_false(-1)
+    (True, None)
+    >>> guess_bool_default_false(None)
     (False, None)
-    >>> form_data_to_bool(u'  f  ')
-    (False, None)
-    >>> form_data_to_bool(u'  tRuE  ')
-    (True, None)
-    >>> form_data_to_bool(None)
-    (False, None)
-    >>> form_data_to_bool(u'    ')
-    (False, None)
-    >>> form_data_to_bool(u'vrai')
+    >>> guess_bool_default_false(u'vrai')
     (u'vrai', u'Value must be a boolean')
 """
 
@@ -1520,44 +1595,18 @@ str_to_bool = pipe(cleanup_line, clean_str_to_bool)
 
     >>> str_to_bool(u'0')
     (False, None)
-    >>> str_to_bool(u'f')
-    (False, None)
-    >>> str_to_bool(u'FALSE')
-    (False, None)
-    >>> str_to_bool(u'false')
-    (False, None)
-    >>> str_to_bool(u'n')
-    (False, None)
-    >>> str_to_bool(u'no')
-    (False, None)
-    >>> str_to_bool(u'off')
+    >>> str_to_bool(u'   0   ')
     (False, None)
     >>> str_to_bool(u'1')
     (True, None)
-    >>> str_to_bool(u'on')
-    (True, None)
-    >>> str_to_bool(u't')
-    (True, None)
-    >>> str_to_bool(u'TRUE')
-    (True, None)
-    >>> str_to_bool(u'true')
-    (True, None)
-    >>> str_to_bool(u'y')
-    (True, None)
-    >>> str_to_bool(u'yes')
-    (True, None)
-    >>> str_to_bool(u'  0  ')
-    (False, None)
-    >>> str_to_bool(u'  f  ')
-    (False, None)
-    >>> str_to_bool(u'  tRuE  ')
+    >>> str_to_bool(u'   1   ')
     (True, None)
     >>> str_to_bool(None)
     (None, None)
-    >>> str_to_bool(u'    ')
-    (None, None)
     >>> str_to_bool(u'vrai')
     (u'vrai', u'Value must be a boolean')
+    >>> str_to_bool(u'on')
+    (u'on', u'Value must be a boolean')
 """
 
 str_to_email = pipe(cleanup_line, clean_str_to_email)
