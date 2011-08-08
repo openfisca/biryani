@@ -485,11 +485,11 @@ def first_match(*converters):
     return first_match_converter
 
 
-def function(function, handle_none = False, handle_state = False):
+def function(function, handle_missing_value = False, handle_state = False):
     """Return a converter that applies a function to value and returns a new value.
 
     .. note:: Like most converters, by default a missing value (aka ``None``) is not converted (ie function is not
-       called). Set ``handle_none`` to ``True`` to call function when value is ``None``.
+       called). Set ``handle_missing_value`` to ``True`` to call function when value is ``None``.
 
     .. note:: When your function doesn't modify value but may generate an error, use a :func:`test` instead.
 
@@ -508,12 +508,12 @@ def function(function, handle_none = False, handle_state = False):
     >>> function(lambda value: value + 1)(u'hello world')
     Traceback (most recent call last):
     TypeError: coercing to Unicode: need string or buffer, int found
-    >>> function(lambda value: value + 1, handle_none = True)(None)
+    >>> function(lambda value: value + 1, handle_missing_value = True)(None)
     Traceback (most recent call last):
     TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'
     """
     def function_converter(value, state = states.default_state):
-        if value is None and not handle_none or function is None:
+        if value is None and not handle_missing_value or function is None:
             return value, None
         if handle_state:
             return function(value, state = state), None
@@ -1176,7 +1176,7 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     return structured_sequence_converter
 
 
-def test(function, error = N_(u'Test failed'), handle_none = False, handle_state = False):
+def test(function, error = N_(u'Test failed'), handle_missing_value = False, handle_state = False):
     """Return a converter that applies a test function to a value and returns an error when test fails.
 
     ``test`` always returns the initial value, even when test fails.
@@ -1191,9 +1191,9 @@ def test(function, error = N_(u'Test failed'), handle_none = False, handle_state
     (1, u'Value is not a string')
     """
     def test_converter(value, state = states.default_state):
-        if value is None and not handle_none or function is None:
+        if value is None and not handle_missing_value or function is None:
             return value, None
-        ok = function(value, state = state) if handle_none else function(value)
+        ok = function(value, state = state) if handle_missing_value else function(value)
         if ok:
             return value, None
         return value, state._(error)

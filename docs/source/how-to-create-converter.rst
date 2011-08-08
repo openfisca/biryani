@@ -38,9 +38,9 @@ so:
 Most of the times this is the correct behaviour, because in *Biryani*, when the input value is missing (aka ``None``) a
 converter is considered to have nothing to convert and should return nothing (aka ``None``).
 
-But, if you want to change this behaviour, you can set the ``handle_none`` flag:
+But, if you want to change this behaviour, you can set the ``handle_missing_value`` flag:
 
->>> python_data_to_len = conv.function(lambda value: len(value), handle_none = True)
+>>> python_data_to_len = conv.function(lambda value: len(value), handle_missing_value = True)
 ...
 >>> python_data_to_len(None)
 Traceback (most recent call last):
@@ -48,7 +48,7 @@ TypeError: object of type 'NoneType' has no len()
 
 In this case, you will have to rewrite your function to handle the ``None`` input value:
 
->>> python_data_to_len = conv.function(lambda value: len(value or ''), handle_none = True)
+>>> python_data_to_len = conv.function(lambda value: len(value or ''), handle_missing_value = True)
 ...
 >>> python_data_to_len(None)
 (0, None)
