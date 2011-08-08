@@ -79,6 +79,7 @@ __all__ = [
     'str_to_slug',
     'str_to_url',
     'str_to_url_name',
+    'struct',
     'structured_mapping',
     'structured_sequence',
     'test',
@@ -582,7 +583,7 @@ def mapping(converters, constructor = dict, keep_empty = False, keep_null_items 
     """Return a converter that constructs a mapping (ie dict, etc) from any kind of value.
 
     .. note:: Most of the times, when input value is also a mapping, converters :func:`uniform_mapping` or
-       :func:`structured_mapping` should be used instead.
+       :func:`struct` should be used instead.
 
     >>> def get(index):
     ...     return function(lambda value: value[index])
@@ -791,7 +792,7 @@ def sequence(converters, constructor = list, keep_empty = False, keep_null_items
     """Return a converter that constructs a sequence (ie list, tuple, etc) from any kind of value.
 
     .. note:: Most of the times, when input value is also a sequence, converters :func:`uniform_sequence` or
-       :func:`structured_sequence` should be used instead.
+       :func:`struct` should be used instead.
 
     >>> def get(key):
     ...     return function(lambda value: value.get(key))
@@ -826,7 +827,7 @@ def sequence(converters, constructor = list, keep_empty = False, keep_null_items
         for converter in converters or []
         if converter is not None
         ]
-    def structure_converter(value, state = states.default_state):
+    def sequence_converter(value, state = states.default_state):
         if value is None:
             return value, None
         errors = {}
@@ -842,7 +843,7 @@ def sequence(converters, constructor = list, keep_empty = False, keep_null_items
         else:
             convertered_values = None
         return convertered_values, errors or None
-    return structure_converter
+    return sequence_converter
 
 
 def set_value(constant):
@@ -881,14 +882,117 @@ def str_to_url(add_prefix = u'http://', full = False, remove_fragment = False, s
         )
 
 
+def struct(converters, constructor = None, default = None, keep_empty = False):
+    """Return a converter that maps a collection of converters to a collection (ie dict, list, set, etc) of values.
+
+    Usage to convert a mapping (ie dict, etc):
+
+    >>> strict_converter = struct(dict(
+    ...     name = pipe(cleanup_line, require),
+    ...     age = str_to_int,
+    ...     email = str_to_email,
+    ...     ))
+    ...
+    >>> strict_converter(dict(name = u'John Doe', age = u'72', email = u'spam@easter-eggs.com'))
+    ({'age': 72, 'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
+    >>> strict_converter(dict(name = u'John Doe', email = u'spam@easter-eggs.com'))
+    ({'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
+    >>> strict_converter(dict(name = u'John Doe', age = None, email = u'spam@easter-eggs.com'))
+    ({'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
+    >>> strict_converter(dict(name = u'John Doe', age = u'72', phone = u'   +33 9 12 34 56 78   '))
+    ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
+    >>> non_strict_converter = struct(
+    ...     dict(
+    ...         name = pipe(cleanup_line, require),
+    ...         age = str_to_int,
+    ...         email = str_to_email,
+    ...         ),
+    ...     default = cleanup_line,
+    ...     )
+    ...
+    >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'spam@easter-eggs.com'))
+    ({'age': 72, 'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
+    >>> non_strict_converter(dict(name = u'John Doe', email = u'spam@easter-eggs.com'))
+    ({'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
+    >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'spam@easter-eggs.com',
+    ...     phone = u'   +33 9 12 34 56 78   '))
+    ({'phone': u'+33 9 12 34 56 78', 'age': 72, 'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
+    >>> struct(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = str_to_int,
+    ...         email = str_to_email,
+    ...         ),
+    ...     default = cleanup_line,
+    ...     )(dict(name = u'   ', email = None))
+    (None, None)
+    >>> struct(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = str_to_int,
+    ...         email = str_to_email,
+    ...         ),
+    ...     default = cleanup_line,
+    ...     keep_empty = True,
+    ...     )(dict(name = u'   ', email = None))
+    ({}, None)
+
+    Usage to convert a sequence (ie list, tuple, etc) or a set:
+
+    >>> strict_converter = struct([
+    ...     pipe(cleanup_line, require),
+    ...     str_to_int,
+    ...     str_to_email,
+    ...     ])
+    ...
+    >>> strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com'])
+    ([u'John Doe', 72, u'spam@easter-eggs.com'], None)
+    >>> strict_converter([u'John Doe', u'spam@easter-eggs.com'])
+    ([u'John Doe', u'spam@easter-eggs.com', None], {1: u'Value must be an integer'})
+    >>> strict_converter([u'John Doe', None, u'spam@easter-eggs.com'])
+    ([u'John Doe', None, u'spam@easter-eggs.com'], None)
+    >>> strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com', u'   +33 9 12 34 56 78   '])
+    ([u'John Doe', 72, u'spam@easter-eggs.com', u'   +33 9 12 34 56 78   '], {3: u'Unexpected item'})
+    >>> non_strict_converter = struct(
+    ...     [
+    ...         pipe(cleanup_line, require),
+    ...         str_to_int,
+    ...         str_to_email,
+    ...         ],
+    ...     default = cleanup_line,
+    ...     )
+    ...
+    >>> non_strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com'])
+    ([u'John Doe', 72, u'spam@easter-eggs.com'], None)
+    >>> non_strict_converter([u'John Doe', u'spam@easter-eggs.com'])
+    ([u'John Doe', u'spam@easter-eggs.com', None], {1: u'Value must be an integer'})
+    >>> non_strict_converter([u'John Doe', None, u'spam@easter-eggs.com'])
+    ([u'John Doe', None, u'spam@easter-eggs.com'], None)
+    >>> non_strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com', u'   +33 9 12 34 56 78   '])
+    ([u'John Doe', 72, u'spam@easter-eggs.com', u'+33 9 12 34 56 78'], None)
+    """
+    import collections
+
+    if isinstance(converters, collections.Mapping):
+        return structured_mapping(converters, constructor = constructor or dict, default = default,
+            keep_empty = keep_empty)
+    assert isinstance(converters, collections.Sequence), \
+            'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
+    return structured_sequence(converters, constructor = constructor or list, default = default,
+        keep_empty = keep_empty)
+
+
 def structured_mapping(converters, constructor = dict, default = None, keep_empty = False):
     """Return a converter that maps a mapping of converters to a mapping (ie dict, etc) of values.
+
+    .. note:: This converter should not be used directly. Use :func:`struct` instead.
 
     >>> strict_converter = structured_mapping(dict(
     ...     name = pipe(cleanup_line, require),
     ...     age = str_to_int,
     ...     email = str_to_email,
     ...     ))
+    ...
     >>> strict_converter(dict(name = u'John Doe', age = u'72', email = u'spam@easter-eggs.com'))
     ({'age': 72, 'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', email = u'spam@easter-eggs.com'))
@@ -905,6 +1009,7 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
     ...         ),
     ...     default = cleanup_line,
     ...     )
+    ...
     >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'spam@easter-eggs.com'))
     ({'age': 72, 'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
     >>> non_strict_converter(dict(name = u'John Doe', email = u'spam@easter-eggs.com'))
@@ -966,11 +1071,14 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
 def structured_sequence(converters, constructor = list, default = None, keep_empty = False):
     """Return a converter that map a sequence of converters to a sequence of values.
 
+    .. note:: This converter should not be used directly. Use :func:`struct` instead.
+
     >>> strict_converter = structured_sequence([
     ...     pipe(cleanup_line, require),
     ...     str_to_int,
     ...     str_to_email,
     ...     ])
+    ...
     >>> strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com'])
     ([u'John Doe', 72, u'spam@easter-eggs.com'], None)
     >>> strict_converter([u'John Doe', u'spam@easter-eggs.com'])
@@ -987,6 +1095,7 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     ...         ],
     ...     default = cleanup_line,
     ...     )
+    ...
     >>> non_strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com'])
     ([u'John Doe', 72, u'spam@easter-eggs.com'], None)
     >>> non_strict_converter([u'John Doe', u'spam@easter-eggs.com'])

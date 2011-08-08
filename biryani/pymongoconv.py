@@ -67,7 +67,7 @@ def object_id_to_object(object_class, cache = None):
 
 python_data_to_geo = conv.pipe(
     conv.test_isinstance((list, tuple)),
-    conv.structured_sequence(
+    conv.struct(
         [
             conv.pipe(conv.python_data_to_float, conv.test_between(-90, 90)), # latitude
             conv.pipe(conv.python_data_to_float, conv.test_between(-180, 180)), # longitude

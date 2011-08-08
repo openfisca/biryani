@@ -185,7 +185,7 @@ Generalize the converter to a function that accepts any bound:
 
 Use the generalized function to convert a dictionary containing both a latitude and a longitude:
 
->>> dict_to_lat_long = conv.structured_mapping(dict(
+>>> dict_to_lat_long = conv.struct(dict(
 ...     latitude = anything_to_bounded_float(-180, 180),
 ...     longitude = anything_to_bounded_float(-360, 360),
 ...     ))
@@ -203,7 +203,7 @@ Converters working on complex structures can be chained too:
 
 >>> dict_to_lat_long = conv.pipe(
 ...     conv.test_isinstance(dict),
-...     conv.structured_mapping(dict(
+...     conv.struct(dict(
 ...         latitude = anything_to_bounded_float(-180, 180),
 ...         longitude = anything_to_bounded_float(-360, 360),
 ...         )),

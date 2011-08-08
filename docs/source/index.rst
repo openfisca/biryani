@@ -58,7 +58,7 @@ A sample validator for a web form containing the following fields:
 * Password (2 times)
 * Email
 
->>> validate_form = conv.structured_mapping(dict(
+>>> validate_form = conv.struct(dict(
 ...     username = conv.pipe(conv.cleanup_line, conv.require),
 ...     password = conv.pipe(
 ...         conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
