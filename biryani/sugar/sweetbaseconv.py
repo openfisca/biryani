@@ -107,7 +107,7 @@ def strip(chars = None):
     This converter is non-standard, because:
 
     * It is a simple one-liner.
-    * Most of the times, converters :func:`biryani.baseconv.cleanup_line` or :func:`biryani.baseconv.cleanup_test` are
+    * Most of the times, converters :func:`biryani.baseconv.cleanup_line` or :func:`biryani.baseconv.cleanup_text` are
       used instead.
 
     >>> strip()(u'   Hello world!   ')
