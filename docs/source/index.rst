@@ -98,7 +98,7 @@ Copyright and license
 *Biryani* is a free software.
 
 * Author: Emmanuel Raviart <eraviart@easter-eggs.com>
-* Copyright (C) 2009, 2010, 2011 Easter-eggs
+* Copyright (C) 2009, 2010, 2011 `Easter-eggs <http://www.easter-eggs.com/>`_
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
