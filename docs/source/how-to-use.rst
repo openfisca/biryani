@@ -2,9 +2,12 @@
 How to to use *Biryani* in a project
 ************************************
 
+.. note:: This chapter shows a few ways to import *Biryani* in your projects. They have proven there effectiveness, but
+there are other ways to import *Biryani*.
 
-Howto use *Biryani* in a simple project
-=======================================
+
+How to use *Biryani* in a simple project
+========================================
 
 ::
 
@@ -17,8 +20,8 @@ Howto use *Biryani* in a simple project
     ...
 
 
-Howto use *Biryani* in a multi-modules project
-==============================================
+How to use *Biryani* in a multi-modules project
+===============================================
 
 In your project, create a module named ``conv.py``.
 
