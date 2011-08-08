@@ -24,8 +24,8 @@
 
 """Experimental or Non Standard Converters
 
-Since these converters may change at any time, don't import this module, but copy and paste the functions you need in
-your application.
+..warning:: Since these converters may change at any time, don't import this module, but copy and paste the functions
+   you need in your application.
 """
 
 

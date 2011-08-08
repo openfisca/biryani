@@ -22,7 +22,8 @@
 # limitations under the License.
 
 
-"""Pymongo Related Converters"""
+"""Pymongo Related Converters
+"""
 
 
 import bson
@@ -39,8 +40,12 @@ __all__ = [
 
 
 def mongodb_query_to_object(object_class):
+    """Return a converter that converts a MongoDB query expression to an object wrapped to a MongoDB document.
+
+    .. warning:: This converter is not stable and may change or be removed at any time. If you need it, you shouldn't
+       import it, but copy and paste its source code into your application.
+    """
     def mongodb_query_to_object_converter(value, state = states.default_state):
-        """Convert a MongoDB query expression to an object wrapped to a MongoDB document."""
         if value is None:
             return value, None
         instance = object_class.find_one(value)
@@ -51,8 +56,12 @@ def mongodb_query_to_object(object_class):
 
 
 def object_id_to_object(object_class, cache = None):
+    """Return a converter that converts a MongoDB ID to an object wrapped to a MongoDB document.
+
+    .. warning:: This converter is not stable and may change or be removed at any time. If you need it, you shouldn't
+       import it, but copy and paste its source code into your application.
+    """
     def object_id_to_object_converter(value, state = states.default_state):
-        """Convert an ID to an object wrapped to a MongoDB document."""
         if value is None:
             return value, None
         assert isinstance(value, bson.objectid.ObjectId), str((value,))
@@ -75,4 +84,8 @@ python_data_to_geo = conv.pipe(
             ],
         default = 'ignore'),
     )
+"""Convert a sequence containing latitude, longitude and accuracy to a list of 2 floats and an integer.
 
+    .. warning:: This converter is not stable and may change or be removed at any time. If you need it, you shouldn't
+       import it, but copy and paste its source code into your application.
+    """

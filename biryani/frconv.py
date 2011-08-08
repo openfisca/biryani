@@ -42,6 +42,9 @@ def clean_str_to_phone(value, state = states.default_state):
 
     .. note:: For a converter that doesn't require a clean string, see :func:`str_to_phone`.
 
+    .. warning:: This converter is not stable and may change or be removed at any time. If you need it, you shouldn't
+       import it, but copy and paste its source code into your application.
+
     >>> clean_str_to_phone(u'0123456789')
     (u'+33 1 23 45 67 89', None)
     >>> clean_str_to_phone('0123456789')
@@ -91,6 +94,9 @@ def clean_str_to_phone(value, state = states.default_state):
 
 str_to_phone = conv.pipe(conv.cleanup_line, clean_str_to_phone)
 """Convert a string to a phone number.
+
+    .. warning:: This converter is not stable and may change or be removed at any time. If you need it, you shouldn't
+       import it, but copy and paste its source code into your application.
 
     >>> str_to_phone(u'   0123456789   ')
     (u'+33 1 23 45 67 89', None)
