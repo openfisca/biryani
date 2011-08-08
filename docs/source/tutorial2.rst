@@ -102,14 +102,14 @@ Add :func:`conv.cleanup_line <biryani.baseconv.cleanup_line>` to strip spaces fr
 >>> anything_to_float(u'     ')
 (None, None)
 
-Add :func:`conv.require <biryani.baseconv.require>` to generate an error when value is missing (ie is ``None``):
+Add :func:`conv.test_exists <biryani.baseconv.test_exists>` to generate an error when value is missing (ie is ``None``):
 
 >>> anything_to_float = conv.pipe(
 ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
 ...     conv.test_isinstance(unicode),
 ...     conv.cleanup_line,
 ...     conv.str_to_float,
-...     conv.require,
+...     conv.test_exists,
 ...     )
 ...
 >>> anything_to_float(u'     ')
@@ -123,7 +123,7 @@ Use a custom :func:`test <biryani.baseconv.test>` to ensure that float is a vali
 ...     conv.cleanup_line,
 ...     conv.str_to_float,
 ...     conv.test(lambda value: -180 <= value <= 180),
-...     conv.require,
+...     conv.test_exists,
 ...     )
 ...
 >>> anything_to_latitude('50')
@@ -143,7 +143,7 @@ Add an explicit error message when latitude is not between -180 and 180 degrees:
 ...     conv.cleanup_line,
 ...     conv.str_to_float,
 ...     conv.test(lambda value: -180 <= value <= 180, error = U'Latitude must be between -180 and 180'),
-...     conv.require,
+...     conv.test_exists,
 ...     )
 ...
 >>> anything_to_latitude(u'500')
@@ -159,7 +159,7 @@ Generalize the converter to a function that accepts any bound:
 ...         conv.str_to_float,
 ...         conv.test(lambda value: min_bound <= value <= max_bound,
 ...             error = 'Value must be between {0} and {1}'.format(min_bound, max_bound)),
-...         conv.require,
+...         conv.test_exists,
 ...         )
 ...
 >>> anything_to_bounded_float(-180, 180)(90)
@@ -176,7 +176,7 @@ Generalize the converter to a function that accepts any bound:
     ...         conv.cleanup_line,
     ...         conv.str_to_float,
     ...         conv.test_between(min_bound, max_bound),
-    ...         conv.require,
+    ...         conv.test_exists,
     ...         )
     ...
     >>> anything_to_bounded_float(-180, 180)(90)
@@ -207,7 +207,7 @@ Converters working on complex structures can be chained too:
 ...         latitude = anything_to_bounded_float(-180, 180),
 ...         longitude = anything_to_bounded_float(-360, 360),
 ...         )),
-...     conv.require,
+...     conv.test_exists,
 ...     )
 ...
 >>> dict_to_lat_long(dict(latitude = '-12.34', longitude = u"45"))

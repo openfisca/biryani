@@ -90,18 +90,18 @@ Now, we need to ensure that submitted form always contains an username:
 >>> validate_form(req3.POST)
 (None, u'Missing value')
 
-*Biryani* has a filter :func:`biryani.baseconv.require` that checks for missing values:
+*Biryani* has a filter :func:`biryani.baseconv.test_exists` that checks for missing values:
 
 >>> def validate_form(params):
 ...     username, error = conv.cleanup_line(params.get('username'))
 ...     if error is None:
-...         username, error = conv.require(username)
+...         username, error = conv.test_exists(username)
 ...     return username, error
 
 The :func:`biryani.baseconv.pipe` allows to chain several converters. This simplifies the function:
 
 >>> def validate_form(params):
-...     return conv.pipe(conv.cleanup_line, conv.require)(params.get('username'))
+...     return conv.pipe(conv.cleanup_line, conv.test_exists)(params.get('username'))
 ...
 >>> validate_form(req1.POST)
 (u'John Doe', None)
@@ -121,7 +121,7 @@ error):
 >>> def validate_form(params):
 ...     data = {}
 ...     errors = {}
-...     username, error = conv.pipe(conv.cleanup_line, conv.require)(params.get('username'))
+...     username, error = conv.pipe(conv.cleanup_line, conv.test_exists)(params.get('username'))
 ...     if username is not None:
 ...         data['username'] = username
 ...     if error is not None:
@@ -148,7 +148,7 @@ simplified to:
 
 >>> def validate_form(params):
 ...     return conv.mapping(dict(
-...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.require),
+...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.test_exists),
 ...         email = conv.pipe(conv.multidict_get('email'), conv.str_to_email),
 ...         ))(params)
 ...
@@ -168,7 +168,7 @@ Let's add it to our function:
 
 >>> def validate_form(params):
 ...     data, errors = conv.mapping(dict(
-...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.require),
+...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.test_exists),
 ...         email = conv.pipe(conv.multidict_get('email'), conv.str_to_email),
 ...         ))(params)
 ...     passwords = params.getall('password')
@@ -225,7 +225,7 @@ Let's combine `test_passwords` and `extract_first_item` to rewrite our `validate
 
 >>> def validate_form(params):
 ...     return conv.mapping(dict(
-...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.require),
+...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.test_exists),
 ...         password = conv.pipe(
 ...             conv.multidict_getall('password'),
 ...             conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
@@ -301,7 +301,7 @@ Now use this function in `validate_form`:
 ...             if clean_tag
 ...             ]))
 ...     return conv.mapping(dict(
-...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.require),
+...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.test_exists),
 ...         password = conv.pipe(
 ...             conv.multidict_getall('password'),
 ...             conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
@@ -349,7 +349,7 @@ Let's combine everything in a new version of `validate_form`:
 ...             if clean_tag
 ...             ]))
 ...     return conv.mapping(dict(
-...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.require),
+...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.test_exists),
 ...         password = conv.pipe(
 ...             conv.multidict_getall('password'),
 ...             conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
@@ -379,7 +379,7 @@ By the way, we don't need to define a function for `validate_form`. Declaring a 
 final form of the form validator:
 
 >>> validate_form = conv.mapping(dict(
-...     username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.require),
+...     username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.test_exists),
 ...     password = conv.pipe(
 ...         conv.multidict_getall('password'),
 ...         conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],

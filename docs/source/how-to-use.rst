@@ -15,7 +15,7 @@ How to use *Biryani* in a simple project
 
     # Use the converters. For example:
     s = '5'
-    i = conv.to_value(conv.str_to_int, conv.require)(s)
+    i = conv.to_value(conv.str_to_int, conv.test_exists)(s)
     assert i == 5
     ...
 
@@ -51,7 +51,7 @@ In your others modules add::
 
     # Use the converters. For example:
     s = '5'
-    i = conv.to_value(conv.str_to_int, conv.require)(s)
+    i = conv.to_value(conv.str_to_int, conv.test_exists)(s)
     assert i == 5
     ...
 

@@ -69,7 +69,6 @@ __all__ = [
     'python_data_to_int',
     'python_data_to_str',
     'rename_item',
-    'require',
     'sequence',
     'set_value',
     'str_to_bool',
@@ -86,6 +85,7 @@ __all__ = [
     'test',
     'test_between',
     'test_equals',
+    'test_exists',
     'test_greater_or_equal',
     'test_in',
     'test_is',
@@ -828,22 +828,6 @@ def rename_item(old_key, new_key):
     return rename_item_converter
 
 
-def require(value, state = states.default_state):
-    """Returns an error when value is missing (aka ``None``).
-
-    >>> require(42)
-    (42, None)
-    >>> require(u'')
-    (u'', None)
-    >>> require(None)
-    (None, u'Missing value')
-    """
-    if value is None:
-        return value, state._(u'Missing value')
-    else:
-        return value, None
-
-
 def sequence(converters, constructor = list, keep_empty = False, keep_null_items = False):
     """Return a converter that constructs a sequence (ie list, tuple, etc) from any kind of value.
 
@@ -944,7 +928,7 @@ def struct(converters, constructor = None, default = None, keep_empty = False):
     Usage to convert a mapping (ie dict, etc):
 
     >>> strict_converter = struct(dict(
-    ...     name = pipe(cleanup_line, require),
+    ...     name = pipe(cleanup_line, test_exists),
     ...     age = str_to_int,
     ...     email = str_to_email,
     ...     ))
@@ -959,7 +943,7 @@ def struct(converters, constructor = None, default = None, keep_empty = False):
     ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
     >>> non_strict_converter = struct(
     ...     dict(
-    ...         name = pipe(cleanup_line, require),
+    ...         name = pipe(cleanup_line, test_exists),
     ...         age = str_to_int,
     ...         email = str_to_email,
     ...         ),
@@ -996,7 +980,7 @@ def struct(converters, constructor = None, default = None, keep_empty = False):
     Usage to convert a sequence (ie list, tuple, etc) or a set:
 
     >>> strict_converter = struct([
-    ...     pipe(cleanup_line, require),
+    ...     pipe(cleanup_line, test_exists),
     ...     str_to_int,
     ...     str_to_email,
     ...     ])
@@ -1011,7 +995,7 @@ def struct(converters, constructor = None, default = None, keep_empty = False):
     ([u'John Doe', 72, u'spam@easter-eggs.com', u'   +33 9 12 34 56 78   '], {3: u'Unexpected item'})
     >>> non_strict_converter = struct(
     ...     [
-    ...         pipe(cleanup_line, require),
+    ...         pipe(cleanup_line, test_exists),
     ...         str_to_int,
     ...         str_to_email,
     ...         ],
@@ -1044,7 +1028,7 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
     .. note:: This converter should not be used directly. Use :func:`struct` instead.
 
     >>> strict_converter = structured_mapping(dict(
-    ...     name = pipe(cleanup_line, require),
+    ...     name = pipe(cleanup_line, test_exists),
     ...     age = str_to_int,
     ...     email = str_to_email,
     ...     ))
@@ -1059,7 +1043,7 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
     ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
     >>> non_strict_converter = structured_mapping(
     ...     dict(
-    ...         name = pipe(cleanup_line, require),
+    ...         name = pipe(cleanup_line, test_exists),
     ...         age = str_to_int,
     ...         email = str_to_email,
     ...         ),
@@ -1130,7 +1114,7 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     .. note:: This converter should not be used directly. Use :func:`struct` instead.
 
     >>> strict_converter = structured_sequence([
-    ...     pipe(cleanup_line, require),
+    ...     pipe(cleanup_line, test_exists),
     ...     str_to_int,
     ...     str_to_email,
     ...     ])
@@ -1145,7 +1129,7 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     ([u'John Doe', 72, u'spam@easter-eggs.com', u'   +33 9 12 34 56 78   '], {3: u'Unexpected item'})
     >>> non_strict_converter = structured_sequence(
     ...     [
-    ...         pipe(cleanup_line, require),
+    ...         pipe(cleanup_line, test_exists),
     ...         str_to_int,
     ...         str_to_email,
     ...         ],
@@ -1255,6 +1239,22 @@ def test_equals(constant):
     """
     return test(lambda value: value == constant if constant is not None else True,
         error = N_(u'Value must be equal to {0}').format(constant))
+
+
+def test_exists(value, state = states.default_state):
+    """Return an error when value is missing (aka ``None``).
+
+    >>> test_exists(42)
+    (42, None)
+    >>> test_exists(u'')
+    (u'', None)
+    >>> test_exists(None)
+    (None, u'Missing value')
+    """
+    if value is None:
+        return value, state._(u'Missing value')
+    else:
+        return value, None
 
 
 def test_greater_or_equal(constant):
