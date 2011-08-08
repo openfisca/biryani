@@ -58,15 +58,6 @@ else:
 from objectconv import *
 
 try:
-    import pymongo
-except ImportError:
-    pass
-else:
-    # Don't export pymongo module.
-    del pymongo
-    from pymongoconv import *
-
-try:
     import webob
 except ImportError:
     pass

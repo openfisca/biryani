@@ -75,18 +75,6 @@ biryani.objectconv
    :undoc-members:
 
 
-biryani.pymongoconv
-===================
-
-.. testsetup::
-
-   from biryani.pymongoconv import *
-
-.. automodule:: biryani.pymongoconv
-   :members:
-   :undoc-members:
-
-
 biryani.states
 ==============
 
