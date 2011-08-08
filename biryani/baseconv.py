@@ -601,7 +601,7 @@ def guess_bool(value, state = states.default_state):
         return value, state._(u'Value must be a boolean')
 
 
-def item_or_sequence(converter, constructor = list, keep_null_items = False):
+def item_or_sequence(converter, constructor = list, keep_missing_items = False):
     """Return a converter that accepts either an item or a sequence of items and applies a converter to them.
 
     >>> item_or_sequence(str_to_int)(u'42')
@@ -616,11 +616,11 @@ def item_or_sequence(converter, constructor = list, keep_null_items = False):
     ([42, 43], None)
     >>> item_or_sequence(str_to_int)([None, None])
     (None, None)
-    >>> item_or_sequence(str_to_int, keep_null_items = True)([None, None])
+    >>> item_or_sequence(str_to_int, keep_missing_items = True)([None, None])
     ([None, None], None)
-    >>> item_or_sequence(str_to_int, keep_null_items = True)([u'42', None, u'43'])
+    >>> item_or_sequence(str_to_int, keep_missing_items = True)([u'42', None, u'43'])
     ([42, None, 43], None)
-    >>> item_or_sequence(str_to_int, keep_null_items = True)([u'42', u'43', u'Hello world!'])
+    >>> item_or_sequence(str_to_int, keep_missing_items = True)([u'42', u'43', u'Hello world!'])
     ([42, 43, u'Hello world!'], {2: u'Value must be an integer'})
     >>> item_or_sequence(str_to_int, constructor = set)(set([u'42', u'43']))
     (set([42, 43]), None)
@@ -628,14 +628,14 @@ def item_or_sequence(converter, constructor = list, keep_null_items = False):
     return condition(
         test_isinstance(constructor),
         pipe(
-            uniform_sequence(converter, constructor = constructor, keep_null_items = keep_null_items),
+            uniform_sequence(converter, constructor = constructor, keep_missing_items = keep_missing_items),
             extract_when_singleton,
             ),
         converter,
         )
 
 
-def mapping(converters, constructor = dict, keep_empty = False, keep_null_items = False):
+def mapping(converters, constructor = dict, keep_empty = False, keep_missing_items = False):
     """Return a converter that constructs a mapping (ie dict, etc) from any kind of value.
 
     .. note:: Most of the times, when input value is also a mapping, converters :func:`uniform_mapping` or
@@ -643,7 +643,7 @@ def mapping(converters, constructor = dict, keep_empty = False, keep_null_items 
 
     >>> def get(index):
     ...     return function(lambda value: value[index])
-    >>> def convert_list_to_dict(constructor = dict, keep_empty = False, keep_null_items = False):
+    >>> def convert_list_to_dict(constructor = dict, keep_empty = False, keep_missing_items = False):
     ...     return mapping(
     ...         dict(
     ...             name = get(0),
@@ -652,7 +652,7 @@ def mapping(converters, constructor = dict, keep_empty = False, keep_null_items 
     ...             ),
     ...         constructor = constructor,
     ...         keep_empty = keep_empty,
-    ...         keep_null_items = keep_null_items,
+    ...         keep_missing_items = keep_missing_items,
     ...         )
     >>> convert_list_to_dict()([u'John Doe', u'72', u'spam@easter-eggs.com'])
     ({'age': 72, 'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
@@ -661,7 +661,7 @@ def mapping(converters, constructor = dict, keep_empty = False, keep_null_items 
     IndexError: list index out of range
     >>> convert_list_to_dict()([u'John Doe', u'72', None])
     ({'age': 72, 'name': u'John Doe'}, None)
-    >>> convert_list_to_dict(keep_null_items = True)([u'John Doe', u'72', None])
+    >>> convert_list_to_dict(keep_missing_items = True)([u'John Doe', u'72', None])
     ({'age': 72, 'email': None, 'name': u'John Doe'}, None)
     >>> convert_list_to_dict()([None, u' ', None])
     (None, None)
@@ -682,7 +682,7 @@ def mapping(converters, constructor = dict, keep_empty = False, keep_null_items 
         convertered_values = {}
         for name, converter in converters.iteritems():
             converted_value, error = converter(value, state = state)
-            if converted_value is not None or keep_null_items:
+            if converted_value is not None or keep_missing_items:
                 convertered_values[name] = converted_value
             if error is not None:
                 errors[name] = error
@@ -828,7 +828,7 @@ def rename_item(old_key, new_key):
     return rename_item_converter
 
 
-def sequence(converters, constructor = list, keep_empty = False, keep_null_items = False):
+def sequence(converters, constructor = list, keep_empty = False, keep_missing_items = False):
     """Return a converter that constructs a sequence (ie list, tuple, etc) from any kind of value.
 
     .. note:: Most of the times, when input value is also a sequence, converters :func:`uniform_sequence` or
@@ -836,7 +836,7 @@ def sequence(converters, constructor = list, keep_empty = False, keep_null_items
 
     >>> def get(key):
     ...     return function(lambda value: value.get(key))
-    >>> def convert_dict_to_list(constructor = list, keep_empty = False, keep_null_items = False):
+    >>> def convert_dict_to_list(constructor = list, keep_empty = False, keep_missing_items = False):
     ...     return sequence(
     ...         [
     ...             get('name'),
@@ -845,7 +845,7 @@ def sequence(converters, constructor = list, keep_empty = False, keep_null_items
     ...             ],
     ...         constructor = constructor,
     ...         keep_empty = keep_empty,
-    ...         keep_null_items = keep_null_items,
+    ...         keep_missing_items = keep_missing_items,
     ...         )
     >>> convert_dict_to_list()({'age': u'72', 'email': u'spam@easter-eggs.com', 'name': u'John Doe'})
     ([u'John Doe', 72, u'spam@easter-eggs.com'], None)
@@ -853,7 +853,7 @@ def sequence(converters, constructor = list, keep_empty = False, keep_null_items
     ((u'John Doe', 72, u'spam@easter-eggs.com'), None)
     >>> convert_dict_to_list()({'email': u'spam@easter-eggs.com', 'name': u'John Doe'})
     ([u'John Doe', u'spam@easter-eggs.com'], None)
-    >>> convert_dict_to_list(keep_null_items = True)({'email': u'spam@easter-eggs.com', 'name': u'John Doe'})
+    >>> convert_dict_to_list(keep_missing_items = True)({'email': u'spam@easter-eggs.com', 'name': u'John Doe'})
     ([u'John Doe', None, u'spam@easter-eggs.com'], None)
     >>> convert_dict_to_list()({})
     (None, None)
@@ -874,7 +874,7 @@ def sequence(converters, constructor = list, keep_empty = False, keep_null_items
         convertered_values = []
         for i, converter in enumerate(converters):
             converted_value, error = converter(value, state = state)
-            if converted_value is not None or keep_null_items:
+            if converted_value is not None or keep_missing_items:
                 convertered_values.append(converted_value)
             if error is not None:
                 errors[i] = error
@@ -1374,8 +1374,8 @@ def translate(conversions):
         else conversions[value])
 
 
-#def uniform_mapping(key_converter, value_converter, constructor = dict, keep_empty = False, keep_null_keys = False,
-#        keep_null_values = False):
+#def uniform_mapping(key_converter, value_converter, constructor = dict, keep_empty = False, keep_missing_keys = False,
+#        keep_missing_values = False):
 #    """Return a converter that applies a unique converter to each key and another unique converter to each value of a mapping."""
 #    def uniform_mapping_converter(values, state = states.default_state):
 #        if values is None:
@@ -1386,10 +1386,10 @@ def translate(conversions):
 #            key, error = key_converter(key, state = state)
 #            if error is not None:
 #                errors[key] = error
-#            if key is None and not keep_null_keys:
+#            if key is None and not keep_missing_keys:
 #                continue
 #            value, error = value_converter(value, state = state)
-#            if value is not None or keep_null_values:
+#            if value is not None or keep_missing_values:
 #                convertered_values[key] = value
 #            if error is not None:
 #                errors[key] = error
@@ -1401,7 +1401,7 @@ def translate(conversions):
 #    return uniform_mapping_converter
 
 
-def uniform_sequence(converter, constructor = list, keep_empty = False, keep_null_items = False):
+def uniform_sequence(converter, constructor = list, keep_empty = False, keep_missing_items = False):
     """Return a converter that applies the same converter to each value of a list.
 
     >>> uniform_sequence(str_to_int)([u'42'])
@@ -1416,11 +1416,11 @@ def uniform_sequence(converter, constructor = list, keep_empty = False, keep_nul
     (None, None)
     >>> uniform_sequence(str_to_int, keep_empty = True)([None, None])
     ([], None)
-    >>> uniform_sequence(str_to_int, keep_empty = True, keep_null_items = True)([None, None])
+    >>> uniform_sequence(str_to_int, keep_empty = True, keep_missing_items = True)([None, None])
     ([None, None], None)
-    >>> uniform_sequence(str_to_int, keep_null_items = True)([u'42', None, u'43'])
+    >>> uniform_sequence(str_to_int, keep_missing_items = True)([u'42', None, u'43'])
     ([42, None, 43], None)
-    >>> uniform_sequence(str_to_int, keep_null_items = True)([u'42', u'43', u'Hello world!'])
+    >>> uniform_sequence(str_to_int, keep_missing_items = True)([u'42', u'43', u'Hello world!'])
     ([42, 43, u'Hello world!'], {2: u'Value must be an integer'})
     >>> uniform_sequence(str_to_int, constructor = set)(set([u'42', u'43']))
     (set([42, 43]), None)
@@ -1432,7 +1432,7 @@ def uniform_sequence(converter, constructor = list, keep_empty = False, keep_nul
         convertered_values = []
         for i, value in enumerate(values):
             value, error = converter(value, state = state)
-            if keep_null_items or value is not None:
+            if keep_missing_items or value is not None:
                 convertered_values.append(value)
             if error is not None:
                 errors[i] = error
