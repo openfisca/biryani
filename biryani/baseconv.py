@@ -828,7 +828,7 @@ def rename_item(old_key, new_key):
     return rename_item_converter
 
 
-def require(value, error = N_(u'Missing value'), state = states.default_state):
+def require(value, state = states.default_state):
     """Returns an error when value is missing (aka ``None``).
 
     >>> require(42)
@@ -837,12 +837,11 @@ def require(value, error = N_(u'Missing value'), state = states.default_state):
     (u'', None)
     >>> require(None)
     (None, u'Missing value')
-    >>> require(None, error = u'Custom error message')
-    (None, u'Custom error message')
     """
     if value is None:
-        return value, state._(error)
-    return value, None
+        return value, state._(u'Missing value')
+    else:
+        return value, None
 
 
 def sequence(converters, constructor = list, keep_empty = False, keep_null_items = False):
