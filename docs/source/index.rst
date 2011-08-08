@@ -16,57 +16,75 @@
 To convert a value into another, you first create the ad-hoc converter by chaining conversion functions. Each conversion function takes a value as input and outputs a couple containing the converted value and an optional error message.
 
 
-Usage Example
-=============
+Usage Examples
+==============
+
+
+Example 1: Email validator
+--------------------------
+
+
+Every converter returns the converted value and an optional error:
+
+>>> from biryani import baseconv as conv
+
+>>> conv.str_to_email(u'John@DOE.name')
+(u'john@doe.name', None)
+>>> conv.str_to_email(u'john.doe.name')
+(u'john.doe.name', u'An email must contain exactly one "@"')
+>>> conv.str_to_email(u'   ')
+(None, None)
+
+
+Example 2: Required email validator
+-----------------------------------
+
+Converters can be combined together to form more complex converters:
+
+>>> str_to_required_email = conv.pipe(conv.str_to_email, conv.require)
+
+>>> str_to_required_email(u'John@DOE.name')
+(u'john@doe.name', None)
+>>> str_to_required_email(u'   ')
+(None, u'Missing value')
+
+
+Example 3: Web form validator
+-----------------------------
 
 A sample validator for a web form containing the following fields:
 
 * Username
 * Password (2 times)
 * Email
-* Tags (several fields with the same name, each one may contain several tags separated by a comma)
 
-This example uses `WebOb <http://webob.org/>`_.
-
->>> import webob
->>> from biryani import allconv as conv
->>> validate_form = conv.mapping(dict(
-...     username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.require),
+>>> validate_form = conv.structured_mapping(dict(
+...     username = conv.pipe(conv.cleanup_line, conv.require),
 ...     password = conv.pipe(
-...         conv.multidict_getall('password'),
 ...         conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
 ...             error = u'Password mismatch'),
 ...         conv.function(lambda passwords: passwords[0]),
 ...         ),
-...     email = conv.pipe(conv.multidict_get('email'), conv.str_to_email),
-...     tags = conv.pipe(
-...         conv.multidict_getall('tag'),
-...         conv.function(lambda tags: u','.join(tags).split(u',')),
-...         conv.uniform_sequence(conv.str_to_slug, constructor = set),
-...         conv.function(sorted),
-...         ),
+...     email = conv.str_to_email,
 ...     ))
 
->>> req = webob.Request.blank('/?username=   John Doe&password=secret&password=secret&email=john@doe.name&tag=friend&tag=user,ADMIN')
->>> result, errors = validate_form(req.GET)
->>> result
-{'username': u'John Doe', 'password': u'secret', 'email': u'john@doe.name', 'tags': [u'admin', u'friend', u'user']}
+>>> validate_form({
+...     'username': u'   John Doe',
+...     'password': [u'secret', u'secret'],
+...     'email': u'John@DOE.name',
+...     })
+({'username': u'John Doe', 'password': u'secret', 'email': u'john@doe.name'}, None)
 
->>> req = webob.Request.blank('/?password=secret&password=other secret&email=john@doe.name&tag=friend&tag=user,ADMIN')
->>> result, errors = validate_form(req.GET)
+>>> result, errors = validate_form({
+...     'password': [u'secret', u'other secret'],
+...     'email': u'John@DOE.name',
+...     })
 >>> result
-{'password': [u'secret', u'other secret'], 'email': u'john@doe.name', 'tags': [u'admin', u'friend', u'user']}
+{'password': [u'secret', u'other secret'], 'email': u'john@doe.name'}
 >>> errors
 {'username': u'Missing value', 'password': u'Password mismatch'}
 
->>> req = webob.Request.blank('/?username=John Doe&password=secret&email=john.doe.name')
->>> result, errors = validate_form(req.GET)
->>> result
-{'username': u'John Doe', 'password': [u'secret'], 'email': u'john.doe.name'}
->>> errors
-{'password': u'Password mismatch', 'email': u'An email must contain exactly one "@"'}
-
-See :doc:`tutorial1-web-form` for a complete explanation of this example.
+See :doc:`tutorial1-web-form` for a complete explanation of a variant of this example.
 
 
 Documentation
