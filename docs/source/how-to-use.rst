@@ -3,7 +3,7 @@ How to to use *Biryani* in a project
 ************************************
 
 .. note:: This chapter shows a few ways to import *Biryani* in your projects. They have proven there effectiveness, but
-there are other ways to import *Biryani*.
+   there are other ways to import *Biryani*.
 
 
 How to use *Biryani* in a simple project
