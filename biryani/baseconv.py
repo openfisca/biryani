@@ -1193,7 +1193,7 @@ def test(function, error = N_(u'Test failed'), handle_missing_value = False, han
     def test_converter(value, state = states.default_state):
         if value is None and not handle_missing_value or function is None:
             return value, None
-        ok = function(value, state = state) if handle_missing_value else function(value)
+        ok = function(value, state = state) if handle_state else function(value)
         if ok:
             return value, None
         return value, state._(error)
