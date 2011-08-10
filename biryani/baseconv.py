@@ -1200,7 +1200,7 @@ def test(function, error = N_(u'Test failed'), handle_missing_value = False, han
     return test_converter
 
 
-def test_between(min_value, max_value):
+def test_between(min_value, max_value, error = None):
     """Return a converter that accepts only values between the two given bounds (included).
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not compared.
@@ -1213,14 +1213,16 @@ def test_between(min_value, max_value):
     (9, None)
     >>> test_between(0, 9)(10)
     (10, u'Value must be between 0 and 9')
+    >>> test_between(0, 9, error = u'Number must be a digit')(10)
+    (10, u'Number must be a digit')
     >>> test_between(0, 9)(None)
     (None, None)
     """
     return test(lambda value: min_value <= value <= max_value,
-        error = N_(u'Value must be between {0} and {1}').format(min_value, max_value))
+        error = error or N_(u'Value must be between {0} and {1}').format(min_value, max_value))
 
 
-def test_equals(constant):
+def test_equals(constant, error = None):
     """Return a converter that accepts only values equals to given constant.
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not compared. Furthermore, when *constant* is
@@ -1232,13 +1234,15 @@ def test_equals(constant):
     ({'a': 1, 'b': 2}, None)
     >>> test_equals(41)(42)
     (42, u'Value must be equal to 41')
+    >>> test_equals(41, error = u'Value is not the answer')(42)
+    (42, u'Value is not the answer')
     >>> test_equals(None)(42)
     (42, None)
     >>> test_equals(42)(None)
     (None, None)
     """
     return test(lambda value: value == constant if constant is not None else True,
-        error = N_(u'Value must be equal to {0}').format(constant))
+        error = error or N_(u'Value must be equal to {0}').format(constant))
 
 
 def test_exists(value, state = states.default_state):
@@ -1257,7 +1261,7 @@ def test_exists(value, state = states.default_state):
         return value, None
 
 
-def test_greater_or_equal(constant):
+def test_greater_or_equal(constant, error = None):
     """Return a converter that accepts only values greater than or equal to given constant.
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not compared.
@@ -1266,16 +1270,18 @@ def test_greater_or_equal(constant):
     (5, None)
     >>> test_greater_or_equal(9)(5)
     (5, u'Value must be greater than or equal to 9')
+    >>> test_greater_or_equal(9, error = u'Value must be a positive two-digits number')(5)
+    (5, u'Value must be a positive two-digits number')
     >>> test_greater_or_equal(9)(None)
     (None, None)
     >>> test_greater_or_equal(None)(5)
     (5, None)
     """
     return test(lambda value: (value >= constant) if constant is not None else True,
-        error = N_(u'Value must be greater than or equal to {0}').format(constant))
+        error = error or N_(u'Value must be greater than or equal to {0}').format(constant))
 
 
-def test_in(values):
+def test_in(values, error = None):
     """Return a converter that accepts only values belonging to a given set (or list or...).
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not compared. Furthermore, when *values* is
@@ -1287,6 +1293,8 @@ def test_in(values):
     ('a', None)
     >>> test_in(['a', 'b', 'c', 'd'])('z')
     ('z', u"Value must be one of ['a', 'b', 'c', 'd']")
+    >>> test_in(['a', 'b', 'c', 'd'], error = u'Value must be a letter less than "e"')('z')
+    ('z', u'Value must be a letter less than "e"')
     >>> test_in([])('z')
     ('z', u'Value must be one of []')
     >>> test_in(None)('z')
@@ -1295,10 +1303,10 @@ def test_in(values):
     (None, None)
     """
     return test(lambda value: value in values if values is not None else True,
-        error = N_(u'Value must be one of {0}').format(values))
+        error = error or N_(u'Value must be one of {0}').format(values))
 
 
-def test_is(constant):
+def test_is(constant, error = None):
     """Return a converter that accepts only values that are strictly equal to given constant.
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not compared. Furthermore, when *constant* is
@@ -1310,30 +1318,34 @@ def test_is(constant):
     ({'a': 1, 'b': 2}, u"Value must be {'a': 1, 'b': 2}")
     >>> test_is(41)(42)
     (42, u'Value must be 41')
+    >>> test_is(41, error = u'Value is not the answer')(42)
+    (42, u'Value is not the answer')
     >>> test_is(None)(42)
     (42, None)
     >>> test_is(42)(None)
     (None, None)
     """
     return test(lambda value: value is constant if constant is not None else True,
-        error = N_(u'Value must be {0}').format(constant))
+        error = error or N_(u'Value must be {0}').format(constant))
 
 
-def test_isinstance(class_or_classes):
+def test_isinstance(class_or_classes, error = None):
     """Return a converter that accepts only an instance of given class (or tuple of classes).
 
     >>> test_isinstance(basestring)('This is a string')
     ('This is a string', None)
     >>> test_isinstance(basestring)(42)
     (42, u"Value is not an instance of <type 'basestring'>")
+    >>> test_isinstance(basestring, error = u'Value is not a string')(42)
+    (42, u'Value is not a string')
     >>> test_isinstance((float, int))(42)
     (42, None)
     """
     return test(lambda value: isinstance(value, class_or_classes),
-        error = N_(u'Value is not an instance of {0}').format(class_or_classes))
+        error = error or N_(u'Value is not an instance of {0}').format(class_or_classes))
 
 
-def test_less_or_equal(constant):
+def test_less_or_equal(constant, error = None):
     """Return a converter that accepts only values less than or equal to given constant.
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not compared.
@@ -1342,13 +1354,15 @@ def test_less_or_equal(constant):
     (5, None)
     >>> test_less_or_equal(0)(5)
     (5, u'Value must be less than or equal to 0')
+    >>> test_less_or_equal(0, error = u'Value must be negative')(5)
+    (5, u'Value must be negative')
     >>> test_less_or_equal(9)(None)
     (None, None)
     >>> test_less_or_equal(None)(5)
     (5, None)
     """
     return test(lambda value: (value <= constant) if constant is not None else True,
-        error = N_(u'Value must be less than or equal to {0}').format(constant))
+        error = error or N_(u'Value must be less than or equal to {0}').format(constant))
 
 
 def translate(conversions):
