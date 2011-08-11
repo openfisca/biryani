@@ -39,6 +39,7 @@ from . import states, strings
 
 __all__ = [
     'bool_to_str',
+    'check',
     'clean_str_to_bool',
     'clean_str_to_email',
     'clean_str_to_json',
@@ -91,7 +92,6 @@ __all__ = [
     'test_is',
     'test_isinstance',
     'test_less_or_equal',
-    'to_value',
     'translate',
 #    'uniform_mapping',
     'uniform_sequence',
@@ -417,7 +417,7 @@ def dict_to_instance(cls):
     ...     pass
     >>> dict_to_instance(C)(dict(a = 1, b = 2))
     (<C object at 0x...>, None)
-    >>> c = to_value(dict_to_instance(C))(dict(a = 1, b = 2))
+    >>> c = check(dict_to_instance(C))(dict(a = 1, b = 2))
     >>> c.a, c.b
     (1, 2)
     >>> dict_to_instance(C)(None)
@@ -1712,28 +1712,56 @@ str_to_url_name = pipe(cleanup_line, clean_str_to_url_name)
 # Utility Functions
 
 
-def to_value(converter, clear_on_error = False):
-    """Return a function that calls given converter and returns its result or raises an exception when an error occurs.
+def check(converter_or_value_and_error, clear_on_error = False):
+    """Check a conversion and either return its value or raise a *ValueError* exception.
 
-    When *clear_on_error* is ``True``, return None instead of raising and exception.
+    This function can be called with either a converter or the result of a conversion.
 
-    >>> to_value(str_to_int)(u'42')
+    Usage with a converter:
+
+    >>> check(str_to_int)(u'42')
     42
-    >>> to_value(str_to_int)(u'hello world')
+    >>> check(str_to_int)(u'hello world')
     Traceback (most recent call last):
     ValueError: Value must be an integer
-    >>> to_value(pipe(python_data_to_str, test_isinstance(unicode), str_to_bool))(42)
+    >>> check(pipe(python_data_to_str, test_isinstance(unicode), str_to_bool))(42)
     True
-    >>> to_value(str_to_int, clear_on_error = True)(u'42')
+    >>> check(str_to_int, clear_on_error = True)(u'42')
     42
-    >>> to_value(str_to_int, clear_on_error = True)(u'hello world')
+    >>> print check(str_to_int, clear_on_error = True)(u'hello world')
+    None
+
+    Usage with a conversion result :
+
+    >>> check(str_to_int(u'42'))
+    42
+    >>> check(str_to_int(u'hello world'))
+    Traceback (most recent call last):
+    ValueError: Value must be an integer
+    >>> check(pipe(python_data_to_str, test_isinstance(unicode), str_to_bool)(42))
+    True
+    >>> check(str_to_int(u'42'), clear_on_error = True)
+    42
+    >>> print check(str_to_int(u'hello world'), clear_on_error = True)
+    None
     """
-    def to_value_converter(*args, **kwargs):
-        value, error = converter(*args, **kwargs)
+    import collections
+
+    if isinstance(converter_or_value_and_error, collections.Sequence):
+        value, error = converter_or_value_and_error
         if error is not None:
             if clear_on_error:
                 return None
             raise ValueError(error)
         return value
-    return to_value_converter
+    else:
+        # converter_or_value_and_error is a converter.
+        def check_converter(*args, **kwargs):
+            value, error = converter_or_value_and_error(*args, **kwargs)
+            if error is not None:
+                if clear_on_error:
+                    return None
+                raise ValueError(error)
+            return value
+        return check_converter
 

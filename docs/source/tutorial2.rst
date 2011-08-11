@@ -34,14 +34,14 @@ So, to ensure that input value is an unicode string, we need to chain several co
 ...     )('42')
 ('42', u"Value is not an instance of <type 'unicode'>")
 
-Use :func:`conv.to_value <biryani.baseconv.to_value>` to extract value from conversion result or raise an exception when an error occurs:
+Use :func:`conv.check <biryani.baseconv.check>` to extract value from conversion result or raise an exception when an error occurs:
 
->>> conv.to_value(conv.pipe(
+>>> conv.check(conv.pipe(
 ...     conv.test_isinstance(unicode),
 ...     conv.str_to_float,
 ...     ))(u'42')
 42.0
->>> conv.to_value(conv.pipe(
+>>> conv.check(conv.pipe(
 ...     conv.test_isinstance(unicode),
 ...     conv.str_to_float,
 ...     ))(42)
