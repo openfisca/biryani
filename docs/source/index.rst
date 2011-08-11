@@ -13,7 +13,7 @@
 
 *Biryani* seeks to provide the same functionality as `FormEncode <http://formencode.org/>`_, while being more easy to use and extend.
 
-To convert a value into another, you first create the ad-hoc converter by chaining conversion functions. Each conversion function takes a value as input and outputs a couple containing the converted value and an optional error message.
+For more informations on *Biryani* features, see chapter :doc:`design`.
 
 
 Usage Examples
@@ -93,6 +93,7 @@ Documentation
 .. toctree::
    :maxdepth: 2
 
+   design
    tutorial1-web-form
    tutorial2
    how-to-create-converter
