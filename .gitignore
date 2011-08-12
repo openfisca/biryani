@@ -1,6 +1,7 @@
 build/
 *.egg-info
 dist/
+*.mo
 *.pyc
 *.pyo
 *~

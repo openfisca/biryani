@@ -1303,7 +1303,7 @@ def test_in(values, error = None):
     (None, None)
     """
     return test(lambda value: value in values if values is not None else True,
-        error = error or N_(u'Value must be one of {0}').format(values))
+        error = error or N_(u'Value must belong to {0}').format(values))
 
 
 def test_is(constant, error = None):

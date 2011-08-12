@@ -60,7 +60,15 @@ setup(
     long_description = '\n'.join(doc_lines[2:]),
     url = 'http://packages.python.org/Biryani/',
 
-    install_requires = [],
+    install_requires = [
+        "Babel >= 0.9.4",
+        ],
+    message_extractors = {
+        'biryani': [
+            ('**.py', 'python', None),
+            ],
+        },
+    package_data = {'biryani': ['i18n/*/LC_MESSAGES/*.mo']},
     packages = find_packages(exclude = ['ez_setup']),
     zip_safe = False,
     )
