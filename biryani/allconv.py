@@ -45,6 +45,8 @@ else:
     del bson
     from bsonconv import *
 
+from creditcardconv import *
+
 try:
     import mx.DateTime, pytz
 except ImportError:

@@ -39,6 +39,18 @@ biryani.bsonconv
    :undoc-members:
 
 
+biryani.creditcardconv
+======================
+
+.. testsetup::
+
+   from biryani.creditcardconv import *
+
+.. automodule:: biryani.creditcardconv
+   :members:
+   :undoc-members:
+
+
 biryani.datetimeconv
 ====================
 
