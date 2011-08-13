@@ -17,7 +17,21 @@ How to release a new version of *Biryani*
     # The full version, including alpha/beta/rc tags.
     release = 'NEW_RELEASE_NUMBER'
 
-#. TODO: Update the localizations and ensure that they are uptodate.
+#. Extract strings to translate from source code::
+
+    ./setup.py extract_messages
+
+#. Update catalog (aka ``.po`` files) from biryani/i18n/biryani.pot``::
+
+    ./setup.py update_catalog
+
+#. Ensure that Project-Id-Version in ``biryani/i18n/biryani.pot`` (and ``.po`` files?)
+
+#. Add missing translations.
+
+#. Compile catalog::
+
+    ./setup.py compile_catalog
 
 #. Execute doctests and check that the build succeeded without error nor warning::
 
