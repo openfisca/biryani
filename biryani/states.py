@@ -26,7 +26,7 @@
 
 
 class State(object):
-    _ = staticmethod(lambda s: s)
+    _ = staticmethod(lambda message: message)
 
     def __repr__(self):
         """Hack to improve ``default_state`` aspect in Sphinx autodoc
