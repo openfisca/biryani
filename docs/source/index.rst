@@ -100,7 +100,7 @@ Documentation
    i18n
    how-to-use
    api
-   sugar
+   non-api
    changelog
    for-maintainer-only
 
