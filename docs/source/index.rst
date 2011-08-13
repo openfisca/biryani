@@ -97,6 +97,7 @@ Documentation
    tutorial1-web-form
    tutorial2
    how-to-create-converter
+   i18n
    how-to-use
    api
    sugar

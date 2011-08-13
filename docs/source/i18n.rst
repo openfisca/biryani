@@ -1,0 +1,91 @@
+***********************************
+Internationalization & Localization
+***********************************
+
+*Biryani* uses ``gettext`` for internationalization and localization.
+
+Translations for *Biryani* messages are located in ``biryani/i18n`` directory.
+
+To translate messages, *Biryani* converters use the ``_()`` method of their ``state`` parameter.
+
+The defaut state parameter :data:`biryani.states.default_state` (an instance of class :class:`biryani.states.State`) has a ``_()`` method that returns the given message asis, without any translation. So, to translate *Biryani* messages you should define a new state that redefines it.
+
+
+Using a localized state
+=======================
+
+Here is an example of how to have french error messages with *Biryani*:
+
+>>> import gettext
+>>> from biryani import states
+...
+>>> french_translation = gettext.translation('biryani', 'biryani/i18n', languages = ['fr'])
+...
+>>> class FrenchState(states.State):
+...     _ = staticmethod(french_translation.ugettext)
+...
+>>> french_state = FrenchState()
+
+To use this newly defined state for your conversions:
+
+>>> from biryani import baseconv as conv
+...
+>>> conv.test_exists(None)
+(None, u'Missing value')
+>>> conv.test_exists(None, state = states.default_state)
+(None, u'Missing value')
+>>> conv.test_exists(None, state = french_state)
+(None, u'Valeur manquante')
+>>> conv.pipe(conv.str_to_int, conv.test_exists)(None, state = french_state)
+(None, u'Valeur manquante')
+>>> conv.pipe(conv.str_to_int, conv.test_exists)(u'Hello world!')
+(u'Hello world!', u'Value must be an integer')
+>>> conv.pipe(conv.str_to_int, conv.test_exists)(u'Hello world!', state = french_state)
+(u'Hello world!', u'La valeur doit \xeatre un entier')
+
+
+Using an internationalized state
+================================
+
+When using *Biryani* in web applications, for example, you will often need to display error messages using the current user's prefered languages.
+
+>>> class UserState(states.State):
+...     _translations_cache = {}
+...     languages = ['en_US', 'en'] # Default languages for user
+...
+...     @property
+...     def _(self):
+...         languages = tuple(self.languages)
+...         translation = self._translations_cache.get(languages)
+...         if translation is None:
+...             self._translations_cache[languages] = translation = gettext.translation(
+...                 'biryani', 'biryani/i18n', fallback = gettext.NullTranslations(), languages = languages)
+...         return translation.ugettext
+
+>>> user_state = UserState()
+>>> conv.test_exists(None, state = user_state)
+(None, u'Missing value')
+
+>>> french_user_state = UserState()
+>>> french_user_state.languages = ['fr_FR', 'fr']
+>>> conv.test_exists(None, state = french_user_state)
+(None, u'Valeur manquante')
+>>> conv.pipe(conv.str_to_int, conv.test_exists)(u'Hello world!', state = french_user_state)
+(u'Hello world!', u'La valeur doit \xeatre un entier')
+
+
+Using *Biryani* translations in an internationalized application
+================================================================
+
+When using *Biryani* in an application that defines its own internationalized messages, you need to merge the translations.
+
+One way to do this is to chain the translations using the fallback mechanism.
+
+For example, if the application using *Biryani* is named **myapp** and stores its localized messages in ``myapp/i18n`` you could chain its translations with those of *Biryani* using some code like::
+
+    languages = ['fr']
+    byriani_translation = gettext.translation('biryani', 'biryani/i18n',
+        fallback = gettext.NullTranslations(), languages = languages)
+    translation = gettext.translation('myapp', 'myapp/i18n',
+        fallback = byriani_translation, languages = languages)
+
