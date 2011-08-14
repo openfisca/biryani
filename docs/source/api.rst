@@ -3,8 +3,12 @@ API
 ***
 
 
+Converters
+==========
+
+
 biryani.baseconv
-================
+----------------
 
 .. testsetup::
 
@@ -16,7 +20,7 @@ biryani.baseconv
 
 
 biryani.babelconv
-=================
+-----------------
 
 .. testsetup::
 
@@ -28,7 +32,7 @@ biryani.babelconv
 
 
 biryani.bsonconv
-================
+----------------
 
 .. testsetup::
 
@@ -40,7 +44,7 @@ biryani.bsonconv
 
 
 biryani.creditcardconv
-======================
+----------------------
 
 .. testsetup::
 
@@ -52,7 +56,7 @@ biryani.creditcardconv
 
 
 biryani.datetimeconv
-====================
+--------------------
 
 .. testsetup::
 
@@ -64,7 +68,7 @@ biryani.datetimeconv
 
 
 biryani.frconv
-==============
+--------------
 
 .. testsetup::
 
@@ -76,7 +80,7 @@ biryani.frconv
 
 
 biryani.objectconv
-==================
+------------------
 
 .. testsetup::
 
@@ -88,7 +92,7 @@ biryani.objectconv
 
 
 biryani.states
-==============
+--------------
 
 .. testsetup::
 
@@ -99,26 +103,29 @@ biryani.states
    :undoc-members:
 
 
-biryani.strings
-===============
-
-.. testsetup::
-
-   from biryani.strings import *
-
-.. automodule:: biryani.strings
-   :members:
-   :undoc-members:
-
-
 biryani.webobconv
-=================
+-----------------
 
 .. testsetup::
 
    from biryani.webobconv import *
 
 .. automodule:: biryani.webobconv
+   :members:
+   :undoc-members:
+
+
+String Functions
+================
+
+biryani.strings
+---------------
+
+.. testsetup::
+
+   from biryani.strings import *
+
+.. automodule:: biryani.strings
    :members:
    :undoc-members:
 
