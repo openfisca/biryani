@@ -477,13 +477,13 @@ def first_match(*converters):
     (u'Hello world!', None)
     """
     def first_match_converter(value, state = states.default_state):
-        convertered_value = value
+        converted_value = value
         error = None
         for converter in converters:
-            convertered_value, error = converter(value, state = state)
+            converted_value, error = converter(value, state = state)
             if error is None:
-                return convertered_value, error
-        return convertered_value, error
+                return converted_value, error
+        return converted_value, error
     return first_match_converter
 
 
@@ -1201,18 +1201,18 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
                 if name not in values_converter:
                     values_converter[name] = default if default is not None else fail(N_(u'Unexpected item'))
         errors = {}
-        convertered_values = {}
+        converted_values = {}
         for name, converter in values_converter.iteritems():
             value, error = converter(values.get(name), state = state)
             if value is not None:
-                convertered_values[name] = value
+                converted_values[name] = value
             if error is not None:
                 errors[name] = error
-        if keep_empty or convertered_values:
-            convertered_values = constructor(convertered_values)
+        if keep_empty or converted_values:
+            converted_values = constructor(converted_values)
         else:
-            convertered_values = None
-        return convertered_values, errors or None
+            converted_values = None
+        return converted_values, errors or None
     return structured_mapping_converter
 
 
@@ -1269,18 +1269,18 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
                 values_converter.append(default if default is not None else fail(N_(u'Unexpected item')))
         import itertools
         errors = {}
-        convertered_values = []
+        converted_values = []
+        is_empty = True
         for i, (converter, value) in enumerate(itertools.izip_longest(
                 values_converter, itertools.islice(values, len(values_converter)))):
             value, error = converter(value, state = state)
-            convertered_values.append(value)
+            if value is not None:
+                is_empty = False
+            converted_values.append(value)
             if error is not None:
                 errors[i] = error
-        if keep_empty or convertered_values:
-            convertered_values = constructor(convertered_values)
-        else:
-            convertered_values = None
-        return convertered_values, errors or None
+        converted_values = constructor(converted_values) if not is_empty or keep_empty else None
+        return converted_values, errors or None
     return structured_sequence_converter
 
 
@@ -1503,7 +1503,7 @@ def translate(conversions):
 #        if values is None:
 #            return values, None
 #        errors = {}
-#        convertered_values = {}
+#        converted_values = {}
 #        for key, value in values.iteritems():
 #            key, error = key_converter(key, state = state)
 #            if error is not None:
@@ -1512,14 +1512,14 @@ def translate(conversions):
 #                continue
 #            value, error = value_converter(value, state = state)
 #            if value is not None or keep_missing_values:
-#                convertered_values[key] = value
+#                converted_values[key] = value
 #            if error is not None:
 #                errors[key] = error
-#        if keep_empty or convertered_values:
-#            convertered_values = constructor(convertered_values)
+#        if keep_empty or converted_values:
+#            converted_values = constructor(converted_values)
 #        else:
-#            convertered_values = None
-#        return convertered_values, errors or None
+#            converted_values = None
+#        return converted_values, errors or None
 #    return uniform_mapping_converter
 
 
@@ -1551,18 +1551,18 @@ def uniform_sequence(converter, constructor = list, keep_empty = False, keep_mis
         if values is None:
             return values, None
         errors = {}
-        convertered_values = []
+        converted_values = []
         for i, value in enumerate(values):
             value, error = converter(value, state = state)
             if keep_missing_items or value is not None:
-                convertered_values.append(value)
+                converted_values.append(value)
             if error is not None:
                 errors[i] = error
-        if keep_empty or convertered_values:
-            convertered_values = constructor(convertered_values)
+        if keep_empty or converted_values:
+            converted_values = constructor(converted_values)
         else:
-            convertered_values = None
-        return convertered_values, errors or None
+            converted_values = None
+        return converted_values, errors or None
     return uniform_sequence_converter
 
 
