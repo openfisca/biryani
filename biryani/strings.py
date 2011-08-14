@@ -28,7 +28,14 @@
 import unicodedata
 
 
-__all__ = ['deep_decode', 'deep_encode', 'normalize', 'slugify']
+__all__ = [
+    'deep_decode',
+    'deep_encode',
+    'lower',
+    'normalize',
+    'slugify',
+    'upper',
+    ]
 
 ASCII_TRANSLATIONS = {
     u'\N{NO-BREAK SPACE}': ' ',
@@ -102,7 +109,19 @@ ASCII_TRANSLATIONS = {
 
 
 def deep_decode(value, encoding = 'utf-8'):
-    """Convert recursively bytes strings embedded in Python data to unicode strings."""
+    """Convert recursively bytes strings embedded in Python data to unicode strings.
+
+    >>> deep_decode('Hello world!')
+    u'Hello world!'
+    >>> deep_decode(dict(a = 'b', c = ['d', 'e']))
+    {u'a': u'b', u'c': [u'd', u'e']}
+    >>> deep_decode(u'Hello world!')
+    u'Hello world!'
+    >>> deep_decode(42)
+    42
+    >>> print deep_decode(None)
+    None
+    """
     return value if isinstance(value, unicode) else value.decode(encoding) if isinstance(value, str) \
         else dict(
             (deep_decode(name, encoding = encoding), deep_decode(item, encoding = encoding))
@@ -120,7 +139,19 @@ def deep_decode(value, encoding = 'utf-8'):
 
 
 def deep_encode(value, encoding = 'utf-8'):
-    """Convert recursively unicode strings embedded in Python data to encoded strings."""
+    """Convert recursively unicode strings embedded in Python data to encoded strings.
+
+    >>> deep_encode(u'Hello world!')
+    'Hello world!'
+    >>> deep_encode({u'a': u'b', u'c': [u'd', u'e']})
+    {'a': 'b', 'c': ['d', 'e']}
+    >>> deep_encode('Hello world!')
+    'Hello world!'
+    >>> deep_encode(42)
+    42
+    >>> print deep_encode(None)
+    None
+    """
     return value if isinstance(value, str) else value.encode(encoding) if isinstance(value, unicode) \
         else dict(
             (deep_encode(name, encoding = encoding), deep_encode(item, encoding = encoding))
@@ -138,11 +169,39 @@ def deep_encode(value, encoding = 'utf-8'):
 
 
 def lower(s):
+    """Convert a string to lower case.
+
+    .. note:: This method is equivalent to the ``lower()`` method of strings, but can be used when a function is
+       expected, for example by the :func:`normalize` & :func:`slugify` functions.
+
+    >>> lower('Hello world!')
+    'hello world!'
+    >>> lower(u'Hello world!')
+    u'hello world!'
+    >>> print lower(None)
+    None
+    """
+    if s is None:
+        return None
     return s.lower()
 
 
 def normalize(s, encoding = 'utf-8', separator = u' ', transform = lower):
-    """Convert a string to its normal form using compatibility decomposition and removing combining characters."""
+    """Convert a string to its normal form using compatibility decomposition and removing combining characters.
+
+    >>> normalize(u'Hello world!')
+    u'hello world!'
+    >>> normalize(u'   Hello   world!   ')
+    u'hello world!'
+    >>> normalize('œil, forêt, ça, où...')
+    u'\u0153il, foret, ca, ou...'
+    >>> normalize('Hello world!')
+    u'hello world!'
+    >>> print normalize(None)
+    None
+    """
+    if s is None:
+        return None
     if isinstance(s, str):
         s = s.decode(encoding)
     assert isinstance(s, unicode), str((s,))
@@ -153,17 +212,31 @@ def normalize(s, encoding = 'utf-8', separator = u' ', transform = lower):
     return normalized
 
 
-def slugify(s, encoding = 'utf-8', separator = '-', transform = lower):
-    """Simplify a string, converting it to a lowercase ASCII subset."""
+def slugify(s, encoding = 'utf-8', separator = u'-', transform = lower):
+    """Simplify a string, converting it to a lowercase ASCII subset.
+
+    >>> slugify(u'Hello world!')
+    u'hello-world'
+    >>> slugify(u'   Hello   world!   ')
+    u'hello-world'
+    >>> slugify('œil, forêt, ça, où...')
+    u'oeil-foret-ca-ou'
+    >>> slugify('Hello world!')
+    u'hello-world'
+    >>> print slugify(None)
+    None
+    """
+    if s is None:
+        return None
     if isinstance(s, str):
         s = s.decode(encoding)
     assert isinstance(s, unicode), str((s,))
-    simplified = ''.join([slugify_char(unicode_char) for unicode_char in s])
-    while '  ' in simplified:
-        simplified = simplified.replace('  ', ' ')
+    simplified = u''.join([slugify_char(unicode_char) for unicode_char in s])
+    while u'  ' in simplified:
+        simplified = simplified.replace(u'  ', u' ')
     simplified = simplified.strip()
-    if separator != ' ':
-        simplified = simplified.replace(' ', separator)
+    if separator != u' ':
+        simplified = simplified.replace(u' ', separator)
     if transform is not None:
         simplified = transform(simplified)
     return simplified
@@ -198,5 +271,19 @@ def unicode_char_to_ascii(unicode_char):
 
 
 def upper(s):
+    """Convert a string to upper case.
+
+    .. note:: This method is equivalent to the ``upper()`` method of strings, but can be used when a function is
+       expected, or example by the :func:`normalize` & :func:`slugify` functions.
+
+    >>> upper('Hello world!')
+    'HELLO WORLD!'
+    >>> upper(u'Hello world!')
+    u'HELLO WORLD!'
+    >>> print upper(None)
+    None
+    """
+    if s is None:
+        return None
     return s.upper()
 
