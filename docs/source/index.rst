@@ -104,13 +104,6 @@ Documentation
    changelog
    for-maintainer-only
 
-.. TODO
-
-   Philosophy
-   Howto use with WebOb
-   How to use with lxml
-   How to import a CSV file
-
 
 Copyright and license
 =====================
