@@ -160,7 +160,7 @@ def str_couple_to_credit_card_type_and_number(value, state = states.default_stat
     >>> str_couple_to_credit_card_type_and_number((u'visa', None))
     ([u'visa', None], {1: u'Missing value'})
     >>> str_couple_to_credit_card_type_and_number((None, None))
-    ([None, None], {0: u'Missing value', 1: u'Missing value'})
+    (None, {0: u'Missing value', 1: u'Missing value'})
     >>> str_couple_to_credit_card_type_and_number(None)
     (None, None)
     """
