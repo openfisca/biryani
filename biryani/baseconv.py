@@ -113,9 +113,13 @@ username_re = re.compile(r"[^ \t\n\r@<>()]+$", re.I)
 
 
 def bool_to_str(value, state = states.default_state):
-    """Convert a boolean to a string.
+    """Convert a boolean to a "0" or "1" string.
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+
+        When you want ``None`` to be converted to ``"0"``, use::
+
+            pipe(bool_to_str, default(u'0'))
 
     >>> bool_to_str(False)
     (u'0', None)
@@ -147,6 +151,10 @@ def clean_str_to_bool(value, state = states.default_state):
     .. note:: For a converter that accepts special strings like "f", "off", "no", etc, see :func:`guess_bool`.
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+
+        When you want ``None`` to be converted to ``False``, use::
+
+            pipe(clean_str_to_bool, default(False))
 
     >>> clean_str_to_bool(u'0')
     (False, None)
@@ -318,6 +326,8 @@ def clean_str_to_url_path_and_query(value, state = states.default_state):
     (u'/Biryani/search.html?q=pipe', None)
     >>> clean_str_to_url_path_and_query(u'http://packages.python.org/Biryani/search.html?q=pipe')
     (u'http://packages.python.org/Biryani/search.html?q=pipe', u'URL must not be complete')
+    >>> print clean_str_to_url_path_and_query(None)
+    (None, None)
     >>> import urlparse
     >>> pipe(
     ...     clean_str_to_url(),
@@ -582,8 +592,11 @@ def guess_bool(value, state = states.default_state):
 
     This converter accepts usual values for ``True`` and ``False``: "0", "f", "false", "n", etc.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted. Use
-       :func:`guess_bool_default_false` when you want ``None`` to be converted to ``False``.
+    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+
+        When you want ``None`` to be converted to ``False``, use::
+
+            pipe(guess_bool, default(False))
 
     >>> guess_bool(u'0')
     (False, None)
@@ -1626,6 +1639,10 @@ python_data_to_bool = function(lambda value: bool(value))
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
 
+        When you want ``None`` to be converted to ``False``, use::
+
+            pipe(python_data_to_bool, default(False))
+
     >>> python_data_to_bool(0)
     (False, None)
     >>> python_data_to_bool(-1)
@@ -1649,7 +1666,11 @@ python_data_to_bool = function(lambda value: bool(value))
 str_to_bool = pipe(cleanup_line, clean_str_to_bool)
 """Convert a string to a boolean.
 
-    Like most converters, a missing value (aka ``None``) is not converted.
+    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+
+        When you want ``None`` to be converted to ``False``, use::
+
+            pipe(str_to_bool, default(False))
 
     >>> str_to_bool(u'0')
     (False, None)
