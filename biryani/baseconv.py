@@ -61,7 +61,6 @@ __all__ = [
     'function',
     'get',
     'guess_bool',
-    'guess_bool_default_false',
     'item_or_sequence',
     'new_mapping',
     'new_sequence',
@@ -1618,72 +1617,6 @@ extract_when_singleton = condition(
 
 # Level-3 Converters
 
-
-guess_bool_default_false = pipe(guess_bool, default(False))
-"""Convert the content of a string (or a number) to a boolean. Do nothing when input value is already a boolean.
-
-    This converter accepts usual values for ``True`` and ``False``: "0", "f", "false", "n", etc.
-
-    .. warning:: Unlike most converters, a missing value (aka ``None``) is converted (to ``False``). Use
-       :func:`guess_bool` when you don't want to keep ``None`` instead of converting it to ``False``.
-
-    >>> guess_bool_default_false(u'0')
-    (False, None)
-    >>> guess_bool_default_false(u'f')
-    (False, None)
-    >>> guess_bool_default_false(u'FALSE')
-    (False, None)
-    >>> guess_bool_default_false(u'false')
-    (False, None)
-    >>> guess_bool_default_false(u'n')
-    (False, None)
-    >>> guess_bool_default_false(u'no')
-    (False, None)
-    >>> guess_bool_default_false(u'off')
-    (False, None)
-    >>> guess_bool_default_false(u'  0  ')
-    (False, None)
-    >>> guess_bool_default_false(u'  f  ')
-    (False, None)
-    >>> guess_bool_default_false(u'')
-    (False, None)
-    >>> guess_bool_default_false(u'   ')
-    (False, None)
-    >>> guess_bool_default_false(False)
-    (False, None)
-    >>> guess_bool_default_false(0)
-    (False, None)
-    >>> guess_bool_default_false(u'1')
-    (True, None)
-    >>> guess_bool_default_false(u'on')
-    (True, None)
-    >>> guess_bool_default_false(u't')
-    (True, None)
-    >>> guess_bool_default_false(u'TRUE')
-    (True, None)
-    >>> guess_bool_default_false(u'true')
-    (True, None)
-    >>> guess_bool_default_false(u'y')
-    (True, None)
-    >>> guess_bool_default_false(u'yes')
-    (True, None)
-    >>> guess_bool_default_false(u'  1  ')
-    (True, None)
-    >>> guess_bool_default_false(u'  tRuE  ')
-    (True, None)
-    >>> guess_bool_default_false(True)
-    (True, None)
-    >>> guess_bool_default_false(1)
-    (True, None)
-    >>> guess_bool_default_false(2)
-    (True, None)
-    >>> guess_bool_default_false(-1)
-    (True, None)
-    >>> guess_bool_default_false(None)
-    (False, None)
-    >>> guess_bool_default_false(u'vrai')
-    (u'vrai', u'Value must be a boolean')
-"""
 
 python_data_to_bool = function(lambda value: bool(value))
 """Convert any Python data to a boolean.
