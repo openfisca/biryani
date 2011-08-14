@@ -143,11 +143,11 @@ error):
 >>> validate_form(req6.POST)
 ({'email': u'john.doe.name'}, {'username': u'Missing value', 'email': u'An email must contain exactly one "@"'})
 
-Using the converters :func:`biryani.webobconv.multidict_get` and :func:`biryani.baseconv.mapping`, the fonction can be
-simplified to:
+Using the converters :func:`biryani.webobconv.multidict_get` and :func:`biryani.baseconv.new_struct`, the fonction can
+be simplified to:
 
 >>> def validate_form(params):
-...     return conv.mapping(dict(
+...     return conv.new_struct(dict(
 ...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.test_exists),
 ...         email = conv.pipe(conv.multidict_get('email'), conv.str_to_email),
 ...         ))(params)
@@ -167,7 +167,7 @@ For the password, we need to ensure that it is present twice in submitted form a
 Let's add it to our function:
 
 >>> def validate_form(params):
-...     data, errors = conv.mapping(dict(
+...     data, errors = conv.new_struct(dict(
 ...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.test_exists),
 ...         email = conv.pipe(conv.multidict_get('email'), conv.str_to_email),
 ...         ))(params)
@@ -224,7 +224,7 @@ extract the first item of a list, but we can create it using :func:`biryani.base
 Let's combine `test_passwords` and `extract_first_item` to rewrite our `validate_form` function:
 
 >>> def validate_form(params):
-...     return conv.mapping(dict(
+...     return conv.new_struct(dict(
 ...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.test_exists),
 ...         password = conv.pipe(
 ...             conv.multidict_getall('password'),
@@ -300,7 +300,7 @@ Now use this function in `validate_form`:
 ...                 )
 ...             if clean_tag
 ...             ]))
-...     return conv.mapping(dict(
+...     return conv.new_struct(dict(
 ...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.test_exists),
 ...         password = conv.pipe(
 ...             conv.multidict_getall('password'),
@@ -348,7 +348,7 @@ Let's combine everything in a new version of `validate_form`:
 ...                 )
 ...             if clean_tag
 ...             ]))
-...     return conv.mapping(dict(
+...     return conv.new_struct(dict(
 ...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.test_exists),
 ...         password = conv.pipe(
 ...             conv.multidict_getall('password'),
@@ -378,7 +378,7 @@ The end
 By the way, we don't need to define a function for `validate_form`. Declaring a variable is sufficient. Here is the
 final form of the form validator:
 
->>> validate_form = conv.mapping(dict(
+>>> validate_form = conv.new_struct(dict(
 ...     username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.test_exists),
 ...     password = conv.pipe(
 ...         conv.multidict_getall('password'),

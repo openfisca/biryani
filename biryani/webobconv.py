@@ -59,7 +59,7 @@ def multidict_get(key, default = None):
     (3, None)
     >>> multidict_get('tag')(req.GET)
     (u'World!', None)
-    >>> mapping(dict(
+    >>> new_struct(dict(
     ...     a = multidict_get('a'),
     ...     b = multidict_get('b'),
     ...     ))(req.GET)
@@ -81,7 +81,7 @@ def multidict_getall(key):
     ([u''], None)
     >>> multidict_getall('tag')(req.GET)
     ([u'hello', u'World!'], None)
-    >>> mapping(dict(
+    >>> new_struct(dict(
     ...     b = multidict_getall('b'),
     ...     tags = multidict_getall('tag'),
     ...     ))(req.GET)

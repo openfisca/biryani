@@ -59,10 +59,13 @@ __all__ = [
     'fail',
     'first_match',
     'function',
+    'get',
     'guess_bool',
     'guess_bool_default_false',
     'item_or_sequence',
-    'mapping',
+    'new_mapping',
+    'new_sequence',
+    'new_struct',
     'noop',
     'pipe',
     'python_data_to_bool',
@@ -70,7 +73,6 @@ __all__ = [
     'python_data_to_int',
     'python_data_to_str',
     'rename_item',
-    'sequence',
     'set_value',
     'str_to_bool',
     'str_to_email',
@@ -521,6 +523,58 @@ def function(function, handle_missing_value = False, handle_state = False):
     return function_converter
 
 
+def get(key, default = UnboundLocalError, error = None):
+    """Return a converter that returns an item of a collection.
+
+    Collection can either be a mapping (ie dict, etc) or a sequence (ie list, tuple, string, etc).
+
+    Usage with a mapping:
+
+    >>> get('a')(dict(a = 1, b = 2))
+    (1, None)
+    >>> get('c')(dict(a = 1, b = 2))
+    (None, u'Unknown key: c')
+    >>> get('c', default = None)(dict(a = 1, b = 2))
+    (None, None)
+    >>> get('c', error = u'Key Error')(dict(a = 1, b = 2))
+    (None, u'Key Error')
+    >>> get(u'a')(None)
+    (None, None)
+
+    Usage with a sequence:
+    >>> get(0)(u'ab')
+    (u'a', None)
+    >>> get(-2)([u'a', u'b'])
+    (u'a', None)
+    >>> get(-3)(u'ab')
+    (None, u'Index out of range: -3')
+    >>> get(2, error = u"Index Error')([u'a', u'b'])
+    (None, u"Index Error')
+    >>> get(-3, default = None)(u'ab')
+    (None, None)
+    >>> get(0)(None)
+    (None, None)
+    """
+    def get_converter(value, state = states.default_state):
+        import collections
+
+        if value is None:
+            return value, None
+        if isinstance(value, collections.Mapping):
+            converted_value = value.get(key, default)
+            if converted_value is UnboundLocalError:
+                return None, state._(u'Unknown key: {0}').format(key) if error is None else state._(error)
+            return converted_value, None
+        assert isinstance(value, collections.Sequence), \
+            'Value must be a mapping or a sequence. Got {0} instead.'.format(type(value))
+        if 0 <= key < len(value):
+            return value[key], None
+        if default is UnboundLocalError:
+            return None, state._(u'Index out of range: {0}').format(key) if error is None else state._(error)
+        return default, None
+    return get_converter
+
+
 def guess_bool(value, state = states.default_state):
     """Convert the content of a string (or a number) to a boolean. Do nothing when input value is already a boolean.
 
@@ -635,16 +689,15 @@ def item_or_sequence(converter, constructor = list, keep_missing_items = False):
         )
 
 
-def mapping(converters, constructor = dict, keep_empty = False, keep_missing_items = False):
+def new_mapping(converters, constructor = dict, keep_empty = False):
     """Return a converter that constructs a mapping (ie dict, etc) from any kind of value.
 
-    .. note:: Most of the times, when input value is also a mapping, converters :func:`uniform_mapping` or
-       :func:`struct` should be used instead.
+    .. note:: This converter should not be used directly. Use :func:`new_struct` instead.
 
-    >>> def get(index):
-    ...     return function(lambda value: value[index])
-    >>> def convert_list_to_dict(constructor = dict, keep_empty = False, keep_missing_items = False):
-    ...     return mapping(
+    .. note:: When input value has the same structure, converter :func:`struct` should be used instead.
+
+    >>> def convert_list_to_dict(constructor = dict, keep_empty = False):
+    ...     return new_mapping(
     ...         dict(
     ...             name = get(0),
     ...             age = pipe(get(1), str_to_int),
@@ -652,17 +705,13 @@ def mapping(converters, constructor = dict, keep_empty = False, keep_missing_ite
     ...             ),
     ...         constructor = constructor,
     ...         keep_empty = keep_empty,
-    ...         keep_missing_items = keep_missing_items,
     ...         )
-    >>> convert_list_to_dict()([u'John Doe', u'72', u'spam@easter-eggs.com'])
-    ({'age': 72, 'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
+    >>> convert_list_to_dict()([u'John Doe', u'72', u'john@doe.com'])
+    ({'age': 72, 'email': u'john@doe.com', 'name': u'John Doe'}, None)
     >>> convert_list_to_dict()([u'John Doe', u'72'])
-    Traceback (most recent call last):
-    IndexError: list index out of range
+    ({'age': 72, 'name': u'John Doe'}, {'email': u'Index out of range: 2'})
     >>> convert_list_to_dict()([u'John Doe', u'72', None])
     ({'age': 72, 'name': u'John Doe'}, None)
-    >>> convert_list_to_dict(keep_missing_items = True)([u'John Doe', u'72', None])
-    ({'age': 72, 'email': None, 'name': u'John Doe'}, None)
     >>> convert_list_to_dict()([None, u' ', None])
     (None, None)
     >>> convert_list_to_dict(keep_empty = True)([None, u' ', None])
@@ -675,23 +724,140 @@ def mapping(converters, constructor = dict, keep_empty = False, keep_missing_ite
         for name, converter in (converters or {}).iteritems()
         if converter is not None
         )
-    def mapping_converter(value, state = states.default_state):
+    def new_mapping_converter(value, state = states.default_state):
         if value is None:
             return value, None
         errors = {}
-        convertered_values = {}
+        converted_values = {}
         for name, converter in converters.iteritems():
             converted_value, error = converter(value, state = state)
-            if converted_value is not None or keep_missing_items:
-                convertered_values[name] = converted_value
+            if converted_value is not None:
+                converted_values[name] = converted_value
             if error is not None:
                 errors[name] = error
-        if keep_empty or convertered_values:
-            convertered_values = constructor(convertered_values)
+        if keep_empty or converted_values:
+            converted_values = constructor(converted_values)
         else:
-            convertered_values = None
-        return convertered_values, errors or None
-    return mapping_converter
+            converted_values = None
+        return converted_values, errors or None
+    return new_mapping_converter
+
+
+def new_sequence(converters, constructor = list, keep_empty = False):
+    """Return a converter that constructs a sequence (ie list, tuple, etc) from any kind of value.
+
+    .. note:: This converter should not be used directly. Use :func:`new_struct` instead.
+
+    .. note:: When input value has the same structure, converter :func:`struct` should be used instead.
+
+    >>> def convert_dict_to_list(constructor = list, keep_empty = False):
+    ...     return new_sequence(
+    ...         [
+    ...             get('name', default = None),
+    ...             pipe(get('age', default = None), str_to_int),
+    ...             pipe(get('email', default = None), str_to_email),
+    ...             ],
+    ...         constructor = constructor,
+    ...         keep_empty = keep_empty,
+    ...         )
+    >>> convert_dict_to_list()({'age': u'72', 'email': u'john@doe.com', 'name': u'John Doe'})
+    ([u'John Doe', 72, u'john@doe.com'], None)
+    >>> convert_dict_to_list(constructor = tuple)({'age': u'72', 'email': u'john@doe.com', 'name': u'John Doe'})
+    ((u'John Doe', 72, u'john@doe.com'), None)
+    >>> convert_dict_to_list()({'email': u'john@doe.com', 'name': u'John Doe'})
+    ([u'John Doe', None, u'john@doe.com'], None)
+    >>> convert_dict_to_list()({})
+    (None, None)
+    >>> convert_dict_to_list(keep_empty = True)({})
+    ([None, None, None], None)
+    >>> convert_dict_to_list()(None)
+    (None, None)
+    """
+    converters = [
+        converter
+        for converter in converters or []
+        if converter is not None
+        ]
+    def new_sequence_converter(value, state = states.default_state):
+        if value is None:
+            return value, None
+        errors = {}
+        converted_values = []
+        is_empty = True
+        for i, converter in enumerate(converters):
+            converted_value, error = converter(value, state = state)
+            if converted_value is not None:
+                is_empty = False
+            converted_values.append(converted_value)
+            if error is not None:
+                errors[i] = error
+        converted_values = constructor(converted_values) if not is_empty or keep_empty else None
+        return converted_values, errors or None
+    return new_sequence_converter
+
+
+def new_struct(converters, constructor = None, keep_empty = False):
+    """Return a converter that constructs a collection (ie dict, list, set, etc) from any kind of value.
+
+    .. note:: When input value has the same structure, converter :func:`struct` should be used instead.
+
+    Usage to create a mapping (ie dict, etc):
+
+    >>> def convert_list_to_dict(constructor = dict, keep_empty = False):
+    ...     return new_struct(
+    ...         dict(
+    ...             name = get(0),
+    ...             age = pipe(get(1), str_to_int),
+    ...             email = pipe(get(2), str_to_email),
+    ...             ),
+    ...         constructor = constructor,
+    ...         keep_empty = keep_empty,
+    ...         )
+    >>> convert_list_to_dict()([u'John Doe', u'72', u'john@doe.com'])
+    ({'age': 72, 'email': u'john@doe.com', 'name': u'John Doe'}, None)
+    >>> convert_list_to_dict()([u'John Doe', u'72'])
+    ({'age': 72, 'name': u'John Doe'}, {'email': u'Index out of range: 2'})
+    >>> convert_list_to_dict()([u'John Doe', u'72', None])
+    ({'age': 72, 'name': u'John Doe'}, None)
+    >>> convert_list_to_dict()([None, u' ', None])
+    (None, None)
+    >>> convert_list_to_dict(keep_empty = True)([None, u' ', None])
+    ({}, None)
+    >>> convert_list_to_dict()(None)
+    (None, None)
+
+    Usage to create a sequence (ie list, tuple, etc) or a set:
+
+    >>> def convert_dict_to_list(constructor = list, keep_empty = False):
+    ...     return new_struct(
+    ...         [
+    ...             get('name', default = None),
+    ...             pipe(get('age', default = None), str_to_int),
+    ...             pipe(get('email', default = None), str_to_email),
+    ...             ],
+    ...         constructor = constructor,
+    ...         keep_empty = keep_empty,
+    ...         )
+    >>> convert_dict_to_list()({'age': u'72', 'email': u'john@doe.com', 'name': u'John Doe'})
+    ([u'John Doe', 72, u'john@doe.com'], None)
+    >>> convert_dict_to_list(constructor = tuple)({'age': u'72', 'email': u'john@doe.com', 'name': u'John Doe'})
+    ((u'John Doe', 72, u'john@doe.com'), None)
+    >>> convert_dict_to_list()({'email': u'john@doe.com', 'name': u'John Doe'})
+    ([u'John Doe', None, u'john@doe.com'], None)
+    >>> convert_dict_to_list()({})
+    (None, None)
+    >>> convert_dict_to_list(keep_empty = True)({})
+    ([None, None, None], None)
+    >>> convert_dict_to_list()(None)
+    (None, None)
+    """
+    import collections
+
+    if isinstance(converters, collections.Mapping):
+        return new_mapping(converters, constructor = constructor or dict,  keep_empty = keep_empty)
+    assert isinstance(converters, collections.Sequence), \
+        'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
+    return new_sequence(converters, constructor = constructor or list, keep_empty = keep_empty)
 
 
 def noop(value, state = states.default_state):
@@ -826,64 +992,6 @@ def rename_item(old_key, new_key):
             value[new_key] = value.pop(old_key)
         return value, None
     return rename_item_converter
-
-
-def sequence(converters, constructor = list, keep_empty = False, keep_missing_items = False):
-    """Return a converter that constructs a sequence (ie list, tuple, etc) from any kind of value.
-
-    .. note:: Most of the times, when input value is also a sequence, converters :func:`uniform_sequence` or
-       :func:`struct` should be used instead.
-
-    >>> def get(key):
-    ...     return function(lambda value: value.get(key))
-    >>> def convert_dict_to_list(constructor = list, keep_empty = False, keep_missing_items = False):
-    ...     return sequence(
-    ...         [
-    ...             get('name'),
-    ...             pipe(get('age'), str_to_int),
-    ...             pipe(get('email'), str_to_email),
-    ...             ],
-    ...         constructor = constructor,
-    ...         keep_empty = keep_empty,
-    ...         keep_missing_items = keep_missing_items,
-    ...         )
-    >>> convert_dict_to_list()({'age': u'72', 'email': u'spam@easter-eggs.com', 'name': u'John Doe'})
-    ([u'John Doe', 72, u'spam@easter-eggs.com'], None)
-    >>> convert_dict_to_list(constructor = tuple)({'age': u'72', 'email': u'spam@easter-eggs.com', 'name': u'John Doe'})
-    ((u'John Doe', 72, u'spam@easter-eggs.com'), None)
-    >>> convert_dict_to_list()({'email': u'spam@easter-eggs.com', 'name': u'John Doe'})
-    ([u'John Doe', u'spam@easter-eggs.com'], None)
-    >>> convert_dict_to_list(keep_missing_items = True)({'email': u'spam@easter-eggs.com', 'name': u'John Doe'})
-    ([u'John Doe', None, u'spam@easter-eggs.com'], None)
-    >>> convert_dict_to_list()({})
-    (None, None)
-    >>> convert_dict_to_list(keep_empty = True)({})
-    ([], None)
-    >>> convert_dict_to_list()(None)
-    (None, None)
-    """
-    converters = [
-        converter
-        for converter in converters or []
-        if converter is not None
-        ]
-    def sequence_converter(value, state = states.default_state):
-        if value is None:
-            return value, None
-        errors = {}
-        convertered_values = []
-        for i, converter in enumerate(converters):
-            converted_value, error = converter(value, state = state)
-            if converted_value is not None or keep_missing_items:
-                convertered_values.append(converted_value)
-            if error is not None:
-                errors[i] = error
-        if keep_empty or convertered_values:
-            convertered_values = constructor(convertered_values)
-        else:
-            convertered_values = None
-        return convertered_values, errors or None
-    return sequence_converter
 
 
 def set_value(constant):
