@@ -172,10 +172,10 @@ def clean_str_to_email(value, state = states.default_state):
 
     .. note:: For a converter that doesn't require a clean string, see :func:`str_to_email`.
 
-    >>> clean_str_to_email(u'spam@easter-eggs.com')
-    (u'spam@easter-eggs.com', None)
-    >>> clean_str_to_email(u'mailto:spam@easter-eggs.com')
-    (u'spam@easter-eggs.com', None)
+    >>> clean_str_to_email(u'john@doe.name')
+    (u'john@doe.name', None)
+    >>> clean_str_to_email(u'mailto:john@doe.name')
+    (u'john@doe.name', None)
     >>> clean_str_to_email(u'root@localhost')
     (u'root@localhost', None)
     >>> clean_str_to_email(u'root@127.0.0.1')
@@ -706,8 +706,8 @@ def new_mapping(converters, constructor = dict, keep_empty = False):
     ...         constructor = constructor,
     ...         keep_empty = keep_empty,
     ...         )
-    >>> convert_list_to_dict()([u'John Doe', u'72', u'john@doe.com'])
-    ({'age': 72, 'email': u'john@doe.com', 'name': u'John Doe'}, None)
+    >>> convert_list_to_dict()([u'John Doe', u'72', u'john@doe.name'])
+    ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> convert_list_to_dict()([u'John Doe', u'72'])
     ({'age': 72, 'name': u'John Doe'}, {'email': u'Index out of range: 2'})
     >>> convert_list_to_dict()([u'John Doe', u'72', None])
@@ -760,12 +760,12 @@ def new_sequence(converters, constructor = list, keep_empty = False):
     ...         constructor = constructor,
     ...         keep_empty = keep_empty,
     ...         )
-    >>> convert_dict_to_list()({'age': u'72', 'email': u'john@doe.com', 'name': u'John Doe'})
-    ([u'John Doe', 72, u'john@doe.com'], None)
-    >>> convert_dict_to_list(constructor = tuple)({'age': u'72', 'email': u'john@doe.com', 'name': u'John Doe'})
-    ((u'John Doe', 72, u'john@doe.com'), None)
-    >>> convert_dict_to_list()({'email': u'john@doe.com', 'name': u'John Doe'})
-    ([u'John Doe', None, u'john@doe.com'], None)
+    >>> convert_dict_to_list()({'age': u'72', 'email': u'john@doe.name', 'name': u'John Doe'})
+    ([u'John Doe', 72, u'john@doe.name'], None)
+    >>> convert_dict_to_list(constructor = tuple)({'age': u'72', 'email': u'john@doe.name', 'name': u'John Doe'})
+    ((u'John Doe', 72, u'john@doe.name'), None)
+    >>> convert_dict_to_list()({'email': u'john@doe.name', 'name': u'John Doe'})
+    ([u'John Doe', None, u'john@doe.name'], None)
     >>> convert_dict_to_list()({})
     (None, None)
     >>> convert_dict_to_list(keep_empty = True)({})
@@ -813,8 +813,8 @@ def new_struct(converters, constructor = None, keep_empty = False):
     ...         constructor = constructor,
     ...         keep_empty = keep_empty,
     ...         )
-    >>> convert_list_to_dict()([u'John Doe', u'72', u'john@doe.com'])
-    ({'age': 72, 'email': u'john@doe.com', 'name': u'John Doe'}, None)
+    >>> convert_list_to_dict()([u'John Doe', u'72', u'john@doe.name'])
+    ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> convert_list_to_dict()([u'John Doe', u'72'])
     ({'age': 72, 'name': u'John Doe'}, {'email': u'Index out of range: 2'})
     >>> convert_list_to_dict()([u'John Doe', u'72', None])
@@ -838,12 +838,12 @@ def new_struct(converters, constructor = None, keep_empty = False):
     ...         constructor = constructor,
     ...         keep_empty = keep_empty,
     ...         )
-    >>> convert_dict_to_list()({'age': u'72', 'email': u'john@doe.com', 'name': u'John Doe'})
-    ([u'John Doe', 72, u'john@doe.com'], None)
-    >>> convert_dict_to_list(constructor = tuple)({'age': u'72', 'email': u'john@doe.com', 'name': u'John Doe'})
-    ((u'John Doe', 72, u'john@doe.com'), None)
-    >>> convert_dict_to_list()({'email': u'john@doe.com', 'name': u'John Doe'})
-    ([u'John Doe', None, u'john@doe.com'], None)
+    >>> convert_dict_to_list()({'age': u'72', 'email': u'john@doe.name', 'name': u'John Doe'})
+    ([u'John Doe', 72, u'john@doe.name'], None)
+    >>> convert_dict_to_list(constructor = tuple)({'age': u'72', 'email': u'john@doe.name', 'name': u'John Doe'})
+    ((u'John Doe', 72, u'john@doe.name'), None)
+    >>> convert_dict_to_list()({'email': u'john@doe.name', 'name': u'John Doe'})
+    ([u'John Doe', None, u'john@doe.name'], None)
     >>> convert_dict_to_list()({})
     (None, None)
     >>> convert_dict_to_list(keep_empty = True)({})
@@ -1041,12 +1041,12 @@ def struct(converters, constructor = None, default = None, keep_empty = False):
     ...     email = str_to_email,
     ...     ))
     ...
-    >>> strict_converter(dict(name = u'John Doe', age = u'72', email = u'spam@easter-eggs.com'))
-    ({'age': 72, 'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
-    >>> strict_converter(dict(name = u'John Doe', email = u'spam@easter-eggs.com'))
-    ({'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
-    >>> strict_converter(dict(name = u'John Doe', age = None, email = u'spam@easter-eggs.com'))
-    ({'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
+    >>> strict_converter(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
+    ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    >>> strict_converter(dict(name = u'John Doe', email = u'john@doe.name'))
+    ({'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    >>> strict_converter(dict(name = u'John Doe', age = None, email = u'john@doe.name'))
+    ({'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', age = u'72', phone = u'   +33 9 12 34 56 78   '))
     ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
     >>> non_strict_converter = struct(
@@ -1058,13 +1058,13 @@ def struct(converters, constructor = None, default = None, keep_empty = False):
     ...     default = cleanup_line,
     ...     )
     ...
-    >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'spam@easter-eggs.com'))
-    ({'age': 72, 'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
-    >>> non_strict_converter(dict(name = u'John Doe', email = u'spam@easter-eggs.com'))
-    ({'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
-    >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'spam@easter-eggs.com',
+    >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
+    ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    >>> non_strict_converter(dict(name = u'John Doe', email = u'john@doe.name'))
+    ({'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'john@doe.name',
     ...     phone = u'   +33 9 12 34 56 78   '))
-    ({'phone': u'+33 9 12 34 56 78', 'age': 72, 'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
+    ({'phone': u'+33 9 12 34 56 78', 'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> struct(
     ...     dict(
     ...         name = cleanup_line,
@@ -1093,14 +1093,14 @@ def struct(converters, constructor = None, default = None, keep_empty = False):
     ...     str_to_email,
     ...     ])
     ...
-    >>> strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com'])
-    ([u'John Doe', 72, u'spam@easter-eggs.com'], None)
-    >>> strict_converter([u'John Doe', u'spam@easter-eggs.com'])
-    ([u'John Doe', u'spam@easter-eggs.com', None], {1: u'Value must be an integer'})
-    >>> strict_converter([u'John Doe', None, u'spam@easter-eggs.com'])
-    ([u'John Doe', None, u'spam@easter-eggs.com'], None)
-    >>> strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com', u'   +33 9 12 34 56 78   '])
-    ([u'John Doe', 72, u'spam@easter-eggs.com', u'   +33 9 12 34 56 78   '], {3: u'Unexpected item'})
+    >>> strict_converter([u'John Doe', u'72', u'john@doe.name'])
+    ([u'John Doe', 72, u'john@doe.name'], None)
+    >>> strict_converter([u'John Doe', u'john@doe.name'])
+    ([u'John Doe', u'john@doe.name', None], {1: u'Value must be an integer'})
+    >>> strict_converter([u'John Doe', None, u'john@doe.name'])
+    ([u'John Doe', None, u'john@doe.name'], None)
+    >>> strict_converter([u'John Doe', u'72', u'john@doe.name', u'   +33 9 12 34 56 78   '])
+    ([u'John Doe', 72, u'john@doe.name', u'   +33 9 12 34 56 78   '], {3: u'Unexpected item'})
     >>> non_strict_converter = struct(
     ...     [
     ...         pipe(cleanup_line, test_exists),
@@ -1110,14 +1110,14 @@ def struct(converters, constructor = None, default = None, keep_empty = False):
     ...     default = cleanup_line,
     ...     )
     ...
-    >>> non_strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com'])
-    ([u'John Doe', 72, u'spam@easter-eggs.com'], None)
-    >>> non_strict_converter([u'John Doe', u'spam@easter-eggs.com'])
-    ([u'John Doe', u'spam@easter-eggs.com', None], {1: u'Value must be an integer'})
-    >>> non_strict_converter([u'John Doe', None, u'spam@easter-eggs.com'])
-    ([u'John Doe', None, u'spam@easter-eggs.com'], None)
-    >>> non_strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com', u'   +33 9 12 34 56 78   '])
-    ([u'John Doe', 72, u'spam@easter-eggs.com', u'+33 9 12 34 56 78'], None)
+    >>> non_strict_converter([u'John Doe', u'72', u'john@doe.name'])
+    ([u'John Doe', 72, u'john@doe.name'], None)
+    >>> non_strict_converter([u'John Doe', u'john@doe.name'])
+    ([u'John Doe', u'john@doe.name', None], {1: u'Value must be an integer'})
+    >>> non_strict_converter([u'John Doe', None, u'john@doe.name'])
+    ([u'John Doe', None, u'john@doe.name'], None)
+    >>> non_strict_converter([u'John Doe', u'72', u'john@doe.name', u'   +33 9 12 34 56 78   '])
+    ([u'John Doe', 72, u'john@doe.name', u'+33 9 12 34 56 78'], None)
     """
     import collections
 
@@ -1141,12 +1141,12 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
     ...     email = str_to_email,
     ...     ))
     ...
-    >>> strict_converter(dict(name = u'John Doe', age = u'72', email = u'spam@easter-eggs.com'))
-    ({'age': 72, 'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
-    >>> strict_converter(dict(name = u'John Doe', email = u'spam@easter-eggs.com'))
-    ({'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
-    >>> strict_converter(dict(name = u'John Doe', age = None, email = u'spam@easter-eggs.com'))
-    ({'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
+    >>> strict_converter(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
+    ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    >>> strict_converter(dict(name = u'John Doe', email = u'john@doe.name'))
+    ({'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    >>> strict_converter(dict(name = u'John Doe', age = None, email = u'john@doe.name'))
+    ({'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', age = u'72', phone = u'   +33 9 12 34 56 78   '))
     ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
     >>> non_strict_converter = structured_mapping(
@@ -1158,13 +1158,13 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
     ...     default = cleanup_line,
     ...     )
     ...
-    >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'spam@easter-eggs.com'))
-    ({'age': 72, 'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
-    >>> non_strict_converter(dict(name = u'John Doe', email = u'spam@easter-eggs.com'))
-    ({'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
-    >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'spam@easter-eggs.com',
+    >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
+    ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    >>> non_strict_converter(dict(name = u'John Doe', email = u'john@doe.name'))
+    ({'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'john@doe.name',
     ...     phone = u'   +33 9 12 34 56 78   '))
-    ({'phone': u'+33 9 12 34 56 78', 'age': 72, 'email': u'spam@easter-eggs.com', 'name': u'John Doe'}, None)
+    ({'phone': u'+33 9 12 34 56 78', 'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> structured_mapping(
     ...     dict(
     ...         name = cleanup_line,
@@ -1227,14 +1227,14 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     ...     str_to_email,
     ...     ])
     ...
-    >>> strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com'])
-    ([u'John Doe', 72, u'spam@easter-eggs.com'], None)
-    >>> strict_converter([u'John Doe', u'spam@easter-eggs.com'])
-    ([u'John Doe', u'spam@easter-eggs.com', None], {1: u'Value must be an integer'})
-    >>> strict_converter([u'John Doe', None, u'spam@easter-eggs.com'])
-    ([u'John Doe', None, u'spam@easter-eggs.com'], None)
-    >>> strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com', u'   +33 9 12 34 56 78   '])
-    ([u'John Doe', 72, u'spam@easter-eggs.com', u'   +33 9 12 34 56 78   '], {3: u'Unexpected item'})
+    >>> strict_converter([u'John Doe', u'72', u'john@doe.name'])
+    ([u'John Doe', 72, u'john@doe.name'], None)
+    >>> strict_converter([u'John Doe', u'john@doe.name'])
+    ([u'John Doe', u'john@doe.name', None], {1: u'Value must be an integer'})
+    >>> strict_converter([u'John Doe', None, u'john@doe.name'])
+    ([u'John Doe', None, u'john@doe.name'], None)
+    >>> strict_converter([u'John Doe', u'72', u'john@doe.name', u'   +33 9 12 34 56 78   '])
+    ([u'John Doe', 72, u'john@doe.name', u'   +33 9 12 34 56 78   '], {3: u'Unexpected item'})
     >>> non_strict_converter = structured_sequence(
     ...     [
     ...         pipe(cleanup_line, test_exists),
@@ -1244,14 +1244,14 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     ...     default = cleanup_line,
     ...     )
     ...
-    >>> non_strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com'])
-    ([u'John Doe', 72, u'spam@easter-eggs.com'], None)
-    >>> non_strict_converter([u'John Doe', u'spam@easter-eggs.com'])
-    ([u'John Doe', u'spam@easter-eggs.com', None], {1: u'Value must be an integer'})
-    >>> non_strict_converter([u'John Doe', None, u'spam@easter-eggs.com'])
-    ([u'John Doe', None, u'spam@easter-eggs.com'], None)
-    >>> non_strict_converter([u'John Doe', u'72', u'spam@easter-eggs.com', u'   +33 9 12 34 56 78   '])
-    ([u'John Doe', 72, u'spam@easter-eggs.com', u'+33 9 12 34 56 78'], None)
+    >>> non_strict_converter([u'John Doe', u'72', u'john@doe.name'])
+    ([u'John Doe', 72, u'john@doe.name'], None)
+    >>> non_strict_converter([u'John Doe', u'john@doe.name'])
+    ([u'John Doe', u'john@doe.name', None], {1: u'Value must be an integer'})
+    >>> non_strict_converter([u'John Doe', None, u'john@doe.name'])
+    ([u'John Doe', None, u'john@doe.name'], None)
+    >>> non_strict_converter([u'John Doe', u'72', u'john@doe.name', u'   +33 9 12 34 56 78   '])
+    ([u'John Doe', 72, u'john@doe.name', u'+33 9 12 34 56 78'], None)
     """
     converters = [
         converter
@@ -1734,18 +1734,18 @@ str_to_bool = pipe(cleanup_line, clean_str_to_bool)
 str_to_email = pipe(cleanup_line, clean_str_to_email)
 """Convert a string to an email address.
 
-    >>> str_to_email(u'spam@easter-eggs.com')
-    (u'spam@easter-eggs.com', None)
-    >>> str_to_email(u'mailto:spam@easter-eggs.com')
-    (u'spam@easter-eggs.com', None)
+    >>> str_to_email(u'john@doe.name')
+    (u'john@doe.name', None)
+    >>> str_to_email(u'mailto:john@doe.name')
+    (u'john@doe.name', None)
     >>> str_to_email(u'root@localhost')
     (u'root@localhost', None)
     >>> str_to_email('root@127.0.0.1')
     ('root@127.0.0.1', u'Invalid domain name')
     >>> str_to_email(u'root')
     (u'root', u'An email must contain exactly one "@"')
-    >>> str_to_email(u'    spam@easter-eggs.com  ')
-    (u'spam@easter-eggs.com', None)
+    >>> str_to_email(u'    john@doe.name  ')
+    (u'john@doe.name', None)
     >>> str_to_email(None)
     (None, None)
     >>> str_to_email(u'    ')
