@@ -22,10 +22,10 @@
 # limitations under the License.
 
 
-"""Experimental or Non Standard Converters
+"""Deprecated Converters
 
-..warning:: Since these converters may change at any time, don't import this module, but copy and paste the functions
-   you need in your application.
+.. warning:: Since these converters may change or be removed at any time, don't import this module, but copy and paste
+   the functions you need in your application.
 """
 
 

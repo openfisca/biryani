@@ -7,7 +7,7 @@ Experimental or non-standard converters
    from biryani import baseconv as conv
    from biryani.nonstandard.deprecatedbaseconv import *
 
-.. automodule:: biryani.deprecated.deprecatedbaseconv
+.. automodule:: biryani.nonstandard.deprecatedbaseconv
    :members:
    :undoc-members:
 

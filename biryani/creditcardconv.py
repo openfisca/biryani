@@ -22,7 +22,10 @@
 # limitations under the License.
 
 
-"""Converters for credit card types, numbers and expiration dates"""
+"""Converters for credit card types, numbers and expiration dates
+
+.. note:: The idea of this module and its algorithms have been borrowed from `FormEncode <http://formencode.org/>`_.
+"""
 
 
 from . import baseconv as conv

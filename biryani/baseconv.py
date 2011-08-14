@@ -1125,7 +1125,7 @@ def struct(converters, constructor = None, default = None, keep_empty = False):
         return structured_mapping(converters, constructor = constructor or dict, default = default,
             keep_empty = keep_empty)
     assert isinstance(converters, collections.Sequence), \
-            'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
+        'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
     return structured_sequence(converters, constructor = constructor or list, default = default,
         keep_empty = keep_empty)
 
