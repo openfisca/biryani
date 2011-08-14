@@ -11,6 +11,20 @@ To translate messages, *Biryani* converters use the ``_()`` method of their ``st
 The defaut state parameter :data:`biryani.states.default_state` (an instance of class :class:`biryani.states.State`) has a ``_()`` method that returns the given message asis, without any translation. So, to translate *Biryani* messages you should define a new state that redefines it.
 
 
+Translations status
+===================
+
+*Biryani* uses `Transifex <https://www.transifex.net/projects/p/biryani/>`_ to translate its messages.
+
+Here is the current status of *Biryani* translations:
+
+.. raw:: html
+
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript" src="https://www.transifex.net/projects/p/biryani/resource/biryanipot/chart/inc_js/"></script>
+    <div id="transifex_chart">Loading chart...</div>
+
+
 Using a localized state
 =======================
 
