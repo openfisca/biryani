@@ -81,6 +81,7 @@ __all__ = [
     'str_to_slug',
     'str_to_url',
     'str_to_url_name',
+    'str_to_url_path_and_query',
     'struct',
     'structured_mapping',
     'structured_sequence',
@@ -308,6 +309,8 @@ def clean_str_to_url_name(value, state = states.default_state):
 
 def clean_str_to_url_path_and_query(value, state = states.default_state):
     """Convert a clean string to the path and query of an URL.
+
+    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_url_path_and_query`.
 
     >>> clean_str_to_url_path_and_query(u'/Biryani/presentation.html#tutorial')
     (u'/Biryani/presentation.html', None)
@@ -1746,6 +1749,21 @@ str_to_url_name = pipe(cleanup_line, clean_str_to_url_name)
     >>> str_to_url_name(u'   Hello world!   ')
     (u'hello_world!', None)
     >>> str_to_url_name(u'')
+    (None, None)
+    """
+
+str_to_url_path_and_query = pipe(cleanup_line, clean_str_to_url_path_and_query)
+"""Convert a string to the path and query of an URL.
+
+    >>> str_to_url_path_and_query(u'/Biryani/presentation.html#tutorial')
+    (u'/Biryani/presentation.html', None)
+    >>> str_to_url_path_and_query(u'/Biryani/search.html?q=pipe')
+    (u'/Biryani/search.html?q=pipe', None)
+    >>> str_to_url_path_and_query(u'   /Biryani/search.html?q=pipe   ')
+    (u'/Biryani/search.html?q=pipe', None)
+    >>> str_to_url_path_and_query(u'http://packages.python.org/Biryani/search.html?q=pipe')
+    (u'http://packages.python.org/Biryani/search.html?q=pipe', u'URL must not be complete')
+    >>> print str_to_url_path_and_query(None)
     (None, None)
     """
 
