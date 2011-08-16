@@ -10,6 +10,8 @@ How to release a new version of *Biryani*
 
     version = 'NEW_RELEASE_NUMBER',
 
+#. Also check that everything is OK: classifiers, keywords, requirements.
+
 #. Edit ``docs/source/conf.py`` to change version number in two lines::
 
     # The short X.Y version.
@@ -25,9 +27,17 @@ How to release a new version of *Biryani*
 
     ./setup.py update_catalog
 
-#. Ensure that Project-Id-Version in ``biryani/i18n/biryani.pot`` (and ``.po`` files?)
+#. Ensure that Project-Id-Version in ``biryani/i18n/biryani.pot`` and ``.po`` files are correct.
 
-#. Add missing translations.
+#. Send source file and translations to *Transifex*::
+
+    tx push -s -t
+
+#. Add missing translations using *Transifex*.
+
+#. Get *Transifex* translations::
+
+    tx pull
 
 #. Compile catalog::
 
@@ -45,9 +55,11 @@ How to release a new version of *Biryani*
 
     ./setup.py build_sphinx -b coverage
 
-   Then check that ``docs/build/coverage/python.txt`` doesnt list non documented functions.
+   Then check that ``docs/build/coverage/python.txt`` doesn't list non documented functions.
 
-#. Update changelog using ``git log``.
+#. Commit remaining changes.
+
+#. Update ``changelog.rst`` using ``git log``.
 
 #. Re-build the HTML documentation and check that the build succeeded without error nor warning::
 
