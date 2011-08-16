@@ -32,7 +32,7 @@ Sample usage:
 >>> from biryani import allconv as conv
 >>> from biryani import states
 ...
->>> N_ = lambda s: s
+>>> N_ = lambda message: message
 ...
 >>> def validate_credit_card(value, state = states.default_state):
 ...     import datetime

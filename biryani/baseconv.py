@@ -104,7 +104,7 @@ domain_re = re.compile(r'''
     ''', re.I | re.VERBOSE)
 html_id_re = re.compile(r'[A-Za-z][-A-Za-z0-9_:.]+$')
 html_name_re = html_id_re
-N_ = lambda s: s
+N_ = lambda message: message
 username_re = re.compile(r"[^ \t\n\r@<>()]+$", re.I)
 
 

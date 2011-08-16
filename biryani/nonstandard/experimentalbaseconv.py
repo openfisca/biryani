@@ -37,7 +37,7 @@ __all__ = [
     'mapping_replace_sequence',
     ]
 
-N_ = conv.N_
+N_ = lambda message: message
 
 
 def mapping_replace_sequence(keys, converter, sequence_constructor = list):
