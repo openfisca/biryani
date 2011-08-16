@@ -17,123 +17,135 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 0.9.6\n"
 
-#: biryani/babelconv.py:59 biryani/bsonconv.py:78
+#: biryani/babelconv.py:62 biryani/bsonconv.py:81
 msgid "Invalid value"
 msgstr "Valeur incorrecte"
 
-#: biryani/baseconv.py:165 biryani/baseconv.py:601
+#: biryani/baseconv.py:174 biryani/baseconv.py:647
 msgid "Value must be a boolean"
 msgstr "La valeur doit être booléenne"
 
-#: biryani/baseconv.py:192
+#: biryani/baseconv.py:201
 msgid "An email must contain exactly one \"@\""
 msgstr "Un courriel doit contenir exactement un \"@\""
 
-#: biryani/baseconv.py:194
+#: biryani/baseconv.py:203
 msgid "Invalid username"
 msgstr "Nom d'utilisateur incorrect"
 
-#: biryani/baseconv.py:196
+#: biryani/baseconv.py:205
 msgid "Invalid domain name"
 msgstr "Nom de domaine incorrect"
 
-#: biryani/baseconv.py:275
+#: biryani/baseconv.py:284
 msgid "URL must be complete"
 msgstr "L'URL doit être complète"
 
-#: biryani/baseconv.py:277
+#: biryani/baseconv.py:286
 msgid "Scheme must belong to {0}"
 msgstr "Le protocole doit faire partie de {0}"
 
-#: biryani/baseconv.py:330
+#: biryani/baseconv.py:343
 msgid "URL must not be complete"
 msgstr "L'URL ne doit pas être complète"
 
-#: biryani/baseconv.py:450
+#: biryani/baseconv.py:441
 msgid "An error occured"
 msgstr "Une erreur est survenue"
 
-#: biryani/baseconv.py:763
+#: biryani/baseconv.py:555
+msgid "Unknown key: {0}"
+msgstr ""
+
+#: biryani/baseconv.py:562
+msgid "Index out of range: {0}"
+msgstr ""
+
+#: biryani/baseconv.py:921
 msgid "Value must be a float"
 msgstr "La valeur doit être un nombre flottant"
 
-#: biryani/baseconv.py:787
+#: biryani/baseconv.py:945
 msgid "Value must be an integer"
 msgstr "La valeur doit être un entier"
 
-#: biryani/baseconv.py:1094 biryani/baseconv.py:1161
+#: biryani/baseconv.py:1194 biryani/baseconv.py:1261
 msgid "Unexpected item"
 msgstr "Élément inattendu"
 
-#: biryani/baseconv.py:1179
+#: biryani/baseconv.py:1279
 msgid "Test failed"
 msgstr "Échec du test"
 
-#: biryani/baseconv.py:1222
+#: biryani/baseconv.py:1322
 msgid "Value must be between {0} and {1}"
 msgstr "La valeur doit être comprise entre {0} et {1}"
 
-#: biryani/baseconv.py:1245
+#: biryani/baseconv.py:1345
 msgid "Value must be equal to {0}"
 msgstr "La valeur doit être égale à {0}"
 
-#: biryani/baseconv.py:1259
+#: biryani/baseconv.py:1359
 msgid "Missing value"
 msgstr "Valeur manquante"
 
-#: biryani/baseconv.py:1281
+#: biryani/baseconv.py:1381
 msgid "Value must be greater than or equal to {0}"
 msgstr "La valeur doit être supérieure ou égale à {0}"
 
-#: biryani/baseconv.py:1306
+#: biryani/baseconv.py:1406
 msgid "Value must belong to {0}"
 msgstr "La valeur doit faire partie de {0}"
 
-#: biryani/baseconv.py:1329
+#: biryani/baseconv.py:1429
 msgid "Value must be {0}"
 msgstr "La valeur doit être {0}"
 
-#: biryani/baseconv.py:1345
+#: biryani/baseconv.py:1445
 msgid "Value is not an instance of {0}"
 msgstr "La valeur n'est pas une instance de {0}"
 
-#: biryani/baseconv.py:1365
+#: biryani/baseconv.py:1465
 msgid "Value must be less than or equal to {0}"
 msgstr "La valeur doit être inférieure ou égale à {0}"
 
-#: biryani/creditcardconv.py:105
+#: biryani/creditcardconv.py:219
 msgid "Credit card number must contain digits"
 msgstr "Un numéro de carte de crédit doit contenir des chiffres"
 
-#: biryani/creditcardconv.py:107
+#: biryani/creditcardconv.py:221
 msgid "Credit card number must contain only digits"
 msgstr "Un numéro de carte de crédit doit contenir uniquement des chiffres"
 
-#: biryani/creditcardconv.py:118
+#: biryani/creditcardconv.py:232
 msgid "Wrong number of digits in credit card number"
 msgstr "Mauvais nombre de chiffres dans le numéro de carte de crédit"
 
-#: biryani/creditcardconv.py:119
+#: biryani/creditcardconv.py:233
 msgid "Invalid credit card number (unknown prefix)"
 msgstr "Numéro de carte de crédit incorrect (mauvais préfixe)"
 
-#: biryani/creditcardconv.py:130
+#: biryani/creditcardconv.py:244
 msgid "Invalid credit card number (wrong checksum)"
 msgstr "Numéro de carte de crédit incorrect (mauvais code d'erreur)"
 
-#: biryani/creditcardconv.py:167
+#: biryani/creditcardconv.py:279
+msgid "Invalid security code for credit card"
+msgstr ""
+
+#: biryani/creditcardconv.py:286
 msgid "Unknown type of credit card"
 msgstr "Type de carte de crédit inconnu"
 
-#: biryani/datetimeconv.py:101
+#: biryani/datetimeconv.py:105
 msgid "Value must be a date in ISO 8601 format"
 msgstr "La valeur doit être une date au format ISO 8602"
 
-#: biryani/datetimeconv.py:147
+#: biryani/datetimeconv.py:151
 msgid "Value must be a date-time in ISO 8601 format"
 msgstr "La valeur doit être une date et heure au format ISO 8602"
 
-#: biryani/datetimeconv.py:279 biryani/datetimeconv.py:309
+#: biryani/datetimeconv.py:283 biryani/datetimeconv.py:313
 msgid "Value must be a timestamp"
 msgstr "La valeur doit être un horodatage"
 
@@ -173,7 +185,7 @@ msgstr "Le premier chiffre du numéro de téléphone est inattendu : {0} au lie
 msgid "Wrong number of digits in phone number"
 msgstr "Mauvais nombre de chiffres dans le numéro de téléphone"
 
-#: biryani/nonstandard/deprecatedbaseconv.py:123
+#: biryani/nonstandard/deprecatedbaseconv.py:124
 msgid "Invalid value format"
 msgstr "Format de la valeur incorrect"
 
