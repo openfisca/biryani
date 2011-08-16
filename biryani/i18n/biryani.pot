@@ -1,14 +1,12 @@
 # Translations template for Biryani.
 # Copyright (C) 2011 Easter-eggs
 # This file is distributed under the same license as the Biryani project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2011.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Biryani 0.8dev\n"
+"Project-Id-Version: Biryani\n"
 "Report-Msgid-Bugs-To: eraviart@easter-eggs.com\n"
-"POT-Creation-Date: 2011-08-13 14:23+0200\n"
+"POT-Creation-Date: 2011-08-16 06:47+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
