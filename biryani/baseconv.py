@@ -53,7 +53,6 @@ __all__ = [
     'condition',
     'decode_str',
     'default',
-    'dict_to_instance',
     'encode_str',
     'extract_when_singleton',
     'fail',
@@ -422,28 +421,6 @@ def default(constant):
     (42, None)
     """
     return lambda value, state = states.default_state: (constant, None) if value is None else (value, None)
-
-
-def dict_to_instance(cls):
-    """Return a converter that creates in instance of a class from a dictionary.
-
-    >>> class C(object):
-    ...     pass
-    >>> dict_to_instance(C)(dict(a = 1, b = 2))
-    (<C object at 0x...>, None)
-    >>> c = check(dict_to_instance(C))(dict(a = 1, b = 2))
-    >>> c.a, c.b
-    (1, 2)
-    >>> dict_to_instance(C)(None)
-    (None, None)
-    """
-    def dict_to_instance_converter(value, state = states.default_state):
-        if value is None:
-            return value, None
-        instance = cls()
-        instance.__dict__ = value
-        return instance, None
-    return dict_to_instance_converter
 
 
 def encode_str(encoding = 'utf-8'):

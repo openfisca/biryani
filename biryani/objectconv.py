@@ -30,9 +30,32 @@ from . import states
 
 
 __all__ = [
+    'dict_to_object',
     'object_to_clean_dict',
     'object_to_dict',
     ]
+
+
+def dict_to_object(cls):
+    """Return a converter that creates in instance of a class from a dictionary.
+
+    >>> class C(object):
+    ...     pass
+    >>> dict_to_object(C)(dict(a = 1, b = 2))
+    (<C object at 0x...>, None)
+    >>> c = check(dict_to_object(C))(dict(a = 1, b = 2))
+    >>> c.a, c.b
+    (1, 2)
+    >>> dict_to_object(C)(None)
+    (None, None)
+    """
+    def dict_to_object_converter(value, state = states.default_state):
+        if value is None:
+            return value, None
+        instance = cls()
+        instance.__dict__ = value
+        return instance, None
+    return dict_to_object_converter
 
 
 object_to_clean_dict = conv.function(lambda instance: dict(
