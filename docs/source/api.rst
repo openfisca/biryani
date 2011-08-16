@@ -79,18 +79,6 @@ biryani.datetimeconv
    :undoc-members:
 
 
-biryani.frconv
---------------
-
-.. testsetup::
-
-   from biryani.frconv import *
-
-.. automodule:: biryani.frconv
-   :members:
-   :undoc-members:
-
-
 biryani.objectconv
 ------------------
 

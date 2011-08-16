@@ -22,7 +22,11 @@
 # limitations under the License.
 
 
-"""Date and Time Related Converters"""
+"""Date and Time Related Converters
+
+.. note:: Date & time converters are not in :mod:`biryani.baseconv`, because some of them depend from external
+   libraries (``mx.DateTime`` & ``pytz``).
+"""
 
 
 import calendar

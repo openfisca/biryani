@@ -22,7 +22,10 @@
 # limitations under the License.
 
 
-"""BSON related Converters"""
+"""MongoDB BSON related Converters
+
+See http://api.mongodb.org/python/current/api/bson/index.html
+"""
 
 
 import re

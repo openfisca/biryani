@@ -2,13 +2,15 @@
 API Overview
 ************
 
+.. testsetup::
+
+   from biryani import *
+   from biryani.baseconv import *
+   from biryani.strings import *
+
 
 Data Converters
 ===============
-
-.. testsetup::
-
-   from biryani.baseconv import *
 
 
 Boolean Converters
@@ -27,14 +29,7 @@ Boolean Converters
    :noindex:
 
 
-Class & Instance Converters
----------------------------
-
-.. autofunction:: biryani.baseconv.dict_to_instance
-   :noindex:
-
-
-Collection (aka dict, list, set, tuple, etc) Converters
+Collection (dict, list, set, tuple, etc) Converters
 -------------------------------------------------------
 
 .. autofunction:: biryani.baseconv.extract_when_singleton
@@ -56,19 +51,6 @@ Collection (aka dict, list, set, tuple, etc) Converters
    :noindex:
 
 .. autofunction:: biryani.baseconv.uniform_sequence
-   :noindex:
-
-
-Date & Time Converters
-----------------------
-
-.. testsetup::
-
-   from biryani.datetimeconv import *
-
-.. automodule:: biryani.datetimeconv
-   :members:
-   :undoc-members:
    :noindex:
 
 
@@ -204,15 +186,81 @@ Converters-related Utilities
 .. autofunction:: biryani.baseconv.check
    :noindex:
 
+.. autofunction:: biryani.custom_conv
+   :noindex:
+
 
 String Functions
 ================
 
+.. automodule:: biryani.strings
+   :members:
+   :undoc-members:
+   :noindex:
+
+
+Extension Modules
+=================
+
 .. testsetup::
 
-   from biryani.strings import *
+   from biryani.babelconv import *
+   from biryani.bsonconv import *
+   from biryani.creditcardconv import *
+   from biryani.datetimeconv import *
+   from biryani.objectconv import *
+   from biryani.webobconv import *
 
-.. automodule:: biryani.strings
+
+Babel Converters
+----------------
+
+.. automodule:: biryani.babelconv
+   :members:
+   :undoc-members:
+   :noindex:
+
+
+BSON Converters
+---------------
+
+.. automodule:: biryani.bsonconv
+   :members:
+   :undoc-members:
+   :noindex:
+
+
+Credit Card Converters
+----------------------
+
+.. automodule:: biryani.creditcardconv
+   :members:
+   :undoc-members:
+   :noindex:
+
+
+Date & Time Converters
+----------------------
+
+.. automodule:: biryani.datetimeconv
+   :members:
+   :undoc-members:
+   :noindex:
+
+
+Object Converters
+-----------------
+
+.. automodule:: biryani.objectconv
+   :members:
+   :undoc-members:
+   :noindex:
+
+
+WebOb Converters
+----------------
+
+.. automodule:: biryani.webobconv
    :members:
    :undoc-members:
    :noindex:

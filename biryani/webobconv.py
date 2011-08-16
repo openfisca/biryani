@@ -22,7 +22,10 @@
 # limitations under the License.
 
 
-"""WebOb related Converters"""
+"""WebOb related Converters
+
+See http://webob.org/
+"""
 
 
 from . import baseconv as conv

@@ -22,7 +22,10 @@
 # limitations under the License.
 
 
-"""Babel related Converters"""
+"""Babel related Converters
+
+See http://babel.edgewall.org/
+"""
 
 
 import babel
