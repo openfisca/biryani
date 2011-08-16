@@ -6,6 +6,19 @@ For *Biryani* maintainer only
 How to release a new version of *Biryani*
 =========================================
 
+#. Edit ``setup.py`` to change version number (ie remove "dev" suffix)::
+
+    version = 'NEW_RELEASE_NUMBER',
+
+#. Also check that everything is OK: classifiers, keywords, requirements.
+
+#. Edit ``docs/source/conf.py`` to change version number in two lines::
+
+    # The short X.Y version.
+    version = 'NEW_MINOR_NUMBER'
+    # The full version, including alpha/beta/rc tags.
+    release = 'NEW_RELEASE_NUMBER'
+
 #. Extract strings to translate from source code::
 
     ./setup.py extract_messages
@@ -18,7 +31,7 @@ How to release a new version of *Biryani*
 
 #. Send source file and translations to *Transifex*::
 
-    tx push -s
+    tx push -s -t
 
 #. Add missing translations using *Transifex*.
 
@@ -46,19 +59,6 @@ How to release a new version of *Biryani*
 
 #. Update ``changelog.rst`` using ``git log``.
 
-#. Edit ``setup.py`` to change version number (ie remove "dev" suffix)::
-
-    version = 'NEW_RELEASE_NUMBER',
-
-#. Also check that everything is OK: classifiers, keywords, requirements.
-
-#. Edit ``docs/source/conf.py`` to change version number in two lines::
-
-    # The short X.Y version.
-    version = 'NEW_MINOR_NUMBER'
-    # The full version, including alpha/beta/rc tags.
-    release = 'NEW_RELEASE_NUMBER'
-
 #. Re-build the HTML documentation and check that the build succeeded without error nor warning::
 
     ./setup.py build_sphinx -b html
@@ -72,7 +72,6 @@ How to release a new version of *Biryani*
 
 #. Build and upload the package to Pypi::
 
-    ./setup.py upload_sphinx
     ./setup.py sdist
     ./setup.py register
 
@@ -85,7 +84,7 @@ How to release a new version of *Biryani*
 #. Edit ``docs/source/conf.py`` to change version number in two lines::
 
     # The short X.Y version.
-    version = 'NEW_FUTURE_MINOR_NUMBER'
+    version = 'NEW_FUTURE_MINOR_NUMBERdev'
     # The full version, including alpha/beta/rc tags.
     release = 'NEW_FUTURE_RELEASE_NUMBERdev'
 
