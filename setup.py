@@ -35,7 +35,7 @@ except ImportError:
 
 
 classifiers = """\
-Development Status :: 3 - Alpha
+Development Status :: 4 - Beta
 Intended Audience :: Developers
 License :: OSI Approved :: Apache Software License
 Operating System :: OS Independent
@@ -49,7 +49,7 @@ doc_lines = __doc__.split('\n')
 
 setup(
     name = 'Biryani',
-    version = '0.8dev',
+    version = '0.8',
 
     author = 'Emmanuel Raviart',
     author_email = 'eraviart@easter-eggs.com',
