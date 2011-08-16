@@ -7,6 +7,18 @@ Converters
 ==========
 
 
+biryani
+-------
+
+.. testsetup::
+
+   from biryani import *
+
+.. automodule:: biryani
+   :members:
+   :undoc-members:
+
+
 biryani.baseconv
 ----------------
 

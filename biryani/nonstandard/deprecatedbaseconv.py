@@ -29,10 +29,11 @@
 """
 
 
-from .. import baseconv as conv
+from .. import custom_conv
 
 
-N_ = conv.N_
+conv = custom_conv('biryani.baseconv', 'biryani.objectconv')
+N_ = lambda message: message
 
 
 def attribute(name):
