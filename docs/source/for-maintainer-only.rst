@@ -57,13 +57,13 @@ How to release a new version of *Biryani*
 
    Then check that ``docs/build/coverage/python.txt`` doesn't list non documented functions.
 
-#. Commit remaining changes.
-
 #. Update ``changelog.rst`` using ``git log``.
 
 #. Re-build the HTML documentation and check that the build succeeded without error nor warning::
 
     ./setup.py build_sphinx -b html
+
+#. Commit changes.
 
 #. Tag the new release and upload it to Gitorious::
 
