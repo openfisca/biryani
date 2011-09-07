@@ -113,14 +113,12 @@ Sample usage:
   'expiration_month': 12,
   'expiration_year': 2021},
  {'credit_card_number': u'Invalid credit card number (wrong checksum)'})
->>> import datetime
->>> today = datetime.date.today()
 >>> pprint.pprint(validate_credit_card(dict(
 ...     credit_card_type = u'Visa',
 ...     credit_card_number = u'4111_1111_1111',
 ...     credit_card_security_code = u'1234',
-...     expiration_month = unicode(today.month - 1),
-...     expiration_year = unicode(today.year),
+...     expiration_month = u'7',
+...     expiration_year = u'2011',
 ...     )))
 ({'credit_card_number': u'411111111111',
   'credit_card_security_code': u'1234',
