@@ -1,29 +1,30 @@
-# Translations template for Biryani.
+# French translations for Biryani.
 # Copyright (C) 2011 Easter-eggs
 # This file is distributed under the same license as the Biryani project.
-# 
+#
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2011.
 # Emmanuel  <emmanuel@raviart.com>, 2011.
 msgid ""
 msgstr ""
 "Project-Id-Version: Biryani\n"
 "Report-Msgid-Bugs-To: eraviart@easter-eggs.com\n"
-"POT-Creation-Date: 2011-08-16 06:47+0200\n"
-"PO-Revision-Date: 2011-08-16 05:37+0000\n"
-"Last-Translator: eraviart <emmanuel@raviart.com>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"POT-Creation-Date: 2011-09-07 15:40+0200\n"
+"PO-Revision-Date: 2011-09-07 15:45+0100\n"
+"Last-Translator: Emmanuel Raviart <eraviart@easter-eggs.com>\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 0.9.6\n"
-"Language: fr\n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
 
-#: biryani/babelconv.py:62 biryani/bsonconv.py:81
+#: biryani/babelconv.py:62
+#: biryani/bsonconv.py:81
 msgid "Invalid value"
 msgstr "Valeur incorrecte"
 
-#: biryani/baseconv.py:174 biryani/baseconv.py:647
+#: biryani/baseconv.py:174
+#: biryani/baseconv.py:647
 msgid "Value must be a boolean"
 msgstr "La valeur doit être booléenne"
 
@@ -71,7 +72,8 @@ msgstr "La valeur doit être un nombre flottant"
 msgid "Value must be an integer"
 msgstr "La valeur doit être un entier"
 
-#: biryani/baseconv.py:1194 biryani/baseconv.py:1261
+#: biryani/baseconv.py:1194
+#: biryani/baseconv.py:1261
 msgid "Unexpected item"
 msgstr "Élément inattendu"
 
@@ -111,31 +113,31 @@ msgstr "La valeur n'est pas une instance de {0}"
 msgid "Value must be less than or equal to {0}"
 msgstr "La valeur doit être inférieure ou égale à {0}"
 
-#: biryani/creditcardconv.py:219
+#: biryani/creditcardconv.py:217
 msgid "Credit card number must contain digits"
 msgstr "Un numéro de carte de crédit doit contenir des chiffres"
 
-#: biryani/creditcardconv.py:221
+#: biryani/creditcardconv.py:219
 msgid "Credit card number must contain only digits"
 msgstr "Un numéro de carte de crédit doit contenir uniquement des chiffres"
 
-#: biryani/creditcardconv.py:232
+#: biryani/creditcardconv.py:230
 msgid "Wrong number of digits in credit card number"
 msgstr "Mauvais nombre de chiffres dans le numéro de carte de crédit"
 
-#: biryani/creditcardconv.py:233
+#: biryani/creditcardconv.py:231
 msgid "Invalid credit card number (unknown prefix)"
 msgstr "Numéro de carte de crédit incorrect (mauvais préfixe)"
 
-#: biryani/creditcardconv.py:244
+#: biryani/creditcardconv.py:242
 msgid "Invalid credit card number (wrong checksum)"
 msgstr "Numéro de carte de crédit incorrect (mauvais code d'erreur)"
 
-#: biryani/creditcardconv.py:279
+#: biryani/creditcardconv.py:277
 msgid "Invalid security code for credit card"
 msgstr "Code de sécurité incorrect pour la carte de crédit"
 
-#: biryani/creditcardconv.py:286
+#: biryani/creditcardconv.py:284
 msgid "Unknown type of credit card"
 msgstr "Type de carte de crédit inconnu"
 
@@ -147,49 +149,57 @@ msgstr "La valeur doit être une date au format ISO 8602"
 msgid "Value must be a date-time in ISO 8601 format"
 msgstr "La valeur doit être une date et heure au format ISO 8602"
 
-#: biryani/datetimeconv.py:283 biryani/datetimeconv.py:313
+#: biryani/datetimeconv.py:283
+#: biryani/datetimeconv.py:313
 msgid "Value must be a timestamp"
 msgstr "La valeur doit être un horodatage"
 
-#: biryani/frconv.py:61
+#: biryani/frconv.py:65
 msgid "Unexpected non numerical characters in phone number"
 msgstr "Caractère non numérique inattendu dans le numéro de téléphone"
 
-#: biryani/frconv.py:73
+#: biryani/frconv.py:77
 msgid "French Guyana"
 msgstr "Guyane française"
 
-#: biryani/frconv.py:74
+#: biryani/frconv.py:78
 msgid "Wallis and Futuna"
 msgstr "Wallis et Futuna"
 
-#: biryani/frconv.py:75
+#: biryani/frconv.py:79
 msgid "New Caledonia"
 msgstr "Nouvelle Calédonie"
 
-#: biryani/frconv.py:76
+#: biryani/frconv.py:80
 msgid "French Polynesia"
 msgstr "Polynésie française"
 
-#: biryani/frconv.py:81
+#: biryani/frconv.py:85
 msgid "Wrong number of digits for phone number of {0}"
 msgstr "Mauvais nombre de chiffres dans le numéro de téléphone de {0}"
 
-#: biryani/frconv.py:82
+#: biryani/frconv.py:86
 msgid "Unknown international phone number"
 msgstr "Numéro de téléphone international inconnu"
 
-#: biryani/frconv.py:89
+#: biryani/frconv.py:93
 msgid "Unexpected first digit in phone number: {0} instead of 0"
-msgstr ""
-"Le premier chiffre du numéro de téléphone est inattendu : {0} au lieu de 0"
+msgstr "Le premier chiffre du numéro de téléphone est inattendu : {0} au lieu de 0"
 
-#: biryani/frconv.py:92
+#: biryani/frconv.py:96
 msgid "Wrong number of digits in phone number"
 msgstr "Mauvais nombre de chiffres dans le numéro de téléphone"
+
+#: biryani/frconv.py:172
+#| msgid "Credit card number must contain only digits"
+msgid "Postal code must contain only digits"
+msgstr "Un code postal doit contenir uniquement des chiffres"
+
+#: biryani/frconv.py:174
+msgid "Postal code must have 5 digits"
+msgstr "Un code postal doit avoir 5 chiffres"
 
 #: biryani/nonstandard/deprecatedbaseconv.py:124
 msgid "Invalid value format"
 msgstr "Format de la valeur incorrect"
-
 

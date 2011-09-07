@@ -1,12 +1,14 @@
 # Translations template for Biryani.
 # Copyright (C) 2011 Easter-eggs
 # This file is distributed under the same license as the Biryani project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2011.
 #
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Biryani\n"
+"Project-Id-Version: Biryani 0.9dev\n"
 "Report-Msgid-Bugs-To: eraviart@easter-eggs.com\n"
-"POT-Creation-Date: 2011-08-16 06:47+0200\n"
+"POT-Creation-Date: 2011-09-07 15:40+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -107,31 +109,31 @@ msgstr ""
 msgid "Value must be less than or equal to {0}"
 msgstr ""
 
-#: biryani/creditcardconv.py:219
+#: biryani/creditcardconv.py:217
 msgid "Credit card number must contain digits"
 msgstr ""
 
-#: biryani/creditcardconv.py:221
+#: biryani/creditcardconv.py:219
 msgid "Credit card number must contain only digits"
 msgstr ""
 
-#: biryani/creditcardconv.py:232
+#: biryani/creditcardconv.py:230
 msgid "Wrong number of digits in credit card number"
 msgstr ""
 
-#: biryani/creditcardconv.py:233
+#: biryani/creditcardconv.py:231
 msgid "Invalid credit card number (unknown prefix)"
 msgstr ""
 
-#: biryani/creditcardconv.py:244
+#: biryani/creditcardconv.py:242
 msgid "Invalid credit card number (wrong checksum)"
 msgstr ""
 
-#: biryani/creditcardconv.py:279
+#: biryani/creditcardconv.py:277
 msgid "Invalid security code for credit card"
 msgstr ""
 
-#: biryani/creditcardconv.py:286
+#: biryani/creditcardconv.py:284
 msgid "Unknown type of credit card"
 msgstr ""
 
@@ -147,40 +149,48 @@ msgstr ""
 msgid "Value must be a timestamp"
 msgstr ""
 
-#: biryani/frconv.py:61
+#: biryani/frconv.py:65
 msgid "Unexpected non numerical characters in phone number"
 msgstr ""
 
-#: biryani/frconv.py:73
+#: biryani/frconv.py:77
 msgid "French Guyana"
 msgstr ""
 
-#: biryani/frconv.py:74
+#: biryani/frconv.py:78
 msgid "Wallis and Futuna"
 msgstr ""
 
-#: biryani/frconv.py:75
+#: biryani/frconv.py:79
 msgid "New Caledonia"
 msgstr ""
 
-#: biryani/frconv.py:76
+#: biryani/frconv.py:80
 msgid "French Polynesia"
 msgstr ""
 
-#: biryani/frconv.py:81
+#: biryani/frconv.py:85
 msgid "Wrong number of digits for phone number of {0}"
 msgstr ""
 
-#: biryani/frconv.py:82
+#: biryani/frconv.py:86
 msgid "Unknown international phone number"
 msgstr ""
 
-#: biryani/frconv.py:89
+#: biryani/frconv.py:93
 msgid "Unexpected first digit in phone number: {0} instead of 0"
 msgstr ""
 
-#: biryani/frconv.py:92
+#: biryani/frconv.py:96
 msgid "Wrong number of digits in phone number"
+msgstr ""
+
+#: biryani/frconv.py:172
+msgid "Postal code must contain only digits"
+msgstr ""
+
+#: biryani/frconv.py:174
+msgid "Postal code must have 5 digits"
 msgstr ""
 
 #: biryani/nonstandard/deprecatedbaseconv.py:124
