@@ -94,7 +94,7 @@ __all__ = [
     'test_isinstance',
     'test_less_or_equal',
     'translate',
-#    'uniform_mapping',
+    'uniform_mapping',
     'uniform_sequence',
     ]
 
@@ -1488,31 +1488,50 @@ def translate(conversions):
         else conversions[value])
 
 
-#def uniform_mapping(key_converter, value_converter, constructor = dict, keep_empty = False, keep_missing_keys = False,
-#        keep_missing_values = False):
-#    """Return a converter that applies a unique converter to each key and another unique converter to each value of a mapping."""
-#    def uniform_mapping_converter(values, state = states.default_state):
-#        if values is None:
-#            return values, None
-#        errors = {}
-#        converted_values = {}
-#        for key, value in values.iteritems():
-#            key, error = key_converter(key, state = state)
-#            if error is not None:
-#                errors[key] = error
-#            if key is None and not keep_missing_keys:
-#                continue
-#            value, error = value_converter(value, state = state)
-#            if value is not None or keep_missing_values:
-#                converted_values[key] = value
-#            if error is not None:
-#                errors[key] = error
-#        if keep_empty or converted_values:
-#            converted_values = constructor(converted_values)
-#        else:
-#            converted_values = None
-#        return converted_values, errors or None
-#    return uniform_mapping_converter
+def uniform_mapping(key_converter, value_converter, constructor = dict, keep_empty = False, keep_missing_keys = False,
+        keep_missing_values = False):
+    """Return a converter that applies a unique converter to each key and another unique converter to each value of a
+    mapping.
+
+    >>> uniform_mapping(cleanup_line, str_to_int)({u'a': u'1', u'b': u'2'})
+    ({u'a': 1, u'b': 2}, None)
+    >>> uniform_mapping(cleanup_line, str_to_int)({u'   answer   ': u'42'})
+    ({u'answer': 42}, None)
+    >>> uniform_mapping(cleanup_line, pipe(test_isinstance(basestring), str_to_int))({u'a': u'1', u'b': u'2', 'c': 3})
+    ({u'a': 1, 'c': 3, u'b': 2}, {'c': u"Value is not an instance of <type 'basestring'>"})
+    >>> uniform_mapping(cleanup_line, str_to_int)({})
+    (None, None)
+    >>> uniform_mapping(cleanup_line, str_to_int, keep_empty = True)({})
+    ({}, None)
+    >>> uniform_mapping(cleanup_line, str_to_int)({None: u'42'})
+    (None, None)
+    >>> uniform_mapping(cleanup_line, str_to_int, keep_missing_keys = True)({None: u'42'})
+    ({None: 42}, None)
+    >>> uniform_mapping(cleanup_line, str_to_int)(None)
+    (None, None)
+    """
+    def uniform_mapping_converter(values, state = states.default_state):
+        if values is None:
+            return values, None
+        errors = {}
+        converted_values = {}
+        for key, value in values.iteritems():
+            key, error = key_converter(key, state = state)
+            if error is not None:
+                errors[key] = error
+            if key is None and not keep_missing_keys:
+                continue
+            value, error = value_converter(value, state = state)
+            if value is not None or keep_missing_values:
+                converted_values[key] = value
+            if error is not None:
+                errors[key] = error
+        if keep_empty or converted_values:
+            converted_values = constructor(converted_values)
+        else:
+            converted_values = None
+        return converted_values, errors or None
+    return uniform_mapping_converter
 
 
 def uniform_sequence(converter, constructor = list, keep_empty = False, keep_missing_items = False):
