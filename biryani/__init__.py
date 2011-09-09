@@ -64,7 +64,7 @@ def custom_conv(*modules_path):
         # Since __import__ returns a package instead of a module, walk to the imported module.
         for module_name in module_path.split('.')[1:]:
             module = getattr(module, module_name)
-        module_public_keys = getattr(module, '__all__')
+        module_public_keys = getattr(module, '__all__', None)
         if module_public_keys is None:
             conv.__dict__.update(module.__dict__)
         else:
