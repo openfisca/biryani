@@ -33,6 +33,7 @@ __all__ = [
     'clean_str_to_phone',
     'expand_postal_routing',
     'shrink_postal_routing',
+    'str_to_lenient_postal_code',
     'str_to_phone',
     'str_to_postal_code',
     'str_to_postal_routing',
@@ -153,6 +154,29 @@ def shrink_postal_routing(value, state = states.default_state):
     return u' '.join(postal_routing_fragments) or None, None
 
 
+str_to_lenient_postal_code = conv.pipe(
+    conv.function(lambda postal_code: strings.slugify(postal_code, separator = u'') or None),
+    conv.function(lambda postal_code: u'0{0}'.format(postal_code) if len(postal_code) == 4 else postal_code),
+    )
+"""Convert a string to a postal code. Don't fail when postal code is not valid.
+
+    .. note:: To validate postal code, use :func:`str_to_postal_code` instead.
+
+    >>> str_to_lenient_postal_code(u'   75014   ')
+    (u'75014', None)
+    >>> str_to_lenient_postal_code(u'   1234   ')
+    (u'01234', None)
+    >>> str_to_lenient_postal_code(u'   123   ')
+    (u'123', None)
+    >>> str_to_lenient_postal_code(u'   123  456   ')
+    (u'123456', None)
+    >>> str_to_lenient_postal_code('   ')
+    (None, None)
+    >>> str_to_lenient_postal_code(None)
+    (None, None)
+    """
+
+
 str_to_phone = conv.pipe(conv.cleanup_line, clean_str_to_phone)
 """Convert a string to a phone number.
 
@@ -167,13 +191,13 @@ str_to_phone = conv.pipe(conv.cleanup_line, clean_str_to_phone)
 
 
 str_to_postal_code = conv.pipe(
-    conv.function(lambda s: strings.slugify(s, separator = u' ') or None),
-    conv.function(lambda s: u''.join(s.split())),
-    conv.test(lambda s: s.isdigit(), error = N_(u'Postal code must contain only digits')),
-    conv.function(lambda s: u'0{0}'.format(s) if len(s) == 4 else s),
-    conv.test(lambda s: len(s) == 5, error = N_(u'Postal code must have 5 digits')),
+    str_to_lenient_postal_code,
+    conv.test(lambda postal_code: postal_code.isdigit(), error = N_(u'Postal code must contain only digits')),
+    conv.test(lambda postal_code: len(postal_code) == 5, error = N_(u'Postal code must have 5 digits')),
     )
-"""Convert a string to a postal code.
+"""Convert a string to a postal code. Generate an error when postal code is not valid.
+
+    .. note:: To allow invalid postal codes without error, use :func:`str_to_lenient_postal_code` instead.
 
     >>> str_to_postal_code(u'   75014   ')
     (u'75014', None)
@@ -181,6 +205,8 @@ str_to_postal_code = conv.pipe(
     (u'01234', None)
     >>> str_to_postal_code(u'   123   ')
     (u'123', u'Postal code must have 5 digits')
+    >>> str_to_postal_code(u'   123  456   ')
+    (u'123456', u'Postal code must have 5 digits')
     >>> str_to_postal_code('   ')
     (None, None)
     >>> str_to_postal_code(None)
