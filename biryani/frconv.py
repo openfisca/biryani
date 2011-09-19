@@ -25,6 +25,8 @@
 """French related Converters"""
 
 
+import re
+
 from . import baseconv as conv
 from . import strings, states
 
@@ -33,12 +35,15 @@ __all__ = [
     'clean_str_to_phone',
     'expand_postal_routing',
     'shrink_postal_routing',
+    'str_to_depcom',
+    'str_to_lenient_depcom',
     'str_to_lenient_postal_code',
     'str_to_phone',
     'str_to_postal_code',
     'str_to_postal_routing',
     ]
 
+depcom_re = re.compile(ur'\d[\dAB]\d{3}$')
 N_ = conv.N_
 
 
@@ -154,8 +159,63 @@ def shrink_postal_routing(value, state = states.default_state):
     return u' '.join(postal_routing_fragments) or None, None
 
 
+str_to_lenient_depcom = conv.pipe(
+    conv.make_str_to_slug(separator = u'', transform = strings.upper),
+    conv.function(lambda depcom: u'0{0}'.format(depcom) if len(depcom) == 4 else depcom),
+    )
+"""Convert a string to an INSEE commune code (aka depcom). Don't fail when depcom is not valid.
+
+    .. note:: To validate depcom, use :func:`str_to_depcom` instead.
+
+    >>> str_to_lenient_depcom(u'   75156   ')
+    (u'75156', None)
+    >>> str_to_lenient_depcom(u'   2A100   ')
+    (u'2A100', None)
+    >>> str_to_lenient_depcom(u'   2b100   ')
+    (u'2B100', None)
+    >>> str_to_lenient_depcom(u'   1234   ')
+    (u'01234', None)
+    >>> str_to_lenient_depcom(u'   123   ')
+    (u'123', None)
+    >>> str_to_lenient_depcom(u'   123  456   ')
+    (u'123456', None)
+    >>> str_to_lenient_depcom('   ')
+    (None, None)
+    >>> str_to_lenient_depcom(None)
+    (None, None)
+    """
+
+
+str_to_depcom = conv.pipe(
+    str_to_lenient_depcom,
+    conv.test(lambda depcom: depcom_re.match(depcom) is not None,
+        error = N_(u'INSEE code must contain only 5 digits or "A" or "B"')),
+    )
+"""Convert a string to aan INSEE commune code (aka depcom). Generate an error when depcom is not valid.
+
+    .. note:: To allow an invalid depcom without error, use :func:`str_to_lenient_depcom` instead.
+
+    >>> str_to_depcom(u'   75156   ')
+    (u'75156', None)
+    >>> str_to_depcom(u'   2A100   ')
+    (u'2A100', None)
+    >>> str_to_depcom(u'   2b100   ')
+    (u'2B100', None)
+    >>> str_to_depcom(u'   1234   ')
+    (u'01234', None)
+    >>> str_to_depcom(u'   123   ')
+    (u'123', u'INSEE code must contain only 5 digits or "A" or "B"')
+    >>> str_to_depcom(u'   123  456   ')
+    (u'123456', u'INSEE code must contain only 5 digits or "A" or "B"')
+    >>> str_to_depcom('   ')
+    (None, None)
+    >>> str_to_depcom(None)
+    (None, None)
+    """
+
+
 str_to_lenient_postal_code = conv.pipe(
-    conv.function(lambda postal_code: strings.slugify(postal_code, separator = u'') or None),
+    conv.make_str_to_slug(separator = u''),
     conv.function(lambda postal_code: u'0{0}'.format(postal_code) if len(postal_code) == 4 else postal_code),
     )
 """Convert a string to a postal code. Don't fail when postal code is not valid.

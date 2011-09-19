@@ -57,13 +57,13 @@ Collection (dict, list, set, tuple, etc) Converters
 Internet Data Converters
 ------------------------
 
+.. autofunction:: biryani.baseconv.make_str_to_url
+   :noindex:
+
 .. autofunction:: biryani.baseconv.str_to_email
    :noindex:
 
 .. autofunction:: biryani.baseconv.str_to_json
-   :noindex:
-
-.. autofunction:: biryani.baseconv.str_to_url
    :noindex:
 
 .. autofunction:: biryani.baseconv.str_to_url_name
@@ -92,6 +92,12 @@ Number Converters
 String Converters
 -----------------
 
+.. autofunction:: biryani.baseconv.make_str_to_normal_form
+   :noindex:
+
+.. autofunction:: biryani.baseconv.make_str_to_slug
+   :noindex:
+
 .. autofunction:: biryani.baseconv.cleanup_empty
    :noindex:
 
@@ -117,16 +123,13 @@ String Converters
 Tests
 -----
 
-.. autofunction:: biryani.baseconv.test
+.. autofunction:: biryani.baseconv.exists
    :noindex:
 
 .. autofunction:: biryani.baseconv.test_between
    :noindex:
 
 .. autofunction:: biryani.baseconv.test_equals
-   :noindex:
-
-.. autofunction:: biryani.baseconv.test_exists
    :noindex:
 
 .. autofunction:: biryani.baseconv.test_greater_or_equal
@@ -142,6 +145,9 @@ Tests
    :noindex:
 
 .. autofunction:: biryani.baseconv.test_less_or_equal
+   :noindex:
+
+.. autofunction:: biryani.baseconv.test
    :noindex:
 
 

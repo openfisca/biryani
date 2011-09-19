@@ -41,7 +41,7 @@ Example 2: Required email validator
 
 Converters can be combined together to form more complex converters:
 
->>> str_to_required_email = conv.pipe(conv.str_to_email, conv.test_exists)
+>>> str_to_required_email = conv.pipe(conv.str_to_email, conv.exists)
 
 >>> str_to_required_email(u'John@DOE.name')
 (u'john@doe.name', None)
@@ -59,7 +59,7 @@ A sample validator for a web form containing the following fields:
 * Email
 
 >>> validate_form = conv.struct(dict(
-...     username = conv.pipe(conv.cleanup_line, conv.test_exists),
+...     username = conv.pipe(conv.cleanup_line, conv.exists),
 ...     password = conv.pipe(
 ...         conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
 ...             error = u'Password mismatch'),

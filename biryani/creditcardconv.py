@@ -43,16 +43,16 @@ Sample usage:
 ...     today = datetime.date.today()
 ...     converted_value, error = conv.struct(
 ...         dict(
-...             credit_card_type = conv.pipe(conv.str_to_credit_card_type, conv.test_exists),
+...             credit_card_type = conv.pipe(conv.str_to_credit_card_type, conv.exists),
 ...             expiration_month = conv.pipe(
 ...                 conv.str_to_int,
 ...                 conv.test_between(1, 12, error = N_(u'Invalid expiration month')),
-...                 conv.test_exists,
+...                 conv.exists,
 ...                 ),
 ...             expiration_year = conv.pipe(
 ...                 conv.str_to_int,
 ...                 conv.test_greater_or_equal(today.year, error = N_(u'Invalid expiration year')),
-...                 conv.test_exists,
+...                 conv.exists,
 ...                 ),
 ...             ),
 ...         default = conv.noop,
@@ -73,12 +73,12 @@ Sample usage:
 ...     converted_value, error = conv.struct(
 ...         dict(
 ...             credit_card_number = conv.pipe(
-...                 conv.str_to_credit_card_number(credit_card_type),
-...                 conv.test_exists,
+...                 conv.make_str_to_credit_card_number(credit_card_type),
+...                 conv.exists,
 ...                 ),
 ...             credit_card_security_code = conv.pipe(
-...                 conv.str_to_credit_card_security_code(credit_card_type),
-...                 conv.test_exists,
+...                 conv.make_str_to_credit_card_security_code(credit_card_type),
+...                 conv.exists,
 ...                 ),
 ...             ),
 ...         default = conv.noop,
@@ -136,9 +136,9 @@ from . import states, strings
 
 
 __all__ = [
-    'clean_str_to_credit_card_number',
-    'str_to_credit_card_number',
-    'str_to_credit_card_security_code',
+    'make_clean_str_to_credit_card_number',
+    'make_str_to_credit_card_number',
+    'make_str_to_credit_card_security_code',
     'str_to_credit_card_type',
     ]
 
@@ -185,29 +185,29 @@ credit_cards_security_code_length = {
 N_ = conv.N_
 
 
-def clean_str_to_credit_card_number(type):
+def make_clean_str_to_credit_card_number(type):
     """Return a converter that converts a clean string to a credit card number of a given type.
 
-    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_credit_card_number`.
+    .. note:: For a converter that doesn't require a clean string, see :func:`make_str_to_credit_card_number`.
 
-    >>> clean_str_to_credit_card_number(u'visa')(u'4111111111111111')
+    >>> make_clean_str_to_credit_card_number(u'visa')(u'4111111111111111')
     (u'4111111111111111', None)
-    >>> clean_str_to_credit_card_number(u'visa')(u'   4111 1111-1111.,1111   ')
+    >>> make_clean_str_to_credit_card_number(u'visa')(u'   4111 1111-1111.,1111   ')
     (u'4111111111111111', None)
-    >>> clean_str_to_credit_card_number(u'visa')(u'411111111111111')
+    >>> make_clean_str_to_credit_card_number(u'visa')(u'411111111111111')
     (u'411111111111111', u'Wrong number of digits in credit card number')
-    >>> clean_str_to_credit_card_number(u'visa')(u'4111111111111112')
+    >>> make_clean_str_to_credit_card_number(u'visa')(u'4111111111111112')
     (u'4111111111111112', u'Invalid credit card number (wrong checksum)')
-    >>> clean_str_to_credit_card_number(u'visa')(u'5111111111111111')
+    >>> make_clean_str_to_credit_card_number(u'visa')(u'5111111111111111')
     (u'5111111111111111', u'Invalid credit card number (unknown prefix)')
-    >>> clean_str_to_credit_card_number(u'visa')(u'')
+    >>> make_clean_str_to_credit_card_number(u'visa')(u'')
     (u'', u'Credit card number must contain digits')
-    >>> clean_str_to_credit_card_number(u'visa')(u'   ')
+    >>> make_clean_str_to_credit_card_number(u'visa')(u'   ')
     (u'', u'Credit card number must contain digits')
-    >>> clean_str_to_credit_card_number(u'visa')(None)
+    >>> make_clean_str_to_credit_card_number(u'visa')(None)
     (None, None)
     """
-    def str_to_credit_card_number_converter(credit_card_number, state = states.default_state):
+    def clean_str_to_credit_card_number(credit_card_number, state = states.default_state):
         if credit_card_number is None:
             return credit_card_number, None
 
@@ -242,33 +242,33 @@ def clean_str_to_credit_card_number(type):
             return credit_card_number, state._(u'Invalid credit card number (wrong checksum)')
         return credit_card_number, None
 
-    return str_to_credit_card_number_converter
+    return clean_str_to_credit_card_number
 
 
-def str_to_credit_card_number(type):
+def make_str_to_credit_card_number(type):
     """Return a converter that converts a string to a credit card number for a given credit card type.
 
-    >>> str_to_credit_card_number(u'visa')(u'4111111111111111')
+    >>> make_str_to_credit_card_number(u'visa')(u'4111111111111111')
     (u'4111111111111111', None)
-    >>> str_to_credit_card_number(u'visa')(u'   4111 1111-1111.,1111   ')
+    >>> make_str_to_credit_card_number(u'visa')(u'   4111 1111-1111.,1111   ')
     (u'4111111111111111', None)
-    >>> str_to_credit_card_number(u'visa')(u'411111111111111')
+    >>> make_str_to_credit_card_number(u'visa')(u'411111111111111')
     (u'411111111111111', u'Wrong number of digits in credit card number')
-    >>> str_to_credit_card_number(u'visa')(u'4111111111111112')
+    >>> make_str_to_credit_card_number(u'visa')(u'4111111111111112')
     (u'4111111111111112', u'Invalid credit card number (wrong checksum)')
-    >>> str_to_credit_card_number(u'visa')(u'5111111111111111')
+    >>> make_str_to_credit_card_number(u'visa')(u'5111111111111111')
     (u'5111111111111111', u'Invalid credit card number (unknown prefix)')
-    >>> str_to_credit_card_number(u'visa')(u'')
+    >>> make_str_to_credit_card_number(u'visa')(u'')
     (None, None)
-    >>> str_to_credit_card_number(u'visa')(u'   ')
+    >>> make_str_to_credit_card_number(u'visa')(u'   ')
     (None, None)
-    >>> str_to_credit_card_number(u'visa')(None)
+    >>> make_str_to_credit_card_number(u'visa')(None)
     (None, None)
     """
-    return conv.pipe(conv.cleanup_line, clean_str_to_credit_card_number(type))
+    return conv.pipe(conv.cleanup_line, make_clean_str_to_credit_card_number(type))
 
 
-def str_to_credit_card_security_code(type):
+def make_str_to_credit_card_security_code(type):
     """Return a converter that converts a string to a security code for a given type of credit card.
     """
     return conv.pipe(

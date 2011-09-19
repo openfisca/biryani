@@ -43,9 +43,6 @@ __all__ = [
     'clean_str_to_bool',
     'clean_str_to_email',
     'clean_str_to_json',
-    'clean_str_to_slug',
-    'clean_str_to_url',
-    'clean_str_to_url_name',
     'clean_str_to_url_path_and_query',
     'cleanup_empty',
     'cleanup_line',
@@ -54,6 +51,7 @@ __all__ = [
     'decode_str',
     'default',
     'encode_str',
+    'exists',
     'extract_when_singleton',
     'fail',
     'first_match',
@@ -61,6 +59,10 @@ __all__ = [
     'get',
     'guess_bool',
     'item_or_sequence',
+    'make_clean_str_to_url',
+    'make_str_to_normal_form',
+    'make_str_to_slug',
+    'make_str_to_url',
     'new_mapping',
     'new_sequence',
     'new_struct',
@@ -78,7 +80,6 @@ __all__ = [
     'str_to_int',
     'str_to_json',
     'str_to_slug',
-    'str_to_url',
     'str_to_url_name',
     'str_to_url_path_and_query',
     'struct',
@@ -87,7 +88,6 @@ __all__ = [
     'test',
     'test_between',
     'test_equals',
-    'test_exists',
     'test_greater_or_equal',
     'test_in',
     'test_is',
@@ -235,85 +235,6 @@ def clean_str_to_json(value, state = states.default_state):
         return value, unicode(e)
 
 
-def clean_str_to_slug(value, state = states.default_state):
-    """Convert a clean string to a slug.
-
-    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_slug`.
-
-    >>> clean_str_to_slug(u'Hello world!')
-    (u'hello-world', None)
-    >>> clean_str_to_slug('Hello world!')
-    (u'hello-world', None)
-    >>> clean_str_to_slug(u'')
-    (None, None)
-    """
-    if value is None:
-        return value, None
-    value = strings.slugify(value)
-    return unicode(value) if value else None, None
-
-
-def clean_str_to_url(add_prefix = u'http://', full = False, remove_fragment = False, schemes = (u'http', u'https')):
-    """Return a converter that converts a clean string to an URL.
-
-    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_url`.
-
-    >>> clean_str_to_url()(u'http://packages.python.org/Biryani/')
-    (u'http://packages.python.org/Biryani/', None)
-    >>> clean_str_to_url(full = True)(u'packages.python.org/Biryani/')
-    (u'http://packages.python.org/Biryani/', None)
-    >>> clean_str_to_url()(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html#tutorial', None)
-    >>> clean_str_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
-    >>> clean_str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
-    (u'http://packages.python.org/Biryani/presentation.html', None)
-    """
-    def clean_str_to_url_converter(value, state = states.default_state):
-        if value is None:
-            return value, None
-        import urlparse
-        split_url = list(urlparse.urlsplit(value))
-        if full and add_prefix and not split_url[0] and not split_url[1] and split_url[2] \
-                and not split_url[2].startswith(u'/'):
-            split_url = list(urlparse.urlsplit(add_prefix + value))
-        scheme = split_url[0]
-        if scheme != scheme.lower():
-            split_url[0] = scheme = scheme.lower()
-        if full and not scheme:
-            return value, state._(u'URL must be complete')
-        if scheme and schemes is not None and scheme not in schemes:
-            return value, state._(u'Scheme must belong to {0}').format(sorted(schemes))
-        network_location = split_url[1]
-        if network_location != network_location.lower():
-            split_url[1] = network_location = network_location.lower()
-        if scheme in (u'http', u'https') and not split_url[2]:
-            # By convention a full HTTP URL must always have at least a "/" in its path.
-            split_url[2] = u'/'
-        if remove_fragment and split_url[4]:
-            split_url[4] = u''
-        return unicode(urlparse.urlunsplit(split_url)), None
-    return clean_str_to_url_converter
-
-
-def clean_str_to_url_name(value, state = states.default_state):
-    """Convert a clean string to a normalized string that can be used in an URL path or a query parameter.
-
-    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_url_name`.
-
-    >>> clean_str_to_url_name(u'Hello world!')
-    (u'hello_world!', None)
-    >>> clean_str_to_url_name(u'')
-    (None, None)
-    """
-    if value is None:
-        return value, None
-    for character in u'\n\r/?&#':
-        value = value.replace(character, u' ')
-    value = strings.normalize(value, separator = u'_')
-    return value or None, None
-
-
 def clean_str_to_url_path_and_query(value, state = states.default_state):
     """Convert a clean string to the path and query of an URL.
 
@@ -329,7 +250,7 @@ def clean_str_to_url_path_and_query(value, state = states.default_state):
     (None, None)
     >>> import urlparse
     >>> pipe(
-    ...     clean_str_to_url(),
+    ...     make_clean_str_to_url(),
     ...     function(lambda value: urlparse.urlunsplit([u'', u''] + list(urlparse.urlsplit(value))[2:])),
     ...     clean_str_to_url_path_and_query,
     ...     )(u'http://packages.python.org/Biryani/search.html?q=pipe')
@@ -436,6 +357,22 @@ def encode_str(encoding = 'utf-8'):
     (None, None)
     """
     return function(lambda value: value.encode(encoding) if isinstance(value, unicode) else value)
+
+
+def exists(value, state = states.default_state):
+    """Return an error when value is missing (aka ``None``).
+
+    >>> exists(42)
+    (42, None)
+    >>> exists(u'')
+    (u'', None)
+    >>> exists(None)
+    (None, u'Missing value')
+    """
+    if value is None:
+        return value, state._(u'Missing value')
+    else:
+        return value, None
 
 
 def fail(msg = N_(u'An error occured')):
@@ -678,6 +615,138 @@ def item_or_sequence(converter, constructor = list, keep_missing_items = False):
             extract_when_singleton,
             ),
         converter,
+        )
+
+
+def make_clean_str_to_url(add_prefix = u'http://', full = False, remove_fragment = False, schemes = (u'http', u'https')):
+    """Return a converter that converts a clean string to an URL.
+
+    .. note:: For a converter that doesn't require a clean string, see :func:`make_str_to_url`.
+
+    >>> make_clean_str_to_url()(u'http://packages.python.org/Biryani/')
+    (u'http://packages.python.org/Biryani/', None)
+    >>> make_clean_str_to_url(full = True)(u'packages.python.org/Biryani/')
+    (u'http://packages.python.org/Biryani/', None)
+    >>> make_clean_str_to_url()(u'/Biryani/presentation.html#tutorial')
+    (u'/Biryani/presentation.html#tutorial', None)
+    >>> make_clean_str_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
+    (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
+    >>> make_clean_str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
+    (u'http://packages.python.org/Biryani/presentation.html', None)
+    """
+    def clean_str_to_url(value, state = states.default_state):
+        if value is None:
+            return value, None
+        import urlparse
+        split_url = list(urlparse.urlsplit(value))
+        if full and add_prefix and not split_url[0] and not split_url[1] and split_url[2] \
+                and not split_url[2].startswith(u'/'):
+            split_url = list(urlparse.urlsplit(add_prefix + value))
+        scheme = split_url[0]
+        if scheme != scheme.lower():
+            split_url[0] = scheme = scheme.lower()
+        if full and not scheme:
+            return value, state._(u'URL must be complete')
+        if scheme and schemes is not None and scheme not in schemes:
+            return value, state._(u'Scheme must belong to {0}').format(sorted(schemes))
+        network_location = split_url[1]
+        if network_location != network_location.lower():
+            split_url[1] = network_location = network_location.lower()
+        if scheme in (u'http', u'https') and not split_url[2]:
+            # By convention a full HTTP URL must always have at least a "/" in its path.
+            split_url[2] = u'/'
+        if remove_fragment and split_url[4]:
+            split_url[4] = u''
+        return unicode(urlparse.urlunsplit(split_url)), None
+    return clean_str_to_url
+
+
+def make_str_to_normal_form(encoding = 'utf-8', separator = u' ', transform = strings.lower):
+    """Return a convert that simplifies a string to normal form using compatibility decomposition and removing combining
+    characters.
+
+    .. note:: For a converter that is dedicated to a name in an URL path, see :func:`str_to_url_name`.
+
+    .. note:: For a converter that keep only letters, digits and separator, see :func:`make_str_to_slug` or
+        :func:`str_to_slug`.
+
+    >>> make_str_to_normal_form()(u'Hello world!')
+    (u'hello world!', None)
+    >>> make_str_to_normal_form()('Hello world!')
+    (u'hello world!', None)
+    >>> make_str_to_normal_form()(u'   Hello world!   ')
+    (u'hello world!', None)
+    >>> make_str_to_normal_form(encoding = u'iso-8859-1')(u'Hello world!')
+    (u'hello world!', None)
+    >>> make_str_to_normal_form(separator = u'_')(u'Hello world!')
+    (u'hello_world!', None)
+    >>> from biryani import strings
+    >>> make_str_to_normal_form(separator = u' ', transform = strings.upper)(u'Hello world!')
+    (u'HELLO WORLD!', None)
+    >>> make_str_to_normal_form()(u'')
+    (None, None)
+    >>> make_str_to_normal_form()(u'   ')
+    (None, None)
+    """
+    def str_to_normal_form(value, state = states.default_state):
+        if value is None:
+            return value, None
+        value = strings.normalize(value, encoding = encoding, separator = separator, transform = transform)
+        return value or None, None
+    return str_to_normal_form
+
+
+def make_str_to_slug(encoding = 'utf-8', separator = u'-', transform = strings.lower):
+    """Return a convert that simplifies a string to a slug.
+
+    .. note:: For a converter that uses default parameters, see :func:`str_to_slug`.
+
+    >>> make_str_to_slug()(u'Hello world!')
+    (u'hello-world', None)
+    >>> make_str_to_slug()('Hello world!')
+    (u'hello-world', None)
+    >>> make_str_to_slug()(u'   Hello world!   ')
+    (u'hello-world', None)
+    >>> make_str_to_slug(encoding = u'iso-8859-1')(u'Hello world!')
+    (u'hello-world', None)
+    >>> make_str_to_slug(separator = u' ')(u'Hello world!')
+    (u'hello world', None)
+    >>> from biryani import strings
+    >>> make_str_to_slug(separator = u' ', transform = strings.upper)(u'Hello world!')
+    (u'HELLO WORLD', None)
+    >>> make_str_to_slug()(u'')
+    (None, None)
+    >>> make_str_to_slug()(u'   ')
+    (None, None)
+    """
+    def str_to_slug(value, state = states.default_state):
+        if value is None:
+            return value, None
+        value = strings.slugify(value, encoding = encoding, separator = separator, transform = transform)
+        return unicode(value) if value else None, None
+    return str_to_slug
+
+
+def make_str_to_url(add_prefix = u'http://', full = False, remove_fragment = False, schemes = (u'http', u'https')):
+    """Return a converter that converts an string to an URL.
+
+    >>> make_str_to_url()(u'http://packages.python.org/Biryani/')
+    (u'http://packages.python.org/Biryani/', None)
+    >>> make_str_to_url(full = True)(u'packages.python.org/Biryani/')
+    (u'http://packages.python.org/Biryani/', None)
+    >>> make_str_to_url()(u'/Biryani/presentation.html#tutorial')
+    (u'/Biryani/presentation.html#tutorial', None)
+    >>> make_str_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
+    (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
+    >>> make_str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
+    (u'http://packages.python.org/Biryani/presentation.html', None)
+    >>> make_str_to_url()(u'    http://packages.python.org/Biryani/   ')
+    (u'http://packages.python.org/Biryani/', None)
+    """
+    return pipe(
+        cleanup_line,
+        make_clean_str_to_url(add_prefix = add_prefix, full = full, remove_fragment = remove_fragment,
+            schemes = schemes),
         )
 
 
@@ -999,27 +1068,25 @@ def set_value(constant):
     return lambda value, state = states.default_state: (constant, None) if value is not None else (None, None)
 
 
-def str_to_url(add_prefix = u'http://', full = False, remove_fragment = False, schemes = (u'http', u'https')):
-    """Return a converter that converts an string to an URL.
+def str_to_url_name(value, state = states.default_state):
+    """Convert a string to a normalized string that can be used in an URL path or a query parameter.
 
-    >>> str_to_url()(u'http://packages.python.org/Biryani/')
-    (u'http://packages.python.org/Biryani/', None)
-    >>> str_to_url(full = True)(u'packages.python.org/Biryani/')
-    (u'http://packages.python.org/Biryani/', None)
-    >>> str_to_url()(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html#tutorial', None)
-    >>> str_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
-    >>> str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
-    (u'http://packages.python.org/Biryani/presentation.html', None)
-    >>> str_to_url()(u'    http://packages.python.org/Biryani/   ')
-    (u'http://packages.python.org/Biryani/', None)
+    .. note:: For a converter that keep only letters, digits and separator, see :func:`make_str_to_slug` or
+        :func:`str_to_slug`.
+
+    >>> str_to_url_name(u'   Hello world!   ')
+    (u'hello_world!', None)
+    >>> str_to_url_name(u'   ')
+    (None, None)
+    >>> str_to_url_name(u'')
+    (None, None)
     """
-    return pipe(
-        cleanup_line,
-        clean_str_to_url(add_prefix = add_prefix, full = full, remove_fragment = remove_fragment,
-            schemes = schemes),
-        )
+    if value is None:
+        return value, None
+    for character in u'\n\r/?&#':
+        value = value.replace(character, u' ')
+    value = strings.normalize(value, separator = u'_')
+    return value or None, None
 
 
 def struct(converters, constructor = None, default = None, keep_empty = False):
@@ -1028,7 +1095,7 @@ def struct(converters, constructor = None, default = None, keep_empty = False):
     Usage to convert a mapping (ie dict, etc):
 
     >>> strict_converter = struct(dict(
-    ...     name = pipe(cleanup_line, test_exists),
+    ...     name = pipe(cleanup_line, exists),
     ...     age = str_to_int,
     ...     email = str_to_email,
     ...     ))
@@ -1043,7 +1110,7 @@ def struct(converters, constructor = None, default = None, keep_empty = False):
     ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
     >>> non_strict_converter = struct(
     ...     dict(
-    ...         name = pipe(cleanup_line, test_exists),
+    ...         name = pipe(cleanup_line, exists),
     ...         age = str_to_int,
     ...         email = str_to_email,
     ...         ),
@@ -1080,7 +1147,7 @@ def struct(converters, constructor = None, default = None, keep_empty = False):
     Usage to convert a sequence (ie list, tuple, etc) or a set:
 
     >>> strict_converter = struct([
-    ...     pipe(cleanup_line, test_exists),
+    ...     pipe(cleanup_line, exists),
     ...     str_to_int,
     ...     str_to_email,
     ...     ])
@@ -1095,7 +1162,7 @@ def struct(converters, constructor = None, default = None, keep_empty = False):
     ([u'John Doe', 72, u'john@doe.name', u'   +33 9 12 34 56 78   '], {3: u'Unexpected item'})
     >>> non_strict_converter = struct(
     ...     [
-    ...         pipe(cleanup_line, test_exists),
+    ...         pipe(cleanup_line, exists),
     ...         str_to_int,
     ...         str_to_email,
     ...         ],
@@ -1128,7 +1195,7 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
     .. note:: This converter should not be used directly. Use :func:`struct` instead.
 
     >>> strict_converter = structured_mapping(dict(
-    ...     name = pipe(cleanup_line, test_exists),
+    ...     name = pipe(cleanup_line, exists),
     ...     age = str_to_int,
     ...     email = str_to_email,
     ...     ))
@@ -1143,7 +1210,7 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
     ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
     >>> non_strict_converter = structured_mapping(
     ...     dict(
-    ...         name = pipe(cleanup_line, test_exists),
+    ...         name = pipe(cleanup_line, exists),
     ...         age = str_to_int,
     ...         email = str_to_email,
     ...         ),
@@ -1214,7 +1281,7 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     .. note:: This converter should not be used directly. Use :func:`struct` instead.
 
     >>> strict_converter = structured_sequence([
-    ...     pipe(cleanup_line, test_exists),
+    ...     pipe(cleanup_line, exists),
     ...     str_to_int,
     ...     str_to_email,
     ...     ])
@@ -1229,7 +1296,7 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     ([u'John Doe', 72, u'john@doe.name', u'   +33 9 12 34 56 78   '], {3: u'Unexpected item'})
     >>> non_strict_converter = structured_sequence(
     ...     [
-    ...         pipe(cleanup_line, test_exists),
+    ...         pipe(cleanup_line, exists),
     ...         str_to_int,
     ...         str_to_email,
     ...         ],
@@ -1343,22 +1410,6 @@ def test_equals(constant, error = None):
     """
     return test(lambda value: value == constant if constant is not None else True,
         error = error or N_(u'Value must be equal to {0}').format(constant))
-
-
-def test_exists(value, state = states.default_state):
-    """Return an error when value is missing (aka ``None``).
-
-    >>> test_exists(42)
-    (42, None)
-    >>> test_exists(u'')
-    (u'', None)
-    >>> test_exists(None)
-    (None, u'Missing value')
-    """
-    if value is None:
-        return value, state._(u'Missing value')
-    else:
-        return value, None
 
 
 def test_greater_or_equal(constant, error = None):
@@ -1718,7 +1769,6 @@ str_to_float = pipe(cleanup_line, python_data_to_float)
     (None, None)
     """
 
-
 str_to_int = pipe(cleanup_line, python_data_to_int)
 """Convert a string to an integer.
 
@@ -1749,23 +1799,19 @@ str_to_json = pipe(cleanup_line, clean_str_to_json)
     (None, None)
     """
 
-str_to_slug = pipe(cleanup_line, clean_str_to_slug)
+str_to_slug = make_str_to_slug()
 """Convert a string to a slug.
+
+    .. note:: For a converter that doesn't use "-" as word separators or doesn't convert characters to lower case, see
+        :func:`str_to_normal_form`.
 
     >>> str_to_slug(u'   Hello world!   ')
     (u'hello-world', None)
-    >>> clean_str_to_slug('   Hello world!   ')
+    >>> str_to_slug('   Hello world!   ')
     (u'hello-world', None)
     >>> str_to_slug(u'')
     (None, None)
-    """
-
-str_to_url_name = pipe(cleanup_line, clean_str_to_url_name)
-"""Convert a string to a normalized string that can be used in an URL path or a query parameter.
-
-    >>> str_to_url_name(u'   Hello world!   ')
-    (u'hello_world!', None)
-    >>> str_to_url_name(u'')
+    >>> str_to_slug(u'   ')
     (None, None)
     """
 

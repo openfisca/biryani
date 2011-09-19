@@ -197,6 +197,8 @@ def normalize(s, encoding = 'utf-8', separator = u' ', transform = lower):
     u'\u0153il, foret, ca, ou...'
     >>> normalize('Hello world!')
     u'hello world!'
+    >>> normalize(u'   ')
+    u''
     >>> print normalize(None)
     None
     """

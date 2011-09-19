@@ -46,7 +46,7 @@ def attribute(name):
 
     >>> class C(object):
     ...     pass
-    >>> conv.pipe(conv.dict_to_object(C), attribute('a'))(dict(a = 1, b = 2))
+    >>> conv.pipe(conv.make_dict_to_object(C), attribute('a'))(dict(a = 1, b = 2))
     (1, None)
     """
     return conv.function(lambda value: getattr(value, name))

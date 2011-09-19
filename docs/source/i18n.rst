@@ -44,17 +44,17 @@ To use this newly defined state for your conversions:
 
 >>> from biryani import baseconv as conv
 ...
->>> conv.test_exists(None)
+>>> conv.exists(None)
 (None, u'Missing value')
->>> conv.test_exists(None, state = states.default_state)
+>>> conv.exists(None, state = states.default_state)
 (None, u'Missing value')
->>> conv.test_exists(None, state = french_state)
+>>> conv.exists(None, state = french_state)
 (None, u'Valeur manquante')
->>> conv.pipe(conv.str_to_int, conv.test_exists)(None, state = french_state)
+>>> conv.pipe(conv.str_to_int, conv.exists)(None, state = french_state)
 (None, u'Valeur manquante')
->>> conv.pipe(conv.str_to_int, conv.test_exists)(u'Hello world!')
+>>> conv.pipe(conv.str_to_int, conv.exists)(u'Hello world!')
 (u'Hello world!', u'Value must be an integer')
->>> conv.pipe(conv.str_to_int, conv.test_exists)(u'Hello world!', state = french_state)
+>>> conv.pipe(conv.str_to_int, conv.exists)(u'Hello world!', state = french_state)
 (u'Hello world!', u'La valeur doit \xeatre un entier')
 
 
@@ -77,14 +77,14 @@ When using *Biryani* in web applications, for example, you will often need to di
 ...         return translation.ugettext
 
 >>> user_state = UserState()
->>> conv.test_exists(None, state = user_state)
+>>> conv.exists(None, state = user_state)
 (None, u'Missing value')
 
 >>> french_user_state = UserState()
 >>> french_user_state.languages = ['fr_FR', 'fr']
->>> conv.test_exists(None, state = french_user_state)
+>>> conv.exists(None, state = french_user_state)
 (None, u'Valeur manquante')
->>> conv.pipe(conv.str_to_int, conv.test_exists)(u'Hello world!', state = french_user_state)
+>>> conv.pipe(conv.str_to_int, conv.exists)(u'Hello world!', state = french_user_state)
 (u'Hello world!', u'La valeur doit \xeatre un entier')
 
 
