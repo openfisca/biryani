@@ -275,7 +275,8 @@ str_to_postal_code = conv.pipe(
 
 
 str_to_postal_routing = conv.pipe(
-    conv.function(lambda s: strings.normalize(s, transform = strings.upper) or None),
+    # Only upper-case ASCII letters, digits and spaces are allowed : http://fr.wikipedia.org/wiki/Adresse_postale#France
+    conv.function(lambda s: strings.slugify(s, separator = u' ', transform = strings.upper) or None),
     shrink_postal_routing,
     )
 """Convert a string to a postal routing (aka locality, ie the part of the address after the postal code).
@@ -288,6 +289,8 @@ str_to_postal_routing = conv.pipe(
     (u'ST ETIENNE', None)
     >>> str_to_postal_routing(u'   SAINT Étienne   ')
     (u'ST ETIENNE', None)
+    >>> str_to_postal_routing(u'   Saint-Fiacre-sur-Maine   ')
+    (u'ST FIACRE SUR MAINE', None)
     >>> str_to_postal_routing(u'Saintes')
     (u'SAINTES', None)
     >>> str_to_postal_routing('   ')
