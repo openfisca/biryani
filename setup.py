@@ -60,6 +60,9 @@ setup(
     long_description = '\n'.join(doc_lines[2:]),
     url = 'http://packages.python.org/Biryani/',
 
+    data_files = [
+        ('share/locale/fr/LC_MESSAGES', ['biryani/i18n/fr/LC_MESSAGES/biryani.mo']),
+        ],
     install_requires = [
         "Babel >= 0.9.4",
         ],
