@@ -33,14 +33,24 @@ Here is an example of how to have french error messages with *Biryani*:
 >>> import gettext
 >>> from biryani import states
 ...
->>> french_translation = gettext.translation('biryani', 'biryani/i18n', languages = ['fr'])
+>>> french_translation = gettext.translation('biryani', languages = ['fr'])
 ...
 >>> class FrenchState(states.State):
 ...     _ = staticmethod(french_translation.ugettext)
 ...
 >>> french_state = FrenchState()
 
-To use this newly defined state for your conversions:
+.. note:: If you get an ``IOError: [Errno 2] No translation file found for domain: 'biryani'``, your *Biryani*
+    translations are not properly installed. To avoid this error, you can specify a ``localedir`` argument to
+    ``gettext.translation``, like::
+
+        french_translation = gettext.translation('biryani', localedir = 'path/to/biryani/i18n', languages = ['fr'])
+
+    or, if the content of ``biryani/i18n`` directory has been copied in ``/usr/local/share/local``::
+
+        french_translation = gettext.translation('biryani', '/usr/local/share/locale', languages = ['fr'])
+
+Once the state has been properly defined, you can use it for your conversions:
 
 >>> from biryani import baseconv as conv
 ...
