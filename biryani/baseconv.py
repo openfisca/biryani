@@ -59,10 +59,18 @@ __all__ = [
     'get',
     'guess_bool',
     'item_or_sequence',
+    'make_between',
     'make_clean_str_to_url',
+    'make_equals',
+    'make_greater_or_equal',
+    'make_in',
+    'make_is',
+    'make_isinstance',
+    'make_less_or_equal',
     'make_str_to_normal_form',
     'make_str_to_slug',
     'make_str_to_url',
+    'make_test',
     'new_mapping',
     'new_sequence',
     'new_struct',
@@ -85,14 +93,6 @@ __all__ = [
     'struct',
     'structured_mapping',
     'structured_sequence',
-    'test',
-    'test_between',
-    'test_equals',
-    'test_greater_or_equal',
-    'test_in',
-    'test_is',
-    'test_isinstance',
-    'test_less_or_equal',
     'translate',
     'uniform_mapping',
     'uniform_sequence',
@@ -292,7 +292,7 @@ def condition(test_converter, ok_converter, error_converter = None):
     .. note:: See also :func:`first_match`.
 
     >>> detect_unknown_values = condition(
-    ...     test_in(['?', 'x']),
+    ...     make_in(['?', 'x']),
     ...     set_value(False),
     ...     set_value(True),
     ...     )
@@ -391,13 +391,13 @@ def fail(msg = N_(u'An error occured')):
 def first_match(*converters):
     """Try each converter successively until one succeeds. When every converter fail, return the result of the last one.
 
-    >>> first_match(test_equals(u'NaN'), str_to_int)(u'NaN')
+    >>> first_match(make_equals(u'NaN'), str_to_int)(u'NaN')
     (u'NaN', None)
-    >>> first_match(test_equals(u'NaN'), str_to_int)(u'42')
+    >>> first_match(make_equals(u'NaN'), str_to_int)(u'42')
     (42, None)
-    >>> first_match(test_equals(u'NaN'), str_to_int)(u'abc')
+    >>> first_match(make_equals(u'NaN'), str_to_int)(u'abc')
     (u'abc', u'Value must be an integer')
-    >>> first_match(test_equals(u'NaN'), str_to_int, set_value(0))(u'Hello world!')
+    >>> first_match(make_equals(u'NaN'), str_to_int, set_value(0))(u'Hello world!')
     (0, None)
     >>> first_match()(u'Hello world!')
     (u'Hello world!', None)
@@ -419,7 +419,7 @@ def function(function, handle_missing_value = False, handle_state = False):
     .. note:: Like most converters, by default a missing value (aka ``None``) is not converted (ie function is not
        called). Set ``handle_missing_value`` to ``True`` to call function when value is ``None``.
 
-    .. note:: When your function doesn't modify value but may generate an error, use a :func:`test` instead.
+    .. note:: When your function doesn't modify value but may generate an error, use a :func:`make_test` instead.
 
     .. note:: When your function modifies value and may generate an error, write a full converter instead of a function.
 
@@ -609,13 +609,35 @@ def item_or_sequence(converter, constructor = list, keep_missing_items = False):
     (set([42, 43]), None)
     """
     return condition(
-        test_isinstance(constructor),
+        make_isinstance(constructor),
         pipe(
             uniform_sequence(converter, constructor = constructor, keep_missing_items = keep_missing_items),
             extract_when_singleton,
             ),
         converter,
         )
+
+
+def make_between(min_value, max_value, error = None):
+    """Return a converter that accepts only values between the two given bounds (included).
+
+    .. warning:: Like most converters, a missing value (aka ``None``) is not compared.
+
+    >>> make_between(0, 9)(5)
+    (5, None)
+    >>> make_between(0, 9)(0)
+    (0, None)
+    >>> make_between(0, 9)(9)
+    (9, None)
+    >>> make_between(0, 9)(10)
+    (10, u'Value must be between 0 and 9')
+    >>> make_between(0, 9, error = u'Number must be a digit')(10)
+    (10, u'Number must be a digit')
+    >>> make_between(0, 9)(None)
+    (None, None)
+    """
+    return make_test(lambda value: min_value <= value <= max_value,
+        error = error or N_(u'Value must be between {0} and {1}').format(min_value, max_value))
 
 
 def make_clean_str_to_url(add_prefix = u'http://', full = False, remove_fragment = False, schemes = (u'http', u'https')):
@@ -659,6 +681,133 @@ def make_clean_str_to_url(add_prefix = u'http://', full = False, remove_fragment
             split_url[4] = u''
         return unicode(urlparse.urlunsplit(split_url)), None
     return clean_str_to_url
+
+
+def make_equals(constant, error = None):
+    """Return a converter that accepts only values equals to given constant.
+
+    .. warning:: Like most converters, a missing value (aka ``None``) is not compared. Furthermore, when *constant* is
+       ``None``, value is never compared.
+
+    >>> make_equals(42)(42)
+    (42, None)
+    >>> make_equals(dict(a = 1, b = 2))(dict(a = 1, b = 2))
+    ({'a': 1, 'b': 2}, None)
+    >>> make_equals(41)(42)
+    (42, u'Value must be equal to 41')
+    >>> make_equals(41, error = u'Value is not the answer')(42)
+    (42, u'Value is not the answer')
+    >>> make_equals(None)(42)
+    (42, None)
+    >>> make_equals(42)(None)
+    (None, None)
+    """
+    return make_test(lambda value: value == constant if constant is not None else True,
+        error = error or N_(u'Value must be equal to {0}').format(constant))
+
+
+def make_greater_or_equal(constant, error = None):
+    """Return a converter that accepts only values greater than or equal to given constant.
+
+    .. warning:: Like most converters, a missing value (aka ``None``) is not compared.
+
+    >>> make_greater_or_equal(0)(5)
+    (5, None)
+    >>> make_greater_or_equal(9)(5)
+    (5, u'Value must be greater than or equal to 9')
+    >>> make_greater_or_equal(9, error = u'Value must be a positive two-digits number')(5)
+    (5, u'Value must be a positive two-digits number')
+    >>> make_greater_or_equal(9)(None)
+    (None, None)
+    >>> make_greater_or_equal(None)(5)
+    (5, None)
+    """
+    return make_test(lambda value: (value >= constant) if constant is not None else True,
+        error = error or N_(u'Value must be greater than or equal to {0}').format(constant))
+
+
+def make_in(values, error = None):
+    """Return a converter that accepts only values belonging to a given set (or list or...).
+
+    .. warning:: Like most converters, a missing value (aka ``None``) is not compared. Furthermore, when *values* is
+       ``None``, value is never compared.
+
+    >>> make_in('abcd')('a')
+    ('a', None)
+    >>> make_in(['a', 'b', 'c', 'd'])('a')
+    ('a', None)
+    >>> make_in(['a', 'b', 'c', 'd'])('z')
+    ('z', u"Value must belong to ['a', 'b', 'c', 'd']")
+    >>> make_in(['a', 'b', 'c', 'd'], error = u'Value must be a letter less than "e"')('z')
+    ('z', u'Value must be a letter less than "e"')
+    >>> make_in([])('z')
+    ('z', u'Value must belong to []')
+    >>> make_in(None)('z')
+    ('z', None)
+    >>> make_in(['a', 'b', 'c', 'd'])(None)
+    (None, None)
+    """
+    return make_test(lambda value: value in values if values is not None else True,
+        error = error or N_(u'Value must belong to {0}').format(values))
+
+
+def make_is(constant, error = None):
+    """Return a converter that accepts only values that are strictly equal to given constant.
+
+    .. warning:: Like most converters, a missing value (aka ``None``) is not compared. Furthermore, when *constant* is
+       ``None``, value is never compared.
+
+    >>> make_is(42)(42)
+    (42, None)
+    >>> make_is(dict(a = 1, b = 2))(dict(a = 1, b = 2))
+    ({'a': 1, 'b': 2}, u"Value must be {'a': 1, 'b': 2}")
+    >>> make_is(41)(42)
+    (42, u'Value must be 41')
+    >>> make_is(41, error = u'Value is not the answer')(42)
+    (42, u'Value is not the answer')
+    >>> make_is(None)(42)
+    (42, None)
+    >>> make_is(42)(None)
+    (None, None)
+    """
+    return make_test(lambda value: value is constant if constant is not None else True,
+        error = error or N_(u'Value must be {0}').format(constant))
+
+
+def make_isinstance(class_or_classes, error = None):
+    """Return a converter that accepts only an instance of given class (or tuple of classes).
+
+    >>> make_isinstance(basestring)('This is a string')
+    ('This is a string', None)
+    >>> make_isinstance(basestring)(42)
+    (42, u"Value is not an instance of <type 'basestring'>")
+    >>> make_isinstance(basestring, error = u'Value is not a string')(42)
+    (42, u'Value is not a string')
+    >>> make_isinstance((float, int))(42)
+    (42, None)
+    """
+    return make_test(lambda value: isinstance(value, class_or_classes),
+        error = error or N_(u'Value is not an instance of {0}').format(class_or_classes))
+
+
+def make_less_or_equal(constant, error = None):
+    """Return a converter that accepts only values less than or equal to given constant.
+
+    .. warning:: Like most converters, a missing value (aka ``None``) is not compared.
+
+    >>> make_less_or_equal(9)(5)
+    (5, None)
+    >>> make_less_or_equal(0)(5)
+    (5, u'Value must be less than or equal to 0')
+    >>> make_less_or_equal(0, error = u'Value must be negative')(5)
+    (5, u'Value must be negative')
+    >>> make_less_or_equal(9)(None)
+    (None, None)
+    >>> make_less_or_equal(None)(5)
+    (5, None)
+    """
+    return make_test(lambda value: (value <= constant) if constant is not None else True,
+        error = error or N_(u'Value must be less than or equal to {0}').format(constant))
 
 
 def make_str_to_normal_form(encoding = 'utf-8', separator = u' ', transform = strings.lower):
@@ -748,6 +897,30 @@ def make_str_to_url(add_prefix = u'http://', full = False, remove_fragment = Fal
         make_clean_str_to_url(add_prefix = add_prefix, full = full, remove_fragment = remove_fragment,
             schemes = schemes),
         )
+
+
+def make_test(function, error = N_(u'Test failed'), handle_missing_value = False, handle_state = False):
+    """Return a converter that applies a test function to a value and returns an error when test fails.
+
+    ``make_test`` always returns the initial value, even when test fails.
+
+     See :doc:`how-to-create-converter` for more informations.
+
+    >>> make_test(lambda value: isinstance(value, basestring))('hello')
+    ('hello', None)
+    >>> make_test(lambda value: isinstance(value, basestring))(1)
+    (1, u'Test failed')
+    >>> make_test(lambda value: isinstance(value, basestring), error = u'Value is not a string')(1)
+    (1, u'Value is not a string')
+    """
+    def test(value, state = states.default_state):
+        if value is None and not handle_missing_value or function is None:
+            return value, None
+        ok = function(value, state = state) if handle_state else function(value)
+        if ok:
+            return value, None
+        return value, state._(error)
+    return test
 
 
 def new_mapping(converters, constructor = dict, keep_empty = False):
@@ -941,9 +1114,9 @@ def pipe(*converters):
     >>> pipe(str_to_bool)(42)
     Traceback (most recent call last):
     AttributeError: 'int' object has no attribute 'strip'
-    >>> pipe(test_isinstance(unicode), str_to_bool)(42)
+    >>> pipe(make_isinstance(unicode), str_to_bool)(42)
     (42, u"Value is not an instance of <type 'unicode'>")
-    >>> pipe(python_data_to_str, test_isinstance(unicode), str_to_bool)(42)
+    >>> pipe(python_data_to_str, make_isinstance(unicode), str_to_bool)(42)
     (True, None)
     >>> pipe()(42)
     (42, None)
@@ -1343,179 +1516,6 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     return structured_sequence_converter
 
 
-def test(function, error = N_(u'Test failed'), handle_missing_value = False, handle_state = False):
-    """Return a converter that applies a test function to a value and returns an error when test fails.
-
-    ``test`` always returns the initial value, even when test fails.
-
-     See :doc:`how-to-create-converter` for more informations.
-
-    >>> test(lambda value: isinstance(value, basestring))('hello')
-    ('hello', None)
-    >>> test(lambda value: isinstance(value, basestring))(1)
-    (1, u'Test failed')
-    >>> test(lambda value: isinstance(value, basestring), error = u'Value is not a string')(1)
-    (1, u'Value is not a string')
-    """
-    def test_converter(value, state = states.default_state):
-        if value is None and not handle_missing_value or function is None:
-            return value, None
-        ok = function(value, state = state) if handle_state else function(value)
-        if ok:
-            return value, None
-        return value, state._(error)
-    return test_converter
-
-
-def test_between(min_value, max_value, error = None):
-    """Return a converter that accepts only values between the two given bounds (included).
-
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared.
-
-    >>> test_between(0, 9)(5)
-    (5, None)
-    >>> test_between(0, 9)(0)
-    (0, None)
-    >>> test_between(0, 9)(9)
-    (9, None)
-    >>> test_between(0, 9)(10)
-    (10, u'Value must be between 0 and 9')
-    >>> test_between(0, 9, error = u'Number must be a digit')(10)
-    (10, u'Number must be a digit')
-    >>> test_between(0, 9)(None)
-    (None, None)
-    """
-    return test(lambda value: min_value <= value <= max_value,
-        error = error or N_(u'Value must be between {0} and {1}').format(min_value, max_value))
-
-
-def test_equals(constant, error = None):
-    """Return a converter that accepts only values equals to given constant.
-
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared. Furthermore, when *constant* is
-       ``None``, value is never compared.
-
-    >>> test_equals(42)(42)
-    (42, None)
-    >>> test_equals(dict(a = 1, b = 2))(dict(a = 1, b = 2))
-    ({'a': 1, 'b': 2}, None)
-    >>> test_equals(41)(42)
-    (42, u'Value must be equal to 41')
-    >>> test_equals(41, error = u'Value is not the answer')(42)
-    (42, u'Value is not the answer')
-    >>> test_equals(None)(42)
-    (42, None)
-    >>> test_equals(42)(None)
-    (None, None)
-    """
-    return test(lambda value: value == constant if constant is not None else True,
-        error = error or N_(u'Value must be equal to {0}').format(constant))
-
-
-def test_greater_or_equal(constant, error = None):
-    """Return a converter that accepts only values greater than or equal to given constant.
-
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared.
-
-    >>> test_greater_or_equal(0)(5)
-    (5, None)
-    >>> test_greater_or_equal(9)(5)
-    (5, u'Value must be greater than or equal to 9')
-    >>> test_greater_or_equal(9, error = u'Value must be a positive two-digits number')(5)
-    (5, u'Value must be a positive two-digits number')
-    >>> test_greater_or_equal(9)(None)
-    (None, None)
-    >>> test_greater_or_equal(None)(5)
-    (5, None)
-    """
-    return test(lambda value: (value >= constant) if constant is not None else True,
-        error = error or N_(u'Value must be greater than or equal to {0}').format(constant))
-
-
-def test_in(values, error = None):
-    """Return a converter that accepts only values belonging to a given set (or list or...).
-
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared. Furthermore, when *values* is
-       ``None``, value is never compared.
-
-    >>> test_in('abcd')('a')
-    ('a', None)
-    >>> test_in(['a', 'b', 'c', 'd'])('a')
-    ('a', None)
-    >>> test_in(['a', 'b', 'c', 'd'])('z')
-    ('z', u"Value must belong to ['a', 'b', 'c', 'd']")
-    >>> test_in(['a', 'b', 'c', 'd'], error = u'Value must be a letter less than "e"')('z')
-    ('z', u'Value must be a letter less than "e"')
-    >>> test_in([])('z')
-    ('z', u'Value must belong to []')
-    >>> test_in(None)('z')
-    ('z', None)
-    >>> test_in(['a', 'b', 'c', 'd'])(None)
-    (None, None)
-    """
-    return test(lambda value: value in values if values is not None else True,
-        error = error or N_(u'Value must belong to {0}').format(values))
-
-
-def test_is(constant, error = None):
-    """Return a converter that accepts only values that are strictly equal to given constant.
-
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared. Furthermore, when *constant* is
-       ``None``, value is never compared.
-
-    >>> test_is(42)(42)
-    (42, None)
-    >>> test_is(dict(a = 1, b = 2))(dict(a = 1, b = 2))
-    ({'a': 1, 'b': 2}, u"Value must be {'a': 1, 'b': 2}")
-    >>> test_is(41)(42)
-    (42, u'Value must be 41')
-    >>> test_is(41, error = u'Value is not the answer')(42)
-    (42, u'Value is not the answer')
-    >>> test_is(None)(42)
-    (42, None)
-    >>> test_is(42)(None)
-    (None, None)
-    """
-    return test(lambda value: value is constant if constant is not None else True,
-        error = error or N_(u'Value must be {0}').format(constant))
-
-
-def test_isinstance(class_or_classes, error = None):
-    """Return a converter that accepts only an instance of given class (or tuple of classes).
-
-    >>> test_isinstance(basestring)('This is a string')
-    ('This is a string', None)
-    >>> test_isinstance(basestring)(42)
-    (42, u"Value is not an instance of <type 'basestring'>")
-    >>> test_isinstance(basestring, error = u'Value is not a string')(42)
-    (42, u'Value is not a string')
-    >>> test_isinstance((float, int))(42)
-    (42, None)
-    """
-    return test(lambda value: isinstance(value, class_or_classes),
-        error = error or N_(u'Value is not an instance of {0}').format(class_or_classes))
-
-
-def test_less_or_equal(constant, error = None):
-    """Return a converter that accepts only values less than or equal to given constant.
-
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared.
-
-    >>> test_less_or_equal(9)(5)
-    (5, None)
-    >>> test_less_or_equal(0)(5)
-    (5, u'Value must be less than or equal to 0')
-    >>> test_less_or_equal(0, error = u'Value must be negative')(5)
-    (5, u'Value must be negative')
-    >>> test_less_or_equal(9)(None)
-    (None, None)
-    >>> test_less_or_equal(None)(5)
-    (5, None)
-    """
-    return test(lambda value: (value <= constant) if constant is not None else True,
-        error = error or N_(u'Value must be less than or equal to {0}').format(constant))
-
-
 def translate(conversions):
     """Return a converter that converts values found in given dictionary and keep others as is.
 
@@ -1548,7 +1548,7 @@ def uniform_mapping(key_converter, value_converter, constructor = dict, keep_emp
     ({u'a': 1, u'b': 2}, None)
     >>> uniform_mapping(cleanup_line, str_to_int)({u'   answer   ': u'42'})
     ({u'answer': 42}, None)
-    >>> uniform_mapping(cleanup_line, pipe(test_isinstance(basestring), str_to_int))({u'a': u'1', u'b': u'2', 'c': 3})
+    >>> uniform_mapping(cleanup_line, pipe(make_isinstance(basestring), str_to_int))({u'a': u'1', u'b': u'2', 'c': 3})
     ({u'a': 1, 'c': 3, u'b': 2}, {'c': u"Value is not an instance of <type 'basestring'>"})
     >>> uniform_mapping(cleanup_line, str_to_int)({})
     (None, None)
@@ -1660,7 +1660,7 @@ cleanup_text = pipe(
     """
 
 extract_when_singleton = condition(
-    test(lambda value: len(value) == 1 and not isinstance(value[0], (list, set, tuple))),
+    make_test(lambda value: len(value) == 1 and not isinstance(value[0], (list, set, tuple))),
     function(lambda value: list(value)[0]),
     )
 """Extract first item of sequence when it is a singleton and it is not itself a sequence, otherwise keep it unchanged.
@@ -1846,7 +1846,7 @@ def check(converter_or_value_and_error, clear_on_error = False):
     >>> check(str_to_int)(u'hello world')
     Traceback (most recent call last):
     ValueError: Value must be an integer
-    >>> check(pipe(python_data_to_str, test_isinstance(unicode), str_to_bool))(42)
+    >>> check(pipe(python_data_to_str, make_isinstance(unicode), str_to_bool))(42)
     True
     >>> check(str_to_int, clear_on_error = True)(u'42')
     42
@@ -1860,7 +1860,7 @@ def check(converter_or_value_and_error, clear_on_error = False):
     >>> check(str_to_int(u'hello world'))
     Traceback (most recent call last):
     ValueError: Value must be an integer
-    >>> check(pipe(python_data_to_str, test_isinstance(unicode), str_to_bool)(42))
+    >>> check(pipe(python_data_to_str, make_isinstance(unicode), str_to_bool)(42))
     True
     >>> check(str_to_int(u'42'), clear_on_error = True)
     42

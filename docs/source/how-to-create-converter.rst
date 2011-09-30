@@ -100,11 +100,11 @@ Tests
 
 To create a converter that tests its input value without modifying it and that produces an error when test fails, the 
 easiest method is to create a function that accepts the input value as argument and that returns the result of the test
-as a boolean. Then you just have to wrap this test function using the :func:`biryan.baseconv.test` converter.
+as a boolean. Then you just have to wrap this test function using the :func:`biryan.baseconv.make_test` converter.
 
 Example of a converter that tests whether a password as a sufficient length:
 
->>> test_valid_password = conv.test(lambda password: len(password) >= 8)
+>>> test_valid_password = conv.make_test(lambda password: len(password) >= 8)
 ...
 >>> test_valid_password(u'abcdefgh')
 (u'abcdefgh', None)
@@ -113,7 +113,7 @@ Example of a converter that tests whether a password as a sufficient length:
 
 You can changed default error message, using the ``error`` argument:
 
->>> test_valid_password = conv.test(lambda password: len(password) >= 8, error = u'Password too short')
+>>> test_valid_password = conv.make_test(lambda password: len(password) >= 8, error = u'Password too short')
 ...
 >>> test_valid_password(u'123')
 (u'123', u'Password too short')
@@ -129,7 +129,7 @@ test is considered to have nothing to test and should return nothing (aka ``None
 
 But, if you want to change this behaviour, you can set the ``handle_missing_value`` flag:
 
->>> test_valid_password = conv.test(lambda password: len(password) >= 8, handle_missing_value = True)
+>>> test_valid_password = conv.make_test(lambda password: len(password) >= 8, handle_missing_value = True)
 ...
 >>> test_valid_password(None)
 Traceback (most recent call last):
@@ -137,7 +137,7 @@ TypeError: object of type 'NoneType' has no len()
 
 In this case, you will have to rewrite your test to handle the ``None`` input value:
 
->>> test_valid_password = conv.test(lambda password: len(password or u'') >= 8, handle_missing_value = True)
+>>> test_valid_password = conv.make_test(lambda password: len(password or u'') >= 8, handle_missing_value = True)
 ...
 >>> test_valid_password(None)
 (None, u'Test failed')
@@ -150,7 +150,7 @@ For example, here is a filter that tests whether the localized version of a stri
 >>> def has_even_len(value, state = states.default_state):
 ...     return len(state._(value)) % 2 == 0
 ...
->>> test_has_even_len = conv.test(has_even_len, handle_state = True)
+>>> test_has_even_len = conv.make_test(has_even_len, handle_state = True)
 ...
 >>> test_has_even_len(u'many')
 (u'many', None)
@@ -228,12 +228,12 @@ For example, to transform our password validator to add a minimal password lengt
 
     >>> def validate_password(min_len = 6):
     ...     return conv.pipe(
-    ...         conv.test(lambda passwords: len(passwords) >= 2,
+    ...         conv.make_test(lambda passwords: len(passwords) >= 2,
     ...             error = u'Missing passwords'),
-    ...         conv.test(lambda passwords: passwords[0] == passwords[1],
+    ...         conv.make_test(lambda passwords: passwords[0] == passwords[1],
     ...             error = u'Password mismatch'),
     ...         conv.function(lambda passwords: passwords[0]),
-    ...         conv.test(lambda password: len(password) >= min_len,
+    ...         conv.make_test(lambda password: len(password) >= min_len,
     ...             error = u'Password too short'),
     ...         )
 

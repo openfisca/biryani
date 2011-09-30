@@ -214,7 +214,7 @@ str_to_lenient_depcom = conv.pipe(
 
 str_to_depcom = conv.pipe(
     str_to_lenient_depcom,
-    conv.test(lambda depcom: depcom_re.match(depcom) is not None,
+    conv.make_test(lambda depcom: depcom_re.match(depcom) is not None,
         error = N_(u'INSEE code must contain only 5 digits or "A" or "B"')),
     )
 """Convert a string to aan INSEE commune code (aka depcom). Generate an error when depcom is not valid.
@@ -278,8 +278,8 @@ str_to_phone = conv.pipe(conv.cleanup_line, clean_str_to_phone)
 
 str_to_postal_code = conv.pipe(
     str_to_lenient_postal_code,
-    conv.test(lambda postal_code: postal_code.isdigit(), error = N_(u'Postal code must contain only digits')),
-    conv.test(lambda postal_code: len(postal_code) == 5, error = N_(u'Postal code must have 5 digits')),
+    conv.make_test(lambda postal_code: postal_code.isdigit(), error = N_(u'Postal code must contain only digits')),
+    conv.make_test(lambda postal_code: len(postal_code) == 5, error = N_(u'Postal code must have 5 digits')),
     )
 """Convert a string to a postal code. Generate an error when postal code is not valid.
 

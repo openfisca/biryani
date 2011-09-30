@@ -46,12 +46,12 @@ Sample usage:
 ...             credit_card_type = conv.pipe(conv.str_to_credit_card_type, conv.exists),
 ...             expiration_month = conv.pipe(
 ...                 conv.str_to_int,
-...                 conv.test_between(1, 12, error = N_(u'Invalid expiration month')),
+...                 conv.make_between(1, 12, error = N_(u'Invalid expiration month')),
 ...                 conv.exists,
 ...                 ),
 ...             expiration_year = conv.pipe(
 ...                 conv.str_to_int,
-...                 conv.test_greater_or_equal(today.year, error = N_(u'Invalid expiration year')),
+...                 conv.make_greater_or_equal(today.year, error = N_(u'Invalid expiration year')),
 ...                 conv.exists,
 ...                 ),
 ...             ),
@@ -273,7 +273,7 @@ def make_str_to_credit_card_security_code(type):
     """
     return conv.pipe(
         conv.cleanup_line,
-        conv.test(lambda value: len(value) == credit_cards_security_code_length[type],
+        conv.make_test(lambda value: len(value) == credit_cards_security_code_length[type],
             error = N_(u'Invalid security code for credit card')),
         conv.str_to_int,
         )
@@ -281,6 +281,6 @@ def make_str_to_credit_card_security_code(type):
 
 str_to_credit_card_type = conv.pipe(
     conv.str_to_slug,
-    conv.test_in(credit_cards_prefix_and_length.keys(), error = N_(u'Unknown type of credit card')),
+    conv.make_in(credit_cards_prefix_and_length.keys(), error = N_(u'Unknown type of credit card')),
     )
 

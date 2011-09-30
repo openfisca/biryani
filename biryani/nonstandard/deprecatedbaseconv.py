@@ -136,5 +136,5 @@ def test_match(regex, error = N_('Invalid value format')):
     >>> test_match(re.compile(u'ok$'))(u'not OK')
     (u'not OK', 'Invalid value format')
     """
-    return conv.test(lambda value: regex.match(value), error = error)
+    return conv.make_test(lambda value: regex.match(value), error = error)
 
