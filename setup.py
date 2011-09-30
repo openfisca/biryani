@@ -71,7 +71,7 @@ setup(
             ('**.py', 'python', None),
             ],
         },
-    package_data = {'biryani': ['i18n/*/LC_MESSAGES/*.mo']},
+#    package_data = {'biryani': ['i18n/*/LC_MESSAGES/*.mo']},
     packages = find_packages(exclude = ['ez_setup']),
     zip_safe = False,
     )
