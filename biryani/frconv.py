@@ -34,6 +34,7 @@ from . import strings, states
 __all__ = [
     'clean_str_to_phone',
     'expand_postal_routing',
+    'repair_postal_routing',
     'shrink_postal_routing',
     'str_to_depcom',
     'str_to_lenient_depcom',
@@ -129,6 +130,31 @@ def expand_postal_routing(value, state = states.default_state):
         elif word == 'STES':
             # STES is not a valid abbreviation for SAINTES, bu we accept it.
             word = 'SAINTES'
+        postal_routing_fragments.append(word)
+    return u' '.join(postal_routing_fragments) or None, None
+
+
+def repair_postal_routing(value, state = states.default_state):
+    """Correct mispelled words in a postal routing.
+
+    .. note:: Postal routing must already be converted to uppercase ASCII.
+
+    .. note:: This converter doesn't handle abbreviations. See :func:`shrink_postal_routing`
+        or :func:`expand_postal_routing` to handle them.
+
+    >>> repair_postal_routing(u'SAINT NAZAIRE CED')
+    (u'SAINT NAZAIRE CEDEX', None)
+    >>> repair_postal_routing(u'ST NAZAIRE CED')
+    (u'ST NAZAIRE CEDEX', None)
+    >>> repair_postal_routing(None)
+    (None, None)
+    """
+    if value is None:
+        return value, None
+    postal_routing_fragments = []
+    for word in value.split():
+        if word == 'CED':
+            word = 'CEDEX'
         postal_routing_fragments.append(word)
     return u' '.join(postal_routing_fragments) or None, None
 
@@ -276,8 +302,9 @@ str_to_postal_code = conv.pipe(
 
 str_to_postal_routing = conv.pipe(
     # Only upper-case ASCII letters, digits and spaces are allowed : http://fr.wikipedia.org/wiki/Adresse_postale#France
-    conv.function(lambda s: strings.slugify(s, separator = u' ', transform = strings.upper) or None),
+    conv.make_str_to_slug(separator = u' ', transform = strings.upper),
     shrink_postal_routing,
+    repair_postal_routing,
     )
 """Convert a string to a postal routing (aka locality, ie the part of the address after the postal code).
 
@@ -291,6 +318,8 @@ str_to_postal_routing = conv.pipe(
     (u'ST ETIENNE', None)
     >>> str_to_postal_routing(u'   Saint-Fiacre-sur-Maine   ')
     (u'ST FIACRE SUR MAINE', None)
+    >>> str_to_postal_routing(u'Thaon-les-vosges ced')
+    (u'THAON LES VOSGES CEDEX', None)
     >>> str_to_postal_routing(u'Saintes')
     (u'SAINTES', None)
     >>> str_to_postal_routing('   ')
