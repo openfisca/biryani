@@ -667,8 +667,8 @@ def make_str_to_normal_form(encoding = 'utf-8', separator = u' ', transform = st
 
     .. note:: For a converter that is dedicated to a name in an URL path, see :func:`str_to_url_name`.
 
-    .. note:: For a converter that keep only letters, digits and separator, see :func:`make_str_to_slug` or
-        :func:`str_to_slug`.
+    .. note:: For a converter that keep only letters, digits and separator, see :func:`make_str_to_slug`
+        or :func:`str_to_slug`.
 
     >>> make_str_to_normal_form()(u'Hello world!')
     (u'hello world!', None)
@@ -1071,8 +1071,8 @@ def set_value(constant):
 def str_to_url_name(value, state = states.default_state):
     """Convert a string to a normalized string that can be used in an URL path or a query parameter.
 
-    .. note:: For a converter that keep only letters, digits and separator, see :func:`make_str_to_slug` or
-        :func:`str_to_slug`.
+    .. note:: For a converter that keep only letters, digits and separator, see :func:`make_str_to_slug`
+        or :func:`str_to_slug`.
 
     >>> str_to_url_name(u'   Hello world!   ')
     (u'hello_world!', None)
@@ -1802,8 +1802,8 @@ str_to_json = pipe(cleanup_line, clean_str_to_json)
 str_to_slug = make_str_to_slug()
 """Convert a string to a slug.
 
-    .. note:: For a converter that doesn't use "-" as word separators or doesn't convert characters to lower case, see
-        :func:`str_to_normal_form`.
+    .. note:: For a converter that doesn't use "-" as word separators or doesn't convert characters to lower case,
+        see :func:`str_to_normal_form`.
 
     >>> str_to_slug(u'   Hello world!   ')
     (u'hello-world', None)

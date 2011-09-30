@@ -56,8 +56,8 @@ def clean_str_to_object_id(value, state = states.default_state):
 
     .. note:: For a converter that doesn't require a clean string, see :func:`str_to_object_id`.
 
-    .. note:: For a converter that doesn't fail when input data is already an ObjectId, use
-       :func:`python_data_to_object_id`.
+    .. note:: For a converter that doesn't fail when input data is already an ObjectId,
+        use :func:`python_data_to_object_id`.
 
     >>> clean_str_to_object_id(u'4e333f53ff42e928000007d8')
     (ObjectId('4e333f53ff42e928000007d8'), None)
@@ -108,8 +108,8 @@ def object_id_to_str(value, state = states.default_state):
 str_to_object_id = conv.pipe(conv.cleanup_line, clean_str_to_object_id)
 """Convert a string to a BSON ObjectId.
 
-    .. note:: For a converter that doesn't fail when input data is already an ObjectId, use
-       :func:`python_data_to_object_id`.
+    .. note:: For a converter that doesn't fail when input data is already an ObjectId,
+        use :func:`python_data_to_object_id`.
 
     >>> str_to_object_id(u'4e333f53ff42e928000007d8')
     (ObjectId('4e333f53ff42e928000007d8'), None)
