@@ -131,7 +131,7 @@ Use a custom :func:`test <biryani.baseconv.make_test>` to ensure that float is a
 >>> anything_to_latitude('')
 (None, u'Missing value')
 >>> anything_to_latitude(' -123.4 ')
-(-123.40000000000001, None)
+(-123.4, None)
 >>> anything_to_latitude(u'500')
 (500.0, u'Test failed')
 
