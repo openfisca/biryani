@@ -246,6 +246,8 @@ def clean_str_to_url_path_and_query(value, state = states.default_state):
     (u'/Biryani/search.html?q=pipe', None)
     >>> clean_str_to_url_path_and_query(u'http://packages.python.org/Biryani/search.html?q=pipe')
     (u'http://packages.python.org/Biryani/search.html?q=pipe', u'URL must not be complete')
+    >>> clean_str_to_url_path_and_query(u'[www.nordnet.fr/grandmix/]')
+    (u'[www.nordnet.fr/grandmix/]', None)
     >>> print clean_str_to_url_path_and_query(None)
     (None, None)
     >>> import urlparse
@@ -259,7 +261,10 @@ def clean_str_to_url_path_and_query(value, state = states.default_state):
     if value is None:
         return value, None
     import urlparse
-    split_url = list(urlparse.urlsplit(value))
+    try:
+        split_url = list(urlparse.urlsplit(value))
+    except ValueError:
+        return value, state._(u'Invalid URL')
     if split_url[0] or split_url[1]:
         return value, state._(u'URL must not be complete')
     if split_url[4]:
@@ -655,15 +660,25 @@ def make_clean_str_to_url(add_prefix = u'http://', full = False, remove_fragment
     (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
     >>> make_clean_str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
     (u'http://packages.python.org/Biryani/presentation.html', None)
+    >>> make_clean_str_to_url(full = True)(u'[www.nordnet.fr/grandmix/]')
+    (u'[www.nordnet.fr/grandmix/]', u'Invalid URL')
+    >>> make_clean_str_to_url(full = True)(u'http://[www.nordnet.fr/grandmix/]')
+    (u'http://[www.nordnet.fr/grandmix/]', u'Invalid URL')
     """
     def clean_str_to_url(value, state = states.default_state):
         if value is None:
             return value, None
         import urlparse
-        split_url = list(urlparse.urlsplit(value))
+        try:
+            split_url = list(urlparse.urlsplit(value))
+        except ValueError:
+            return value, state._(u'Invalid URL')
         if full and add_prefix and not split_url[0] and not split_url[1] and split_url[2] \
                 and not split_url[2].startswith(u'/'):
-            split_url = list(urlparse.urlsplit(add_prefix + value))
+            try:
+                split_url = list(urlparse.urlsplit(add_prefix + value))
+            except ValueError:
+                return value, state._(u'Invalid URL')
         scheme = split_url[0]
         if scheme != scheme.lower():
             split_url[0] = scheme = scheme.lower()
