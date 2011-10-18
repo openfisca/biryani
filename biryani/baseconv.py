@@ -1277,7 +1277,8 @@ def str_to_url_name(value, state = states.default_state):
     return value or None, None
 
 
-def struct(converters, constructor = None, default = None, keep_empty = False):
+def struct(converters, constructor = None, default = None, keep_empty = False, keep_missing_values = False,
+        skip_missing_items = False):
     """Return a converter that maps a collection of converters to a collection (ie dict, list, set, etc) of values.
 
     Usage to convert a mapping (ie dict, etc):
@@ -1370,14 +1371,18 @@ def struct(converters, constructor = None, default = None, keep_empty = False):
 
     if isinstance(converters, collections.Mapping):
         return structured_mapping(converters, constructor = constructor or dict, default = default,
-            keep_empty = keep_empty)
+            keep_empty = keep_empty, keep_missing_values = keep_missing_values,
+            skip_missing_items = skip_missing_items)
     assert isinstance(converters, collections.Sequence), \
         'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
+    assert not keep_missing_values, """Flag "keep_missing_values" can't be used for sequences."""
+    assert not skip_missing_items, """Flag "skip_missing_items" can't be used for sequences."""
     return structured_sequence(converters, constructor = constructor or list, default = default,
         keep_empty = keep_empty)
 
 
-def structured_mapping(converters, constructor = dict, default = None, keep_empty = False):
+def structured_mapping(converters, constructor = dict, default = None, keep_empty = False, keep_missing_values = False,
+        skip_missing_items = False):
     """Return a converter that maps a mapping of converters to a mapping (ie dict, etc) of values.
 
     .. note:: This converter should not be used directly. Use :func:`struct` instead.
@@ -1450,8 +1455,10 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
         errors = {}
         converted_values = {}
         for name, converter in values_converter.iteritems():
+            if skip_missing_items and name not in values:
+                continue
             value, error = converter(values.get(name), state = state)
-            if value is not None:
+            if value is not None or keep_missing_values:
                 converted_values[name] = value
             if error is not None:
                 errors[name] = error
