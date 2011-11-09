@@ -93,6 +93,7 @@ __all__ = [
     'struct',
     'structured_mapping',
     'structured_sequence',
+    'test_exists',
     'translate',
     'uniform_mapping',
     'uniform_sequence',
@@ -362,22 +363,6 @@ def encode_str(encoding = 'utf-8'):
     (None, None)
     """
     return function(lambda value: value.encode(encoding) if isinstance(value, unicode) else value)
-
-
-def exists(value, state = states.default_state):
-    """Return an error when value is missing (aka ``None``).
-
-    >>> exists(42)
-    (42, None)
-    >>> exists(u'')
-    (u'', None)
-    >>> exists(None)
-    (None, u'Missing value')
-    """
-    if value is None:
-        return value, state._(u'Missing value')
-    else:
-        return value, None
 
 
 def fail(msg = N_(u'An error occured')):
@@ -1538,6 +1523,28 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     return structured_sequence_converter
 
 
+def test_exists(error = N_(u'Missing value')):
+    """Return a converters that signals an error when value is missing (aka ``None``).
+
+    .. note:: When error message "Missing value" can be kept, use :func:`exists` instead.
+
+    >>> test_exists()(42)
+    (42, None)
+    >>> test_exists()(u'')
+    (u'', None)
+    >>> test_exists()(None)
+    (None, u'Missing value')
+    >>> test_exists(error = u'Required value')(None)
+    (None, u'Required value')
+    """
+    def exists(value, state = states.default_state):
+        if value is None:
+            return value, state._(error)
+        else:
+            return value, None
+    return exists
+
+
 def translate(conversions):
     """Return a converter that converts values found in given dictionary and keep others as is.
 
@@ -1679,6 +1686,19 @@ cleanup_text = pipe(
     (None, None)
     >>> cleanup_text(None)
     (None, None)
+    """
+
+exists = test_exists()
+"""Return an error when value is missing (aka ``None``).
+
+    .. note:: To change error message "Missing value", use :func:`test_exists` instead.
+
+    >>> exists(42)
+    (42, None)
+    >>> exists(u'')
+    (u'', None)
+    >>> exists(None)
+    (None, u'Missing value')
     """
 
 extract_when_singleton = condition(
