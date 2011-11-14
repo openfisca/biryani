@@ -33,9 +33,9 @@ Next Release
 
 * Rename parameters ``keep_null_items`` & ``keep_null_keys`` used by mappings or sequences converters to ``keep_missing_items`` & ``keep_missing_keys``.
 
-* Add optional state to :func:`biryani.baseconv.function` and :func:`biryani.baseconv.make_test` converters.
+* Add optional state to :func:`biryani.baseconv.function` and :func:`biryani.baseconv.test` converters.
 
-* Rename ``handle_none`` parameter of  :func:`biryani.baseconv.function` and :func:`biryani.baseconv.make_test` converters to ``handle_missing_value``.
+* Rename ``handle_none`` parameter of  :func:`biryani.baseconv.function` and :func:`biryani.baseconv.test` converters to ``handle_missing_value``.
 
 * Rename function ``to_value`` to :func:`biryani.baseconv.check` and extend it to accept either a converter or a conversion result as argument.
 

@@ -126,28 +126,31 @@ Tests
 .. autofunction:: biryani.baseconv.exists
    :noindex:
 
-.. autofunction:: biryani.baseconv.make_between
+.. autofunction:: biryani.baseconv.test
    :noindex:
 
-.. autofunction:: biryani.baseconv.make_equals
+.. autofunction:: biryani.baseconv.test_between
    :noindex:
 
-.. autofunction:: biryani.baseconv.make_greater_or_equal
+.. autofunction:: biryani.baseconv.test_equals
    :noindex:
 
-.. autofunction:: biryani.baseconv.make_in
+.. autofunction:: biryani.baseconv.test_exists
    :noindex:
 
-.. autofunction:: biryani.baseconv.make_is
+.. autofunction:: biryani.baseconv.test_greater_or_equal
    :noindex:
 
-.. autofunction:: biryani.baseconv.make_isinstance
+.. autofunction:: biryani.baseconv.test_in
    :noindex:
 
-.. autofunction:: biryani.baseconv.make_less_or_equal
+.. autofunction:: biryani.baseconv.test_is
    :noindex:
 
-.. autofunction:: biryani.baseconv.make_test
+.. autofunction:: biryani.baseconv.test_isinstance
+   :noindex:
+
+.. autofunction:: biryani.baseconv.test_less_or_equal
    :noindex:
 
 

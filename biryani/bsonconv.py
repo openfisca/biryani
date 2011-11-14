@@ -85,7 +85,7 @@ def clean_str_to_object_id(value, state = states.default_state):
 def object_id_to_str(value, state = states.default_state):
     """Convert a BSON ObjectId to unicode.
 
-    .. note:: To ensure that input value is an ObjectId, first use :func:`biryani.baseconv.make_isinstance`.
+    .. note:: To ensure that input value is an ObjectId, first use :func:`biryani.baseconv.test_isinstance`.
 
     >>> from bson.objectid import ObjectId
     >>> object_id_to_str(ObjectId('4e333f53ff42e928000007d8'))
@@ -93,9 +93,9 @@ def object_id_to_str(value, state = states.default_state):
     >>> object_id_to_str(u'4e333f53ff42e928000007d8')
     (u'4e333f53ff42e928000007d8', None)
     >>> from biryani import baseconv as conv
-    >>> conv.pipe(conv.make_isinstance(ObjectId), object_id_to_str)(ObjectId('4e333f53ff42e928000007d8'))
+    >>> conv.pipe(conv.test_isinstance(ObjectId), object_id_to_str)(ObjectId('4e333f53ff42e928000007d8'))
     (u'4e333f53ff42e928000007d8', None)
-    >>> conv.pipe(conv.make_isinstance(ObjectId), object_id_to_str)(u'4e333f53ff42e928000007d8')
+    >>> conv.pipe(conv.test_isinstance(ObjectId), object_id_to_str)(u'4e333f53ff42e928000007d8')
     (u'4e333f53ff42e928000007d8', u"Value is not an instance of <class 'bson.objectid.ObjectId'>")
     >>> object_id_to_str(None)
     (None, None)
@@ -136,9 +136,9 @@ str_to_object_id = conv.pipe(conv.cleanup_line, clean_str_to_object_id)
 
 
 python_data_to_object_id = conv.first_match(
-    conv.make_isinstance(bson.objectid.ObjectId),
+    conv.test_isinstance(bson.objectid.ObjectId),
     conv.pipe(
-        conv.make_isinstance(basestring),
+        conv.test_isinstance(basestring),
         str_to_object_id,
         ),
     )

@@ -192,9 +192,9 @@ Let's add it to our function:
 ({'username': u'John Doe', 'password': [u'secret']}, {'password': u'Password mismatch'})
 
 In *Biryani*, there is no filter that checks that there is two passwords and that they are equal.
-But we can easily write one using :func:`biryani.baseconv.make_test`:
+But we can easily write one using :func:`biryani.baseconv.test`:
 
->>> test_passwords = conv.make_test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1])
+>>> test_passwords = conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1])
 ...
 >>> test_passwords([u'secret', u'secret'])
 ([u'secret', u'secret'], None)
@@ -205,7 +205,7 @@ But we can easily write one using :func:`biryani.baseconv.make_test`:
 
 We can improve the error message of our test:
 
->>> test_passwords = conv.make_test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
+>>> test_passwords = conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
 ...     error = u'Password mismatch')
 ...
 >>> test_passwords([u'secret', u'secret'])
@@ -228,7 +228,7 @@ Let's combine `test_passwords` and `extract_first_item` to rewrite our `validate
 ...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.exists),
 ...         password = conv.pipe(
 ...             conv.multidict_getall('password'),
-...             conv.make_test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
+...             conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
 ...                 error = u'Password mismatch'),
 ...             conv.function(lambda passwords: passwords[0]),
 ...             ),
@@ -304,7 +304,7 @@ Now use this function in `validate_form`:
 ...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.exists),
 ...         password = conv.pipe(
 ...             conv.multidict_getall('password'),
-...             conv.make_test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
+...             conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
 ...                 error = u'Password mismatch'),
 ...             conv.function(lambda passwords: passwords[0]),
 ...             ),
@@ -352,7 +352,7 @@ Let's combine everything in a new version of `validate_form`:
 ...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.exists),
 ...         password = conv.pipe(
 ...             conv.multidict_getall('password'),
-...             conv.make_test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
+...             conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
 ...                 error = u'Password mismatch'),
 ...             conv.function(lambda passwords: passwords[0]),
 ...             ),
@@ -382,7 +382,7 @@ final form of the form validator:
 ...     username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.exists),
 ...     password = conv.pipe(
 ...         conv.multidict_getall('password'),
-...         conv.make_test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
+...         conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
 ...             error = u'Password mismatch'),
 ...         conv.function(lambda passwords: passwords[0]),
 ...         ),

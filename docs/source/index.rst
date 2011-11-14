@@ -61,7 +61,7 @@ A sample validator for a web form containing the following fields:
 >>> validate_form = conv.struct(dict(
 ...     username = conv.pipe(conv.cleanup_line, conv.exists),
 ...     password = conv.pipe(
-...         conv.make_test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
+...         conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
 ...             error = u'Password mismatch'),
 ...         conv.function(lambda passwords: passwords[0]),
 ...         ),
