@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Biryani 0.9dev\n"
 "Report-Msgid-Bugs-To: eraviart@easter-eggs.com\n"
-"POT-Creation-Date: 2011-09-07 15:40+0200\n"
+"POT-Creation-Date: 2011-11-14 15:21+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,91 +21,95 @@ msgstr ""
 msgid "Invalid value"
 msgstr ""
 
-#: biryani/baseconv.py:174 biryani/baseconv.py:647
+#: biryani/baseconv.py:175 biryani/baseconv.py:574
 msgid "Value must be a boolean"
 msgstr ""
 
-#: biryani/baseconv.py:201
+#: biryani/baseconv.py:202
 msgid "An email must contain exactly one \"@\""
 msgstr ""
 
-#: biryani/baseconv.py:203
+#: biryani/baseconv.py:204
 msgid "Invalid username"
 msgstr ""
 
-#: biryani/baseconv.py:205
+#: biryani/baseconv.py:206
 msgid "Invalid domain name"
 msgstr ""
 
-#: biryani/baseconv.py:284
-msgid "URL must be complete"
+#: biryani/baseconv.py:268 biryani/baseconv.py:638 biryani/baseconv.py:644
+msgid "Invalid URL"
 msgstr ""
 
-#: biryani/baseconv.py:286
-msgid "Scheme must belong to {0}"
-msgstr ""
-
-#: biryani/baseconv.py:343
+#: biryani/baseconv.py:270
 msgid "URL must not be complete"
 msgstr ""
 
-#: biryani/baseconv.py:441
+#: biryani/baseconv.py:368
 msgid "An error occured"
 msgstr ""
 
-#: biryani/baseconv.py:555
+#: biryani/baseconv.py:482
 msgid "Unknown key: {0}"
 msgstr ""
 
-#: biryani/baseconv.py:562
+#: biryani/baseconv.py:489
 msgid "Index out of range: {0}"
 msgstr ""
 
-#: biryani/baseconv.py:921
+#: biryani/baseconv.py:649
+msgid "URL must be complete"
+msgstr ""
+
+#: biryani/baseconv.py:651
+msgid "Scheme must belong to {0}"
+msgstr ""
+
+#: biryani/baseconv.py:990
 msgid "Value must be a float"
 msgstr ""
 
-#: biryani/baseconv.py:945
+#: biryani/baseconv.py:1014
 msgid "Value must be an integer"
 msgstr ""
 
-#: biryani/baseconv.py:1194 biryani/baseconv.py:1261
+#: biryani/baseconv.py:1266 biryani/baseconv.py:1335
 msgid "Unexpected item"
 msgstr ""
 
-#: biryani/baseconv.py:1279
-msgid "Test failed"
-msgstr ""
-
-#: biryani/baseconv.py:1322
+#: biryani/baseconv.py:1372
 msgid "Value must be between {0} and {1}"
 msgstr ""
 
-#: biryani/baseconv.py:1345
+#: biryani/baseconv.py:1375
+msgid "Test failed"
+msgstr ""
+
+#: biryani/baseconv.py:1419
 msgid "Value must be equal to {0}"
 msgstr ""
 
-#: biryani/baseconv.py:1359
+#: biryani/baseconv.py:1422
 msgid "Missing value"
 msgstr ""
 
-#: biryani/baseconv.py:1381
+#: biryani/baseconv.py:1461
 msgid "Value must be greater than or equal to {0}"
 msgstr ""
 
-#: biryani/baseconv.py:1406
+#: biryani/baseconv.py:1486
 msgid "Value must belong to {0}"
 msgstr ""
 
-#: biryani/baseconv.py:1429
+#: biryani/baseconv.py:1509
 msgid "Value must be {0}"
 msgstr ""
 
-#: biryani/baseconv.py:1445
+#: biryani/baseconv.py:1525
 msgid "Value is not an instance of {0}"
 msgstr ""
 
-#: biryani/baseconv.py:1465
+#: biryani/baseconv.py:1545
 msgid "Value must be less than or equal to {0}"
 msgstr ""
 
@@ -149,47 +153,51 @@ msgstr ""
 msgid "Value must be a timestamp"
 msgstr ""
 
-#: biryani/frconv.py:65
+#: biryani/frconv.py:72
 msgid "Unexpected non numerical characters in phone number"
 msgstr ""
 
-#: biryani/frconv.py:77
+#: biryani/frconv.py:84
 msgid "French Guyana"
 msgstr ""
 
-#: biryani/frconv.py:78
+#: biryani/frconv.py:85
 msgid "Wallis and Futuna"
 msgstr ""
 
-#: biryani/frconv.py:79
+#: biryani/frconv.py:86
 msgid "New Caledonia"
 msgstr ""
 
-#: biryani/frconv.py:80
+#: biryani/frconv.py:87
 msgid "French Polynesia"
 msgstr ""
 
-#: biryani/frconv.py:85
+#: biryani/frconv.py:92
 msgid "Wrong number of digits for phone number of {0}"
 msgstr ""
 
-#: biryani/frconv.py:86
+#: biryani/frconv.py:93
 msgid "Unknown international phone number"
 msgstr ""
 
-#: biryani/frconv.py:93
+#: biryani/frconv.py:100
 msgid "Unexpected first digit in phone number: {0} instead of 0"
 msgstr ""
 
-#: biryani/frconv.py:96
+#: biryani/frconv.py:103
 msgid "Wrong number of digits in phone number"
 msgstr ""
 
-#: biryani/frconv.py:172
+#: biryani/frconv.py:218
+msgid "INSEE code must contain only 5 digits or \"A\" or \"B\""
+msgstr ""
+
+#: biryani/frconv.py:281
 msgid "Postal code must contain only digits"
 msgstr ""
 
-#: biryani/frconv.py:174
+#: biryani/frconv.py:282
 msgid "Postal code must have 5 digits"
 msgstr ""
 
