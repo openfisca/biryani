@@ -29,7 +29,6 @@ See http://webob.org/
 
 
 from . import baseconv as conv
-from . import states
 
 
 __all__ = [

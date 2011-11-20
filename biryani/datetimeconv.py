@@ -33,7 +33,6 @@ import calendar
 import datetime
 
 import mx.DateTime
-import pytz
 
 from . import baseconv as conv
 from . import states

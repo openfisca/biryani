@@ -29,7 +29,6 @@
 """
 
 
-from .. import baseconv as conv
 from .. import states
 
 
