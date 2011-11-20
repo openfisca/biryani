@@ -89,7 +89,7 @@ def clean_str_to_phone(value, state = states.default_state):
         if country is not None:
             if len(value) == 11:
                 return u'+{0} {1} {2} {3}'.format(value[2:5], value[5:7], value[7:9], value[9:11]), None
-            return value, state._(u'Wrong number of digits for phone number of {0}').format(_(country))
+            return value, state._(u'Wrong number of digits for phone number of {0}').format(state._(country))
         return value, state._(u'Unknown international phone number')
     if len(value) == 4:
         return value, None
