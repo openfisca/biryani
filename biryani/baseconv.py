@@ -750,14 +750,14 @@ def make_str_to_url(add_prefix = u'http://', full = False, remove_fragment = Fal
         )
 
 
-def new_mapping(converters, constructor = dict, keep_empty = False):
+def new_mapping(converters, constructor = None, keep_empty = False):
     """Return a converter that constructs a mapping (ie dict, etc) from any kind of value.
 
     .. note:: This converter should not be used directly. Use :func:`new_struct` instead.
 
     .. note:: When input value has the same structure, converter :func:`struct` should be used instead.
 
-    >>> def convert_list_to_dict(constructor = dict, keep_empty = False):
+    >>> def convert_list_to_dict(constructor = None, keep_empty = False):
     ...     return new_mapping(
     ...         dict(
     ...             name = get(0),
@@ -779,7 +779,27 @@ def new_mapping(converters, constructor = dict, keep_empty = False):
     ({}, None)
     >>> convert_list_to_dict()(None)
     (None, None)
+    >>> import collections
+    >>> new_mapping(
+    ...     dict(
+    ...         name = get(0),
+    ...         age = pipe(get(1), str_to_int),
+    ...         email = pipe(get(2), str_to_email),
+    ...         ),
+    ...     constructor = collections.OrderedDict,
+    ...     )([u'John Doe', u'72', u'john@doe.name'])
+    (OrderedDict([('age', 72), ('email', u'john@doe.name'), ('name', u'John Doe')]), None)
+    >>> new_mapping(
+    ...     collections.OrderedDict(
+    ...         name = get(0),
+    ...         age = pipe(get(1), str_to_int),
+    ...         email = pipe(get(2), str_to_email),
+    ...         ),
+    ...     )([u'John Doe', u'72', u'john@doe.name'])
+    (OrderedDict([('age', 72), ('email', u'john@doe.name'), ('name', u'John Doe')]), None)
     """
+    if constructor is None:
+        constructor = type(converters)
     converters = dict(
         (name, converter)
         for name, converter in (converters or {}).iteritems()
@@ -804,14 +824,14 @@ def new_mapping(converters, constructor = dict, keep_empty = False):
     return new_mapping_converter
 
 
-def new_sequence(converters, constructor = list, keep_empty = False):
+def new_sequence(converters, constructor = None, keep_empty = False):
     """Return a converter that constructs a sequence (ie list, tuple, etc) from any kind of value.
 
     .. note:: This converter should not be used directly. Use :func:`new_struct` instead.
 
     .. note:: When input value has the same structure, converter :func:`struct` should be used instead.
 
-    >>> def convert_dict_to_list(constructor = list, keep_empty = False):
+    >>> def convert_dict_to_list(constructor = None, keep_empty = False):
     ...     return new_sequence(
     ...         [
     ...             get('name', default = None),
@@ -833,7 +853,27 @@ def new_sequence(converters, constructor = list, keep_empty = False):
     ([None, None, None], None)
     >>> convert_dict_to_list()(None)
     (None, None)
+    >>> import collections
+    >>> new_sequence(
+    ...     [
+    ...         get('name', default = None),
+    ...         pipe(get('age', default = None), str_to_int),
+    ...         pipe(get('email', default = None), str_to_email),
+    ...         ],
+    ...     constructor = tuple,
+    ...     )({'age': u'72', 'email': u'john@doe.name', 'name': u'John Doe'})
+    ((u'John Doe', 72, u'john@doe.name'), None)
+    >>> new_sequence(
+    ...     (
+    ...         get('name', default = None),
+    ...         pipe(get('age', default = None), str_to_int),
+    ...         pipe(get('email', default = None), str_to_email),
+    ...         ),
+    ...     )({'age': u'72', 'email': u'john@doe.name', 'name': u'John Doe'})
+    ((u'John Doe', 72, u'john@doe.name'), None)
     """
+    if constructor is None:
+        constructor = type(converters)
     converters = [
         converter
         for converter in converters or []
@@ -864,7 +904,7 @@ def new_struct(converters, constructor = None, keep_empty = False):
 
     Usage to create a mapping (ie dict, etc):
 
-    >>> def convert_list_to_dict(constructor = dict, keep_empty = False):
+    >>> def convert_list_to_dict(constructor = None, keep_empty = False):
     ...     return new_struct(
     ...         dict(
     ...             name = get(0),
@@ -886,10 +926,28 @@ def new_struct(converters, constructor = None, keep_empty = False):
     ({}, None)
     >>> convert_list_to_dict()(None)
     (None, None)
+    >>> import collections
+    >>> new_struct(
+    ...     dict(
+    ...         name = get(0),
+    ...         age = pipe(get(1), str_to_int),
+    ...         email = pipe(get(2), str_to_email),
+    ...         ),
+    ...     constructor = collections.OrderedDict,
+    ...     )([u'John Doe', u'72', u'john@doe.name'])
+    (OrderedDict([('age', 72), ('email', u'john@doe.name'), ('name', u'John Doe')]), None)
+    >>> new_struct(
+    ...     collections.OrderedDict(
+    ...         name = get(0),
+    ...         age = pipe(get(1), str_to_int),
+    ...         email = pipe(get(2), str_to_email),
+    ...         ),
+    ...     )([u'John Doe', u'72', u'john@doe.name'])
+    (OrderedDict([('age', 72), ('email', u'john@doe.name'), ('name', u'John Doe')]), None)
 
     Usage to create a sequence (ie list, tuple, etc) or a set:
 
-    >>> def convert_dict_to_list(constructor = list, keep_empty = False):
+    >>> def convert_dict_to_list(constructor = None, keep_empty = False):
     ...     return new_struct(
     ...         [
     ...             get('name', default = None),
@@ -911,14 +969,32 @@ def new_struct(converters, constructor = None, keep_empty = False):
     ([None, None, None], None)
     >>> convert_dict_to_list()(None)
     (None, None)
+    >>> import collections
+    >>> new_struct(
+    ...     [
+    ...         get('name', default = None),
+    ...         pipe(get('age', default = None), str_to_int),
+    ...         pipe(get('email', default = None), str_to_email),
+    ...         ],
+    ...     constructor = tuple,
+    ...     )({'age': u'72', 'email': u'john@doe.name', 'name': u'John Doe'})
+    ((u'John Doe', 72, u'john@doe.name'), None)
+    >>> new_struct(
+    ...     (
+    ...         get('name', default = None),
+    ...         pipe(get('age', default = None), str_to_int),
+    ...         pipe(get('email', default = None), str_to_email),
+    ...         ),
+    ...     )({'age': u'72', 'email': u'john@doe.name', 'name': u'John Doe'})
+    ((u'John Doe', 72, u'john@doe.name'), None)
     """
     import collections
 
     if isinstance(converters, collections.Mapping):
-        return new_mapping(converters, constructor = constructor or dict,  keep_empty = keep_empty)
+        return new_mapping(converters, constructor = constructor,  keep_empty = keep_empty)
     assert isinstance(converters, collections.Sequence), \
         'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
-    return new_sequence(converters, constructor = constructor or list, keep_empty = keep_empty)
+    return new_sequence(converters, constructor = constructor, keep_empty = keep_empty)
 
 
 def noop(value, state = states.default_state):
@@ -1144,6 +1220,32 @@ def struct(converters, constructor = None, default = None, keep_empty = False, k
     ...     keep_empty = True,
     ...     )(dict(name = u'   ', email = None))
     ({}, None)
+    >>> import collections
+    >>> struct(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = str_to_int,
+    ...         email = str_to_email,
+    ...         ),
+    ...     constructor = collections.OrderedDict,
+    ...     )(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
+    (OrderedDict([('age', 72), ('email', u'john@doe.name'), ('name', u'John Doe')]), None)
+    >>> struct(
+    ...     collections.OrderedDict(
+    ...         name = cleanup_line,
+    ...         age = str_to_int,
+    ...         email = str_to_email,
+    ...         ),
+    ...     )(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
+    (OrderedDict([('age', 72), ('email', u'john@doe.name'), ('name', u'John Doe')]), None)
+    >>> struct(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = str_to_int,
+    ...         email = str_to_email,
+    ...         ),
+    ...     )(collections.OrderedDict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
+    ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
 
     Usage to convert a sequence (ie list, tuple, etc) or a set:
 
@@ -1178,22 +1280,48 @@ def struct(converters, constructor = None, default = None, keep_empty = False, k
     ([u'John Doe', None, u'john@doe.name'], None)
     >>> non_strict_converter([u'John Doe', u'72', u'john@doe.name', u'   +33 9 12 34 56 78   '])
     ([u'John Doe', 72, u'john@doe.name', u'+33 9 12 34 56 78'], None)
+    >>> import collections
+    >>> struct(
+    ...     [
+    ...         pipe(cleanup_line, exists),
+    ...         str_to_int,
+    ...         str_to_email,
+    ...         ],
+    ...     constructor = tuple,
+    ...     )([u'John Doe', u'72', u'john@doe.name'])
+    ((u'John Doe', 72, u'john@doe.name'), None)
+    >>> struct(
+    ...     (
+    ...         pipe(cleanup_line, exists),
+    ...         str_to_int,
+    ...         str_to_email,
+    ...         ),
+    ...     )([u'John Doe', u'72', u'john@doe.name'])
+    ((u'John Doe', 72, u'john@doe.name'), None)
+    >>> struct(
+    ...     [
+    ...         pipe(cleanup_line, exists),
+    ...         str_to_int,
+    ...         str_to_email,
+    ...         ],
+    ...     )((u'John Doe', u'72', u'john@doe.name'))
+    ([u'John Doe', 72, u'john@doe.name'], None)
     """
     import collections
 
     if isinstance(converters, collections.Mapping):
-        return structured_mapping(converters, constructor = constructor or dict, default = default,
+        return structured_mapping(converters, constructor = constructor, default = default,
             keep_empty = keep_empty, keep_missing_values = keep_missing_values,
             skip_missing_items = skip_missing_items)
     assert isinstance(converters, collections.Sequence), \
         'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
     assert not keep_missing_values, """Flag "keep_missing_values" can't be used for sequences."""
     assert not skip_missing_items, """Flag "skip_missing_items" can't be used for sequences."""
-    return structured_sequence(converters, constructor = constructor or list, default = default,
+    return structured_sequence(converters, constructor = constructor, default = default,
         keep_empty = keep_empty)
 
 
-def structured_mapping(converters, constructor = dict, default = None, keep_empty = False, keep_missing_values = False,
+def structured_mapping(converters, constructor = None, default = None, keep_empty = False, keep_missing_values = False,
         skip_missing_items = False):
     """Return a converter that maps a mapping of converters to a mapping (ie dict, etc) of values.
 
@@ -1248,7 +1376,35 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
     ...     keep_empty = True,
     ...     )(dict(name = u'   ', email = None))
     ({}, None)
+    >>> import collections
+    >>> structured_mapping(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = str_to_int,
+    ...         email = str_to_email,
+    ...         ),
+    ...     constructor = collections.OrderedDict,
+    ...     )(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
+    (OrderedDict([('age', 72), ('email', u'john@doe.name'), ('name', u'John Doe')]), None)
+    >>> structured_mapping(
+    ...     collections.OrderedDict(
+    ...         name = cleanup_line,
+    ...         age = str_to_int,
+    ...         email = str_to_email,
+    ...         ),
+    ...     )(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
+    (OrderedDict([('age', 72), ('email', u'john@doe.name'), ('name', u'John Doe')]), None)
+    >>> structured_mapping(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = str_to_int,
+    ...         email = str_to_email,
+    ...         ),
+    ...     )(collections.OrderedDict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
+    ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     """
+    if constructor is None:
+        constructor = type(converters)
     converters = dict(
         (name, converter)
         for name, converter in (converters or {}).iteritems()
@@ -1282,7 +1438,7 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
     return structured_mapping_converter
 
 
-def structured_sequence(converters, constructor = list, default = None, keep_empty = False):
+def structured_sequence(converters, constructor = None, default = None, keep_empty = False):
     """Return a converter that map a sequence of converters to a sequence of values.
 
     .. note:: This converter should not be used directly. Use :func:`struct` instead.
@@ -1318,7 +1474,35 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     ([u'John Doe', None, u'john@doe.name'], None)
     >>> non_strict_converter([u'John Doe', u'72', u'john@doe.name', u'   +33 9 12 34 56 78   '])
     ([u'John Doe', 72, u'john@doe.name', u'+33 9 12 34 56 78'], None)
+    >>> import collections
+    >>> structured_sequence(
+    ...     [
+    ...         pipe(cleanup_line, exists),
+    ...         str_to_int,
+    ...         str_to_email,
+    ...         ],
+    ...     constructor = tuple,
+    ...     )([u'John Doe', u'72', u'john@doe.name'])
+    ((u'John Doe', 72, u'john@doe.name'), None)
+    >>> structured_sequence(
+    ...     (
+    ...         pipe(cleanup_line, exists),
+    ...         str_to_int,
+    ...         str_to_email,
+    ...         ),
+    ...     )([u'John Doe', u'72', u'john@doe.name'])
+    ((u'John Doe', 72, u'john@doe.name'), None)
+    >>> structured_sequence(
+    ...     [
+    ...         pipe(cleanup_line, exists),
+    ...         str_to_int,
+    ...         str_to_email,
+    ...         ],
+    ...     )((u'John Doe', u'72', u'john@doe.name'))
+    ([u'John Doe', 72, u'john@doe.name'], None)
     """
+    if constructor is None:
+        constructor = type(converters)
     converters = [
         converter
         for converter in converters or []
