@@ -36,16 +36,21 @@ __all__ = [
     'expand_postal_routing',
     'repair_postal_routing',
     'shrink_postal_routing',
+    'split_postal_distribution',
     'str_to_depcom',
     'str_to_lenient_depcom',
     'str_to_lenient_postal_code',
     'str_to_phone',
     'str_to_postal_code',
+    'str_to_postal_distribution',
     'str_to_postal_routing',
     ]
 
 depcom_re = re.compile(ur'\d[\dAB]\d{3}$')
 N_ = conv.N_
+
+
+# Level-1 Converters
 
 
 def clean_str_to_phone(value, state = states.default_state):
@@ -183,6 +188,47 @@ def shrink_postal_routing(value, state = states.default_state):
             word = 'STE'
         postal_routing_fragments.append(word)
     return u' '.join(postal_routing_fragments) or None, None
+
+
+def split_postal_distribution(value, state = states.default_state):
+    """Extract french postal code and postal routing (aka locality) from a string
+
+    .. note:: Input value must already be converted to uppercase ASCII.
+
+    >>> split_postal_distribution(u'75014 PARIS')
+    ((u'75014', u'PARIS'), None)
+    >>> split_postal_distribution(u'75014 PARIS 14')
+    ((u'75014', u'PARIS 14'), None)
+    >>> split_postal_distribution(u'42000 ST ETIENNE')
+    ((u'42000', u'ST ETIENNE'), None)
+    >>> split_postal_distribution(u'   44690 SAINT FIACRE SUR MAINE')
+    ((u'44690', u'SAINT FIACRE SUR MAINE'), None)
+    >>> split_postal_distribution(u'88151 THAON LES VOSGES CED')
+    ((u'88151', u'THAON LES VOSGES CED'), None)
+    >>> split_postal_distribution(u'17100 SAINTES')
+    ((u'17100', u'SAINTES'), None)
+    >>> split_postal_distribution('   ')
+    (None, None)
+    >>> split_postal_distribution(None)
+    (None, None)
+    """
+    if value is None:
+        return value, None
+    postal_code = None
+    postal_routing_fragments = []
+    for word in value.split():
+        if postal_code is None:
+            if word.isdigit():
+                if not postal_routing_fragments \
+                        or postal_routing_fragments[0] not in ('LYON', 'MARSEILLE', 'PARIS') \
+                        or not (1 <= int(word) <= 20):
+                    postal_code = unicode(word)
+                    continue
+        postal_routing_fragments.append(word)
+    postal_routing = u' '.join(postal_routing_fragments) or None
+    if postal_code is None and postal_routing is None:
+        return None, None
+    return (postal_code, postal_routing), None
 
 
 str_to_lenient_depcom = conv.pipe(
@@ -325,6 +371,43 @@ str_to_postal_routing = conv.pipe(
     >>> str_to_postal_routing('   ')
     (None, None)
     >>> str_to_postal_routing(None)
+    (None, None)
+    """
+
+
+# Level-2 Converters
+
+
+str_to_postal_distribution = conv.pipe(
+    conv.make_str_to_slug(separator = u' ', transform = strings.upper),
+    split_postal_distribution,
+    conv.struct(
+        [
+        conv.noop,
+        str_to_postal_routing,
+            ],
+        constructor = tuple,
+        ),
+    )
+"""Convert a string to a postal routing (aka locality, ie the part of the address after the postal code).
+
+    >>> str_to_postal_distribution(u'   75014  Paris')
+    ((u'75014', u'PARIS'), None)
+    >>> str_to_postal_distribution(u'   75014 Paris  14   ')
+    ((u'75014', u'PARIS 14'), None)
+    >>> str_to_postal_distribution(u'   42000 SAINT Etienne   ')
+    ((u'42000', u'ST ETIENNE'), None)
+    >>> str_to_postal_distribution(u'   42000 SAINT Étienne   ')
+    ((u'42000', u'ST ETIENNE'), None)
+    >>> str_to_postal_distribution(u'   44690 Saint-Fiacre-sur-Maine   ')
+    ((u'44690', u'ST FIACRE SUR MAINE'), None)
+    >>> str_to_postal_distribution(u'88151 Thaon-les-vosges ced')
+    ((u'88151', u'THAON LES VOSGES CEDEX'), None)
+    >>> str_to_postal_distribution(u'17100 Saintes')
+    ((u'17100', u'SAINTES'), None)
+    >>> str_to_postal_distribution('   ')
+    (None, None)
+    >>> str_to_postal_distribution(None)
     (None, None)
     """
 
