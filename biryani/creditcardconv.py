@@ -127,7 +127,7 @@ Sample usage:
   'expiration_year': 2011},
  {'credit_card_number': u'Wrong number of digits in credit card number',
   'credit_card_security_code': u'Invalid security code for credit card',
-  'expiration_month': u'Invalid expiration date'})
+  'expiration_year': u'Invalid expiration year'})
 """
 
 
