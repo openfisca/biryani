@@ -39,6 +39,7 @@ from . import states, strings
 
 __all__ = [
     'bool_to_str',
+    'catch_error',
     'check',
     'clean_str_to_bool',
     'clean_str_to_email',
@@ -141,6 +142,26 @@ def bool_to_str(value, state = states.default_state):
     if value is None:
         return value, None
     return unicode(int(bool(value))), None
+
+
+def catch_error(converter, error_value = None):
+    """Make a converter that calls another converter and ignore its errors.
+
+    >>> catch_error(noop)(42)
+    (42, None)
+    >>> catch_error(fail())(42)
+    (None, None)
+    >>> catch_error(noop, error_value = 0)(42)
+    (42, None)
+    >>> catch_error(fail(), error_value = 0)(42)
+    (0, None)
+    """
+    def catch_error_converter(value, state = states.default_state):
+        result, error = converter(value, state = state)
+        if error is not None:
+            return error_value, None
+        return result, None
+    return catch_error_converter
 
 
 def clean_str_to_bool(value, state = states.default_state):

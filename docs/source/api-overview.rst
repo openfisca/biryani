@@ -170,6 +170,9 @@ Flow-Control Converters
 Special Converters
 ==================
 
+.. autofunction:: biryani.baseconv.catch_error
+   :noindex:
+
 .. autofunction:: biryani.baseconv.default
    :noindex:
 
