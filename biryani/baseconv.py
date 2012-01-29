@@ -1147,6 +1147,7 @@ def rename_item(old_key, new_key):
         if value is None:
             return value, None
         if old_key in value:
+            value = value.copy() # Don't modify existing mapping.
             value[new_key] = value.pop(old_key)
         return value, None
     return rename_item_converter
