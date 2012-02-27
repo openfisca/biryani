@@ -276,7 +276,7 @@ def upper(s):
     """Convert a string to upper case.
 
     .. note:: This method is equivalent to the ``upper()`` method of strings, but can be used when a function is
-       expected, or example by the :func:`normalize` & :func:`slugify` functions.
+       expected, for example by the :func:`normalize` & :func:`slugify` functions.
 
     >>> upper('Hello world!')
     'HELLO WORLD!'
