@@ -180,10 +180,10 @@ A converter is a function that has two parameters, the input value and the state
 ...         # When an error occurs and output value can not be computed, return input value with the error message.
 ...         # Every error message is localized using ``state._()``.
 ...         return passwords, state._(u'Missing passwords')
-...     if passwords[0] != passwords[1]:
-...         return passwords, state._(u'Password mismatch')
 ...     password = passwords[0]
-...     if len(passwords[0]) < 8:
+...     if password != passwords[1]:
+...         return passwords, state._(u'Password mismatch')
+...     if len(password) < 8:
 ...         return password, state._(u'Password too short')
 ...     return password, None
 
@@ -209,10 +209,10 @@ For example, to transform our password validator to add a minimal password lengt
 ...             # When an error occurs and output value can not be computed, return input value with the error message.
 ...             # Every error message is localized using ``state._()``.
 ...             return passwords, state._(u'Missing passwords')
-...         if passwords[0] != passwords[1]:
-...             return passwords, state._(u'Password mismatch')
 ...         password = passwords[0]
-...         if len(passwords[0]) < min_len:
+...         if password != passwords[1]:
+...             return passwords, state._(u'Password mismatch')
+...         if len(password) < min_len:
 ...             return password, state._(u'Password too short')
 ...         return password, None
 ...     return validate_password_converter
