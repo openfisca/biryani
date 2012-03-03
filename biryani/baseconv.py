@@ -1556,6 +1556,30 @@ def structured_sequence(converters, constructor = None, default = None, keep_emp
     return structured_sequence_converter
 
 
+def test(function, error = N_(u'Test failed'), handle_missing_value = False, handle_state = False):
+    """Return a converter that applies a test function to a value and returns an error when test fails.
+
+    ``test`` always returns the initial value, even when test fails.
+
+     See :doc:`how-to-create-converter` for more informations.
+
+    >>> test(lambda value: isinstance(value, basestring))('hello')
+    ('hello', None)
+    >>> test(lambda value: isinstance(value, basestring))(1)
+    (1, u'Test failed')
+    >>> test(lambda value: isinstance(value, basestring), error = u'Value is not a string')(1)
+    (1, u'Value is not a string')
+    """
+    def test_converter(value, state = states.default_state):
+        if value is None and not handle_missing_value or function is None:
+            return value, None
+        ok = function(value, state = state) if handle_state else function(value)
+        if ok:
+            return value, None
+        return value, state._(error)
+    return test_converter
+
+
 def test_between(min_value, max_value, error = None):
     """Return a converter that accepts only values between the two given bounds (included).
 
@@ -1576,30 +1600,6 @@ def test_between(min_value, max_value, error = None):
     """
     return test(lambda value: min_value <= value <= max_value,
         error = error or N_(u'Value must be between {0} and {1}').format(min_value, max_value))
-
-
-def test(function, error = N_(u'Test failed'), handle_missing_value = False, handle_state = False):
-    """Return a converter that applies a test function to a value and returns an error when test fails.
-
-    ``test`` always returns the initial value, even when test fails.
-
-     See :doc:`how-to-create-converter` for more informations.
-
-    >>> test(lambda value: isinstance(value, basestring))('hello')
-    ('hello', None)
-    >>> test(lambda value: isinstance(value, basestring))(1)
-    (1, u'Test failed')
-    >>> test(lambda value: isinstance(value, basestring), error = u'Value is not a string')(1)
-    (1, u'Value is not a string')
-    """
-    def test(value, state = states.default_state):
-        if value is None and not handle_missing_value or function is None:
-            return value, None
-        ok = function(value, state = state) if handle_state else function(value)
-        if ok:
-            return value, None
-        return value, state._(error)
-    return test
 
 
 def test_equals(constant, error = None):
