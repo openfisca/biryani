@@ -220,6 +220,7 @@ Extension Modules
    from biryani.bsonconv import *
    from biryani.creditcardconv import *
    from biryani.datetimeconv import *
+   from biryani.netconv import *
    from biryani.objectconv import *
    from biryani.webobconv import *
 
@@ -255,6 +256,15 @@ Date & Time Converters
 ----------------------
 
 .. automodule:: biryani.datetimeconv
+   :members:
+   :undoc-members:
+   :noindex:
+
+
+Network Converters
+------------------
+
+.. automodule:: biryani.netconv
    :members:
    :undoc-members:
    :noindex:

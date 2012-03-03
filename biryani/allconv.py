@@ -57,6 +57,15 @@ else:
     del pytz
     from datetimeconv import *
 
+try:
+    import DNS
+except ImportError:
+    pass
+else:
+    # Don't export modules.
+    del DNS
+    from netconv import *
+
 from objectconv import *
 
 try:

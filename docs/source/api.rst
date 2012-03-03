@@ -79,6 +79,18 @@ biryani.datetimeconv
    :undoc-members:
 
 
+biryani.netconv
+---------------
+
+.. testsetup::
+
+   from biryani.netconv import *
+
+.. automodule:: biryani.netconv
+   :members:
+   :undoc-members:
+
+
 biryani.objectconv
 ------------------
 
