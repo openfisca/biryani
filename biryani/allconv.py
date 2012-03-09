@@ -67,6 +67,7 @@ else:
     from netconv import *
 
 from objectconv import *
+from webconv import *
 
 try:
     import webob

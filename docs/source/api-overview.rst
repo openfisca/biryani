@@ -222,6 +222,7 @@ Extension Modules
    from biryani.datetimeconv import *
    from biryani.netconv import *
    from biryani.objectconv import *
+   from biryani.webconv import *
    from biryani.webobconv import *
 
 
@@ -274,6 +275,15 @@ Object Converters
 -----------------
 
 .. automodule:: biryani.objectconv
+   :members:
+   :undoc-members:
+   :noindex:
+
+
+Wev Converters
+--------------
+
+.. automodule:: biryani.webconv
    :members:
    :undoc-members:
    :noindex:

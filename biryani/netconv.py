@@ -49,8 +49,8 @@ def test_email():
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not tested.
 
-    >>> test_email()(u'eraviart@easter-eggs.com')
-    (u'eraviart@easter-eggs.com', None)
+    >>> test_email()(u'info@easter-eggs.com')
+    (u'info@easter-eggs.com', None)
     >>> test_email()(u'unknown-user@unknown-server.easter-eggs.com')
     (u'unknown-user@unknown-server.easter-eggs.com', u'Domain "unknown-server.easter-eggs.com" doesn\\'t exist')
     >>> test_email()(u'unknown-user@easter-eggs.com')
