@@ -36,31 +36,31 @@ from . import states
 
 
 __all__ = [
-    'make_base64url_to_str',
+    'make_base64url_to_bytes',
+    'make_bytes_to_base64url',
     'make_json_to_str',
-    'make_str_to_base64url',
     'make_str_to_json',
     ]
 
 
-def make_base64url_to_str(add_padding = False):
-    """Return a converter that decodes a string from an URL-safe base64 encoding.
+def make_base64url_to_bytes(add_padding = False):
+    """Return a converter that decodes data from an URL-safe base64 encoding.
 
     .. note:: To handle values without padding "=", set ``add_padding`` to ``True``.
 
-    >>> make_base64url_to_str()(u'SGVsbG8gV29ybGQ=')
-    (u'Hello World', None)
-    >>> make_base64url_to_str(add_padding = True)(u'SGVsbG8gV29ybGQ')
-    (u'Hello World', None)
-    >>> make_base64url_to_str(add_padding = True)(u'SGVsbG8gV29ybGQ=')
-    (u'Hello World', None)
-    >>> make_base64url_to_str()(u'SGVsbG8gV29ybGQ')
+    >>> make_base64url_to_bytes()(u'SGVsbG8gV29ybGQ=')
+    ('Hello World', None)
+    >>> make_base64url_to_bytes(add_padding = True)(u'SGVsbG8gV29ybGQ')
+    ('Hello World', None)
+    >>> make_base64url_to_bytes(add_padding = True)(u'SGVsbG8gV29ybGQ=')
+    ('Hello World', None)
+    >>> make_base64url_to_bytes()(u'SGVsbG8gV29ybGQ')
     (u'SGVsbG8gV29ybGQ', u'Invalid base64url string')
-    >>> make_base64url_to_str()(u'Hello World')
+    >>> make_base64url_to_bytes()(u'Hello World')
     (u'Hello World', u'Invalid base64url string')
-    >>> make_base64url_to_str()(u'')
-    (u'', None)
-    >>> make_base64url_to_str()(None)
+    >>> make_base64url_to_bytes()(u'')
+    ('', None)
+    >>> make_base64url_to_bytes()(None)
     (None, None)
     """
     def base64url_to_str(value, state = states.default_state):
@@ -77,8 +77,34 @@ def make_base64url_to_str(add_padding = False):
             decoded_value = base64.urlsafe_b64decode(value_str)
         except TypeError:
             return value, state._(u'Invalid base64url string')
-        return decoded_value.decode('utf-8'), None
+        return decoded_value, None
     return base64url_to_str
+
+
+def make_bytes_to_base64url(remove_padding = False):
+    """Return a converter that converts a string or bytes to an URL-safe base64 encoding.
+
+    .. note:: To remove trailing (non URL-safe) "=", set ``remove_padding`` to ``True``.
+
+    >>> make_bytes_to_base64url()(u'Hello World')
+    (u'SGVsbG8gV29ybGQ=', None)
+    >>> make_bytes_to_base64url(remove_padding = True)(u'Hello World')
+    (u'SGVsbG8gV29ybGQ', None)
+    >>> make_bytes_to_base64url()(u'')
+    (u'', None)
+    >>> make_bytes_to_base64url()(None)
+    (None, None)
+    """
+    def str_to_base64url(value, state = states.default_state):
+        if value is None:
+            return value, None
+        if isinstance(value, unicode):
+            value = value.encode('utf-8')
+        encoded_value = base64.urlsafe_b64encode(value)
+        if remove_padding:
+            encoded_value = encoded_value.rstrip('=')
+        return unicode(encoded_value), None
+    return str_to_base64url
 
 
 def make_json_to_str(*args, **kwargs):
@@ -104,32 +130,6 @@ def make_json_to_str(*args, **kwargs):
             return value, state._(u'Invalid JSON')
         return value_str, None
     return json_to_str
-
-
-def make_str_to_base64url(remove_padding = False):
-    """Return a converter that encodes a string to an URL-safe base64 encoding.
-
-    .. note:: To remove trailing (non URL-safe) "=", set ``remove_padding`` to ``True``.
-
-    >>> make_str_to_base64url()(u'Hello World')
-    (u'SGVsbG8gV29ybGQ=', None)
-    >>> make_str_to_base64url(remove_padding = True)(u'Hello World')
-    (u'SGVsbG8gV29ybGQ', None)
-    >>> make_str_to_base64url()(u'')
-    (u'', None)
-    >>> make_str_to_base64url()(None)
-    (None, None)
-    """
-    def str_to_base64url(value, state = states.default_state):
-        if value is None:
-            return value, None
-        if isinstance(value, unicode):
-            value = value.encode('utf-8')
-        encoded_value = base64.urlsafe_b64encode(value)
-        if remove_padding:
-            encoded_value = encoded_value.rstrip('=')
-        return unicode(encoded_value), None
-    return str_to_base64url
 
 
 def make_str_to_json(*args, **kwargs):
