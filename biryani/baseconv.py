@@ -87,6 +87,7 @@ __all__ = [
     'switch',
     'test',
     'test_between',
+    'test_conv',
     'test_equals',
     'test_exists',
     'test_greater_or_equal',
@@ -1619,6 +1620,22 @@ def test_between(min_value, max_value, error = None):
     """
     return test(lambda value: min_value <= value <= max_value,
         error = error or N_(u'Value must be between {0} and {1}').format(min_value, max_value))
+
+
+def test_conv(converter):
+    """Return a converter that applies a applies a converter to test a value without modifying it.
+
+    ``test_conv`` always returns the initial value, even when test fails.
+
+    >>> test_conv(str_to_int)(u'42')
+    (u'42', None)
+    >>> test_conv(str_to_int)(u'Hello world!')
+    (u'Hello world!', u'Value must be an integer')
+    """
+    def test_conv_converter(value, state = states.default_state):
+        converted_value, error = converter(value, state = state)
+        return value, error
+    return test_conv_converter
 
 
 def test_equals(constant, error = None):

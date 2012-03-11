@@ -129,6 +129,9 @@ Tests
 .. autofunction:: biryani.baseconv.test_between
    :noindex:
 
+.. autofunction:: biryani.baseconv.test_conv
+   :noindex:
+
 .. autofunction:: biryani.baseconv.test_equals
    :noindex:
 
