@@ -43,7 +43,6 @@ __all__ = [
     'check',
     'clean_str_to_bool',
     'clean_str_to_email',
-    'clean_str_to_json',
     'clean_str_to_url_path_and_query',
     'cleanup_empty',
     'cleanup_line',
@@ -79,7 +78,6 @@ __all__ = [
     'str_to_email',
     'str_to_float',
     'str_to_int',
-    'str_to_json',
     'str_to_slug',
     'str_to_url_name',
     'str_to_url_path_and_query',
@@ -226,35 +224,6 @@ def clean_str_to_email(value, state = states.default_state):
     if not domain_re.match(domain) and domain != 'localhost':
         return value, state._(u'Invalid domain name')
     return value, None
-
-
-def clean_str_to_json(value, state = states.default_state):
-    """Convert a clean string to a JSON value.
-
-    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_json`.
-
-    .. note:: This converter uses module ``simplejson``  when it is available, or module ``json`` otherwise.
-
-    >>> clean_str_to_json(u'{"a": 1, "b": 2}')
-    ({u'a': 1, u'b': 2}, None)
-    >>> clean_str_to_json(u'null')
-    (None, None)
-    >>> clean_str_to_json(None)
-    (None, None)
-    """
-    if value is None:
-        return value, None
-    try:
-        import simplejson as json
-    except ImportError:
-        import json
-    if isinstance(value, str):
-        # Ensure that json.loads() uses unicode strings.
-        value = value.decode('utf-8')
-    try:
-        return json.loads(value), None
-    except json.JSONDecodeError, e:
-        return value, unicode(e)
 
 
 def clean_str_to_url_path_and_query(value, state = states.default_state):
@@ -2027,23 +1996,6 @@ str_to_int = pipe(cleanup_line, python_data_to_int)
     >>> str_to_int(u'42.75')
     (u'42.75', u'Value must be an integer')
     >>> str_to_int(None)
-    (None, None)
-    """
-
-str_to_json = pipe(cleanup_line, clean_str_to_json)
-"""Convert a string to a JSON value.
-
-    .. note:: This converter uses module ``simplejson``  when it is available, or module ``json`` otherwise.
-
-    >>> str_to_json(u'{"a": 1, "b": 2}')
-    ({u'a': 1, u'b': 2}, None)
-    >>> str_to_json(u'null')
-    (None, None)
-    >>> str_to_json(u'   {"a": 1, "b": 2}    ')
-    ({u'a': 1, u'b': 2}, None)
-    >>> str_to_json(None)
-    (None, None)
-    >>> str_to_json(u'    ')
     (None, None)
     """
 

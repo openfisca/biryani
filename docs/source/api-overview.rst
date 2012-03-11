@@ -63,9 +63,6 @@ Internet Data Converters
 .. autofunction:: biryani.baseconv.str_to_email
    :noindex:
 
-.. autofunction:: biryani.baseconv.str_to_json
-   :noindex:
-
 .. autofunction:: biryani.baseconv.str_to_url_name
    :noindex:
 
