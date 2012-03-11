@@ -84,6 +84,7 @@ __all__ = [
     'struct',
     'structured_mapping',
     'structured_sequence',
+    'switch',
     'test',
     'test_between',
     'test_equals',
@@ -1523,6 +1524,55 @@ def structured_sequence(converters, constructor = None, default = None, keep_emp
         converted_values = constructor(converted_values) if not is_empty or keep_empty else None
         return converted_values, errors or None
     return structured_sequence_converter
+
+
+def switch(key_converter, converters, default = None):
+    """Return a converter that extracts a key from value and then converts value using the converter matching the key.
+
+    >>> simple_type_switcher = switch(
+    ...     function(lambda value: type(value)),
+    ...     {
+    ...         bool: set_value(u'boolean'),
+    ...         int: python_data_to_str,
+    ...         str: set_value(u'encoded string'),
+    ...         },
+    ...     )
+    >>> simple_type_switcher(True)
+    (u'boolean', None)
+    >>> simple_type_switcher(42)
+    (u'42', None)
+    >>> simple_type_switcher('Hello world!')
+    (u'encoded string', None)
+    >>> simple_type_switcher(u'Hello world!')
+    (u'Hello world!', u'Expression "<type \\'unicode\\'>" doesn\\'t match any key')
+    >>> simple_type_switcher(None)
+    (None, u'Expression "None" doesn\\'t match any key')
+    >>> type_switcher = switch(
+    ...     function(lambda value: type(value)),
+    ...     {
+    ...         list: uniform_sequence(simple_type_switcher),
+    ...         },
+    ...     default = python_data_to_str,
+    ...     )
+    >>> type_switcher([False, 42])
+    ([u'boolean', u'42'], None)
+    >>> type_switcher(u'Hello world!')
+    (u'Hello world!', None)
+    >>> type_switcher(None)
+    (None, None)
+    >>> type_switcher([None])
+    (None, {0: u'Expression "None" doesn\\'t match any key'})
+    """
+    def switch_converter(value, state = states.default_state):
+        key, error = key_converter(value, state = state)
+        if error is not None:
+            return value, error
+        if key not in converters:
+            if default is None:
+                return value, state._(u'''Expression "{}" doesn't match any key''').format(key)
+            return default(value, state = state)
+        return converters[key](value, state = state)
+    return switch_converter
 
 
 def test(function, error = N_(u'Test failed'), handle_missing_value = False, handle_state = False):

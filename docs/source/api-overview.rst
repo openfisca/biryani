@@ -163,6 +163,9 @@ Flow-Control Converters
 .. autofunction:: biryani.baseconv.pipe
    :noindex:
 
+.. autofunction:: biryani.baseconv.switch
+   :noindex:
+
 
 Special Converters
 ==================
