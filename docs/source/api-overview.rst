@@ -217,12 +217,13 @@ Extension Modules
 .. testsetup::
 
    from biryani.babelconv import *
+   from biryani.base64conv import *
    from biryani.bsonconv import *
    from biryani.creditcardconv import *
    from biryani.datetimeconv import *
+   from biryani.jsonconv import *
    from biryani.netconv import *
    from biryani.objectconv import *
-   from biryani.webconv import *
    from biryani.webobconv import *
 
 
@@ -230,6 +231,15 @@ Babel Converters
 ----------------
 
 .. automodule:: biryani.babelconv
+   :members:
+   :undoc-members:
+   :noindex:
+
+
+Base64 Converters
+-----------------
+
+.. automodule:: biryani.base64conv
    :members:
    :undoc-members:
    :noindex:
@@ -262,6 +272,15 @@ Date & Time Converters
    :noindex:
 
 
+JSON Converters
+---------------
+
+.. automodule:: biryani.jsonconv
+   :members:
+   :undoc-members:
+   :noindex:
+
+
 Network Converters
 ------------------
 
@@ -275,15 +294,6 @@ Object Converters
 -----------------
 
 .. automodule:: biryani.objectconv
-   :members:
-   :undoc-members:
-   :noindex:
-
-
-Wev Converters
---------------
-
-.. automodule:: biryani.webconv
    :members:
    :undoc-members:
    :noindex:

@@ -43,6 +43,18 @@ biryani.babelconv
    :undoc-members:
 
 
+biryani.base64conv
+------------------
+
+.. testsetup::
+
+   from biryani.base64conv import *
+
+.. automodule:: biryani.base64conv
+   :members:
+   :undoc-members:
+
+
 biryani.bsonconv
 ----------------
 
@@ -79,6 +91,18 @@ biryani.datetimeconv
    :undoc-members:
 
 
+biryani.jsonconv
+----------------
+
+.. testsetup::
+
+   from biryani.jsonconv import *
+
+.. automodule:: biryani.jsonconv
+   :members:
+   :undoc-members:
+
+
 biryani.netconv
 ---------------
 
@@ -111,18 +135,6 @@ biryani.states
    from biryani.states import *
 
 .. automodule:: biryani.states
-   :members:
-   :undoc-members:
-
-
-biryani.webconv
----------------
-
-.. testsetup::
-
-   from biryani.webconv import *
-
-.. automodule:: biryani.webconv
    :members:
    :undoc-members:
 

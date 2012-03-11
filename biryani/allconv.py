@@ -36,6 +36,8 @@ else:
     del babel
     from babelconv import *
 
+from base64conv import *
+
 try:
     import bson
 except ImportError:
@@ -57,6 +59,8 @@ else:
     del pytz
     from datetimeconv import *
 
+from jsonconv import *
+
 try:
     import DNS
 except ImportError:
@@ -67,7 +71,6 @@ else:
     from netconv import *
 
 from objectconv import *
-from webconv import *
 
 try:
     import webob

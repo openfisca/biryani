@@ -22,24 +22,17 @@
 # limitations under the License.
 
 
-"""Web Related Converters
-
-.. note:: Web converters are not in :mod:`biryani.baseconv`, because they use web-specific modules.
-"""
+"""Base64 Related Converters"""
 
 
 import base64
-import json
 
-from . import baseconv as conv
 from . import states
 
 
 __all__ = [
     'make_base64url_to_bytes',
     'make_bytes_to_base64url',
-    'make_json_to_str',
-    'make_str_to_json',
     ]
 
 
@@ -105,54 +98,4 @@ def make_bytes_to_base64url(remove_padding = False):
             encoded_value = encoded_value.rstrip('=')
         return unicode(encoded_value), None
     return str_to_base64url
-
-
-def make_json_to_str(*args, **kwargs):
-    """Return a converter that encodes a JSON data to a string.
-
-    >>> make_json_to_str()({u'a': 1, u'b': [2, u'three']})
-    (u'{"a": 1, "b": [2, "three"]}', None)
-    >>> make_json_to_str()(u'Hello World')
-    (u'"Hello World"', None)
-    >>> make_json_to_str()(set([1, 2, 3]))
-    (set([1, 2, 3]), u'Invalid JSON')
-    >>> make_json_to_str()(u'')
-    (u'""', None)
-    >>> make_json_to_str()(None)
-    (None, None)
-    """
-    def json_to_str(value, state = states.default_state):
-        if value is None:
-            return value, None
-        try:
-            value_str = unicode(json.dumps(value, *args, **kwargs))
-        except TypeError, error:
-            return value, state._(u'Invalid JSON')
-        return value_str, None
-    return json_to_str
-
-
-def make_str_to_json(*args, **kwargs):
-    """Return a converter that decodes a string to a JSON data.
-
-    >>> make_str_to_json()(u'{"a": 1, "b": [2, "three"]}')
-    ({u'a': 1, u'b': [2, u'three']}, None)
-    >>> make_str_to_json()(u'Hello World')
-    (u'Hello World', u'Invalid JSON')
-    >>> make_str_to_json()(u'{"a": 1, "b":')
-    (u'{"a": 1, "b":', u'Invalid JSON')
-    >>> make_str_to_json()(u'')
-    (u'', u'Invalid JSON')
-    >>> make_str_to_json()(None)
-    (None, None)
-    """
-    def str_to_json(value, state = states.default_state):
-        if value is None:
-            return value, None
-        try:
-            value_json = json.loads(value, *args, **kwargs)
-        except ValueError, error:
-            return value, state._(u'Invalid JSON')
-        return value_json, None
-    return str_to_json
 
