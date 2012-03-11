@@ -34,7 +34,6 @@ import urllib2
 import DNS # from pyDNS
 DNS.DiscoverNameServers()
 
-from . import baseconv as conv
 from . import states
 
 
