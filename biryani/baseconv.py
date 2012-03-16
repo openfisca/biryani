@@ -60,6 +60,7 @@ __all__ = [
     'guess_bool',
     'item_or_sequence',
     'make_clean_str_to_url',
+    'make_item_to_singleton',
     'make_str_to_normal_form',
     'make_str_to_slug',
     'make_str_to_url',
@@ -651,6 +652,40 @@ def make_clean_str_to_url(add_prefix = u'http://', full = False, remove_fragment
             split_url[4] = u''
         return unicode(urlparse.urlunsplit(split_url)), None
     return clean_str_to_url
+
+
+def make_item_to_singleton(constructor = list):
+    """Convert an item to a singleton, but keep a sequence of items unchanged.
+
+    >>> make_item_to_singleton()(u'Hello world!')
+    ([u'Hello world!'], None)
+    >>> make_item_to_singleton()([u'Hello world!'])
+    ([u'Hello world!'], None)
+    >>> make_item_to_singleton()([42, u'Hello world!'])
+    ([42, u'Hello world!'], None)
+    >>> make_item_to_singleton()([])
+    ([], None)
+    >>> make_item_to_singleton()(None)
+    (None, None)
+    >>> make_item_to_singleton(constructor = set)(u'Hello world!')
+    (set([u'Hello world!']), None)
+    >>> make_item_to_singleton(constructor = set)(set([u'Hello world!']))
+    (set([u'Hello world!']), None)
+    >>> make_item_to_singleton(constructor = set)(set([42, u'Hello world!']))
+    (set([u'Hello world!', 42]), None)
+    >>> make_item_to_singleton(constructor = set)([42, u'Hello world!'])
+    Traceback (most recent call last):
+    TypeError: unhashable type: 'list'
+    >>> make_item_to_singleton(constructor = set)(set())
+    (set([]), None)
+    >>> make_item_to_singleton(constructor = set)(None)
+    (None, None)
+    """
+    return condition(
+        test_isinstance(constructor),
+        noop,
+        new_struct([noop], constructor = constructor),
+        )
 
 
 def make_str_to_normal_form(encoding = 'utf-8', separator = u' ', transform = strings.lower):
