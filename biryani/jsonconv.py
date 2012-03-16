@@ -43,6 +43,8 @@ def make_json_to_str(*args, **kwargs):
     (u'{"a": 1, "b": [2, "three"]}', None)
     >>> make_json_to_str()(u'Hello World')
     (u'"Hello World"', None)
+    >>> make_json_to_str(ensure_ascii = False, indent = 2, sort_keys = True)({u'a': 1, u'b': [2, u'three']})
+    (u'{\\n  "a": 1, \\n  "b": [\\n    2, \\n    "three"\\n  ]\\n}', None)
     >>> make_json_to_str()(set([1, 2, 3]))
     (set([1, 2, 3]), u'Invalid JSON')
     >>> make_json_to_str()(u'')
