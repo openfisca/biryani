@@ -60,6 +60,16 @@ else:
     from datetimeconv import *
 
 from jsonconv import *
+from jwkconv import *
+
+try:
+    import Crypto
+except ImportError:
+    pass
+else:
+    # Don't export Crypto module.
+    del Crypto
+    from jwtconv import *
 
 try:
     import DNS

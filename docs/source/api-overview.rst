@@ -225,6 +225,8 @@ Extension Modules
    from biryani.creditcardconv import *
    from biryani.datetimeconv import *
    from biryani.jsonconv import *
+   from biryani.jwkconv import *
+   from biryani.jwtconv import *
    from biryani.netconv import *
    from biryani.objectconv import *
    from biryani.webobconv import *
@@ -279,6 +281,24 @@ JSON Converters
 ---------------
 
 .. automodule:: biryani.jsonconv
+   :members:
+   :undoc-members:
+   :noindex:
+
+
+JSON Web Keys (JWK) Converters
+------------------------------
+
+.. automodule:: biryani.jwkconv
+   :members:
+   :undoc-members:
+   :noindex:
+
+
+JSON Web Tokens (JWK) Converters
+--------------------------------
+
+.. automodule:: biryani.jwtconv
    :members:
    :undoc-members:
    :noindex:

@@ -103,6 +103,30 @@ biryani.jsonconv
    :undoc-members:
 
 
+biryani.jwkconv
+----------------
+
+.. testsetup::
+
+   from biryani.jwkconv import *
+
+.. automodule:: biryani.jwkconv
+   :members:
+   :undoc-members:
+
+
+biryani.jwtconv
+----------------
+
+.. testsetup::
+
+   from biryani.jwtconv import *
+
+.. automodule:: biryani.jwtconv
+   :members:
+   :undoc-members:
+
+
 biryani.netconv
 ---------------
 
