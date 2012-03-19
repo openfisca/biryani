@@ -27,7 +27,7 @@
 
 import re
 
-from . import baseconv as conv
+from .baseconv import cleanup_line, function, make_str_to_slug, N_, noop, pipe, struct, test
 from . import strings, states
 
 
@@ -47,7 +47,6 @@ __all__ = [
     ]
 
 depcom_re = re.compile(ur'\d[\dAB]\d{3}$')
-N_ = conv.N_
 
 
 # Level-1 Converters
@@ -231,9 +230,9 @@ def split_postal_distribution(value, state = states.default_state):
     return (postal_code, postal_routing), None
 
 
-str_to_lenient_depcom = conv.pipe(
-    conv.make_str_to_slug(separator = u'', transform = strings.upper),
-    conv.function(lambda depcom: u'0{0}'.format(depcom) if len(depcom) == 4 else depcom),
+str_to_lenient_depcom = pipe(
+    make_str_to_slug(separator = u'', transform = strings.upper),
+    function(lambda depcom: u'0{0}'.format(depcom) if len(depcom) == 4 else depcom),
     )
 """Convert a string to an INSEE commune code (aka depcom). Don't fail when depcom is not valid.
 
@@ -258,9 +257,9 @@ str_to_lenient_depcom = conv.pipe(
     """
 
 
-str_to_depcom = conv.pipe(
+str_to_depcom = pipe(
     str_to_lenient_depcom,
-    conv.test(lambda depcom: depcom_re.match(depcom) is not None,
+    test(lambda depcom: depcom_re.match(depcom) is not None,
         error = N_(u'INSEE code must contain only 5 digits or "A" or "B"')),
     )
 """Convert a string to aan INSEE commune code (aka depcom). Generate an error when depcom is not valid.
@@ -286,9 +285,9 @@ str_to_depcom = conv.pipe(
     """
 
 
-str_to_lenient_postal_code = conv.pipe(
-    conv.make_str_to_slug(separator = u''),
-    conv.function(lambda postal_code: u'0{0}'.format(postal_code) if len(postal_code) == 4 else postal_code),
+str_to_lenient_postal_code = pipe(
+    make_str_to_slug(separator = u''),
+    function(lambda postal_code: u'0{0}'.format(postal_code) if len(postal_code) == 4 else postal_code),
     )
 """Convert a string to a postal code. Don't fail when postal code is not valid.
 
@@ -309,7 +308,7 @@ str_to_lenient_postal_code = conv.pipe(
     """
 
 
-str_to_phone = conv.pipe(conv.cleanup_line, clean_str_to_phone)
+str_to_phone = pipe(cleanup_line, clean_str_to_phone)
 """Convert a string to a phone number.
 
     .. warning:: This converter is not stable and may change or be removed at any time. If you need it, you shouldn't
@@ -322,10 +321,10 @@ str_to_phone = conv.pipe(conv.cleanup_line, clean_str_to_phone)
     """
 
 
-str_to_postal_code = conv.pipe(
+str_to_postal_code = pipe(
     str_to_lenient_postal_code,
-    conv.test(lambda postal_code: postal_code.isdigit(), error = N_(u'Postal code must contain only digits')),
-    conv.test(lambda postal_code: len(postal_code) == 5, error = N_(u'Postal code must have 5 digits')),
+    test(lambda postal_code: postal_code.isdigit(), error = N_(u'Postal code must contain only digits')),
+    test(lambda postal_code: len(postal_code) == 5, error = N_(u'Postal code must have 5 digits')),
     )
 """Convert a string to a postal code. Generate an error when postal code is not valid.
 
@@ -346,9 +345,9 @@ str_to_postal_code = conv.pipe(
     """
 
 
-str_to_postal_routing = conv.pipe(
+str_to_postal_routing = pipe(
     # Only upper-case ASCII letters, digits and spaces are allowed : http://fr.wikipedia.org/wiki/Adresse_postale#France
-    conv.make_str_to_slug(separator = u' ', transform = strings.upper),
+    make_str_to_slug(separator = u' ', transform = strings.upper),
     shrink_postal_routing,
     repair_postal_routing,
     )
@@ -378,12 +377,12 @@ str_to_postal_routing = conv.pipe(
 # Level-2 Converters
 
 
-str_to_postal_distribution = conv.pipe(
-    conv.make_str_to_slug(separator = u' ', transform = strings.upper),
+str_to_postal_distribution = pipe(
+    make_str_to_slug(separator = u' ', transform = strings.upper),
     split_postal_distribution,
-    conv.struct(
+    struct(
         [
-        conv.noop,
+        noop,
         str_to_postal_routing,
             ],
         constructor = tuple,

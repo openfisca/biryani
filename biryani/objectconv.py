@@ -25,7 +25,7 @@
 """Object Related Converters"""
 
 
-from . import baseconv as conv
+from .baseconv import function
 from . import states
 
 
@@ -58,7 +58,7 @@ def make_dict_to_object(cls):
     return dict_to_object
 
 
-object_to_clean_dict = conv.function(lambda instance: dict(
+object_to_clean_dict = function(lambda instance: dict(
     (name, value)
     for name, value in instance.__dict__.iteritems()
     if getattr(instance.__class__, name, None) is not value
@@ -98,7 +98,7 @@ object_to_clean_dict = conv.function(lambda instance: dict(
     AttributeError: 'int' object has no attribute '__dict__'
     """
 
-object_to_dict = conv.function(lambda instance: getattr(instance, '__dict__'))
+object_to_dict = function(lambda instance: getattr(instance, '__dict__'))
 """Convert an object's instance to a dictionary, by returning its ``__dict__`` atribute.
 
     .. note:: Use converter :func:`object_to_clean_dict` when you want to remove defaut values from generated

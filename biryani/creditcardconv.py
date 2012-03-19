@@ -131,7 +131,7 @@ Sample usage:
 """
 
 
-from . import baseconv as conv
+from .baseconv import cleanup_line, N_, pipe, str_to_int, str_to_slug, test, test_in
 from . import states, strings
 
 
@@ -182,7 +182,6 @@ credit_cards_security_code_length = {
     "mastercard": 3,
     "visa": 3,
     }
-N_ = conv.N_
 
 
 def make_clean_str_to_credit_card_number(type):
@@ -265,22 +264,22 @@ def make_str_to_credit_card_number(type):
     >>> make_str_to_credit_card_number(u'visa')(None)
     (None, None)
     """
-    return conv.pipe(conv.cleanup_line, make_clean_str_to_credit_card_number(type))
+    return pipe(cleanup_line, make_clean_str_to_credit_card_number(type))
 
 
 def make_str_to_credit_card_security_code(type):
     """Return a converter that converts a string to a security code for a given type of credit card.
     """
-    return conv.pipe(
-        conv.cleanup_line,
-        conv.test(lambda value: len(value) == credit_cards_security_code_length[type],
+    return pipe(
+        cleanup_line,
+        test(lambda value: len(value) == credit_cards_security_code_length[type],
             error = N_(u'Invalid security code for credit card')),
-        conv.str_to_int,
+        str_to_int,
         )
 
 
-str_to_credit_card_type = conv.pipe(
-    conv.str_to_slug,
-    conv.test_in(credit_cards_prefix_and_length.keys(), error = N_(u'Unknown type of credit card')),
+str_to_credit_card_type = pipe(
+    str_to_slug,
+    test_in(credit_cards_prefix_and_length.keys(), error = N_(u'Unknown type of credit card')),
     )
 

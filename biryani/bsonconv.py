@@ -32,7 +32,7 @@ import re
 
 import bson
 
-from . import baseconv as conv
+from .baseconv import cleanup_line, first_match, pipe, test_isinstance
 from . import states
 
 
@@ -105,7 +105,7 @@ def object_id_to_str(value, state = states.default_state):
     return unicode(value), None
 
 
-str_to_object_id = conv.pipe(conv.cleanup_line, clean_str_to_object_id)
+str_to_object_id = pipe(cleanup_line, clean_str_to_object_id)
 """Convert a string to a BSON ObjectId.
 
     .. note:: For a converter that doesn't fail when input data is already an ObjectId,
@@ -135,10 +135,10 @@ str_to_object_id = conv.pipe(conv.cleanup_line, clean_str_to_object_id)
 # Level-2 Converters
 
 
-python_data_to_object_id = conv.first_match(
-    conv.test_isinstance(bson.objectid.ObjectId),
-    conv.pipe(
-        conv.test_isinstance(basestring),
+python_data_to_object_id = first_match(
+    test_isinstance(bson.objectid.ObjectId),
+    pipe(
+        test_isinstance(basestring),
         str_to_object_id,
         ),
     )

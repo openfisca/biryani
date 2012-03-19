@@ -30,7 +30,7 @@ See http://babel.edgewall.org/
 
 import babel
 
-from . import baseconv as conv
+from .baseconv import cleanup_line, pipe
 from . import states
 
 
@@ -63,7 +63,7 @@ def clean_str_to_lang(value, state = states.default_state):
     return value, None
 
 
-str_to_lang = conv.pipe(conv.cleanup_line, clean_str_to_lang)
+str_to_lang = pipe(cleanup_line, clean_str_to_lang)
 """Convert a string to a language code.
 
     >>> str_to_lang(u'fr')

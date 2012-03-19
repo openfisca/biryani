@@ -34,7 +34,7 @@ import datetime
 
 import mx.DateTime
 
-from . import baseconv as conv
+from .baseconv import cleanup_line, function, pipe
 from . import states
 
 
@@ -258,7 +258,7 @@ def set_datetime_tzinfo(tzinfo = None):
     >>> set_datetime_tzinfo(pytz.utc)(datetime.datetime(2011, 1, 2, 3, 4, 5))
     (datetime.datetime(2011, 1, 2, 3, 4, 5, tzinfo=<UTC>), None)
     """
-    return conv.function(lambda value: value.replace(tzinfo = tzinfo))
+    return function(lambda value: value.replace(tzinfo = tzinfo))
 
 
 def timestamp_to_date(value, state = states.default_state):
@@ -315,7 +315,7 @@ def timestamp_to_datetime(value, state = states.default_state):
 # Level-2 Converters
 
 
-iso8601_to_date = conv.pipe(conv.cleanup_line, clean_iso8601_to_date)
+iso8601_to_date = pipe(cleanup_line, clean_iso8601_to_date)
 """Convert a string in ISO 8601 format to a date.
 
     >>> iso8601_to_date(u'2012-03-04')
@@ -346,7 +346,7 @@ iso8601_to_date = conv.pipe(conv.cleanup_line, clean_iso8601_to_date)
     (None, None)
     """
 
-iso8601_to_datetime = conv.pipe(conv.cleanup_line, clean_iso8601_to_datetime)
+iso8601_to_datetime = pipe(cleanup_line, clean_iso8601_to_datetime)
 """Convert a string in ISO 8601 format to a datetime.
 
     >>> iso8601_to_datetime(u'2012-03-04')

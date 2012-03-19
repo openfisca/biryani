@@ -28,7 +28,7 @@ See http://webob.org/
 """
 
 
-from . import baseconv as conv
+from .baseconv import function
 
 
 __all__ = [
@@ -67,7 +67,7 @@ def multidict_get(key, default = None):
     ...     ))(req.GET)
     ({'a': u'1'}, None)
     """
-    return conv.function(lambda multidict: multidict.get(key, default = default))
+    return function(lambda multidict: multidict.get(key, default = default))
 
 
 def multidict_getall(key):
@@ -89,7 +89,7 @@ def multidict_getall(key):
     ...     ))(req.GET)
     ({'tags': [u'hello', u'World!']}, None)
     """
-    return conv.function(lambda multidict: multidict.getall(key) or None)
+    return function(lambda multidict: multidict.getall(key) or None)
 
 
 def multidict_getone(key):
@@ -112,5 +112,5 @@ def multidict_getone(key):
     Traceback (most recent call last):
     KeyError: "Multiple values match 'tag': ['hello', 'World!']"
     """
-    return conv.function(lambda multidict: multidict.getone(key))
+    return function(lambda multidict: multidict.getone(key))
 
