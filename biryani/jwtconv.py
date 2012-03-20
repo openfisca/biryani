@@ -236,26 +236,10 @@ def verify_decoded_json_web_token_signature(public_key_as_encoded_str = None, pu
 #                TODO
 #            elif algorithm_prefix == u'HS':
             if algorithm_prefix == u'HS':
-                hmac_shared_secret = shared_secret
-#                if hmac_shared_secret is None:
-#                    # When no shared secret was given use the client_secret of the client whose id is in "aud" item.
-#                    if 'claims' in value:
-#                        client, error = pipe(
-#                            test_isinstance(basestring),
-#                            str_to_client,
-#                            exists,
-#                            )(value['claims'].get('aud'), state = state)
-#                        if error is None:
-#                            assert client.secret is not None
-#                            hmac_shared_secret = client.secret.encode('utf-8')
-#                        else:
-#                            errors.setdefault('claims', {})['aud'] = error
-#                    else:
-#                        errors.setdefault('claims', {})['aud'] = state._('Invalid client ID')
-                if hmac_shared_secret is None:
-                    errors['signature'] = state._('Unable to check signature')
+                if shared_secret is None:
+                    errors['signature'] = state._('Unable to check signature: Missing shared secret')
                 else:
-                    verified = HMAC.new(hmac_shared_secret, msg = value['secured_input'],
+                    verified = HMAC.new(shared_secret, msg = value['secured_input'],
                         digestmod = digest_constructor).digest() == value['signature']
             else:
                 assert algorithm_prefix == u'RS'
