@@ -14,7 +14,7 @@ Converters usually don't test their input value:
 
 >>> conv.str_to_float(42)
 Traceback (most recent call last):
-AttributeError: 'int' object has no attribute 'strip'
+AttributeError:
 
 So, to ensure that input value is an unicode string, we need to chain several converters:
 
@@ -46,7 +46,7 @@ Use :func:`conv.check <biryani.baseconv.check>` to extract value from conversion
 ...     conv.str_to_float,
 ...     ))(42)
 Traceback (most recent call last):
-ValueError: Value is not an instance of <type 'unicode'>
+ValueError:
 
 Add a custom function to convert string to unicode when needed, and store resulting converter into a variable:
 

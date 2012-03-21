@@ -56,7 +56,7 @@ def test_email():
     (u'unknown-user@easter-eggs.com', None)
     >>> test_email()(u'')
     Traceback (most recent call last):
-    ValueError: need more than 1 value to unpack
+    ValueError:
     >>> pipe(
     ...     str_to_email,
     ...     test_email(),
@@ -97,7 +97,7 @@ def test_http_url(valid_status_codes = None):
     (u'http://unknown-server.easter-eggs.com/', u'An error occured when trying to connect to the web server: <urlopen error [Errno -2] Name or service not known>')
     >>> test_http_url()(u'')
     Traceback (most recent call last):
-    ValueError: unknown url type: 
+    ValueError:
     >>> pipe(
     ...     make_str_to_url(),
     ...     test_http_url(),

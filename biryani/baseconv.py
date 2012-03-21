@@ -418,10 +418,10 @@ def function(function, handle_missing_value = False, handle_state = False):
     (None, None)
     >>> function(lambda value: value + 1)(u'hello world')
     Traceback (most recent call last):
-    TypeError: coercing to Unicode: need string or buffer, int found
+    TypeError:
     >>> function(lambda value: value + 1, handle_missing_value = True)(None)
     Traceback (most recent call last):
-    TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'
+    TypeError:
     """
     def function_converter(value, state = states.default_state):
         if value is None and not handle_missing_value or function is None:
@@ -675,7 +675,7 @@ def make_item_to_singleton(constructor = list):
     (set([u'Hello world!', 42]), None)
     >>> make_item_to_singleton(constructor = set)([42, u'Hello world!'])
     Traceback (most recent call last):
-    TypeError: unhashable type: 'list'
+    TypeError:
     >>> make_item_to_singleton(constructor = set)(set())
     (set([]), None)
     >>> make_item_to_singleton(constructor = set)(None)
@@ -1040,10 +1040,10 @@ def pipe(*converters):
 
     >>> str_to_bool(42)
     Traceback (most recent call last):
-    AttributeError: 'int' object has no attribute 'strip'
+    AttributeError:
     >>> pipe(str_to_bool)(42)
     Traceback (most recent call last):
-    AttributeError: 'int' object has no attribute 'strip'
+    AttributeError:
     >>> pipe(test_isinstance(unicode), str_to_bool)(42)
     (42, u"Value is not an instance of <type 'unicode'>")
     >>> pipe(python_data_to_str, test_isinstance(unicode), str_to_bool)(42)
@@ -2147,7 +2147,7 @@ def check(converter_or_value_and_error, clear_on_error = False):
     42
     >>> check(str_to_int)(u'hello world')
     Traceback (most recent call last):
-    ValueError: Value must be an integer
+    ValueError:
     >>> check(pipe(python_data_to_str, test_isinstance(unicode), str_to_bool))(42)
     True
     >>> check(str_to_int, clear_on_error = True)(u'42')
@@ -2161,7 +2161,7 @@ def check(converter_or_value_and_error, clear_on_error = False):
     42
     >>> check(str_to_int(u'hello world'))
     Traceback (most recent call last):
-    ValueError: Value must be an integer
+    ValueError:
     >>> check(pipe(python_data_to_str, test_isinstance(unicode), str_to_bool)(42))
     True
     >>> check(str_to_int(u'42'), clear_on_error = True)

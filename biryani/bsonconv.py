@@ -68,7 +68,7 @@ def clean_str_to_object_id(value, state = states.default_state):
     >>> from bson.objectid import ObjectId
     >>> clean_str_to_object_id(ObjectId('4e333f53ff42e928000007d8'))
     Traceback (most recent call last):
-    AttributeError: 'ObjectId' object has no attribute 'lower'
+    AttributeError:
     >>> clean_str_to_object_id(u"ObjectId('4e333f53ff42e928000007d8')")
     (u"ObjectId('4e333f53ff42e928000007d8')", u'Invalid value')
     >>> clean_str_to_object_id(None)
@@ -122,7 +122,7 @@ str_to_object_id = pipe(cleanup_line, clean_str_to_object_id)
     >>> from bson.objectid import ObjectId
     >>> str_to_object_id(ObjectId('4e333f53ff42e928000007d8'))
     Traceback (most recent call last):
-    AttributeError: 'ObjectId' object has no attribute 'lower'
+    AttributeError:
     >>> str_to_object_id(u"ObjectId('4e333f53ff42e928000007d8')")
     (u"ObjectId('4e333f53ff42e928000007d8')", u'Invalid value')
     >>> str_to_object_id(u'  ')

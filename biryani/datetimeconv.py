@@ -203,7 +203,7 @@ def datetime_to_date(value, state = states.default_state):
     (datetime.date(2012, 3, 4), None)
     >>> datetime_to_date(datetime.date(2012, 3, 4))
     Traceback (most recent call last):
-    AttributeError: 'datetime.date' object has no attribute 'date'
+    AttributeError:
     >>> datetime_to_date(None)
     (None, None)
     """
@@ -268,7 +268,7 @@ def timestamp_to_date(value, state = states.default_state):
     (datetime.date(1970, 1, 2), None)
     >>> timestamp_to_date(u'123456789.123')
     Traceback (most recent call last):
-    TypeError: unsupported operand type(s) for /: 'unicode' and 'int'
+    TypeError:
     >>> pipe(str_to_float, timestamp_to_date)(u'123456789.123')
     (datetime.date(1970, 1, 2), None)
     >>> timestamp_to_date(None)
@@ -295,7 +295,7 @@ def timestamp_to_datetime(value, state = states.default_state):
     (datetime.datetime(1970, 1, 2, 11, 17, 36, 789123, tzinfo=<UTC>), None)
     >>> timestamp_to_datetime(u'123456789.123')
     Traceback (most recent call last):
-    TypeError: unsupported operand type(s) for /: 'unicode' and 'int'
+    TypeError:
     >>> pipe(str_to_float, timestamp_to_datetime)(u'123456789.123')
     (datetime.datetime(1970, 1, 2, 11, 17, 36, 789123), None)
     >>> timestamp_to_datetime(None)

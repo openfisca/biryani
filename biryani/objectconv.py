@@ -95,7 +95,7 @@ object_to_clean_dict = function(lambda instance: dict(
     (None, None)
     >>> object_to_clean_dict(42)
     Traceback (most recent call last):
-    AttributeError: 'int' object has no attribute '__dict__'
+    AttributeError:
     """
 
 object_to_dict = function(lambda instance: getattr(instance, '__dict__'))
@@ -130,6 +130,6 @@ object_to_dict = function(lambda instance: getattr(instance, '__dict__'))
     (None, None)
     >>> object_to_dict(42)
     Traceback (most recent call last):
-    AttributeError: 'int' object has no attribute '__dict__'
+    AttributeError:
     """
 

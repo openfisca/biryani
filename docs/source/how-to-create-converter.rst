@@ -44,7 +44,7 @@ But, if you want to change this behaviour, you can set the ``handle_missing_valu
 ...
 >>> python_data_to_len(None)
 Traceback (most recent call last):
-TypeError: object of type 'NoneType' has no len()
+TypeError:
 
 In this case, you will have to rewrite your function to handle the ``None`` input value:
 
@@ -133,7 +133,7 @@ But, if you want to change this behaviour, you can set the ``handle_missing_valu
 ...
 >>> test_valid_password(None)
 Traceback (most recent call last):
-TypeError: object of type 'NoneType' has no len()
+TypeError:
 
 In this case, you will have to rewrite your test to handle the ``None`` input value:
 
