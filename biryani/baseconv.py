@@ -601,7 +601,8 @@ def item_or_sequence(converter, constructor = list, keep_missing_items = False):
         )
 
 
-def make_clean_str_to_url(add_prefix = u'http://', full = False, remove_fragment = False, schemes = (u'http', u'https')):
+def make_clean_str_to_url(add_prefix = u'http://', error_if_fragment = False, full = False, remove_fragment = False,
+        schemes = (u'http', u'https')):
     """Return a converter that converts a clean string to an URL.
 
     .. note:: For a converter that doesn't require a clean string, see :func:`make_str_to_url`.
@@ -616,6 +617,8 @@ def make_clean_str_to_url(add_prefix = u'http://', full = False, remove_fragment
     (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
     >>> make_clean_str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
     (u'http://packages.python.org/Biryani/presentation.html', None)
+    >>> make_clean_str_to_url(error_if_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
+    (u'http://packages.python.org/Biryani/presentation.html#tutorial', u'URL must not contain a fragment')
     >>> make_clean_str_to_url(full = True)(u'[www.nordnet.fr/grandmix/]')
     (u'[www.nordnet.fr/grandmix/]', u'Invalid URL')
     >>> make_clean_str_to_url(full = True)(u'http://[www.nordnet.fr/grandmix/]')
@@ -648,8 +651,11 @@ def make_clean_str_to_url(add_prefix = u'http://', full = False, remove_fragment
         if scheme in (u'http', u'https') and not split_url[2]:
             # By convention a full HTTP URL must always have at least a "/" in its path.
             split_url[2] = u'/'
-        if remove_fragment and split_url[4]:
-            split_url[4] = u''
+        if split_url[4]:
+            if error_if_fragment:
+                return value, state._(u'URL must not contain a fragment')
+            if remove_fragment:
+                split_url[4] = u''
         return unicode(urlparse.urlunsplit(split_url)), None
     return clean_str_to_url
 
@@ -754,7 +760,8 @@ def make_str_to_slug(encoding = 'utf-8', separator = u'-', transform = strings.l
     return str_to_slug
 
 
-def make_str_to_url(add_prefix = u'http://', full = False, remove_fragment = False, schemes = (u'http', u'https')):
+def make_str_to_url(add_prefix = u'http://', error_if_fragment = False, full = False, remove_fragment = False,
+        schemes = (u'http', u'https')):
     """Return a converter that converts an string to an URL.
 
     >>> make_str_to_url()(u'http://packages.python.org/Biryani/')
@@ -767,13 +774,15 @@ def make_str_to_url(add_prefix = u'http://', full = False, remove_fragment = Fal
     (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
     >>> make_str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
     (u'http://packages.python.org/Biryani/presentation.html', None)
+    >>> make_str_to_url(error_if_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
+    (u'http://packages.python.org/Biryani/presentation.html#tutorial', u'URL must not contain a fragment')
     >>> make_str_to_url()(u'    http://packages.python.org/Biryani/   ')
     (u'http://packages.python.org/Biryani/', None)
     """
     return pipe(
         cleanup_line,
-        make_clean_str_to_url(add_prefix = add_prefix, full = full, remove_fragment = remove_fragment,
-            schemes = schemes),
+        make_clean_str_to_url(add_prefix = add_prefix, error_if_fragment = error_if_fragment, full = full,
+            remove_fragment = remove_fragment, schemes = schemes),
         )
 
 
