@@ -358,7 +358,7 @@ def encode_str(encoding = 'utf-8'):
     return function(lambda value: value.encode(encoding) if isinstance(value, unicode) else value)
 
 
-def fail(error = N_(u'An error occured'), handle_missing_value = False):
+def fail(error = N_(u'An error occured')):
     """Return a converter that always returns an error.
 
     >>> fail(u'Wrong answer')(42)
@@ -366,13 +366,9 @@ def fail(error = N_(u'An error occured'), handle_missing_value = False):
     >>> fail()(42)
     (42, u'An error occured')
     >>> fail()(None)
-    (None, None)
-    >>> fail(handle_missing_value = True)(None)
     (None, u'An error occured')
     """
     def fail_converter(value, state = states.default_state):
-        if value is None and not handle_missing_value:
-            return None, None
         return value, state._(error)
     return fail_converter
 
@@ -1504,8 +1500,7 @@ def structured_mapping(converters, constructor = None, default = None, keep_empt
             values_converter = converters.copy()
             for name in values:
                 if name not in values_converter:
-                    values_converter[name] = default if default is not None else fail(
-                        error = N_(u'Unexpected item'), handle_missing_value = True)
+                    values_converter[name] = default if default is not None else fail(error = N_(u'Unexpected item'))
         errors = {}
         converted_values = {}
         for name, converter in values_converter.iteritems():
@@ -1602,8 +1597,7 @@ def structured_sequence(converters, constructor = None, default = None, keep_emp
         else:
             values_converter = converters[:]
             while len(values) > len(values_converter):
-                values_converter.append(default if default is not None else fail(
-                    error = N_(u'Unexpected item'), handle_missing_value = True))
+                values_converter.append(default if default is not None else fail(error = N_(u'Unexpected item')))
         import itertools
         errors = {}
         converted_values = []
