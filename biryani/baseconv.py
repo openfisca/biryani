@@ -96,6 +96,7 @@ __all__ = [
     'test_is',
     'test_isinstance',
     'test_less_or_equal',
+    'test_missing',
     'translate',
     'uniform_mapping',
     'uniform_sequence',
@@ -1766,8 +1767,7 @@ def test_exists(error = N_(u'Missing value')):
     def exists(value, state = states.default_state):
         if value is None:
             return value, state._(error)
-        else:
-            return value, None
+        return value, None
     return exists
 
 
@@ -1873,6 +1873,25 @@ def test_less_or_equal(constant, error = None):
     """
     return test(lambda value: (value <= constant) if constant is not None else True,
         error = error or N_(u'Value must be less than or equal to {0}').format(constant))
+
+
+def test_missing(error = N_(u'Unexpected value')):
+    """Return a converters that signals an error when value is not missing (aka not ``None``).
+
+    >>> test_missing()(42)
+    (42, u'Unexpected value')
+    >>> test_missing(error = u'No value allowed')(42)
+    (42, u'No value allowed')
+    >>> test_missing()(u'')
+    (u'', u'Unexpected value')
+    >>> test_missing()(None)
+    (None, None)
+    """
+    def missing(value, state = states.default_state):
+        if value is None:
+            return value, None
+        return value, state._(error)
+    return missing
 
 
 def translate(conversions):
