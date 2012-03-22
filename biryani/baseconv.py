@@ -1257,6 +1257,27 @@ def struct(converters, constructor = None, default = None, keep_empty = False, k
     ...     keep_empty = True,
     ...     )(dict(name = u'   ', email = None))
     ({}, None)
+    >>> struct(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = str_to_int,
+    ...         email = str_to_email,
+    ...         ),
+    ...     default = cleanup_line,
+    ...     keep_missing_values = True,
+    ...     )(dict(name = u'   ', email = None))
+    ({'age': None, 'email': None, 'name': None}, None)
+    >>> struct(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = str_to_int,
+    ...         email = str_to_email,
+    ...         ),
+    ...     default = cleanup_line,
+    ...     keep_missing_values = True,
+    ...     skip_missing_items = True,
+    ...     )(dict(name = u'   ', email = None))
+    ({'email': None, 'name': None}, None)
     >>> import collections
     >>> struct(
     ...     dict(
@@ -1413,6 +1434,27 @@ def structured_mapping(converters, constructor = None, default = None, keep_empt
     ...     keep_empty = True,
     ...     )(dict(name = u'   ', email = None))
     ({}, None)
+    >>> structured_mapping(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = str_to_int,
+    ...         email = str_to_email,
+    ...         ),
+    ...     default = cleanup_line,
+    ...     keep_missing_values = True,
+    ...     )(dict(name = u'   ', email = None))
+    ({'age': None, 'email': None, 'name': None}, None)
+    >>> structured_mapping(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = str_to_int,
+    ...         email = str_to_email,
+    ...         ),
+    ...     default = cleanup_line,
+    ...     keep_missing_values = True,
+    ...     skip_missing_items = True,
+    ...     )(dict(name = u'   ', email = None))
+    ({'email': None, 'name': None}, None)
     >>> import collections
     >>> structured_mapping(
     ...     dict(
