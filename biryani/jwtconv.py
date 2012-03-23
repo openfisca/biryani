@@ -154,35 +154,39 @@ def clean_str_to_decoded_json_web_token(token, state = default_state):
     return value, errors or None
 
 
-def make_json_to_signed_json_web_token(algorithm = None, json_web_key_url = None, key_id = None,
-        private_key_file_path = None, shared_secret = None):
+def make_json_to_signed_json_web_token(algorithm = None, json_web_key_url = None, key_id = None, private_key = None,
+        shared_secret = None):
     """Return a converter that wraps JSON data into a signed JSON web token.
 
     cf http://tools.ietf.org/html/draft-jones-json-web-token
     """
-    assert algorithm in valid_signature_algorithms
-    algorithm_prefix = algorithm[:2]
-    algorithm_size = int(algorithm[2:])
-    digest_constructor = digest_constructor_by_size[algorithm_size]
+    if algorithm is None:
+        algorithm = u'none'
+    assert algorithm == u'none' or algorithm in valid_signature_algorithms
     header = dict(
         alg = algorithm,
         typ = u'JWT', # type: signed JSON Web Token
         )
-#    if algorithm_prefix == u'ES':
-#        TODO
-#    elif algorithm_prefix == u'HS':
-    if algorithm_prefix == u'HS':
-        assert shared_secret is not None
-        assert isinstance(shared_secret, str)
-    else:
-        assert algorithm_prefix == u'RS'
-        assert private_key_file_path is not None
-        if json_web_key_url is not None:
-            header['jku'] = json_web_key_url
-        if key_id is not None:
-            header['kid'] = key_id
-        private_key = RSA.importKey(open(private_key_file_path).read())
-        signer = PKCS1_v1_5.new(private_key)
+    if algorithm != u'none':
+        algorithm_prefix = algorithm[:2]
+        algorithm_size = int(algorithm[2:])
+        digest_constructor = digest_constructor_by_size[algorithm_size]
+#        if algorithm_prefix == u'ES':
+#            TODO
+#        elif algorithm_prefix == u'HS':
+        if algorithm_prefix == u'HS':
+            assert shared_secret is not None
+            assert isinstance(shared_secret, str)
+        else:
+            assert algorithm_prefix == u'RS'
+            assert private_key is not None
+            assert isinstance(private_key, str)
+            if json_web_key_url is not None:
+                header['jku'] = json_web_key_url
+            if key_id is not None:
+                header['kid'] = key_id
+            rsa_private_key = RSA.importKey(private_key)
+            signer = PKCS1_v1_5.new(rsa_private_key)
     encoded_header = check(pipe(
         make_json_to_str(encoding = 'utf-8', ensure_ascii = False),
         make_bytes_to_base64url(remove_padding = True),
@@ -200,9 +204,11 @@ def make_json_to_signed_json_web_token(algorithm = None, json_web_key_url = None
             return encoded_payload, error
 
         secured_input = '{0}.{1}'.format(encoded_header, encoded_payload)
-#        if algorithm_prefix == u'ES':
+        if algorithm == u'none':
+            signature = ''
+#        elif algorithm_prefix == u'ES':
 #            TODO
-        if algorithm_prefix == u'HS':
+        elif algorithm_prefix == u'HS':
             signature = HMAC.new(shared_secret, msg = secured_input, digestmod = digest_constructor).digest()
         else:
             assert algorithm_prefix == u'RS'
@@ -261,7 +267,7 @@ def verify_decoded_json_web_token_signature(public_key_as_encoded_str = None, pu
                     errors['signature'] = state._('Invalid signature')
             if 'signature' not in errors and not verified:
                 errors['signature'] = state._('Non authentic signature')
-        else:
+        elif algorithm != u'none':
             errors['header'] = dict(alg = state._('Unimplemented digital signature algorithm'))
         return value, errors or None
     return verify_decoded_json_web_token_signature_converter
