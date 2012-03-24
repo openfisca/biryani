@@ -33,14 +33,15 @@ from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
 from .base64conv import make_base64url_to_bytes, make_bytes_to_base64url
-from .baseconv import (check, cleanup_line, exists, noop, pipe, struct, test, test_greater_or_equal, test_isinstance,
-    test_less_or_equal)
+from .baseconv import (check, cleanup_line, exists, get, noop, pipe, struct, test, test_greater_or_equal,
+    test_isinstance, test_less_or_equal)
 from .jsonconv import make_json_to_str, make_str_to_json
 from .states import default_state
 
 
 __all__ = [
     'clean_str_to_decoded_json_web_token',
+    'decoded_json_web_token_to_json',
     'make_json_to_signed_json_web_token',
     'str_to_decoded_json_web_token',
     'verify_decoded_json_web_token_signature',
@@ -152,6 +153,9 @@ def clean_str_to_decoded_json_web_token(token, state = default_state):
         if claims_errors is not None:
             errors['claims'] = claims_errors
     return value, errors or None
+
+
+decoded_json_web_token_to_json = get('claims')
 
 
 def make_json_to_signed_json_web_token(algorithm = None, json_web_key_url = None, key_id = None, private_key = None,
