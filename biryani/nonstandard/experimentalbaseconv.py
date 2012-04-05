@@ -74,4 +74,3 @@ def mapping_replace_sequence(keys, converter, sequence_constructor = list):
                     converted_value[key] = item_value
         return converted_value or None, None
     return mapping_replace_sequence_converter
-

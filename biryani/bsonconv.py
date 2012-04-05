@@ -162,4 +162,3 @@ python_data_to_object_id = first_match(
     >>> python_data_to_object_id(None)
     (None, None)
     """
-

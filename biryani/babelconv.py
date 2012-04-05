@@ -81,5 +81,3 @@ str_to_lang = pipe(cleanup_line, clean_str_to_lang)
     >>> str_to_lang(None)
     (None, None)
     """
-
-

@@ -111,14 +111,14 @@ def clean_str_to_decoded_json_web_token(token, state = default_state):
                         ),
                     exp = pipe(
                         test_isinstance((int, long)),
-                        test(lambda timestamp: now_timestamp - 300 < timestamp, # Allow 5 minutes drift.
+                        test(lambda timestamp: now_timestamp - 300 < timestamp,  # Allow 5 minutes drift.
                             error = state._('Expired JSON web token'),
                             ),
                         ),
                     iat = pipe(
                         test_isinstance((int, long)),
                         test_greater_or_equal(0),
-                        test_less_or_equal(now_timestamp + 300, # Allow 5 minutes drift.
+                        test_less_or_equal(now_timestamp + 300,  # Allow 5 minutes drift.
                             error = state._('JSON web token issued in the future'),
                             ),
                         ),
@@ -133,7 +133,7 @@ def clean_str_to_decoded_json_web_token(token, state = default_state):
                     nbf = pipe(
                         test_isinstance((int, long)),
                         test_greater_or_equal(0),
-                        test(lambda timestamp: now_timestamp + 300 >= timestamp, # Allow 5 minutes drift.
+                        test(lambda timestamp: now_timestamp + 300 >= timestamp,  # Allow 5 minutes drift.
                             error = state._('JSON web token not yet valid'),
                             ),
                         ),
@@ -169,7 +169,7 @@ def make_json_to_signed_json_web_token(algorithm = None, json_web_key_url = None
     assert algorithm == u'none' or algorithm in valid_signature_algorithms
     header = dict(
         alg = algorithm,
-        typ = u'JWT', # type: signed JSON Web Token
+        typ = u'JWT',  # type: signed JSON Web Token
         )
     if algorithm != u'none':
         algorithm_prefix = algorithm[:2]
@@ -230,7 +230,7 @@ str_to_decoded_json_web_token = pipe(cleanup_line, clean_str_to_decoded_json_web
 def verify_decoded_json_web_token_signature(public_key_as_encoded_str = None, public_key_as_json_web_key = None,
         shared_secret = None):
     if shared_secret is not None:
-        assert isinstance(shared_secret, str) # Shared secret must not be unicode.
+        assert isinstance(shared_secret, str)  # Shared secret must not be unicode.
 
     def verify_decoded_json_web_token_signature_converter(value, state = default_state):
         if value is None:
@@ -255,8 +255,8 @@ def verify_decoded_json_web_token_signature(public_key_as_encoded_str = None, pu
                 assert algorithm_prefix == u'RS'
                 if public_key_as_encoded_str is None:
                     assert public_key_as_json_web_key is not None
-                    public_key_dict = public_key_as_json_web_key['jwk'][-1] # TODO
-                    assert public_key_dict['alg'] == u'RSA', public_key_as_json_web_key # TODO
+                    public_key_dict = public_key_as_json_web_key['jwk'][-1]  # TODO
+                    assert public_key_dict['alg'] == u'RSA', public_key_as_json_web_key  # TODO
                     public_key = RSA.construct((
                         check(make_base64url_to_bytes(add_padding = True))(public_key_dict['mod'], state = state),
                         check(make_base64url_to_bytes(add_padding = True))(public_key_dict['exp'], state = state),
@@ -275,4 +275,3 @@ def verify_decoded_json_web_token_signature(public_key_as_encoded_str = None, pu
             errors['header'] = dict(alg = state._('Unimplemented digital signature algorithm'))
         return value, errors or None
     return verify_decoded_json_web_token_signature_converter
-

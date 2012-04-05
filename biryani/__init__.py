@@ -71,4 +71,3 @@ def custom_conv(*modules_path):
             for key in module_public_keys:
                 setattr(conv, key, getattr(module, key))
     return conv
-

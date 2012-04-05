@@ -620,8 +620,8 @@ def make_clean_str_to_url(add_prefix = u'http://', error_if_fragment = False, fu
     (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
     >>> make_clean_str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
     (u'http://packages.python.org/Biryani/presentation.html', None)
-    >>> make_clean_str_to_url(error_if_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
-    (u'http://packages.python.org/Biryani/presentation.html#tutorial', u'URL must not contain a fragment')
+    >>> make_clean_str_to_url(error_if_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tuto')
+    (u'http://packages.python.org/Biryani/presentation.html#tuto', u'URL must not contain a fragment')
     >>> make_clean_str_to_url(full = True)(u'[www.nordnet.fr/grandmix/]')
     (u'[www.nordnet.fr/grandmix/]', u'Invalid URL')
     >>> make_clean_str_to_url(full = True)(u'http://[www.nordnet.fr/grandmix/]')
@@ -844,6 +844,7 @@ def new_mapping(converters, constructor = None, keep_empty = False):
         for name, converter in (converters or {}).iteritems()
         if converter is not None
         )
+
     def new_mapping_converter(value, state = states.default_state):
         if value is None:
             return value, None
@@ -918,6 +919,7 @@ def new_sequence(converters, constructor = None, keep_empty = False):
         for converter in converters or []
         if converter is not None
         ]
+
     def new_sequence_converter(value, state = states.default_state):
         if value is None:
             return value, None
@@ -1030,7 +1032,7 @@ def new_struct(converters, constructor = None, keep_empty = False):
     import collections
 
     if isinstance(converters, collections.Mapping):
-        return new_mapping(converters, constructor = constructor,  keep_empty = keep_empty)
+        return new_mapping(converters, constructor = constructor, keep_empty = keep_empty)
     assert isinstance(converters, collections.Sequence), \
         'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
     return new_sequence(converters, constructor = constructor, keep_empty = keep_empty)
@@ -1165,7 +1167,7 @@ def rename_item(old_key, new_key):
         if value is None:
             return value, None
         if old_key in value:
-            value = value.copy() # Don't modify existing mapping.
+            value = value.copy()  # Don't modify existing mapping.
             value[new_key] = value.pop(old_key)
         return value, None
     return rename_item_converter
@@ -1492,6 +1494,7 @@ def structured_mapping(converters, constructor = None, default = None, keep_empt
         for name, converter in (converters or {}).iteritems()
         if converter is not None
         )
+
     def structured_mapping_converter(values, state = states.default_state):
         if values is None:
             return values, None
@@ -1590,6 +1593,7 @@ def structured_sequence(converters, constructor = None, default = None, keep_emp
         for converter in converters or []
         if converter is not None
         ]
+
     def structured_sequence_converter(values, state = states.default_state):
         if values is None:
             return values, None
@@ -2260,4 +2264,3 @@ def check(converter_or_value_and_error, clear_on_error = False):
                 raise ValueError('Error: {} for: {}'.format(error, value))
             return value
         return check_converter
-

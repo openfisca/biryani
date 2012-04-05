@@ -92,4 +92,3 @@ def make_str_to_json(*args, **kwargs):
         except ValueError:
             return value, state._(u'Invalid JSON')
     return str_to_json
-

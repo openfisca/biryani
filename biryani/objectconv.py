@@ -132,4 +132,3 @@ object_to_dict = function(lambda instance: getattr(instance, '__dict__'))
     Traceback (most recent call last):
     AttributeError:
     """
-

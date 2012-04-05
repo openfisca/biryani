@@ -284,7 +284,7 @@ def timestamp_to_date(value, state = states.default_state):
 
 def timestamp_to_datetime(value, state = states.default_state):
     """Convert a JavaScript timestamp to a datetime.
-    
+
     .. note:: Since a timestamp has no timezone, the generated datetime has no *tzinfo* attribute.
        Use :func:`set_datetime_tzinfo` to add one.
 
@@ -376,4 +376,3 @@ iso8601_to_datetime = pipe(cleanup_line, clean_iso8601_to_datetime)
     >>> iso8601_to_datetime(None)
     (None, None)
     """
-

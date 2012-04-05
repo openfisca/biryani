@@ -98,4 +98,3 @@ def make_bytes_to_base64url(remove_padding = False):
             encoded_value = encoded_value.rstrip('=')
         return unicode(encoded_value), None
     return str_to_base64url
-

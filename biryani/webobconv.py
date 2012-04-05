@@ -113,4 +113,3 @@ def multidict_getone(key):
     KeyError:
     """
     return function(lambda multidict: multidict.getone(key))
-

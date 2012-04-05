@@ -282,4 +282,3 @@ str_to_credit_card_type = pipe(
     str_to_slug,
     test_in(credit_cards_prefix_and_length.keys(), error = N_(u'Unknown type of credit card')),
     )
-

@@ -30,7 +30,7 @@ class State(object):
 
     def __repr__(self):
         """Hack to improve ``default_state`` aspect in Sphinx autodoc
-        
+
         A state doesn't not need to implement this method.
         """
         if self is default_state:
@@ -41,4 +41,3 @@ class State(object):
 
 #: Minimal context, usable with converters
 default_state = State()
-

@@ -31,7 +31,7 @@
 import socket
 import urllib2
 
-import DNS # from pyDNS
+import DNS  # from pyDNS
 DNS.DiscoverNameServers()
 
 from . import states

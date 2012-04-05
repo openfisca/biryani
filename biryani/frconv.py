@@ -409,4 +409,3 @@ str_to_postal_distribution = pipe(
     >>> str_to_postal_distribution(None)
     (None, None)
     """
-

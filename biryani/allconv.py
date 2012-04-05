@@ -50,7 +50,8 @@ else:
 from creditcardconv import *
 
 try:
-    import mx.DateTime, pytz
+    import mx.DateTime
+    import pytz
 except ImportError:
     pass
 else:
@@ -90,4 +91,3 @@ else:
     # Don't export webob module.
     del webob
     from webobconv import *
-
