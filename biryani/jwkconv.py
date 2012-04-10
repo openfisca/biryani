@@ -32,7 +32,82 @@ from .baseconv import (exists, function, noop, pipe, struct, switch, test_conv, 
 
 __all__ = [
     'json_to_json_web_key',
+    'json_to_json_web_key_object',
     ]
+
+
+json_to_json_web_key_object = pipe(
+    test_isinstance(dict),
+    struct(
+        dict(
+            alg = pipe(
+                test_isinstance(basestring),
+                test_in([
+                    u'EC',
+                    u'RSA',
+                    ]),
+                exists,
+                ),
+            kid = test_isinstance(basestring),
+            use = pipe(
+                test_isinstance(basestring),
+                test_in([
+                    u'enc',
+                    u'sig',
+                    ]),
+                ),
+            ),
+        default = noop,
+        ),
+    switch(
+        function(lambda key_object: key_object['alg']),
+        dict(
+            EC = struct(dict(
+                alg = noop,
+                crv = pipe(
+                    test_isinstance(basestring),
+                    test_in([
+                        u'P-256',
+                        u'P-384',
+                        u'P-521',
+                        ]),
+                    exists,
+                    ),
+                kid = noop,
+                use = noop,
+                x = pipe(
+                    test_isinstance(basestring),
+                    test_conv(make_base64url_to_bytes(add_padding = True)),
+                    exists,
+                    ),
+                y = pipe(
+                    test_isinstance(basestring),
+                    test_conv(make_base64url_to_bytes(add_padding = True)),
+                    exists,
+                    ),
+                )),
+            RSA = struct(dict(
+                alg = noop,
+                exp = pipe(
+                    test_isinstance(basestring),
+                    test_conv(make_base64url_to_bytes(add_padding = True)),
+                    exists,
+                    ),
+                kid = noop,
+                mod = pipe(
+                    test_isinstance(basestring),
+                    test_conv(make_base64url_to_bytes(add_padding = True)),
+                    exists,
+                    ),
+                use = noop,
+                )),
+            ),
+        ),
+    )
+"""Verify that given JSON is a valid JSON Web Key object.
+
+    A JWK Key Object is a JSON object that represents a single public key.
+    """
 
 
 json_to_json_web_key = pipe(
@@ -41,73 +116,7 @@ json_to_json_web_key = pipe(
         dict(
             jwk = pipe(
                 test_isinstance(list),
-                uniform_sequence(pipe(
-                    struct(
-                        dict(
-                            alg = pipe(
-                                test_isinstance(basestring),
-                                test_in([
-                                    u'EC',
-                                    u'RSA',
-                                    ]),
-                                exists,
-                                ),
-                            kid = test_isinstance(basestring),
-                            use = pipe(
-                                test_isinstance(basestring),
-                                test_in([
-                                    u'enc',
-                                    u'sig',
-                                    ]),
-                                ),
-                            ),
-                        default = noop,
-                        ),
-                    switch(
-                        function(lambda key_object: key_object['alg']),
-                        dict(
-                            EC = struct(dict(
-                                alg = noop,
-                                crv = pipe(
-                                    test_isinstance(basestring),
-                                    test_in([
-                                        u'P-256',
-                                        u'P-384',
-                                        u'P-521',
-                                        ]),
-                                    exists,
-                                    ),
-                                kid = noop,
-                                use = noop,
-                                x = pipe(
-                                    test_isinstance(basestring),
-                                    test_conv(make_base64url_to_bytes(add_padding = True)),
-                                    exists,
-                                    ),
-                                y = pipe(
-                                    test_isinstance(basestring),
-                                    test_conv(make_base64url_to_bytes(add_padding = True)),
-                                    exists,
-                                    ),
-                                )),
-                            RSA = struct(dict(
-                                alg = noop,
-                                exp = pipe(
-                                    test_isinstance(basestring),
-                                    test_conv(make_base64url_to_bytes(add_padding = True)),
-                                    exists,
-                                    ),
-                                kid = noop,
-                                mod = pipe(
-                                    test_isinstance(basestring),
-                                    test_conv(make_base64url_to_bytes(add_padding = True)),
-                                    exists,
-                                    ),
-                                use = noop,
-                                )),
-                            ),
-                        ),
-                    )),
+                uniform_sequence(json_to_json_web_key_object),
                 exists,
                 ),
             ),

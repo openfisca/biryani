@@ -22,27 +22,38 @@
 # limitations under the License.
 
 
-"""Converters for JSON Web Tokens (JWT)"""
+"""Converters for JSON Web Tokens (JWT)
+
+cf http://tools.ietf.org/html/draft-jones-json-web-token
+"""
 
 
 import calendar
+import cStringIO
 import datetime
+import gzip
+from struct import pack
+import zlib
 
+from Crypto import Cipher, Random, Signature
 from Crypto.Hash import HMAC, SHA256, SHA384, SHA512
 from Crypto.PublicKey import RSA
-from Crypto.Signature import PKCS1_v1_5
 
 from .base64conv import make_base64url_to_bytes, make_bytes_to_base64url
-from .baseconv import (check, cleanup_line, exists, get, noop, pipe, struct, test, test_greater_or_equal,
-    test_isinstance, test_less_or_equal)
+from .baseconv import (check, cleanup_line, condition, exists, get, make_str_to_url, noop, pipe, struct, test,
+    test_greater_or_equal, test_in, test_isinstance, test_less_or_equal, test_missing, uniform_sequence)
 from .jsonconv import make_json_to_str, make_str_to_json
+from jwkconv import json_to_json_web_key_object
 from .states import default_state
 
 
 __all__ = [
     'clean_str_to_decoded_json_web_token',
     'decoded_json_web_token_to_json',
-    'make_json_to_signed_json_web_token',
+    'decrypt_json_web_token',
+    'encrypt_json_web_token',
+    'make_json_to_json_web_token',
+    'sign_json_web_token',
     'str_to_decoded_json_web_token',
     'verify_decoded_json_web_token_signature',
     ]
@@ -52,6 +63,27 @@ digest_constructor_by_size = {
     384: SHA384,
     512: SHA512,
     }
+valid_encryption_algorithms = (
+#    u'A128GCM',
+#    u'A256GCM',
+    u'A128KW',
+    u'A256KW',
+#    u'A512KW',
+#    u'ECDH-ES',
+    u'RSA1_5',
+#    u'RSA-OAEP',
+    )
+valid_encryption_methods = (
+    u'A128CBC',
+    u'A256CBC',
+#    u'A128GCM',
+#    u'A256GCM',
+    )
+valid_integrity_algorithms = (
+    u'HS256',
+    u'HS384',
+    u'HS512',
+    )
 valid_signature_algorithms = (
 #    u'ES256',
     u'HS256',
@@ -158,19 +190,403 @@ def clean_str_to_decoded_json_web_token(token, state = default_state):
 decoded_json_web_token_to_json = get('claims')
 
 
-def make_json_to_signed_json_web_token(algorithm = None, json_web_key_url = None, key_id = None, private_key = None,
-        shared_secret = None):
-    """Return a converter that wraps JSON data into a signed JSON web token.
+def decrypt_json_web_token(private_key = None, shared_secret = None):
+    if shared_secret is not None:
+        assert isinstance(shared_secret, str)  # Shared secret must not be unicode.
 
-    cf http://tools.ietf.org/html/draft-jones-json-web-token
+    def decrypt_json_web_token_converter(token, state = default_state):
+        if token is None:
+            return None, None
+
+        if token.count('.') != 3:
+            return token, state._(u'Invalid crypted JSON web token')
+        encoded_header, encoded_encrypted_key, encoded_cyphertext, encoded_integrity_value = token.split('.')
+
+        header, error = pipe(
+            make_base64url_to_bytes(add_padding = True),
+            make_str_to_json(),
+            test_isinstance(dict),
+            struct(
+                dict(
+                    alg = pipe(
+                        test_isinstance(basestring),
+                        test_in(valid_encryption_algorithms),
+                        exists,
+                        ),
+                    enc = pipe(
+                        test_isinstance(basestring),
+                        test_in(valid_encryption_methods),
+                        exists,
+                        ),
+                    # epk = TODO to support ECDH-ES
+                    int = pipe(
+                        test_isinstance(basestring),
+                        test_in(valid_integrity_algorithms),
+                        ),
+                    iv = pipe(
+                        test_isinstance(basestring),
+                        make_base64url_to_bytes(add_padding = True),
+                        ),
+                    jku = pipe(
+                        test_isinstance(basestring),
+                        make_str_to_url(add_prefix = None, error_if_fragment = True, full = True, schemes = ['https']),
+                        ),
+                    jpk = pipe(
+                        test_isinstance(basestring),
+                        make_str_to_json(),
+                        json_to_json_web_key_object,
+                        ),
+                    kid = test_isinstance(basestring),
+                    typ = pipe(
+                        test_isinstance(basestring),
+                        test_in([
+                            u'http://openid.net/specs/jwt/1.0',
+                            u'JWE',
+                            u'JWT',
+                            ]),
+                        ),
+                    x5c = pipe(
+                        test_isinstance(list),
+                        uniform_sequence(pipe(
+                            test_isinstance(basestring),
+                            # TODO
+                            )),
+                        ),
+                    x5t = pipe(
+                        test_isinstance(basestring),
+                        make_base64url_to_bytes(add_padding = True),
+                        # TODO
+                        ),
+                    x5u = pipe(
+                        test_isinstance(basestring),
+                        make_str_to_url(add_prefix = None, error_if_fragment = True, full = True, schemes = ['https']),
+                        ),
+                    zip = pipe(
+                        test_isinstance(basestring),
+                        test_in([
+                            u'DEFLATE',
+                            u'GZIP',
+                            u'none',
+                            ]),
+                        ),
+                    ),
+                # default = None,  # For security reasons a header can only contain known attributes.
+                keep_empty_values = True,
+                ),
+            exists,
+            )(encoded_header, state = state)
+        if error is not None:
+            return token, state._('Invalid header: {}').format(error)
+        header, error = struct(
+            dict(
+                int = condition(
+                    test(lambda header: header['enc'].endswith('GCM')),
+                    # When an Authenticated Encryption with Associated Data (AEAD) algorithm, "int" must not be present.
+                    test_missing(),
+                    # Otherwise, "int" is required.
+                    exists(),
+                    ),
+                ),
+            default = noop,
+            keep_empty_values = True,
+            )(header, state = state)
+        encrypted_key, error = make_base64url_to_bytes(add_padding = True)(encoded_encrypted_key, state = state)
+        if error is not None:
+            return token, state._('Invalid encrypted key: {}').format(error)
+        cyphertext, error = make_base64url_to_bytes(add_padding = True)(encoded_cyphertext, state = state)
+        if error is not None:
+            return token, state._('Invalid cyphertext: {}').format(error)
+        integrity_value, error = make_base64url_to_bytes(add_padding = True)(encoded_integrity_value, state = state)
+        if error is not None:
+            return token, state._('Invalid integrity value: {}').format(error)
+
+        # TODO: Verify that the JWE Header references a key known to the recipient.
+
+        algorithm = header['alg']
+        if algorithm not in valid_encryption_algorithms:
+            return token, state._('Unimplemented encryption algorithm')
+        if algorithm == u'RSA1_5':
+            rsa_private_key = RSA.importKey(private_key)
+            cipher = Cipher.PKCS1_v1_5.new(rsa_private_key)
+            # Build a sentinel that has the same size of the plaintext (ie the content master key).
+            sentinel = Random.get_random_bytes(256 >> 3)
+            try:
+                content_master_key = cipher.decrypt(encrypted_key, sentinel)
+            except:
+                return token, state._(u'Invalid content master key')
+        elif algorithm == u'RSA-OAEP':
+            rsa_private_key = RSA.importKey(private_key)
+            cipher = Cipher.PKCS1_OAEP.new(rsa_private_key)
+            try:
+                content_master_key = cipher.decrypt(encrypted_key)
+            except:
+                return token, state._(u'Invalid content master key')
+
+        method = header['enc']
+        if method.endswith('GCM'):
+            # Algorithm is an AEAD algorithm.
+            content_encryption_key = content_master_key
+            encoded_signature = ''
+        else:
+            method_size = int(method[1:4])
+            encryption_key_length = method_size >> 3  # method_size is in bits, but length is in bytes.
+            content_encryption_key = derive_key(content_master_key, 'Encryption', encryption_key_length)
+            integrity = header['int']
+            integrity_size = int(integrity[2:])
+            integrity_key_length = integrity_size >> 3
+            content_integrity_key = derive_key(content_master_key, 'Integrity', integrity_key_length)
+            secured_input = token.rsplit('.', 1)
+            digest_constructor = digest_constructor_by_size[integrity_size]
+            signature = HMAC.new(content_integrity_key, msg = secured_input, digestmod = digest_constructor).digest()
+            encoded_signature = check(make_bytes_to_base64url(remove_padding = True))(signature, state = state)
+        if encoded_integrity_value != encoded_signature:
+            return token, state._('Non authentic signature')
+
+        if method.startswith(u'A') and method.endswith(u'CBC'):
+            if header['iv'] is None:
+                return token, state._(u'Invalid header: "iv" required for {} encryption method').format(method)
+            cipher = Cipher.AES.new(content_encryption_key, mode = Cipher.AES.MODE_CBC, IV = header['iv'])
+        else:
+            TODO
+        try:
+            compressed_plaintext = cipher.decrypt(cyphertext)
+        except:
+            return token, state._(u'Invalid cyphertext')
+
+        compression = header['zip']
+        if compression == u'DEFLATE':
+            try:
+                plaintext = zlib.decompress(compressed_plaintext)
+            except zlib.error:
+                return token, state._(u'Invalid compressed plaintext')
+        elif compression == u'GZIP':
+            compressed_file = cStringIO.StringIO(compressed_plaintext)
+            try:
+                gzip_file = gzip.GzipFile(mode = 'rb', fileobj = compressed_file)
+                plaintext = gzip_file.read()
+            except zlib.error:
+                return token, state._(u'Invalid compressed plaintext')
+        else:
+            assert compression in (None, u'none'), compression
+            plaintext = compressed_plaintext
+
+        if header['typ'] == u'JWE':
+            # Token was a nested token and plaintext is also a token.
+            return plaintext, None
+
+        # Create a new (unencrypted and unsigned) token containing plaintext.
+        header = dict(
+            alg = u'none',
+            )
+        encoded_header = check(pipe(
+            make_json_to_str(encoding = 'utf-8', ensure_ascii = False),
+            make_bytes_to_base64url(remove_padding = True),
+            ))(header)
+        encoded_payload, error = check(make_bytes_to_base64url(remove_padding = True))(plaintext, state = state)
+        return '{}.{}.'.format(encoded_header, encoded_payload), None
+    return decrypt_json_web_token_converter
+
+
+def derive_key(master_key, label, key_length):
+    """Concatenation Key Derivation Function
+
+    This is a simplified version of the algorithm described in  section "5.8.1 Concatenation Key Derivation Function
+    (Approved Alternative 1)" of "Recommendation for Pair-Wise Key Establishment Schemes Using Discrete Logarithm
+    Cryptography" (NIST SP 800-56 A).
+    http://csrc.nist.gov/publications/nistpubs/800-56A/SP800-56A_Revision1_Mar08-2007.pdf
+
+    .. note:: ``key_length`` is the length in bytes (not bits).
     """
+    assert isinstance(master_key, str)
+    assert isinstance(label, str)
+    hashes = []
+    for index in range(key_length >> 5):  # SHA256 hash has a length of 32 bytes == 2**5.
+        hash_object = SHA256.new(pack('>I', index + 1))
+        hash_object.update(master_key)
+        hash_object.update(label)
+        hashes.append(hash_object.digest())
+    remaining_length = key_length & 0x1F
+    if remaining_length != 0:
+        # Generated key length is not a multiple of 256 bits (= 32 bytes).
+        hash_object = SHA256.new(pack('>I', len(hashes) + 1))
+        hash_object.update(master_key)
+        hash_object.update(label)
+        hashes.append(hash_object.digest()[:remaining_length])
+    return ''.join(hashes)
+
+
+def encrypt_json_web_token(algorithm = None, compression = None, integrity = None, json_web_key_url = None,
+        key_id = None, method = None, public_key_as_encoded_str = None, public_key_as_json_web_key = None,
+        shared_secret = None):
+    assert algorithm in valid_encryption_algorithms
+    assert integrity in valid_integrity_algorithms, integrity
+    assert method in valid_encryption_methods, method
+
+    method_size = int(method[1:4])
+    encryption_key_length = method_size >> 3  # method_size is in bits, but length is in bytes.
+    if integrity is None:
+        assert method.endswith('GCM'), 'Encryption algorithm requires a separate integrity algorithm'
+        integrity_key_length = 0
+    else:
+        assert not method.endswith('GCM'), "AEAD encryption doesn't use a separate integrity algorithm"
+        integrity_size = int(integrity[2:])
+        integrity_key_length = integrity_size >> 3
+
+    # The content master key must be at least as long as the encryption & integrity keys.
+    content_master_key = Random.get_random_bytes(max(encryption_key_length, integrity_key_length))
+    if algorithm.startswith(u'RSA'):
+        if public_key_as_encoded_str is None:
+            assert public_key_as_json_web_key is not None
+            public_key_dict = public_key_as_json_web_key['jwk'][-1]  # TODO
+            assert public_key_dict['alg'] == u'RSA', public_key_as_json_web_key  # TODO
+            rsa_public_key = RSA.construct((
+                check(make_base64url_to_bytes(add_padding = True))(public_key_dict['mod']),
+                check(make_base64url_to_bytes(add_padding = True))(public_key_dict['exp']),
+                ))
+        else:
+            rsa_public_key = RSA.importKey(public_key_as_encoded_str)
+        if algorithm == u'RSA1_5':
+            cipher = Cipher.PKCS1_v1_5.new(rsa_public_key)
+        else:
+            assert algorithm == u'RSA-OAEP', algorithm
+            cipher = Cipher.PKCS1_OAEP.new(rsa_public_key)
+        encrypted_key = cipher.encrypt(content_master_key)
+    else:
+        TODO
+    encoded_encrypted_key = check(make_bytes_to_base64url(remove_padding = True))(encrypted_key)
+
+    # Generate a random Initialization Vector (IV) (if required for the algorithm).
+    if method in (u'A128CBC', u'A256CBC'):
+        # All AES ciphers use 128 bits (= 16 bytes) blocks
+        initialization_vector = Random.get_random_bytes(16)
+    else:
+        initialization_vector = None
+
+    if method.endswith('GCM'):
+        # Algorithm is an AEAD algorithm.
+        content_encryption_key = content_master_key
+        content_integrity_key = None
+    else:
+        content_encryption_key = derive_key(content_master_key, 'Encryption', encryption_key_length)
+        content_integrity_key = derive_key(content_master_key, 'Integrity', integrity_key_length)
+
+    def encrypt_json_web_token_converter(token, state = default_state):
+        if token is None:
+            return None, None
+
+        if '.' not in token:
+            return token, state._('Missing header')
+        encoded_header, token_without_header = token.split('.', 1)
+        header, error = pipe(
+            make_base64url_to_bytes(add_padding = True),
+            make_str_to_json(),
+            )(encoded_header, state = state)
+        if error is not None:
+            return token, state._('Invalid header: {}').format(error)
+
+        if header['alg'] == u'none':
+            if '.' not in token_without_header:
+                return token, state._('Missing signature')
+            encoded_payload, encoded_signature = token_without_header.split('.', 1)
+            if encoded_signature:
+                return token, state._('Unexpected signature in plaintext token')
+            plaintext, error = make_base64url_to_bytes(add_padding = True)(encoded_payload, state = state)
+            if error is not None:
+                return token, state._('Invalid encoded payload: {}').format(error)
+        else:
+            # Token is already signed or encrypted. Use nested signing.
+            header = dict(
+                typ = u'JWE',
+                )
+            plaintext = token
+
+        if compression == u'DEFLATE':
+            compressed_plaintext = zlib.compress(plaintext, level = 9)
+        elif compression == u'GZIP':
+            compressed_file = cStringIO.StringIO()
+            gzip_file = gzip.GzipFile(mode = 'wb', fileobj = compressed_file)
+            gzip_file.write(plaintext)
+            compressed_plaintext = compressed_file.getvalue()
+        else:
+            assert compression in (None, u'none'), compression
+            compressed_plaintext = plaintext
+
+        if method.startswith(u'A') and method.endswith(u'CBC'):
+            cipher = Cipher.AES.new(content_encryption_key, mode = Cipher.AES.MODE_CBC, IV = initialization_vector)
+        else:
+            TODO
+        cyphertext = cipher.encrypt(compressed_plaintext)
+        encoded_cyphertext = check(make_bytes_to_base64url(remove_padding = True))(cyphertext)
+
+        header['alg'] = algorithm
+        header['enc'] = method
+        if integrity is not None:
+            header['int'] = integrity
+        # TODO ephemeral_public_key
+        # header['epk'] = ephemeral_public_key
+        if initialization_vector is not None:
+            header['iv'] = initialization_vector
+        # TODO header['jku']
+        # TODO header['jpk']
+        # TODO header['kid']
+        # TODO header['x5c']
+        # TODO header['x5t']
+        # TODO header['x5u']
+        if compression not in (None, 'none'):
+            header['zip'] = compression
+        encoded_header = check(pipe(
+            make_json_to_str(encoding = 'utf-8', ensure_ascii = False),
+            make_bytes_to_base64url(remove_padding = True),
+            ))(header)
+
+        secured_input = '{}.{}.{}'.format(encoded_header, encoded_encrypted_key, encoded_cyphertext)
+
+        if integrity is None:
+            encoded_signature = ''
+        else:
+            digest_constructor = digest_constructor_by_size[integrity_size]
+            signature = HMAC.new(content_integrity_key, msg = secured_input, digestmod = digest_constructor).digest()
+            encoded_signature = check(make_bytes_to_base64url(remove_padding = True))(signature, state = state)
+
+        token = '{}.{}'.format(secured_input, encoded_signature)
+        return token, None
+    return encrypt_json_web_token_converter
+
+
+def make_json_to_json_web_token(typ = None):
+    """Return a converter that wraps JSON data into an unsigned and unencrypted JSON web token."""
+    header = dict(
+        alg = u'none',
+        )
+    if typ is not None:
+        header['typ'] = typ
+    encoded_header = check(pipe(
+        make_json_to_str(encoding = 'utf-8', ensure_ascii = False),
+        make_bytes_to_base64url(remove_padding = True),
+        ))(header)
+
+    def json_to_json_web_token(claims, state = default_state):
+        if claims is None:
+            return None, None
+
+        encoded_payload, error = pipe(
+            make_json_to_str(encoding = 'utf-8', ensure_ascii = False),
+            make_bytes_to_base64url(remove_padding = True),
+            )(claims, state = state)
+        if error is not None:
+            return encoded_payload, error
+        secured_input = '{0}.{1}'.format(encoded_header, encoded_payload)
+        encoded_signature = ''
+        token = '{0}.{1}'.format(secured_input, encoded_signature)
+        return token, None
+    return json_to_json_web_token
+
+
+def sign_json_web_token(algorithm = None, json_web_key_url = None, key_id = None, private_key = None,
+        shared_secret = None):
     if algorithm is None:
         algorithm = u'none'
     assert algorithm == u'none' or algorithm in valid_signature_algorithms
-    header = dict(
-        alg = algorithm,
-        typ = u'JWT',  # type: signed JSON Web Token
-        )
     if algorithm != u'none':
         algorithm_prefix = algorithm[:2]
         algorithm_size = int(algorithm[2:])
@@ -185,34 +601,50 @@ def make_json_to_signed_json_web_token(algorithm = None, json_web_key_url = None
             assert algorithm_prefix == u'RS'
             assert private_key is not None
             assert isinstance(private_key, str)
+            rsa_private_key = RSA.importKey(private_key)
+            signer = Signature.PKCS1_v1_5.new(rsa_private_key)
+
+    def sign_json_web_token_converter(token, state = default_state):
+        if token is None:
+            return None, None
+        if algorithm == u'none':
+            return token, None
+        if '.' not in token:
+            return token, state._('Missing header')
+        encoded_header, token_without_header = token.split('.', 1)
+        header, error = pipe(
+            make_base64url_to_bytes(add_padding = True),
+            make_str_to_json(),
+            )(encoded_header, state = state)
+        if error is not None:
+            return token, state._('Invalid header: {}').format(error)
+        if header['alg'] == u'none':
+            if '.' not in token_without_header:
+                return token, state._('Missing signature')
+            encoded_payload, encoded_signature = token_without_header.split('.', 1)
+            if encoded_signature:
+                return token, state._('Unexpected signature in plaintext token')
+        else:
+            # Token is already signed or encrypted. Use nested signing.
+            header = dict(
+                typ = u'JWS',
+                )
+            encoded_payload = check(make_bytes_to_base64url(remove_padding = True))(token, state = state)
+        header['alg'] = algorithm
+        if algorithm_prefix == u'RS':
             if json_web_key_url is not None:
                 header['jku'] = json_web_key_url
             if key_id is not None:
                 header['kid'] = key_id
-            rsa_private_key = RSA.importKey(private_key)
-            signer = PKCS1_v1_5.new(rsa_private_key)
-    encoded_header = check(pipe(
-        make_json_to_str(encoding = 'utf-8', ensure_ascii = False),
-        make_bytes_to_base64url(remove_padding = True),
-        ))(header)
-
-    def json_to_signed_json_web_token(claims, state = default_state):
-        if claims is None:
-            return None, None
-
-        encoded_payload, error = pipe(
+        encoded_header = check(pipe(
             make_json_to_str(encoding = 'utf-8', ensure_ascii = False),
             make_bytes_to_base64url(remove_padding = True),
-            )(claims, state = state)
-        if error is not None:
-            return encoded_payload, error
-
+            ))(header)
         secured_input = '{0}.{1}'.format(encoded_header, encoded_payload)
-        if algorithm == u'none':
-            signature = ''
-#        elif algorithm_prefix == u'ES':
+#        if algorithm_prefix == u'ES':
 #            TODO
-        elif algorithm_prefix == u'HS':
+#        elif algorithm_prefix == u'HS':
+        if algorithm_prefix == u'HS':
             signature = HMAC.new(shared_secret, msg = secured_input, digestmod = digest_constructor).digest()
         else:
             assert algorithm_prefix == u'RS'
@@ -221,7 +653,7 @@ def make_json_to_signed_json_web_token(algorithm = None, json_web_key_url = None
         encoded_signature = check(make_bytes_to_base64url(remove_padding = True))(signature, state = state)
         token = '{0}.{1}'.format(secured_input, encoded_signature)
         return token, None
-    return json_to_signed_json_web_token
+    return sign_json_web_token_converter
 
 
 str_to_decoded_json_web_token = pipe(cleanup_line, clean_str_to_decoded_json_web_token)
@@ -257,13 +689,13 @@ def verify_decoded_json_web_token_signature(public_key_as_encoded_str = None, pu
                     assert public_key_as_json_web_key is not None
                     public_key_dict = public_key_as_json_web_key['jwk'][-1]  # TODO
                     assert public_key_dict['alg'] == u'RSA', public_key_as_json_web_key  # TODO
-                    public_key = RSA.construct((
+                    rsa_public_key = RSA.construct((
                         check(make_base64url_to_bytes(add_padding = True))(public_key_dict['mod'], state = state),
                         check(make_base64url_to_bytes(add_padding = True))(public_key_dict['exp'], state = state),
                         ))
                 else:
-                    public_key = RSA.importKey(public_key_as_encoded_str)
-                verifier = PKCS1_v1_5.new(public_key)
+                    rsa_public_key = RSA.importKey(public_key_as_encoded_str)
+                verifier = Signature.PKCS1_v1_5.new(rsa_public_key)
                 try:
                     digest = digest_constructor.new(value['secured_input'])
                     verified = verifier.verify(digest, value['signature'])
