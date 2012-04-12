@@ -408,7 +408,7 @@ def function(function, handle_missing_value = False, handle_state = False):
 
     .. note:: When your function modifies value and may generate an error, write a full converter instead of a function.
 
-    See :doc:`how-to-create-converter` for more informations.
+    See :doc:`how-to-create-converter` for more information.
 
     >>> function(int)('42')
     (42, None)
@@ -1709,7 +1709,7 @@ def test(function, error = N_(u'Test failed'), handle_missing_value = False, han
 
     ``test`` always returns the initial value, even when test fails.
 
-     See :doc:`how-to-create-converter` for more informations.
+     See :doc:`how-to-create-converter` for more information.
 
     >>> test(lambda value: isinstance(value, basestring))('hello')
     ('hello', None)
