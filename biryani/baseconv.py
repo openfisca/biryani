@@ -604,7 +604,8 @@ def item_or_sequence(converter, constructor = list, keep_missing_items = False):
         )
 
 
-def make_clean_str_to_url(add_prefix = u'http://', error_if_fragment = False, full = False, remove_fragment = False,
+def make_clean_str_to_url(add_prefix = u'http://', error_if_fragment = False, error_if_path = False,
+        error_if_query = False, full = False, remove_fragment = False, remove_path = False, remove_query = False,
         schemes = (u'http', u'https')):
     """Return a converter that converts a clean string to an URL.
 
@@ -618,6 +619,14 @@ def make_clean_str_to_url(add_prefix = u'http://', error_if_fragment = False, fu
     (u'/Biryani/presentation.html#tutorial', None)
     >>> make_clean_str_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
     (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
+    >>> make_clean_str_to_url(remove_path = True)(u'http://packages.python.org/Biryani/presentation.html')
+    (u'http://packages.python.org/', None)
+    >>> make_clean_str_to_url(error_if_path = True)(u'http://packages.python.org/Biryani/presentation.html')
+    (u'http://packages.python.org/Biryani/presentation.html', u'URL must not contain a path')
+    >>> make_clean_str_to_url(remove_query = True)(u'http://packages.python.org/Biryani/presentation.html?tuto=1')
+    (u'http://packages.python.org/Biryani/presentation.html', None)
+    >>> make_clean_str_to_url(error_if_query = True)(u'http://packages.python.org/Biryani/presentation.html?tuto=1')
+    (u'http://packages.python.org/Biryani/presentation.html?tuto=1', u'URL must not contain a query')
     >>> make_clean_str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
     (u'http://packages.python.org/Biryani/presentation.html', None)
     >>> make_clean_str_to_url(error_if_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tuto')
@@ -651,9 +660,19 @@ def make_clean_str_to_url(add_prefix = u'http://', error_if_fragment = False, fu
         network_location = split_url[1]
         if network_location != network_location.lower():
             split_url[1] = network_location = network_location.lower()
+        if split_url[2]:
+            if error_if_path:
+                return value, state._(u'URL must not contain a path')
+            if remove_path:
+                split_url[2] = u''
         if scheme in (u'http', u'https') and not split_url[2]:
             # By convention a full HTTP URL must always have at least a "/" in its path.
             split_url[2] = u'/'
+        if split_url[3]:
+            if error_if_query:
+                return value, state._(u'URL must not contain a query')
+            if remove_query:
+                split_url[3] = u''
         if split_url[4]:
             if error_if_fragment:
                 return value, state._(u'URL must not contain a fragment')
