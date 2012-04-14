@@ -660,11 +660,11 @@ def make_clean_str_to_url(add_prefix = u'http://', error_if_fragment = False, er
         network_location = split_url[1]
         if network_location != network_location.lower():
             split_url[1] = network_location = network_location.lower()
-        if split_url[2]:
+        if split_url[2] and split_url[2] != u'/':
             if error_if_path:
                 return value, state._(u'URL must not contain a path')
             if remove_path:
-                split_url[2] = u''
+                split_url[2] = u'/'
         if scheme in (u'http', u'https') and not split_url[2]:
             # By convention a full HTTP URL must always have at least a "/" in its path.
             split_url[2] = u'/'
