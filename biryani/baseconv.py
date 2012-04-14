@@ -1620,7 +1620,7 @@ def structured_sequence(converters, constructor = None, default = None, keep_emp
     return structured_sequence_converter
 
 
-def switch(key_converter, converters, default = None):
+def switch(key_converter, converters, default = None, handle_missing_value = False):
     """Return a converter that extracts a key from value and then converts value using the converter matching the key.
 
     >>> simple_type_switcher = switch(
@@ -1630,6 +1630,7 @@ def switch(key_converter, converters, default = None):
     ...         int: python_data_to_str,
     ...         str: set_value(u'encoded string'),
     ...         },
+    ...     handle_missing_value = True,
     ...     )
     >>> simple_type_switcher(True)
     (u'boolean', None)
@@ -1658,6 +1659,8 @@ def switch(key_converter, converters, default = None):
     (None, {0: u'Expression "None" doesn\\'t match any key'})
     """
     def switch_converter(value, state = states.default_state):
+        if value is None and not handle_missing_value:
+            return None, None
         key, error = key_converter(value, state = state)
         if error is not None:
             return value, error
