@@ -782,7 +782,8 @@ def make_str_to_slug(encoding = 'utf-8', separator = u'-', transform = strings.l
     return str_to_slug
 
 
-def make_str_to_url(add_prefix = u'http://', error_if_fragment = False, full = False, remove_fragment = False,
+def make_str_to_url(add_prefix = u'http://', error_if_fragment = False, error_if_path = False,
+        error_if_query = False, full = False, remove_fragment = False, remove_path = False, remove_query = False,
         schemes = (u'http', u'https')):
     """Return a converter that converts an string to an URL.
 
@@ -794,6 +795,14 @@ def make_str_to_url(add_prefix = u'http://', error_if_fragment = False, full = F
     (u'/Biryani/presentation.html#tutorial', None)
     >>> make_str_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
     (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
+    >>> make_str_to_url(remove_path = True)(u'http://packages.python.org/Biryani/presentation.html')
+    (u'http://packages.python.org/', None)
+    >>> make_str_to_url(error_if_path = True)(u'http://packages.python.org/Biryani/presentation.html')
+    (u'http://packages.python.org/Biryani/presentation.html', u'URL must not contain a path')
+    >>> make_str_to_url(remove_query = True)(u'http://packages.python.org/Biryani/presentation.html?tuto=1')
+    (u'http://packages.python.org/Biryani/presentation.html', None)
+    >>> make_str_to_url(error_if_query = True)(u'http://packages.python.org/Biryani/presentation.html?tuto=1')
+    (u'http://packages.python.org/Biryani/presentation.html?tuto=1', u'URL must not contain a query')
     >>> make_str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
     (u'http://packages.python.org/Biryani/presentation.html', None)
     >>> make_str_to_url(error_if_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
@@ -803,8 +812,10 @@ def make_str_to_url(add_prefix = u'http://', error_if_fragment = False, full = F
     """
     return pipe(
         cleanup_line,
-        make_clean_str_to_url(add_prefix = add_prefix, error_if_fragment = error_if_fragment, full = full,
-            remove_fragment = remove_fragment, schemes = schemes),
+        make_clean_str_to_url(add_prefix = add_prefix, error_if_fragment = error_if_fragment,
+            error_if_path = error_if_path, error_if_query = error_if_query, full = full,
+            remove_fragment = remove_fragment, remove_path = remove_path, remove_query = remove_query,
+            schemes = schemes),
         )
 
 
