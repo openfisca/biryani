@@ -40,6 +40,7 @@ from Crypto.Cipher import AES as Cipher_AES, PKCS1_v1_5 as Cipher_PKCS1_v1_5, PK
 from Crypto.Signature import PKCS1_v1_5 as Signature_PKCS1_v1_5
 from Crypto.Hash import HMAC, SHA256, SHA384, SHA512
 from Crypto.PublicKey import RSA
+from Crypto.Util import number
 
 from .base64conv import make_base64url_to_bytes, make_bytes_to_base64url
 from .baseconv import (check, cleanup_line, exists, get, make_str_to_url, N_, noop, pipe, struct, test,
@@ -431,8 +432,8 @@ def encrypt_json_web_token(algorithm = None, compression = None, integrity = Non
                 public_key_dict = public_key_as_json_web_key['jwk'][-1]  # TODO
                 assert public_key_dict['alg'] == u'RSA', public_key_as_json_web_key  # TODO
                 rsa_public_key = RSA.construct((
-                    check(make_base64url_to_bytes(add_padding = True))(public_key_dict['mod']),
-                    check(make_base64url_to_bytes(add_padding = True))(public_key_dict['exp']),
+                    number.bytes_to_long(check(make_base64url_to_bytes(add_padding = True))(public_key_dict['mod'])),
+                    number.bytes_to_long(check(make_base64url_to_bytes(add_padding = True))(public_key_dict['exp'])),
                     ))
             else:
                 rsa_public_key = RSA.importKey(public_key_as_encoded_str)
@@ -689,8 +690,10 @@ def verify_decoded_json_web_token_signature(allowed_algorithms = None, public_ke
                     public_key_dict = public_key_as_json_web_key['jwk'][-1]  # TODO
                     assert public_key_dict['alg'] == u'RSA', public_key_as_json_web_key  # TODO
                     rsa_public_key = RSA.construct((
-                        check(make_base64url_to_bytes(add_padding = True))(public_key_dict['mod'], state = state),
-                        check(make_base64url_to_bytes(add_padding = True))(public_key_dict['exp'], state = state),
+                        number.bytes_to_long(check(make_base64url_to_bytes(add_padding = True))(
+                            public_key_dict['mod'], state = state)),
+                        number.bytes_to_long(check(make_base64url_to_bytes(add_padding = True))(
+                            public_key_dict['exp'], state = state)),
                         ))
                 else:
                     rsa_public_key = RSA.importKey(public_key_as_encoded_str)
