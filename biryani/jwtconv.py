@@ -42,8 +42,8 @@ from Crypto.Hash import HMAC, SHA256, SHA384, SHA512
 from Crypto.PublicKey import RSA
 
 from .base64conv import make_base64url_to_bytes, make_bytes_to_base64url
-from .baseconv import (check, cleanup_line, condition, exists, get, make_str_to_url, noop, pipe, struct, test,
-    test_greater_or_equal, test_in, test_isinstance, test_less_or_equal, test_missing, uniform_sequence)
+from .baseconv import (check, cleanup_line, exists, get, make_str_to_url, N_, noop, pipe, struct, test,
+    test_greater_or_equal, test_in, test_isinstance, test_less_or_equal, uniform_sequence)
 from .jsonconv import make_json_to_str, make_str_to_json
 from jwkconv import json_to_json_web_key_object
 from .states import default_state
@@ -135,7 +135,6 @@ def decode_json_web_token(token, state = default_state):
     if value['header'].get('typ', u'JWT') != u'JWT':
         return value, dict(header = dict(typ = state._(u'Not a signed JSON Web Token (JWS)')))
     if claims is not None:
-        now_timestamp = calendar.timegm(datetime.datetime.utcnow().timetuple())
         value['claims'], claims_errors = pipe(
             test_isinstance(dict),
             struct(
@@ -710,18 +709,19 @@ def verify_decoded_json_web_token_signature(allowed_algorithms = None, public_ke
 
 
 def verify_decoded_json_web_token_time():
+    now_timestamp = calendar.timegm(datetime.datetime.utcnow().timetuple())
     return struct(
         dict(
             claims = struct(
                 dict(
                     exp = test(lambda timestamp: now_timestamp - 300 < timestamp,  # Allow 5 minutes drift.
-                        error = state._(u'Expired JSON web token'),
+                        error = N_(u'Expired JSON web token'),
                         ),
                     iat = test_less_or_equal(now_timestamp + 300,  # Allow 5 minutes drift.
-                        error = state._(u'JSON web token issued in the future'),
+                        error = N_(u'JSON web token issued in the future'),
                         ),
                     nbf = test(lambda timestamp: now_timestamp + 300 >= timestamp,  # Allow 5 minutes drift.
-                        error = state._(u'JSON web token not yet valid'),
+                        error = N_(u'JSON web token not yet valid'),
                         ),
                     ),
                 default = noop,
