@@ -58,6 +58,7 @@ __all__ = [
     'sign_json_web_token',
     'str_to_json_web_token',
     'verify_decoded_json_web_token_signature',
+    'verify_decoded_json_web_token_time',
     ]
 
 digest_constructor_by_size = {
@@ -145,16 +146,11 @@ def decode_json_web_token(token, state = default_state):
                         ),
                     exp = pipe(
                         test_isinstance((int, long)),
-                        test(lambda timestamp: now_timestamp - 300 < timestamp,  # Allow 5 minutes drift.
-                            error = state._(u'Expired JSON web token'),
-                            ),
+                        test_greater_or_equal(0),
                         ),
                     iat = pipe(
                         test_isinstance((int, long)),
                         test_greater_or_equal(0),
-                        test_less_or_equal(now_timestamp + 300,  # Allow 5 minutes drift.
-                            error = state._(u'JSON web token issued in the future'),
-                            ),
                         ),
                     iss = pipe(
                         test_isinstance(basestring),
@@ -167,9 +163,6 @@ def decode_json_web_token(token, state = default_state):
                     nbf = pipe(
                         test_isinstance((int, long)),
                         test_greater_or_equal(0),
-                        test(lambda timestamp: now_timestamp + 300 >= timestamp,  # Allow 5 minutes drift.
-                            error = state._(u'JSON web token not yet valid'),
-                            ),
                         ),
                     prn = pipe(
                         test_isinstance(basestring),
@@ -714,3 +707,25 @@ def verify_decoded_json_web_token_signature(allowed_algorithms = None, public_ke
             errors['header'] = dict(alg = state._(u'Unimplemented digital signature algorithm'))
         return value, errors or None
     return verify_decoded_json_web_token_signature_converter
+
+
+def verify_decoded_json_web_token_time():
+    return struct(
+        dict(
+            claims = struct(
+                dict(
+                    exp = test(lambda timestamp: now_timestamp - 300 < timestamp,  # Allow 5 minutes drift.
+                        error = state._(u'Expired JSON web token'),
+                        ),
+                    iat = test_less_or_equal(now_timestamp + 300,  # Allow 5 minutes drift.
+                        error = state._(u'JSON web token issued in the future'),
+                        ),
+                    nbf = test(lambda timestamp: now_timestamp + 300 >= timestamp,  # Allow 5 minutes drift.
+                        error = state._(u'JSON web token not yet valid'),
+                        ),
+                    ),
+                default = noop,
+                ),
+            ),
+        default = noop,
+        )
