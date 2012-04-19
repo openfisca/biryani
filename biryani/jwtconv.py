@@ -598,7 +598,6 @@ def sign_json_web_token(algorithm = None, json_web_key_url = None, key_id = None
         else:
             assert algorithm_prefix == u'RS'
             assert private_key is not None
-            assert isinstance(private_key, str)
             rsa_private_key = RSA.importKey(private_key)
             signer = Signature_PKCS1_v1_5.new(rsa_private_key)
 
