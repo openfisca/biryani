@@ -76,9 +76,9 @@ def test_email():
                 answers = DNS.DnsRequest(domain, qtype = 'mx', timeout = 10).req().answers
         except (socket.error, DNS.DNSError), e:
             return value, (state or states.default_state)._(
-                u'An error occured when trying to connect to the email server: {}').format(e)
+                u'An error occured when trying to connect to the email server: {0}').format(e)
         if not answers:
-            return value, (state or states.default_state)._(u'''Domain "{}" doesn't exist''').format(domain)
+            return value, (state or states.default_state)._(u'''Domain "{0}" doesn't exist''').format(domain)
         return value, None
     return test_email_converter
 
@@ -117,13 +117,13 @@ def test_http_url(valid_status_codes = None):
         except urllib2.HTTPError, response:
             if 200 <= response.code < 400:
                 return value, (state or states.default_state)._(
-                    u'An error occured when trying to connect to the web server: {:d} {}').format(
+                    u'An error occured when trying to connect to the web server: {0:d} {1}').format(
                     response.code, response.msg)
             if response.code not in (valid_status_codes or []):
                 return value, (state or states.default_state)._(
-                    u'The web server responded with a bad status code: {:d} {}').format(response.code, response.msg)
+                    u'The web server responded with a bad status code: {0:d} {1}').format(response.code, response.msg)
         except urllib2.URLError, e:
             return value, (state or states.default_state)._(
-                u'An error occured when trying to connect to the web server: {}').format(e)
+                u'An error occured when trying to connect to the web server: {0}').format(e)
         return value, None
     return test_http_url_converter

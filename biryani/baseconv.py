@@ -1708,7 +1708,7 @@ def switch(key_converter, converters, default = None, handle_none_value = False)
             return value, error
         if key not in converters:
             if default is None:
-                return value, (state or states.default_state)._(u'''Expression "{}" doesn't match any key''').format(
+                return value, (state or states.default_state)._(u'''Expression "{0}" doesn't match any key''').format(
                     key)
             return default(value, state = state)
         return converters[key](value, state = state)
@@ -2325,7 +2325,7 @@ def check(converter_or_value_and_error, clear_on_error = False):
         if error is not None:
             if clear_on_error:
                 return None
-            raise ValueError('Error: {} for: {}'.format(error, value))
+            raise ValueError('Error: {0} for: {1}'.format(error, value))
         return value
     else:
         # converter_or_value_and_error is a converter.
@@ -2334,6 +2334,6 @@ def check(converter_or_value_and_error, clear_on_error = False):
             if error is not None:
                 if clear_on_error:
                     return None
-                raise ValueError('Error: {} for: {}'.format(error, value))
+                raise ValueError('Error: {0} for: {1}'.format(error, value))
             return value
         return check_converter
