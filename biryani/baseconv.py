@@ -1203,17 +1203,19 @@ def rename_item(old_key, new_key):
     return rename_item_converter
 
 
-def set_value(constant):
-    """Return a converter that replaces any non-null value by given one.
-
-    .. note:: This is the opposite behaviour of func:`default`.
+def set_value(constant, set_missing_value = False):
+    """Return a converter that replaces any value by given one.
 
     >>> set_value(42)(u'Answer to the Ultimate Question of Life, the Universe, and Everything')
     (42, None)
     >>> set_value(42)(None)
     (None, None)
+    >>> set_value(42, set_missing_value = True)(None)
+    (42, None)
     """
-    return lambda value, state = states.default_state: (constant, None) if value is not None else (None, None)
+    return lambda value, state = states.default_state: (constant, None) \
+        if value is not None or set_missing_value \
+        else (None, None)
 
 
 def str_to_url_name(value, state = states.default_state):
