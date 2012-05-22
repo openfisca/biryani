@@ -1242,6 +1242,8 @@ def struct(converters, constructor = None, default = None, keep_empty = False, k
         skip_missing_items = False):
     """Return a converter that maps a collection of converters to a collection (ie dict, list, set, etc) of values.
 
+    .. note:: Parameters ``keep_missing_values`` & ``skip_missing_items`` are not used for sequences.
+
     Usage to convert a mapping (ie dict, etc):
 
     >>> strict_converter = struct(dict(
@@ -1409,10 +1411,7 @@ def struct(converters, constructor = None, default = None, keep_empty = False, k
             skip_missing_items = skip_missing_items)
     assert isinstance(converters, collections.Sequence), \
         'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
-    assert not keep_missing_values, """Flag "keep_missing_values" can't be used for sequences."""
-    assert not skip_missing_items, """Flag "skip_missing_items" can't be used for sequences."""
-    return structured_sequence(converters, constructor = constructor, default = default,
-        keep_empty = keep_empty)
+    return structured_sequence(converters, constructor = constructor, default = default, keep_empty = keep_empty)
 
 
 def structured_mapping(converters, constructor = None, default = None, keep_empty = False, keep_missing_values = False,
