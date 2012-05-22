@@ -107,8 +107,6 @@ domain_re = re.compile(r'''
     (?:[a-z0-9][a-z0-9\-]{0,62}\.)+ # (sub)domain - alpha followed by 62max chars (63 total)
     [a-z]{2,}$                      # TLD
     ''', re.I | re.VERBOSE)
-html_id_re = re.compile(r'[A-Za-z][-A-Za-z0-9_:.]+$')
-html_name_re = html_id_re
 N_ = lambda message: message
 username_re = re.compile(r"[^ \t\n\r@<>()]+$", re.I)
 
