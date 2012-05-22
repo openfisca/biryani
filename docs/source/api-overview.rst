@@ -156,6 +156,9 @@ Tests
 .. autofunction:: biryani.baseconv.test_missing
    :noindex:
 
+.. autofunction:: biryani.baseconv.test_not_in
+   :noindex:
+
 
 Flow-Control Converters
 =======================

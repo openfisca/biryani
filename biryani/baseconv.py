@@ -97,6 +97,7 @@ __all__ = [
     'test_isinstance',
     'test_less_or_equal',
     'test_missing',
+    'test_not_in',
     'translate',
     'uniform_mapping',
     'uniform_sequence',
@@ -1931,6 +1932,33 @@ def test_missing(error = N_(u'Unexpected value')):
             return value, None
         return value, state._(error)
     return missing
+
+
+def test_not_in(values, error = None):
+    """Return a converter that rejects only values belonging to a given set (or list or...).
+
+    .. warning:: Like most converters, a missing value (aka ``None``) is not compared. Furthermore, when *values* is
+       ``None``, value is never compared.
+
+    >>> test_not_in('abcd')('e')
+    ('e', None)
+    >>> test_not_in(['a', 'b', 'c', 'd'])('e')
+    ('e', None)
+    >>> test_not_in('abcd')('a')
+    ('a', u'Value must not belong to abcd')
+    >>> test_not_in(['a', 'b', 'c', 'd'])('a')
+    ('a', u"Value must not belong to ['a', 'b', 'c', 'd']")
+    >>> test_not_in(['a', 'b', 'c', 'd'], error = u'Value must not be a letter less than "e"')('a')
+    ('a', u'Value must not be a letter less than "e"')
+    >>> test_not_in([])('z')
+    ('z', None)
+    >>> test_not_in(None)('z')
+    ('z', None)
+    >>> test_not_in(['a', 'b', 'c', 'd'])(None)
+    (None, None)
+    """
+    return test(lambda value: value not in (values or []),
+        error = error or N_(u'Value must not belong to {0}').format(values))
 
 
 def translate(conversions):
