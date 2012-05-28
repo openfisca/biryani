@@ -369,7 +369,7 @@ def fail(error = N_(u'An error occured')):
     (None, u'An error occured')
     """
     def fail_converter(value, state = states.default_state):
-        return value, state._(error)
+        return value, state._(error) if isinstance(error, basestring) else error
     return fail_converter
 
 
@@ -474,14 +474,16 @@ def get(key, default = UnboundLocalError, error = None):
         if isinstance(value, collections.Mapping):
             converted_value = value.get(key, default)
             if converted_value is UnboundLocalError:
-                return None, state._(u'Unknown key: {0}').format(key) if error is None else state._(error)
+                return None, state._(u'Unknown key: {0}').format(key) if error is None else state._(error) \
+                    if isinstance(error, basestring) else error
             return converted_value, None
         assert isinstance(value, collections.Sequence), \
             'Value must be a mapping or a sequence. Got {0} instead.'.format(type(value))
         if 0 <= key < len(value):
             return value[key], None
         if default is UnboundLocalError:
-            return None, state._(u'Index out of range: {0}').format(key) if error is None else state._(error)
+            return None, state._(u'Index out of range: {0}').format(key) if error is None else state._(error) \
+                if isinstance(error, basestring) else error
         return default, None
     return get_converter
 
@@ -1722,7 +1724,7 @@ def test(function, error = N_(u'Test failed'), handle_missing_value = False, han
         ok = function(value, state = state) if handle_state else function(value)
         if ok:
             return value, None
-        return value, state._(error)
+        return value, state._(error) if isinstance(error, basestring) else error
     return test_converter
 
 
@@ -1803,7 +1805,7 @@ def test_exists(error = N_(u'Missing value')):
     """
     def exists(value, state = states.default_state):
         if value is None:
-            return value, state._(error)
+            return value, state._(error) if isinstance(error, basestring) else error
         return value, None
     return exists
 
@@ -1927,7 +1929,7 @@ def test_missing(error = N_(u'Unexpected value')):
     def missing(value, state = states.default_state):
         if value is None:
             return value, None
-        return value, state._(error)
+        return value, state._(error) if isinstance(error, basestring) else error
     return missing
 
 
