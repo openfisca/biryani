@@ -333,7 +333,9 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
             compressed_plaintext = cipher.decrypt(cyphertext)
         except:
             return token, state._(u'Invalid cyphertext')
-        compressed_plaintext = compressed_plaintext.rstrip('$')  # TODO
+        # Remove PKCS #5 padding.
+        padding_number = ord(compressed_plaintext[-1])
+        compressed_plaintext = compressed_plaintext[:-padding_number]
 
         compression = header['zip']
         if compression == u'DEF':
@@ -490,9 +492,9 @@ def encrypt_json_web_token(algorithm = None, compression = None, integrity = Non
             cipher = Cipher_AES.new(content_encryption_key, mode = Cipher_AES.MODE_CBC, IV = initialization_vector)
         else:
             TODO
-        # TODO: Replace "$" padding with (not yet) normalized padding.
-        if len(compressed_plaintext) % 16 > 0:
-            compressed_plaintext += '$' * (16 - len(compressed_plaintext) % 16)
+        # Add PKCS #5 padding.
+        padding_number = 16 - len(compressed_plaintext) % 16
+        compressed_plaintext += chr(padding_number) * padding_number
         cyphertext = cipher.encrypt(compressed_plaintext)
         encoded_cyphertext = check(make_bytes_to_base64url(remove_padding = True))(cyphertext, state = state)
 
