@@ -27,13 +27,59 @@
 
 import base64
 
-from . import states
+from .states import default_state
 
 
 __all__ = [
+    'base64_to_bytes',
+    'bytes_to_base64',
     'make_base64url_to_bytes',
     'make_bytes_to_base64url',
     ]
+
+
+def base64_to_bytes(value, state = default_state):
+    """Decode data from a base64 encoding.
+
+    >>> base64_to_bytes(u'SGVsbG8gV29ybGQ=')
+    ('Hello World', None)
+    >>> base64_to_bytes(u'SGVsbG8gV29ybGQ')
+    (u'SGVsbG8gV29ybGQ', u'Invalid base64 string')
+    >>> base64_to_bytes(u'Hello World')
+    (u'Hello World', u'Invalid base64 string')
+    >>> base64_to_bytes(u'')
+    ('', None)
+    >>> base64_to_bytes(None)
+    (None, None)
+    """
+    if value is None:
+        return value, None
+    value_str = str(value) if isinstance(value, unicode) else value
+    try:
+        decoded_value = base64.b64decode(value_str)
+    except TypeError:
+        return value, state._(u'Invalid base64 string')
+    return decoded_value, None
+
+
+def bytes_to_base64(value, state = default_state):
+    """Convertsa string or bytes to a base64 encoding.
+
+    >>> bytes_to_base64('Hello World')
+    (u'SGVsbG8gV29ybGQ=', None)
+    >>> bytes_to_base64(u'Hello World')
+    (u'SGVsbG8gV29ybGQ=', None)
+    >>> bytes_to_base64(u'')
+    (u'', None)
+    >>> bytes_to_base64(None)
+    (None, None)
+    """
+    if value is None:
+        return value, None
+    if isinstance(value, unicode):
+        value = value.encode('utf-8')
+    encoded_value = base64.b64encode(value)
+    return unicode(encoded_value), None
 
 
 def make_base64url_to_bytes(add_padding = False):
@@ -56,7 +102,7 @@ def make_base64url_to_bytes(add_padding = False):
     >>> make_base64url_to_bytes()(None)
     (None, None)
     """
-    def base64url_to_str(value, state = states.default_state):
+    def base64url_to_bytes(value, state = default_state):
         if value is None:
             return value, None
         value_str = str(value) if isinstance(value, unicode) else value
@@ -71,7 +117,7 @@ def make_base64url_to_bytes(add_padding = False):
         except TypeError:
             return value, state._(u'Invalid base64url string')
         return decoded_value, None
-    return base64url_to_str
+    return base64url_to_bytes
 
 
 def make_bytes_to_base64url(remove_padding = False):
@@ -79,6 +125,8 @@ def make_bytes_to_base64url(remove_padding = False):
 
     .. note:: To remove trailing (non URL-safe) "=", set ``remove_padding`` to ``True``.
 
+    >>> make_bytes_to_base64url()('Hello World')
+    (u'SGVsbG8gV29ybGQ=', None)
     >>> make_bytes_to_base64url()(u'Hello World')
     (u'SGVsbG8gV29ybGQ=', None)
     >>> make_bytes_to_base64url(remove_padding = True)(u'Hello World')
@@ -88,7 +136,7 @@ def make_bytes_to_base64url(remove_padding = False):
     >>> make_bytes_to_base64url()(None)
     (None, None)
     """
-    def str_to_base64url(value, state = states.default_state):
+    def bytes_to_base64url(value, state = default_state):
         if value is None:
             return value, None
         if isinstance(value, unicode):
@@ -97,4 +145,4 @@ def make_bytes_to_base64url(remove_padding = False):
         if remove_padding:
             encoded_value = encoded_value.rstrip('=')
         return unicode(encoded_value), None
-    return str_to_base64url
+    return bytes_to_base64url
