@@ -66,11 +66,8 @@ digest_constructor_by_size = {
     512: SHA512,
     }
 valid_encryption_algorithms = (
-#    u'A128GCM',
-#    u'A256GCM',
     u'A128KW',
     u'A256KW',
-#    u'A512KW',
 #    u'ECDH-ES',
     u'RSA1_5',
     u'RSA-OAEP',
@@ -284,8 +281,6 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
         # TODO: Verify that the JWE Header references a key known to the recipient.
 
         algorithm = header['alg']
-        if algorithm not in valid_encryption_algorithms:
-            return token, state._(u'Unimplemented encryption algorithm')
         if algorithm == u'RSA1_5':
             rsa_private_key = RSA.importKey(private_key)
             cipher = Cipher_PKCS1_v1_5.new(rsa_private_key)
