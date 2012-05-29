@@ -46,7 +46,7 @@ from .base64conv import make_base64url_to_bytes, make_bytes_to_base64url
 from .baseconv import (check, cleanup_line, exists, get, make_str_to_url, N_, noop, pipe, struct, test,
     test_greater_or_equal, test_in, test_isinstance, test_less_or_equal, uniform_sequence)
 from .jsonconv import make_json_to_str, make_str_to_json
-from jwkconv import json_to_json_web_key_object
+from jwkconv import json_to_json_web_key
 from .states import default_state
 
 
@@ -231,7 +231,7 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
                     jpk = pipe(
                         test_isinstance(basestring),
                         make_str_to_json(),
-                        json_to_json_web_key_object,
+                        json_to_json_web_key,
                         ),
                     kid = test_isinstance(basestring),
                     typ = pipe(

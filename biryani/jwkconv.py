@@ -32,11 +32,11 @@ from .baseconv import (exists, function, noop, pipe, struct, switch, test_conv, 
 
 __all__ = [
     'json_to_json_web_key',
-    'json_to_json_web_key_object',
+    'json_to_json_web_key_set',
     ]
 
 
-json_to_json_web_key_object = pipe(
+json_to_json_web_key = pipe(
     test_isinstance(dict),
     struct(
         dict(
@@ -110,13 +110,13 @@ json_to_json_web_key_object = pipe(
     """
 
 
-json_to_json_web_key = pipe(
+json_to_json_web_key_set = pipe(
     test_isinstance(dict),
     struct(
         dict(
             jwk = pipe(
                 test_isinstance(list),
-                uniform_sequence(json_to_json_web_key_object),
+                uniform_sequence(json_to_json_web_key),
                 exists,
                 ),
             ),
@@ -125,7 +125,7 @@ json_to_json_web_key = pipe(
 """Verify that given JSON is a valid JSON Web Key.
 
     >>> from pprint import pprint
-    >>> pprint(json_to_json_web_key({'jwk': [{
+    >>> pprint(json_to_json_web_key_set({'jwk': [{
     ...     'alg': u'EC',
     ...     'crv': u'P-256',
     ...     'kid': u'1',
@@ -142,7 +142,7 @@ json_to_json_web_key = pipe(
      None)
 
     >>> from biryani.jsonconv import make_str_to_json
-    >>> pprint(conv.pipe(make_str_to_json(), json_to_json_web_key)('''
+    >>> pprint(conv.pipe(make_str_to_json(), json_to_json_web_key_set)('''
     ... {"jwk":
     ...   [
     ...     {"alg":"EC",
