@@ -40,7 +40,7 @@ from Crypto.Hash import HMAC, SHA256, SHA384, SHA512
 from Crypto.PublicKey import RSA
 from Crypto.Util import number
 
-from .base64conv import make_base64url_to_bytes, make_bytes_to_base64url
+from .base64conv import base64_to_bytes, make_base64url_to_bytes, make_bytes_to_base64url
 from .baseconv import (check, cleanup_line, exists, get, make_str_to_url, N_, noop, pipe, struct, test,
     test_greater_or_equal, test_in, test_isinstance, test_less_or_equal, uniform_sequence)
 from .jsonconv import make_json_to_str, make_str_to_json
