@@ -223,7 +223,7 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
                         test_isinstance(basestring),
                         make_str_to_url(add_prefix = None, error_if_fragment = True, full = True, schemes = ['https']),
                         ),
-                    jpk = pipe(
+                    jwk = pipe(
                         test_isinstance(basestring),
                         make_str_to_json(),
                         json_to_json_web_key,
