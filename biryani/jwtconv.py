@@ -242,6 +242,7 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
                         test_isinstance(list),
                         uniform_sequence(pipe(
                             test_isinstance(basestring),
+                            base64_to_bytes,
                             # TODO
                             )),
                         ),
