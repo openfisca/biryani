@@ -414,6 +414,7 @@ def encrypt_json_web_token(algorithm = None, compression = None, integrity = Non
             integrity_key_length = integrity_size >> 3
 
         # The content master key must be at least as long as the encryption & integrity keys.
+        # TODO: Don't create a content master key, when key agreement is employed.
         content_master_key = Random.get_random_bytes(max(encryption_key_length, integrity_key_length))
         if algorithm.startswith(u'RSA'):
             if public_key_as_encoded_str is None:
