@@ -128,7 +128,7 @@ def decode_json_web_token(token, state = default_state):
         value['signature'] = signature
     else:
         errors['encoded_signature'] = state._(u'Invalid format')
-    if value['header'].get('typ', u'JWT') != u'JWT':
+    if value['header'].get('typ', u'JWT') not in (u'application/jwt', u'JWT'):
         return value, dict(header = dict(typ = state._(u'Not a signed JSON Web Token (JWS)')))
     if claims is not None:
         value['claims'], claims_errors = pipe(
@@ -232,7 +232,8 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
                     typ = pipe(
                         test_isinstance(basestring),
                         test_in([
-                            u'http://openid.net/specs/jwt/1.0',
+                            u'application/jwe',
+                            u'application/jwt',
                             u'JWE',
                             u'JWT',
                             ]),
@@ -344,7 +345,7 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
             assert compression in (None, u'none'), compression
             plaintext = compressed_plaintext
 
-        if header['typ'] == u'JWE':
+        if header['typ'] in (u'application/jwe', u'JWE'):
             # Token was a nested token and plaintext is also a token.
             return plaintext, None
 
@@ -504,7 +505,7 @@ def encrypt_json_web_token(algorithm = None, compression = None, integrity = Non
         if initialization_vector is not None:
             header['iv'] = check(make_bytes_to_base64url(remove_padding = True))(initialization_vector, state = state)
         # TODO header['jku']
-        # TODO header['jpk']
+        # TODO header['jwk']
         # TODO header['kid']
         # TODO header['x5c']
         # TODO header['x5t']
