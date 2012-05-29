@@ -29,9 +29,7 @@ cf http://tools.ietf.org/html/draft-jones-json-web-token
 
 
 import calendar
-import cStringIO
 import datetime
-import gzip
 from struct import pack
 import zlib
 
@@ -261,8 +259,7 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
                     zip = pipe(
                         test_isinstance(basestring),
                         test_in([
-                            u'DEFLATE',
-                            u'GZIP',
+                            u'DEF',
                             u'none',
                             ]),
                         ),
@@ -343,16 +340,9 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
         compressed_plaintext = compressed_plaintext.rstrip('$')  # TODO
 
         compression = header['zip']
-        if compression == u'DEFLATE':
+        if compression == u'DEF':
             try:
                 plaintext = zlib.decompress(compressed_plaintext)
-            except zlib.error:
-                return token, state._(u'Invalid compressed plaintext')
-        elif compression == u'GZIP':
-            compressed_file = cStringIO.StringIO(compressed_plaintext)
-            try:
-                gzip_file = gzip.GzipFile(mode = 'rb', fileobj = compressed_file)
-                plaintext = gzip_file.read()
             except zlib.error:
                 return token, state._(u'Invalid compressed plaintext')
         else:
@@ -494,14 +484,8 @@ def encrypt_json_web_token(algorithm = None, compression = None, integrity = Non
                 )
             plaintext = token
 
-        if compression == u'DEFLATE':
+        if compression == u'DEF':
             compressed_plaintext = zlib.compress(plaintext, level = 9)
-        elif compression == u'GZIP':
-            compressed_file = cStringIO.StringIO()
-            gzip_file = gzip.GzipFile(mode = 'wb', fileobj = compressed_file)
-            gzip_file.write(plaintext)
-            gzip_file.close()
-            compressed_plaintext = compressed_file.getvalue()
         else:
             assert compression in (None, u'none'), compression
             compressed_plaintext = plaintext
