@@ -83,7 +83,7 @@ When using *Biryani* in web applications, for example, you will often need to di
 ...         translation = self._translations_cache.get(languages)
 ...         if translation is None:
 ...             self._translations_cache[languages] = translation = gettext.translation(
-...                 'biryani', fallback = gettext.NullTranslations(), languages = languages)
+...                 'biryani', fallback = True, languages = languages)
 ...         return translation.ugettext
 
 >>> user_state = UserState()
@@ -108,6 +108,7 @@ One way to do this is to chain the translations using the fallback mechanism.
 For example, if the application using *Biryani* is named **myapp** and stores its localized messages in ``myapp/i18n`` you could chain its translations with those of *Biryani* using some code like::
 
     languages = ['fr']
-    byriani_translation = gettext.translation('biryani', fallback = gettext.NullTranslations(), languages = languages)
-    translation = gettext.translation('myapp', 'myapp/i18n', fallback = byriani_translation, languages = languages)
+    byriani_translation = gettext.translation('biryani', fallback = True, languages = languages)
+    translation = gettext.translation('myapp', 'myapp/i18n', fallback = True, languages = languages)
+    translation.add_fallback(byriani_translation)
 
