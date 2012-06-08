@@ -280,7 +280,7 @@ def cleanup_empty(value, state = states.default_state):
     >>> cleanup_empty({})
     (None, None)
     >>> cleanup_empty({'answer': 42})
-    ({'anwser': 42}, None)
+    ({'answer': 42}, None)
     >>> cleanup_empty(u'hello world')
     (u'hello world', None)
     >>> cleanup_empty(u'   hello world   ')
@@ -1158,7 +1158,7 @@ def python_data_to_int(value, state = states.default_state):
     >>> python_data_to_int(42.75)
     (42, None)
     >>> python_data_to_int(u'42.75')
-    (42, u'Value must be an integer')
+    (u'42.75', u'Value must be an integer')
     >>> python_data_to_int(None)
     (None, None)
     """
