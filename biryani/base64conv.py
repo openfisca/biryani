@@ -27,7 +27,7 @@
 
 import base64
 
-from .states import default_state
+from . import states
 
 
 __all__ = [
@@ -38,7 +38,7 @@ __all__ = [
     ]
 
 
-def base64_to_bytes(value, state = default_state):
+def base64_to_bytes(value, state = None):
     """Decode data from a base64 encoding.
 
     >>> base64_to_bytes(u'SGVsbG8gV29ybGQ=')
@@ -58,11 +58,11 @@ def base64_to_bytes(value, state = default_state):
     try:
         decoded_value = base64.b64decode(value_str)
     except TypeError:
-        return value, state._(u'Invalid base64 string')
+        return value, (state or states.default_state)._(u'Invalid base64 string')
     return decoded_value, None
 
 
-def bytes_to_base64(value, state = default_state):
+def bytes_to_base64(value, state = None):
     """Convertsa string or bytes to a base64 encoding.
 
     >>> bytes_to_base64('Hello World')
@@ -102,20 +102,20 @@ def make_base64url_to_bytes(add_padding = False):
     >>> make_base64url_to_bytes()(None)
     (None, None)
     """
-    def base64url_to_bytes(value, state = default_state):
+    def base64url_to_bytes(value, state = None):
         if value is None:
             return value, None
         value_str = str(value) if isinstance(value, unicode) else value
         if add_padding:
             len_mod4 = len(value_str) % 4
             if len_mod4 == 1:
-                return value, state._(u'Invalid base64url string')
+                return value, (state or states.default_state)._(u'Invalid base64url string')
             if len_mod4 > 0:
                 value_str += '=' * (4 - len_mod4)
         try:
             decoded_value = base64.urlsafe_b64decode(value_str)
         except TypeError:
-            return value, state._(u'Invalid base64url string')
+            return value, (state or states.default_state)._(u'Invalid base64url string')
         return decoded_value, None
     return base64url_to_bytes
 
@@ -136,7 +136,7 @@ def make_bytes_to_base64url(remove_padding = False):
     >>> make_bytes_to_base64url()(None)
     (None, None)
     """
-    def bytes_to_base64url(value, state = default_state):
+    def bytes_to_base64url(value, state = None):
         if value is None:
             return value, None
         if isinstance(value, unicode):

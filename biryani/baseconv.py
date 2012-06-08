@@ -114,7 +114,7 @@ username_re = re.compile(r"[^ \t\n\r@<>()]+$", re.I)
 # Level-1 Converters
 
 
-def bool_to_str(value, state = states.default_state):
+def bool_to_str(value, state = None):
     """Convert a boolean to a "0" or "1" string.
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
@@ -157,7 +157,7 @@ def catch_error(converter, error_value = None):
     >>> catch_error(fail(), error_value = 0)(42)
     (0, None)
     """
-    def catch_error_converter(value, state = states.default_state):
+    def catch_error_converter(value, state = None):
         result, error = converter(value, state = state)
         if error is not None:
             return error_value, None
@@ -165,7 +165,7 @@ def catch_error(converter, error_value = None):
     return catch_error_converter
 
 
-def clean_str_to_bool(value, state = states.default_state):
+def clean_str_to_bool(value, state = None):
     """Convert a clean string to a boolean.
 
     .. note:: For a converter that doesn't require a clean string, see :func:`str_to_bool`.
@@ -194,10 +194,10 @@ def clean_str_to_bool(value, state = states.default_state):
     try:
         return bool(int(value)), None
     except ValueError:
-        return value, state._(u'Value must be a boolean')
+        return value, (state or states.default_state)._(u'Value must be a boolean')
 
 
-def clean_str_to_email(value, state = states.default_state):
+def clean_str_to_email(value, state = None):
     """Convert a clean string to an email address.
 
     .. note:: For a converter that doesn't require a clean string, see :func:`str_to_email`.
@@ -221,15 +221,15 @@ def clean_str_to_email(value, state = states.default_state):
     try:
         username, domain = value.split('@', 1)
     except ValueError:
-        return value, state._(u'An email must contain exactly one "@"')
+        return value, (state or states.default_state)._(u'An email must contain exactly one "@"')
     if not username_re.match(username):
-        return value, state._(u'Invalid username')
+        return value, (state or states.default_state)._(u'Invalid username')
     if not domain_re.match(domain) and domain != 'localhost':
-        return value, state._(u'Invalid domain name')
+        return value, (state or states.default_state)._(u'Invalid domain name')
     return value, None
 
 
-def clean_str_to_url_path_and_query(value, state = states.default_state):
+def clean_str_to_url_path_and_query(value, state = None):
     """Convert a clean string to the path and query of an URL.
 
     .. note:: For a converter that doesn't require a clean string, see :func:`str_to_url_path_and_query`.
@@ -258,15 +258,15 @@ def clean_str_to_url_path_and_query(value, state = states.default_state):
     try:
         split_url = list(urlparse.urlsplit(value))
     except ValueError:
-        return value, state._(u'Invalid URL')
+        return value, (state or states.default_state)._(u'Invalid URL')
     if split_url[0] or split_url[1]:
-        return value, state._(u'URL must not be complete')
+        return value, (state or states.default_state)._(u'URL must not be complete')
     if split_url[4]:
         split_url[4] = ''
     return unicode(urlparse.urlunsplit(split_url)), None
 
 
-def cleanup_empty(value, state = states.default_state):
+def cleanup_empty(value, state = None):
     """When value is comparable to False (ie None, 0 , '', etc) replace it with None else keep it as is.
 
     >>> cleanup_empty(0)
@@ -304,7 +304,7 @@ def condition(test_converter, ok_converter, error_converter = None):
     >>> detect_unknown_values(u'?')
     (False, None)
     """
-    def condition_converter(value, state = states.default_state):
+    def condition_converter(value, state = None):
         test, error = test_converter(value, state = state)
         if error is None:
             return ok_converter(value, state = state)
@@ -346,7 +346,7 @@ def default(constant):
     >>> pipe(str_to_int, default(42))(None)
     (42, None)
     """
-    return lambda value, state = states.default_state: (constant, None) if value is None else (value, None)
+    return lambda value, state = None: (constant, None) if value is None else (value, None)
 
 
 def encode_str(encoding = 'utf-8'):
@@ -374,8 +374,8 @@ def fail(error = N_(u'An error occured')):
     >>> fail()(None)
     (None, u'An error occured')
     """
-    def fail_converter(value, state = states.default_state):
-        return value, state._(error) if isinstance(error, basestring) else error
+    def fail_converter(value, state = None):
+        return value, (state or states.default_state)._(error) if isinstance(error, basestring) else error
     return fail_converter
 
 
@@ -393,7 +393,7 @@ def first_match(*converters):
     >>> first_match()(u'Hello world!')
     (u'Hello world!', None)
     """
-    def first_match_converter(value, state = states.default_state):
+    def first_match_converter(value, state = None):
         converted_value = value
         error = None
         for converter in converters:
@@ -431,7 +431,7 @@ def function(function, handle_missing_value = False, handle_state = False):
     Traceback (most recent call last):
     TypeError:
     """
-    def function_converter(value, state = states.default_state):
+    def function_converter(value, state = None):
         if value is None and not handle_missing_value or function is None:
             return value, None
         if handle_state:
@@ -472,7 +472,7 @@ def get(key, default = UnboundLocalError, error = None):
     >>> get(0)(None)
     (None, None)
     """
-    def get_converter(value, state = states.default_state):
+    def get_converter(value, state = None):
         import collections
 
         if value is None:
@@ -480,21 +480,23 @@ def get(key, default = UnboundLocalError, error = None):
         if isinstance(value, collections.Mapping):
             converted_value = value.get(key, default)
             if converted_value is UnboundLocalError:
-                return None, state._(u'Unknown key: {0}').format(key) if error is None else state._(error) \
-                    if isinstance(error, basestring) else error
+                return None, (state or states.default_state)._(u'Unknown key: {0}').format(key) \
+                    if error is None \
+                    else (state or states.default_state)._(error) if isinstance(error, basestring) else error
             return converted_value, None
         assert isinstance(value, collections.Sequence), \
             'Value must be a mapping or a sequence. Got {0} instead.'.format(type(value))
         if 0 <= key < len(value):
             return value[key], None
         if default is UnboundLocalError:
-            return None, state._(u'Index out of range: {0}').format(key) if error is None else state._(error) \
-                if isinstance(error, basestring) else error
+            return None, (state or states.default_state)._(u'Index out of range: {0}').format(key) \
+                if error is None \
+                else (state or states.default_state)._(error) if isinstance(error, basestring) else error
         return default, None
     return get_converter
 
 
-def guess_bool(value, state = states.default_state):
+def guess_bool(value, state = None):
     """Convert the content of a string (or a number) to a boolean. Do nothing when input value is already a boolean.
 
     This converter accepts usual values for ``True`` and ``False``: "0", "f", "false", "n", etc.
@@ -574,7 +576,7 @@ def guess_bool(value, state = states.default_state):
             return False, None
         if lower_value in (u'on', u't', u'true', u'y', u'yes'):
             return True, None
-        return value, state._(u'Value must be a boolean')
+        return value, (state or states.default_state)._(u'Value must be a boolean')
 
 
 def item_or_sequence(converter, constructor = list, keep_missing_items = False):
@@ -643,33 +645,33 @@ def make_clean_str_to_url(add_prefix = u'http://', error_if_fragment = False, er
     >>> make_clean_str_to_url(full = True)(u'http://[www.nordnet.fr/grandmix/]')
     (u'http://[www.nordnet.fr/grandmix/]', u'Invalid URL')
     """
-    def clean_str_to_url(value, state = states.default_state):
+    def clean_str_to_url(value, state = None):
         if value is None:
             return value, None
         import urlparse
         try:
             split_url = list(urlparse.urlsplit(value))
         except ValueError:
-            return value, state._(u'Invalid URL')
+            return value, (state or states.default_state)._(u'Invalid URL')
         if full and add_prefix and not split_url[0] and not split_url[1] and split_url[2] \
                 and not split_url[2].startswith(u'/'):
             try:
                 split_url = list(urlparse.urlsplit(add_prefix + value))
             except ValueError:
-                return value, state._(u'Invalid URL')
+                return value, (state or states.default_state)._(u'Invalid URL')
         scheme = split_url[0]
         if scheme != scheme.lower():
             split_url[0] = scheme = scheme.lower()
         if full and not scheme:
-            return value, state._(u'URL must be complete')
+            return value, (state or states.default_state)._(u'URL must be complete')
         if scheme and schemes is not None and scheme not in schemes:
-            return value, state._(u'Scheme must belong to {0}').format(sorted(schemes))
+            return value, (state or states.default_state)._(u'Scheme must belong to {0}').format(sorted(schemes))
         network_location = split_url[1]
         if network_location != network_location.lower():
             split_url[1] = network_location = network_location.lower()
         if split_url[2] and split_url[2] != u'/':
             if error_if_path:
-                return value, state._(u'URL must not contain a path')
+                return value, (state or states.default_state)._(u'URL must not contain a path')
             if remove_path:
                 split_url[2] = u'/'
         if scheme in (u'http', u'https') and not split_url[2]:
@@ -677,12 +679,12 @@ def make_clean_str_to_url(add_prefix = u'http://', error_if_fragment = False, er
             split_url[2] = u'/'
         if split_url[3]:
             if error_if_query:
-                return value, state._(u'URL must not contain a query')
+                return value, (state or states.default_state)._(u'URL must not contain a query')
             if remove_query:
                 split_url[3] = u''
         if split_url[4]:
             if error_if_fragment:
-                return value, state._(u'URL must not contain a fragment')
+                return value, (state or states.default_state)._(u'URL must not contain a fragment')
             if remove_fragment:
                 split_url[4] = u''
         return unicode(urlparse.urlunsplit(split_url)), None
@@ -750,7 +752,7 @@ def make_str_to_normal_form(encoding = 'utf-8', separator = u' ', transform = st
     >>> make_str_to_normal_form()(u'   ')
     (None, None)
     """
-    def str_to_normal_form(value, state = states.default_state):
+    def str_to_normal_form(value, state = None):
         if value is None:
             return value, None
         value = strings.normalize(value, encoding = encoding, separator = separator, transform = transform)
@@ -781,7 +783,7 @@ def make_str_to_slug(encoding = 'utf-8', separator = u'-', transform = strings.l
     >>> make_str_to_slug()(u'   ')
     (None, None)
     """
-    def str_to_slug(value, state = states.default_state):
+    def str_to_slug(value, state = None):
         if value is None:
             return value, None
         value = strings.slugify(value, encoding = encoding, separator = separator, transform = transform)
@@ -882,7 +884,7 @@ def new_mapping(converters, constructor = None, keep_empty = False):
         if converter is not None
         )
 
-    def new_mapping_converter(value, state = states.default_state):
+    def new_mapping_converter(value, state = None):
         if value is None:
             return value, None
         errors = {}
@@ -957,7 +959,7 @@ def new_sequence(converters, constructor = None, keep_empty = False):
         if converter is not None
         ]
 
-    def new_sequence_converter(value, state = states.default_state):
+    def new_sequence_converter(value, state = None):
         if value is None:
             return value, None
         errors = {}
@@ -1075,7 +1077,7 @@ def new_struct(converters, constructor = None, keep_empty = False):
     return new_sequence(converters, constructor = constructor, keep_empty = keep_empty)
 
 
-def noop(value, state = states.default_state):
+def noop(value, state = None):
     """Return value as is.
 
     >>> noop(42)
@@ -1114,13 +1116,13 @@ def pipe(*converters):
                 return value, error
             args = [value]
             kwargs = {}
-            if state != UnboundLocalError:
+            if state is not UnboundLocalError:
                 kwargs['state'] = state
         return value, None
     return pipe_converter
 
 
-def python_data_to_float(value, state = states.default_state):
+def python_data_to_float(value, state = None):
     """Convert any python data to a float.
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
@@ -1141,10 +1143,10 @@ def python_data_to_float(value, state = states.default_state):
     try:
         return float(value), None
     except ValueError:
-        return value, state._(u'Value must be a float')
+        return value, (state or states.default_state)._(u'Value must be a float')
 
 
-def python_data_to_int(value, state = states.default_state):
+def python_data_to_int(value, state = None):
     """Convert any python data to an integer.
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
@@ -1167,10 +1169,10 @@ def python_data_to_int(value, state = states.default_state):
     try:
         return int(value), None
     except ValueError:
-        return value, state._(u'Value must be an integer')
+        return value, (state or states.default_state)._(u'Value must be an integer')
 
 
-def python_data_to_str(value, state = states.default_state):
+def python_data_to_str(value, state = None):
     """Convert any Python data to unicode.
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
@@ -1202,7 +1204,7 @@ def rename_item(old_key, new_key):
     >>> rename_item('c', 'd')(None)
     (None, None)
     """
-    def rename_item_converter(value, state = states.default_state):
+    def rename_item_converter(value, state = None):
         if value is None:
             return value, None
         if old_key in value:
@@ -1222,12 +1224,12 @@ def set_value(constant, set_missing_value = False):
     >>> set_value(42, set_missing_value = True)(None)
     (42, None)
     """
-    return lambda value, state = states.default_state: (constant, None) \
+    return lambda value, state = None: (constant, None) \
         if value is not None or set_missing_value \
         else (None, None)
 
 
-def str_to_url_name(value, state = states.default_state):
+def str_to_url_name(value, state = None):
     """Convert a string to a normalized string that can be used in an URL path or a query parameter.
 
     .. note:: For a converter that keep only letters, digits and separator, see :func:`make_str_to_slug`
@@ -1535,7 +1537,7 @@ def structured_mapping(converters, constructor = None, default = None, keep_empt
         if converter is not None
         )
 
-    def structured_mapping_converter(values, state = states.default_state):
+    def structured_mapping_converter(values, state = None):
         if values is None:
             return values, None
         if default == 'ignore':
@@ -1634,7 +1636,7 @@ def structured_sequence(converters, constructor = None, default = None, keep_emp
         if converter is not None
         ]
 
-    def structured_sequence_converter(values, state = states.default_state):
+    def structured_sequence_converter(values, state = None):
         if values is None:
             return values, None
         if default == 'ignore':
@@ -1698,7 +1700,7 @@ def switch(key_converter, converters, default = None, handle_missing_value = Fal
     >>> type_switcher([None])
     (None, {0: u'Expression "None" doesn\\'t match any key'})
     """
-    def switch_converter(value, state = states.default_state):
+    def switch_converter(value, state = None):
         if value is None and not handle_missing_value:
             return None, None
         key, error = key_converter(value, state = state)
@@ -1706,7 +1708,8 @@ def switch(key_converter, converters, default = None, handle_missing_value = Fal
             return value, error
         if key not in converters:
             if default is None:
-                return value, state._(u'''Expression "{}" doesn't match any key''').format(key)
+                return value, (state or states.default_state)._(u'''Expression "{}" doesn't match any key''').format(
+                    key)
             return default(value, state = state)
         return converters[key](value, state = state)
     return switch_converter
@@ -1726,13 +1729,13 @@ def test(function, error = N_(u'Test failed'), handle_missing_value = False, han
     >>> test(lambda value: isinstance(value, basestring), error = u'Value is not a string')(1)
     (1, u'Value is not a string')
     """
-    def test_converter(value, state = states.default_state):
+    def test_converter(value, state = None):
         if value is None and not handle_missing_value or function is None:
             return value, None
         ok = function(value, state = state) if handle_state else function(value)
         if ok:
             return value, None
-        return value, state._(error) if isinstance(error, basestring) else error
+        return value, (state or states.default_state)._(error) if isinstance(error, basestring) else error
     return test_converter
 
 
@@ -1768,7 +1771,7 @@ def test_conv(converter):
     >>> test_conv(str_to_int)(u'Hello world!')
     (u'Hello world!', u'Value must be an integer')
     """
-    def test_conv_converter(value, state = states.default_state):
+    def test_conv_converter(value, state = None):
         converted_value, error = converter(value, state = state)
         return value, error
     return test_conv_converter
@@ -1811,9 +1814,9 @@ def test_exists(error = N_(u'Missing value')):
     >>> test_exists(error = u'Required value')(None)
     (None, u'Required value')
     """
-    def exists(value, state = states.default_state):
+    def exists(value, state = None):
         if value is None:
-            return value, state._(error) if isinstance(error, basestring) else error
+            return value, (state or states.default_state)._(error) if isinstance(error, basestring) else error
         return value, None
     return exists
 
@@ -1934,10 +1937,10 @@ def test_missing(error = N_(u'Unexpected value')):
     >>> test_missing()(None)
     (None, None)
     """
-    def missing(value, state = states.default_state):
+    def missing(value, state = None):
         if value is None:
             return value, None
-        return value, state._(error) if isinstance(error, basestring) else error
+        return value, (state or states.default_state)._(error) if isinstance(error, basestring) else error
     return missing
 
 
@@ -2013,7 +2016,7 @@ def uniform_mapping(key_converter, value_converter, constructor = dict, keep_emp
     >>> uniform_mapping(cleanup_line, str_to_int)(None)
     (None, None)
     """
-    def uniform_mapping_converter(values, state = states.default_state):
+    def uniform_mapping_converter(values, state = None):
         if values is None:
             return values, None
         errors = {}
@@ -2061,7 +2064,7 @@ def uniform_sequence(converter, constructor = list, keep_empty = False, keep_mis
     >>> uniform_sequence(str_to_int, constructor = set)(set([u'42', u'43']))
     (set([42, 43]), None)
     """
-    def uniform_sequence_converter(values, state = states.default_state):
+    def uniform_sequence_converter(values, state = None):
         if values is None:
             return values, None
         errors = {}

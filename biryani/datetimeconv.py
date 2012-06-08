@@ -58,7 +58,7 @@ __all__ = [
 # Level-1 Converters
 
 
-def clean_iso8601_to_date(value, state = states.default_state):
+def clean_iso8601_to_date(value, state = None):
     """Convert a clean string in ISO 8601 format to a date.
 
     .. note:: For a converter that doesn't require a clean string, see :func:`iso8601_to_date`.
@@ -101,10 +101,10 @@ def clean_iso8601_to_date(value, state = states.default_state):
     try:
         return datetime.date.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
     except ValueError:
-        return value, state._(u'Value must be a date in ISO 8601 format')
+        return value, (state or states.default_state)._(u'Value must be a date in ISO 8601 format')
 
 
-def clean_iso8601_to_datetime(value, state = states.default_state):
+def clean_iso8601_to_datetime(value, state = None):
     """Convert a clean string in ISO 8601 format to a datetime.
 
     .. note:: For a converter that doesn't require a clean string, see :func:`iso8601_to_datetime`.
@@ -147,10 +147,10 @@ def clean_iso8601_to_datetime(value, state = states.default_state):
     try:
         return datetime.datetime.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
     except ValueError:
-        return value, state._(u'Value must be a date-time in ISO 8601 format')
+        return value, (state or states.default_state)._(u'Value must be a date-time in ISO 8601 format')
 
 
-def date_to_datetime(value, state = states.default_state):
+def date_to_datetime(value, state = None):
     """Convert a date object to a datetime.
 
     >>> import datetime
@@ -166,7 +166,7 @@ def date_to_datetime(value, state = states.default_state):
     return datetime.datetime(value.year, value.month, value.day), None
 
 
-def date_to_iso8601(value, state = states.default_state):
+def date_to_iso8601(value, state = None):
     """Convert a date to a string using ISO 8601 format.
 
     >>> date_to_iso8601(datetime.date(2012, 3, 4))
@@ -181,7 +181,7 @@ def date_to_iso8601(value, state = states.default_state):
     return unicode(value.strftime('%Y-%m-%d')), None
 
 
-def date_to_timestamp(value, state = states.default_state):
+def date_to_timestamp(value, state = None):
     """Convert a datetime to a JavaScript timestamp.
 
     >>> date_to_timestamp(datetime.date(2012, 3, 4))
@@ -196,7 +196,7 @@ def date_to_timestamp(value, state = states.default_state):
     return int(calendar.timegm(value.timetuple()) * 1000), None
 
 
-def datetime_to_date(value, state = states.default_state):
+def datetime_to_date(value, state = None):
     """Convert a datetime object to a date.
 
     >>> datetime_to_date(datetime.datetime(2012, 3, 4, 5, 6, 7))
@@ -212,7 +212,7 @@ def datetime_to_date(value, state = states.default_state):
     return value.date(), None
 
 
-def datetime_to_iso8601(value, state = states.default_state):
+def datetime_to_iso8601(value, state = None):
     """Convert a datetime to a string using ISO 8601 format.
 
     >>> datetime_to_iso8601(datetime.datetime(2012, 3, 4, 5, 6, 7))
@@ -227,7 +227,7 @@ def datetime_to_iso8601(value, state = states.default_state):
     return unicode(value.strftime('%Y-%m-%d %H:%M:%S')), None
 
 
-def datetime_to_timestamp(value, state = states.default_state):
+def datetime_to_timestamp(value, state = None):
     """Convert a datetime to a JavaScript timestamp.
 
     >>> datetime_to_timestamp(datetime.datetime(2012, 3, 4, 5, 6, 7))
@@ -261,7 +261,7 @@ def set_datetime_tzinfo(tzinfo = None):
     return function(lambda value: value.replace(tzinfo = tzinfo))
 
 
-def timestamp_to_date(value, state = states.default_state):
+def timestamp_to_date(value, state = None):
     """Convert a JavaScript timestamp to a date.
 
     >>> timestamp_to_date(123456789.123)
@@ -279,10 +279,10 @@ def timestamp_to_date(value, state = states.default_state):
     try:
         return datetime.date.fromtimestamp(value / 1000), None
     except ValueError:
-        return value, state._(u'Value must be a timestamp')
+        return value, (state or states.default_state)._(u'Value must be a timestamp')
 
 
-def timestamp_to_datetime(value, state = states.default_state):
+def timestamp_to_datetime(value, state = None):
     """Convert a JavaScript timestamp to a datetime.
 
     .. note:: Since a timestamp has no timezone, the generated datetime has no *tzinfo* attribute.
@@ -309,7 +309,7 @@ def timestamp_to_datetime(value, state = states.default_state):
         # return datetime.datetime.fromtimestamp(value / 1000, pytz.utc), None
         return datetime.datetime.fromtimestamp(value / 1000), None
     except ValueError:
-        return value, state._(u'Value must be a timestamp')
+        return value, (state or states.default_state)._(u'Value must be a timestamp')
 
 
 # Level-2 Converters

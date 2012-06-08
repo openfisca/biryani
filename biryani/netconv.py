@@ -65,7 +65,7 @@ def test_email():
     >>> test_email()(None)
     (None, None)
     """
-    def test_email_converter(value, state = states.default_state):
+    def test_email_converter(value, state = None):
         if value is None:
             return value, None
         username, domain = value.split('@', 1)
@@ -75,9 +75,10 @@ def test_email():
             if not answers:
                 answers = DNS.DnsRequest(domain, qtype = 'mx', timeout = 10).req().answers
         except (socket.error, DNS.DNSError), e:
-            return value, state._(u'An error occured when trying to connect to the email server: {}').format(e)
+            return value, (state or states.default_state)._(
+                u'An error occured when trying to connect to the email server: {}').format(e)
         if not answers:
-            return value, state._(u'''Domain "{}" doesn't exist''').format(domain)
+            return value, (state or states.default_state)._(u'''Domain "{}" doesn't exist''').format(domain)
         return value, None
     return test_email_converter
 
@@ -106,7 +107,7 @@ def test_http_url(valid_status_codes = None):
     >>> test_http_url()(None)
     (None, None)
     """
-    def test_http_url_converter(value, state = states.default_state):
+    def test_http_url_converter(value, state = None):
         if value is None:
             return value, None
         request = urllib2.Request(value)
@@ -115,12 +116,14 @@ def test_http_url(valid_status_codes = None):
             response = urllib2.urlopen(request).read()
         except urllib2.HTTPError, response:
             if 200 <= response.code < 400:
-                return value, state._('An error occured when trying to connect to the web server: {:d} {}').format(
+                return value, (state or states.default_state)._(
+                    u'An error occured when trying to connect to the web server: {:d} {}').format(
                     response.code, response.msg)
             if response.code not in (valid_status_codes or []):
-                return value, state._(u'The web server responded with a bad status code: {:d} {}').format(
-                    response.code, response.msg)
+                return value, (state or states.default_state)._(
+                    u'The web server responded with a bad status code: {:d} {}').format(response.code, response.msg)
         except urllib2.URLError, e:
-            return value, state._(u'An error occured when trying to connect to the web server: {}').format(e)
+            return value, (state or states.default_state)._(
+                u'An error occured when trying to connect to the web server: {}').format(e)
         return value, None
     return test_http_url_converter

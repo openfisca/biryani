@@ -61,14 +61,14 @@ localized response.
 
 >>> from biryani import states
 ...
->>> def zero_one_or_many(value, state = states.default_state):
+>>> def zero_one_or_many(value, state = None):
 ...     size = len(value)
 ...     if size == 0:
-...         return state._(u'zero')
+...         return (state or states.default_state)._(u'zero')
 ...     elif size == 1:
-...         return state._(u'one')
+...         return (state or states.default_state)._(u'one')
 ...     else:
-...         return state._(u'many')
+...         return (state or states.default_state)._(u'many')
 ...
 >>> convert_to_zero_one_or_many = conv.function(zero_one_or_many, handle_state = True)
 ...
@@ -147,8 +147,8 @@ the ``handle_state`` flag.
 
 For example, here is a filter that tests whether the localized version of a string as an even length:
 
->>> def has_even_len(value, state = states.default_state):
-...     return len(state._(value)) % 2 == 0
+>>> def has_even_len(value, state = None):
+...     return len((state or states.default_state)._(value)) % 2 == 0
 ...
 >>> test_has_even_len = conv.test(has_even_len, handle_state = True)
 ...
@@ -171,20 +171,20 @@ generates an error when they differ or are two short, or returns the valid passw
 A converter is a function that has two parameters, the input value and the state, and that returns a couple
 (output value, eventual error message).
 
->>> def validate_password(passwords, state = states.default_state):
+>>> def validate_password(passwords, state = None):
 ...     # Generally, a converter should ignore a ``None`` input value:
 ...     if passwords is None:
 ...         return passwords, None
 ...     # Test passwords.
 ...     if len(passwords) < 2:
 ...         # When an error occurs and output value can not be computed, return input value with the error message.
-...         # Every error message is localized using ``state._()``.
-...         return passwords, state._(u'Missing passwords')
+...         # Every error message is localized using ``(state or states.default_state)._()``.
+...         return passwords, (state or states.default_state)._(u'Missing passwords')
 ...     password = passwords[0]
 ...     if password != passwords[1]:
-...         return passwords, state._(u'Password mismatch')
+...         return passwords, (state or states.default_state)._(u'Password mismatch')
 ...     if len(password) < 8:
-...         return password, state._(u'Password too short')
+...         return password, (state or states.default_state)._(u'Password too short')
 ...     return password, None
 
 >>> validate_password([u'abcdefgh', u'abcdefgh'])
@@ -200,20 +200,20 @@ a customized converters.
 For example, to transform our password validator to add a minimal password length:
 
 >>> def validate_password(min_len = 6):
-...     def validate_password_converter(passwords, state = states.default_state):
+...     def validate_password_converter(passwords, state = None):
 ...         # Generally, a converter should ignore a ``None`` input value:
 ...         if passwords is None:
 ...             return passwords, None
 ...         # Test passwords.
 ...         if len(passwords) < 2:
 ...             # When an error occurs and output value can not be computed, return input value with the error message.
-...             # Every error message is localized using ``state._()``.
-...             return passwords, state._(u'Missing passwords')
+...             # Every error message is localized using ``(state or states.default_state)._()``.
+...             return passwords, (state or states.default_state)._(u'Missing passwords')
 ...         password = passwords[0]
 ...         if password != passwords[1]:
-...             return passwords, state._(u'Password mismatch')
+...             return passwords, (state or states.default_state)._(u'Password mismatch')
 ...         if len(password) < min_len:
-...             return password, state._(u'Password too short')
+...             return password, (state or states.default_state)._(u'Password too short')
 ...         return password, None
 ...     return validate_password_converter
 

@@ -40,7 +40,7 @@ __all__ = [
     ]
 
 
-def clean_str_to_lang(value, state = states.default_state):
+def clean_str_to_lang(value, state = None):
     """Convert a clean string to a language code.
 
     .. note:: For a converter that doesn't require a clean string, see :func:`str_to_lang`.
@@ -59,7 +59,7 @@ def clean_str_to_lang(value, state = states.default_state):
     if value is None:
         return value, None
     if not babel.localedata.exists(value):
-        return value, state._(u'Invalid value')
+        return value, (state or states.default_state)._(u'Invalid value')
     return value, None
 
 

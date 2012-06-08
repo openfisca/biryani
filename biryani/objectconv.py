@@ -26,7 +26,6 @@
 
 
 from .baseconv import function
-from . import states
 
 
 __all__ = [
@@ -49,7 +48,7 @@ def make_dict_to_object(cls):
     >>> make_dict_to_object(C)(None)
     (None, None)
     """
-    def dict_to_object(value, state = states.default_state):
+    def dict_to_object(value, state = None):
         if value is None:
             return value, None
         instance = cls()

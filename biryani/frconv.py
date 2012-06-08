@@ -52,7 +52,7 @@ depcom_re = re.compile(ur'\d[\dAB]\d{3}$')
 # Level-1 Converters
 
 
-def clean_str_to_phone(value, state = states.default_state):
+def clean_str_to_phone(value, state = None):
     """Convert a clean string to a phone number.
 
     .. note:: For a converter that doesn't require a clean string, see :func:`str_to_phone`.
@@ -73,7 +73,7 @@ def clean_str_to_phone(value, state = states.default_state):
     if not value:
         return value, None
     if not value.isdigit():
-        return value, state._(u'Unexpected non numerical characters in phone number')
+        return value, (state or states.default_state)._(u'Unexpected non numerical characters in phone number')
 
     if value.startswith('0033'):
         value = value[2:]
@@ -93,21 +93,23 @@ def clean_str_to_phone(value, state = states.default_state):
         if country is not None:
             if len(value) == 11:
                 return u'+{0} {1} {2} {3}'.format(value[2:5], value[5:7], value[7:9], value[9:11]), None
-            return value, state._(u'Wrong number of digits for phone number of {0}').format(state._(country))
-        return value, state._(u'Unknown international phone number')
+            return value, (state or states.default_state)._(u'Wrong number of digits for phone number of {0}').format(
+                (state or states.default_state)._(country))
+        return value, (state or states.default_state)._(u'Unknown international phone number')
     if len(value) == 4:
         return value, None
     if len(value) == 9 and value[0] != '0':
         value = u'0{0}'.format(value)
     if len(value) == 10:
         if value[0] != '0':
-            return value, state._(u'Unexpected first digit in phone number: {0} instead of 0').format(value[0])
+            return value, (state or states.default_state)._(
+                u'Unexpected first digit in phone number: {0} instead of 0').format(value[0])
         mask = u'+33 {0}{1} {2} {3} {4}' if value[1] == '8' else u'+33 {0} {1} {2} {3} {4}'
         return mask.format(value[1], value[2:4], value[4:6], value[6:8], value[8:10]), None
-    return value, state._(u'Wrong number of digits in phone number')
+    return value, (state or states.default_state)._(u'Wrong number of digits in phone number')
 
 
-def expand_postal_routing(value, state = states.default_state):
+def expand_postal_routing(value, state = None):
     """Replace abbreviations with their full name in a postal routing
 
     .. note:: Postal routing must already be converted to uppercase ASCII.
@@ -138,7 +140,7 @@ def expand_postal_routing(value, state = states.default_state):
     return u' '.join(postal_routing_fragments) or None, None
 
 
-def repair_postal_routing(value, state = states.default_state):
+def repair_postal_routing(value, state = None):
     """Correct mispelled words in a postal routing.
 
     .. note:: Postal routing must already be converted to uppercase ASCII.
@@ -163,7 +165,7 @@ def repair_postal_routing(value, state = states.default_state):
     return u' '.join(postal_routing_fragments) or None, None
 
 
-def shrink_postal_routing(value, state = states.default_state):
+def shrink_postal_routing(value, state = None):
     """Replace words in a postal routing with their abbreviation.
 
     .. note:: Postal routing must already be converted to uppercase ASCII.
@@ -189,7 +191,7 @@ def shrink_postal_routing(value, state = states.default_state):
     return u' '.join(postal_routing_fragments) or None, None
 
 
-def split_postal_distribution(value, state = states.default_state):
+def split_postal_distribution(value, state = None):
     """Extract french postal code and postal routing (aka locality) from a string
 
     .. note:: Input value must already be converted to uppercase ASCII.

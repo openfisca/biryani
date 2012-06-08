@@ -29,9 +29,6 @@
 """
 
 
-from .. import states
-
-
 __all__ = [
     'mapping_replace_sequence',
     ]
@@ -42,7 +39,7 @@ N_ = lambda message: message
 def mapping_replace_sequence(keys, converter, sequence_constructor = list):
     """Return a converter that extracts a sequence from a mapping, converts it and reinjects it into the mapping.
     """
-    def mapping_replace_sequence_converter(value, state = states.default_state):
+    def mapping_replace_sequence_converter(value, state = None):
         if value is None:
             return value, None
         sequence = sequence_constructor(

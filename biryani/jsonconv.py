@@ -28,7 +28,7 @@
 import json
 
 from .baseconv import cleanup_line, pipe
-from .states import default_state
+from . import states
 
 
 __all__ = [
@@ -56,7 +56,7 @@ def make_clean_str_to_json(*args, **kwargs):
     >>> make_clean_str_to_json()(None)
     (None, None)
     """
-    def clean_str_to_json(value, state = default_state):
+    def clean_str_to_json(value, state = None):
         if value is None:
             return value, None
         if isinstance(value, str):
@@ -65,7 +65,7 @@ def make_clean_str_to_json(*args, **kwargs):
         try:
             return json.loads(value, *args, **kwargs), None
         except ValueError:
-            return value, state._(u'Invalid JSON')
+            return value, (state or states.default_state)._(u'Invalid JSON')
     return clean_str_to_json
 
 
@@ -85,13 +85,13 @@ def make_json_to_str(*args, **kwargs):
     >>> make_json_to_str()(None)
     (None, None)
     """
-    def json_to_str(value, state = default_state):
+    def json_to_str(value, state = None):
         if value is None:
             return value, None
         try:
             value_str = unicode(json.dumps(value, *args, **kwargs))
         except TypeError:
-            return value, state._(u'Invalid JSON')
+            return value, (state or states.default_state)._(u'Invalid JSON')
         return value_str, None
     return json_to_str
 

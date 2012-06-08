@@ -51,7 +51,7 @@ object_id_re = re.compile(r'[\da-f]{24}$')
 # Level-1 Converters
 
 
-def clean_str_to_object_id(value, state = states.default_state):
+def clean_str_to_object_id(value, state = None):
     """Convert a clean string to a BSON ObjectId.
 
     .. note:: For a converter that doesn't require a clean string, see :func:`str_to_object_id`.
@@ -78,11 +78,11 @@ def clean_str_to_object_id(value, state = states.default_state):
         return value, None
     id = value.lower()
     if object_id_re.match(id) is None:
-        return value, state._(u'Invalid value')
+        return value, (state or states.default_state)._(u'Invalid value')
     return bson.objectid.ObjectId(id), None
 
 
-def object_id_to_str(value, state = states.default_state):
+def object_id_to_str(value, state = None):
     """Convert a BSON ObjectId to unicode.
 
     .. note:: To ensure that input value is an ObjectId, first use :func:`biryani.baseconv.test_isinstance`.
