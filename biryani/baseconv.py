@@ -333,7 +333,7 @@ def decode_str(encoding = 'utf-8'):
 def default(constant):
     """Return a converter that replace a missing value (aka ``None``) by given one.
 
-    .. note:: This is the opposite behaviour of func:`set_value`.
+    .. note:: See converter :func:`set_value` to replace a non-missing value.
 
     >>> default(42)(None)
     (42, None)
