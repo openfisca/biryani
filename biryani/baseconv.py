@@ -1540,7 +1540,7 @@ def structured_mapping(converters, constructor = None, default = None, keep_empt
     def structured_mapping_converter(values, state = None):
         if values is None:
             return values, None
-        if default == 'ignore':
+        if default == 'drop':
             values_converter = converters
         else:
             values_converter = converters.copy()
@@ -1639,7 +1639,7 @@ def structured_sequence(converters, constructor = None, default = None, keep_emp
     def structured_sequence_converter(values, state = None):
         if values is None:
             return values, None
-        if default == 'ignore':
+        if default == 'drop':
             values_converter = converters
         else:
             values_converter = converters[:]
