@@ -141,8 +141,8 @@ json_to_json_web_key_set = pipe(
                'y': u'4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM'}]},
      None)
 
-    >>> from biryani.jsonconv import make_str_to_json
-    >>> pprint(conv.pipe(make_str_to_json(), json_to_json_web_key_set)('''
+    >>> from biryani.jsonconv import make_input_to_json
+    >>> pprint(conv.pipe(make_input_to_json(), json_to_json_web_key_set)('''
     ... {"jwk":
     ...   [
     ...     {"alg":"EC",

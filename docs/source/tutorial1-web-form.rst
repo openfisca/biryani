@@ -126,7 +126,7 @@ error):
 ...         data['username'] = username
 ...     if error is not None:
 ...         errors['username'] = error
-...     email, error = conv.str_to_email(params.get('email'))
+...     email, error = conv.input_to_email(params.get('email'))
 ...     if email is not None:
 ...         data['email'] = email
 ...     if error is not None:
@@ -149,7 +149,7 @@ be simplified to:
 >>> def validate_form(params):
 ...     return conv.new_struct(dict(
 ...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.not_none),
-...         email = conv.pipe(conv.multidict_get('email'), conv.str_to_email),
+...         email = conv.pipe(conv.multidict_get('email'), conv.input_to_email),
 ...         ))(params)
 ...
 >>> validate_form(req4.POST)
@@ -169,7 +169,7 @@ Let's add it to our function:
 >>> def validate_form(params):
 ...     data, errors = conv.new_struct(dict(
 ...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.not_none),
-...         email = conv.pipe(conv.multidict_get('email'), conv.str_to_email),
+...         email = conv.pipe(conv.multidict_get('email'), conv.input_to_email),
 ...         ))(params)
 ...     passwords = params.getall('password')
 ...     if len(passwords) == 2 and passwords[0] == passwords[1]:
@@ -232,7 +232,7 @@ Let's combine `test_passwords` and `extract_first_item` to rewrite our `validate
 ...                 error = u'Password mismatch'),
 ...             conv.function(lambda passwords: passwords[0]),
 ...             ),
-...         email = conv.pipe(conv.multidict_get('email'), conv.str_to_email),
+...         email = conv.pipe(conv.multidict_get('email'), conv.input_to_email),
 ...         ))(params)
 ...
 >>> validate_form(req7.POST)
@@ -308,7 +308,7 @@ Now use this function in `validate_form`:
 ...                 error = u'Password mismatch'),
 ...             conv.function(lambda passwords: passwords[0]),
 ...             ),
-...         email = conv.pipe(conv.multidict_get('email'), conv.str_to_email),
+...         email = conv.pipe(conv.multidict_get('email'), conv.input_to_email),
 ...         tags = conv.pipe(conv.multidict_getall('tag'), conv.function(cleanup_tags)),
 ...         ))(params)
 ...
@@ -331,10 +331,10 @@ It works well, but let's rewrite the tags converter in a more "biryanic" way:
 
     conv.uniform_sequence(conv.cleanup_str, constructor = set)
 
-* We can make a slight improvement by converting each tag to a slug, using :func:`biryani.baseconv.str_to_slug` to remove
+* We can make a slight improvement by converting each tag to a slug, using :func:`biryani.baseconv.input_to_slug` to remove
   diacritical marks, etc::
 
-    conv.uniform_sequence(conv.str_to_slug, constructor = set)
+    conv.uniform_sequence(conv.input_to_slug, constructor = set)
 
 Let's combine everything in a new version of `validate_form`:
 
@@ -356,11 +356,11 @@ Let's combine everything in a new version of `validate_form`:
 ...                 error = u'Password mismatch'),
 ...             conv.function(lambda passwords: passwords[0]),
 ...             ),
-...         email = conv.pipe(conv.multidict_get('email'), conv.str_to_email),
+...         email = conv.pipe(conv.multidict_get('email'), conv.input_to_email),
 ...         tags = conv.pipe(
 ...             conv.multidict_getall('tag'),
 ...             conv.function(lambda tags: u','.join(tags).split(u',')),
-...             conv.uniform_sequence(conv.str_to_slug, constructor = set),
+...             conv.uniform_sequence(conv.input_to_slug, constructor = set),
 ...             conv.function(sorted),
 ...             ),
 ...         ))(params)
@@ -386,11 +386,11 @@ final form of the form validator:
 ...             error = u'Password mismatch'),
 ...         conv.function(lambda passwords: passwords[0]),
 ...         ),
-...     email = conv.pipe(conv.multidict_get('email'), conv.str_to_email),
+...     email = conv.pipe(conv.multidict_get('email'), conv.input_to_email),
 ...     tags = conv.pipe(
 ...         conv.multidict_getall('tag'),
 ...         conv.function(lambda tags: u','.join(tags).split(u',')),
-...         conv.uniform_sequence(conv.str_to_slug, constructor = set),
+...         conv.uniform_sequence(conv.input_to_slug, constructor = set),
 ...         conv.function(sorted),
 ...         ),
 ...     ))

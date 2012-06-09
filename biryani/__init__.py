@@ -52,9 +52,9 @@ def custom_conv(*modules_path):
     and import only needed modules.
 
     >>> conv = custom_conv('biryani.baseconv', 'biryani.datetimeconv')
-    >>> conv.str_to_int(u'42') # str_to_int is defined in baseconv module.
+    >>> conv.input_to_int(u'42') # input_to_int is defined in baseconv module.
     (42, None)
-    >>> conv.iso8601_to_date(u'1789-07-14') # iso8601_to_date is defined in datetimeconv module.
+    >>> conv.iso8601_input_to_date(u'1789-07-14') # iso8601_input_to_date is defined in datetimeconv module.
     (datetime.date(1789, 7, 14), None)
     """
 

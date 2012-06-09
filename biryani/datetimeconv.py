@@ -39,16 +39,16 @@ from . import states
 
 
 __all__ = [
-    'clean_iso8601_to_date',
-    'clean_iso8601_to_datetime',
     'date_to_datetime',
-    'date_to_iso8601',
+    'date_to_iso8601_str',
     'date_to_timestamp',
     'datetime_to_date',
-    'datetime_to_iso8601',
+    'datetime_to_iso8601_str',
     'datetime_to_timestamp',
-    'iso8601_to_date',
-    'iso8601_to_datetime',
+    'iso8601_input_to_date',
+    'iso8601_input_to_datetime',
+    'iso8601_str_to_date',
+    'iso8601_str_to_datetime',
     'set_datetime_tzinfo',
     'timestamp_to_date',
     'timestamp_to_datetime',
@@ -56,98 +56,6 @@ __all__ = [
 
 
 # Level-1 Converters
-
-
-def clean_iso8601_to_date(value, state = None):
-    """Convert a clean string in ISO 8601 format to a date.
-
-    .. note:: For a converter that doesn't require a clean string, see :func:`iso8601_to_date`.
-
-    >>> clean_iso8601_to_date(u'2012-03-04')
-    (datetime.date(2012, 3, 4), None)
-    >>> clean_iso8601_to_date(u'20120304')
-    (datetime.date(2012, 3, 4), None)
-    >>> clean_iso8601_to_date(u'2012-03-04 05:06:07')
-    (datetime.date(2012, 3, 4), None)
-    >>> clean_iso8601_to_date(u'2012-03-04T05:06:07')
-    (datetime.date(2012, 3, 4), None)
-    >>> clean_iso8601_to_date(u'2012-03-04 05:06:07+01:00')
-    (datetime.date(2012, 3, 4), None)
-    >>> clean_iso8601_to_date(u'2012-03-04 05:06:07-02:00')
-    (datetime.date(2012, 3, 4), None)
-    >>> clean_iso8601_to_date(u'2012-03-04 05:06:07 +01:00')
-    (datetime.date(2012, 3, 4), None)
-    >>> clean_iso8601_to_date(u'2012-03-04 05:06:07 -02:00')
-    (datetime.date(2012, 3, 4), None)
-    >>> clean_iso8601_to_date(u'20120304 05:06:07')
-    (datetime.date(2012, 3, 4), None)
-    >>> clean_iso8601_to_date(u'today')
-    (u'today', u'Value must be a date in ISO 8601 format')
-    >>> clean_iso8601_to_date(u'')
-    (u'', u'Value must be a date in ISO 8601 format')
-    >>> clean_iso8601_to_date(None)
-    (None, None)
-    """
-    if value is None:
-        return value, None
-    # mx.DateTime.ISO.ParseDateTimeUTC fails when time zone is preceded with a space. For example,
-    # mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03 +01:00') raises a"ValueError: wrong format,
-    # use YYYY-MM-DD HH:MM:SS" while mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03+01:00') works.
-    # So we remove space before "+" and "-".
-    while u' +' in value:
-        value = value.replace(u' +', '+')
-    while u' -' in value:
-        value = value.replace(u' -', '-')
-    try:
-        return datetime.date.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
-    except ValueError:
-        return value, (state or states.default_state)._(u'Value must be a date in ISO 8601 format')
-
-
-def clean_iso8601_to_datetime(value, state = None):
-    """Convert a clean string in ISO 8601 format to a datetime.
-
-    .. note:: For a converter that doesn't require a clean string, see :func:`iso8601_to_datetime`.
-
-    >>> clean_iso8601_to_datetime(u'2012-03-04')
-    (datetime.datetime(2012, 3, 4, 0, 0), None)
-    >>> clean_iso8601_to_datetime(u'20120304')
-    (datetime.datetime(2012, 3, 4, 0, 0), None)
-    >>> clean_iso8601_to_datetime(u'2012-03-04 05:06:07')
-    (datetime.datetime(2012, 3, 4, 5, 6, 7), None)
-    >>> clean_iso8601_to_datetime(u'2012-03-04T05:06:07')
-    (datetime.datetime(2012, 3, 4, 5, 6, 7), None)
-    >>> clean_iso8601_to_datetime(u'2012-03-04 05:06:07+01:00')
-    (datetime.datetime(2012, 3, 4, 4, 6, 7), None)
-    >>> clean_iso8601_to_datetime(u'2012-03-04 05:06:07-02:00')
-    (datetime.datetime(2012, 3, 4, 7, 6, 7), None)
-    >>> clean_iso8601_to_datetime(u'2012-03-04 05:06:07 +01:00')
-    (datetime.datetime(2012, 3, 4, 4, 6, 7), None)
-    >>> clean_iso8601_to_datetime(u'2012-03-04 05:06:07 -02:00')
-    (datetime.datetime(2012, 3, 4, 7, 6, 7), None)
-    >>> clean_iso8601_to_datetime(u'20120304 05:06:07')
-    (datetime.datetime(2012, 3, 4, 5, 6, 7), None)
-    >>> clean_iso8601_to_datetime(u'now')
-    (u'now', u'Value must be a date-time in ISO 8601 format')
-    >>> clean_iso8601_to_datetime(u'')
-    (u'', u'Value must be a date-time in ISO 8601 format')
-    >>> clean_iso8601_to_datetime(None)
-    (None, None)
-    """
-    if value is None:
-        return value, None
-    # mx.DateTime.ISO.ParseDateTimeUTC fails when time zone is preceded with a space. For example,
-    # mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03 +01:00') raises a"ValueError: wrong format,
-    # use YYYY-MM-DD HH:MM:SS" while mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03+01:00') works.
-    # So we remove space before "+" and "-".
-    while u' +' in value:
-        value = value.replace(u' +', '+')
-    while u' -' in value:
-        value = value.replace(u' -', '-')
-    try:
-        return datetime.datetime.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
-    except ValueError:
-        return value, (state or states.default_state)._(u'Value must be a date-time in ISO 8601 format')
 
 
 def date_to_datetime(value, state = None):
@@ -166,14 +74,14 @@ def date_to_datetime(value, state = None):
     return datetime.datetime(value.year, value.month, value.day), None
 
 
-def date_to_iso8601(value, state = None):
+def date_to_iso8601_str(value, state = None):
     """Convert a date to a string using ISO 8601 format.
 
-    >>> date_to_iso8601(datetime.date(2012, 3, 4))
+    >>> date_to_iso8601_str(datetime.date(2012, 3, 4))
     (u'2012-03-04', None)
-    >>> date_to_iso8601(datetime.datetime(2012, 3, 4, 5, 6, 7))
+    >>> date_to_iso8601_str(datetime.datetime(2012, 3, 4, 5, 6, 7))
     (u'2012-03-04', None)
-    >>> date_to_iso8601(None)
+    >>> date_to_iso8601_str(None)
     (None, None)
     """
     if value is None:
@@ -212,14 +120,14 @@ def datetime_to_date(value, state = None):
     return value.date(), None
 
 
-def datetime_to_iso8601(value, state = None):
+def datetime_to_iso8601_str(value, state = None):
     """Convert a datetime to a string using ISO 8601 format.
 
-    >>> datetime_to_iso8601(datetime.datetime(2012, 3, 4, 5, 6, 7))
+    >>> datetime_to_iso8601_str(datetime.datetime(2012, 3, 4, 5, 6, 7))
     (u'2012-03-04 05:06:07', None)
-    >>> datetime_to_iso8601(datetime.date(2012, 3, 4))
+    >>> datetime_to_iso8601_str(datetime.date(2012, 3, 4))
     (u'2012-03-04 00:00:00', None)
-    >>> datetime_to_iso8601(None)
+    >>> datetime_to_iso8601_str(None)
     (None, None)
     """
     if value is None:
@@ -243,6 +151,98 @@ def datetime_to_timestamp(value, state = None):
     if utcoffset is not None:
         value -= utcoffset
     return int(calendar.timegm(value.timetuple()) * 1000 + value.microsecond / 1000), None
+
+
+def iso8601_str_to_date(value, state = None):
+    """Convert a clean string in ISO 8601 format to a date.
+
+    .. note:: For a converter that doesn't require a clean string, see :func:`iso8601_input_to_date`.
+
+    >>> iso8601_str_to_date(u'2012-03-04')
+    (datetime.date(2012, 3, 4), None)
+    >>> iso8601_str_to_date(u'20120304')
+    (datetime.date(2012, 3, 4), None)
+    >>> iso8601_str_to_date(u'2012-03-04 05:06:07')
+    (datetime.date(2012, 3, 4), None)
+    >>> iso8601_str_to_date(u'2012-03-04T05:06:07')
+    (datetime.date(2012, 3, 4), None)
+    >>> iso8601_str_to_date(u'2012-03-04 05:06:07+01:00')
+    (datetime.date(2012, 3, 4), None)
+    >>> iso8601_str_to_date(u'2012-03-04 05:06:07-02:00')
+    (datetime.date(2012, 3, 4), None)
+    >>> iso8601_str_to_date(u'2012-03-04 05:06:07 +01:00')
+    (datetime.date(2012, 3, 4), None)
+    >>> iso8601_str_to_date(u'2012-03-04 05:06:07 -02:00')
+    (datetime.date(2012, 3, 4), None)
+    >>> iso8601_str_to_date(u'20120304 05:06:07')
+    (datetime.date(2012, 3, 4), None)
+    >>> iso8601_str_to_date(u'today')
+    (u'today', u'Value must be a date in ISO 8601 format')
+    >>> iso8601_str_to_date(u'')
+    (u'', u'Value must be a date in ISO 8601 format')
+    >>> iso8601_str_to_date(None)
+    (None, None)
+    """
+    if value is None:
+        return value, None
+    # mx.DateTime.ISO.ParseDateTimeUTC fails when time zone is preceded with a space. For example,
+    # mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03 +01:00') raises a"ValueError: wrong format,
+    # use YYYY-MM-DD HH:MM:SS" while mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03+01:00') works.
+    # So we remove space before "+" and "-".
+    while u' +' in value:
+        value = value.replace(u' +', '+')
+    while u' -' in value:
+        value = value.replace(u' -', '-')
+    try:
+        return datetime.date.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
+    except ValueError:
+        return value, (state or states.default_state)._(u'Value must be a date in ISO 8601 format')
+
+
+def iso8601_str_to_datetime(value, state = None):
+    """Convert a clean string in ISO 8601 format to a datetime.
+
+    .. note:: For a converter that doesn't require a clean string, see :func:`iso8601_input_to_datetime`.
+
+    >>> iso8601_str_to_datetime(u'2012-03-04')
+    (datetime.datetime(2012, 3, 4, 0, 0), None)
+    >>> iso8601_str_to_datetime(u'20120304')
+    (datetime.datetime(2012, 3, 4, 0, 0), None)
+    >>> iso8601_str_to_datetime(u'2012-03-04 05:06:07')
+    (datetime.datetime(2012, 3, 4, 5, 6, 7), None)
+    >>> iso8601_str_to_datetime(u'2012-03-04T05:06:07')
+    (datetime.datetime(2012, 3, 4, 5, 6, 7), None)
+    >>> iso8601_str_to_datetime(u'2012-03-04 05:06:07+01:00')
+    (datetime.datetime(2012, 3, 4, 4, 6, 7), None)
+    >>> iso8601_str_to_datetime(u'2012-03-04 05:06:07-02:00')
+    (datetime.datetime(2012, 3, 4, 7, 6, 7), None)
+    >>> iso8601_str_to_datetime(u'2012-03-04 05:06:07 +01:00')
+    (datetime.datetime(2012, 3, 4, 4, 6, 7), None)
+    >>> iso8601_str_to_datetime(u'2012-03-04 05:06:07 -02:00')
+    (datetime.datetime(2012, 3, 4, 7, 6, 7), None)
+    >>> iso8601_str_to_datetime(u'20120304 05:06:07')
+    (datetime.datetime(2012, 3, 4, 5, 6, 7), None)
+    >>> iso8601_str_to_datetime(u'now')
+    (u'now', u'Value must be a date-time in ISO 8601 format')
+    >>> iso8601_str_to_datetime(u'')
+    (u'', u'Value must be a date-time in ISO 8601 format')
+    >>> iso8601_str_to_datetime(None)
+    (None, None)
+    """
+    if value is None:
+        return value, None
+    # mx.DateTime.ISO.ParseDateTimeUTC fails when time zone is preceded with a space. For example,
+    # mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03 +01:00') raises a"ValueError: wrong format,
+    # use YYYY-MM-DD HH:MM:SS" while mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03+01:00') works.
+    # So we remove space before "+" and "-".
+    while u' +' in value:
+        value = value.replace(u' +', '+')
+    while u' -' in value:
+        value = value.replace(u' -', '-')
+    try:
+        return datetime.datetime.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
+    except ValueError:
+        return value, (state or states.default_state)._(u'Value must be a date-time in ISO 8601 format')
 
 
 def set_datetime_tzinfo(tzinfo = None):
@@ -269,7 +269,7 @@ def timestamp_to_date(value, state = None):
     >>> timestamp_to_date(u'123456789.123')
     Traceback (most recent call last):
     TypeError:
-    >>> pipe(str_to_float, timestamp_to_date)(u'123456789.123')
+    >>> pipe(input_to_float, timestamp_to_date)(u'123456789.123')
     (datetime.date(1970, 1, 2), None)
     >>> timestamp_to_date(None)
     (None, None)
@@ -296,7 +296,7 @@ def timestamp_to_datetime(value, state = None):
     >>> timestamp_to_datetime(u'123456789.123')
     Traceback (most recent call last):
     TypeError:
-    >>> pipe(str_to_float, timestamp_to_datetime)(u'123456789.123')
+    >>> pipe(input_to_float, timestamp_to_datetime)(u'123456789.123')
     (datetime.datetime(1970, 1, 2, 11, 17, 36, 789123), None)
     >>> timestamp_to_datetime(None)
     (None, None)
@@ -315,64 +315,64 @@ def timestamp_to_datetime(value, state = None):
 # Level-2 Converters
 
 
-iso8601_to_date = pipe(cleanup_line, clean_iso8601_to_date)
+iso8601_input_to_date = pipe(cleanup_line, iso8601_str_to_date)
 """Convert a string in ISO 8601 format to a date.
 
-    >>> iso8601_to_date(u'2012-03-04')
+    >>> iso8601_input_to_date(u'2012-03-04')
     (datetime.date(2012, 3, 4), None)
-    >>> iso8601_to_date(u'20120304')
+    >>> iso8601_input_to_date(u'20120304')
     (datetime.date(2012, 3, 4), None)
-    >>> iso8601_to_date(u'2012-03-04 05:06:07')
+    >>> iso8601_input_to_date(u'2012-03-04 05:06:07')
     (datetime.date(2012, 3, 4), None)
-    >>> iso8601_to_date(u'2012-03-04T05:06:07')
+    >>> iso8601_input_to_date(u'2012-03-04T05:06:07')
     (datetime.date(2012, 3, 4), None)
-    >>> iso8601_to_date(u'2012-03-04 05:06:07+01:00')
+    >>> iso8601_input_to_date(u'2012-03-04 05:06:07+01:00')
     (datetime.date(2012, 3, 4), None)
-    >>> iso8601_to_date(u'2012-03-04 05:06:07-02:00')
+    >>> iso8601_input_to_date(u'2012-03-04 05:06:07-02:00')
     (datetime.date(2012, 3, 4), None)
-    >>> iso8601_to_date(u'2012-03-04 05:06:07 +01:00')
+    >>> iso8601_input_to_date(u'2012-03-04 05:06:07 +01:00')
     (datetime.date(2012, 3, 4), None)
-    >>> iso8601_to_date(u'2012-03-04 05:06:07 -02:00')
+    >>> iso8601_input_to_date(u'2012-03-04 05:06:07 -02:00')
     (datetime.date(2012, 3, 4), None)
-    >>> iso8601_to_date(u'20120304 05:06:07')
+    >>> iso8601_input_to_date(u'20120304 05:06:07')
     (datetime.date(2012, 3, 4), None)
-    >>> iso8601_to_date(u'   2012-03-04   ')
+    >>> iso8601_input_to_date(u'   2012-03-04   ')
     (datetime.date(2012, 3, 4), None)
-    >>> iso8601_to_date(u'today')
+    >>> iso8601_input_to_date(u'today')
     (u'today', u'Value must be a date in ISO 8601 format')
-    >>> iso8601_to_date(u'   ')
+    >>> iso8601_input_to_date(u'   ')
     (None, None)
-    >>> iso8601_to_date(None)
+    >>> iso8601_input_to_date(None)
     (None, None)
     """
 
-iso8601_to_datetime = pipe(cleanup_line, clean_iso8601_to_datetime)
+iso8601_input_to_datetime = pipe(cleanup_line, iso8601_str_to_datetime)
 """Convert a string in ISO 8601 format to a datetime.
 
-    >>> iso8601_to_datetime(u'2012-03-04')
+    >>> iso8601_input_to_datetime(u'2012-03-04')
     (datetime.datetime(2012, 3, 4, 0, 0), None)
-    >>> iso8601_to_datetime(u'20120304')
+    >>> iso8601_input_to_datetime(u'20120304')
     (datetime.datetime(2012, 3, 4, 0, 0), None)
-    >>> iso8601_to_datetime(u'2012-03-04 05:06:07')
+    >>> iso8601_input_to_datetime(u'2012-03-04 05:06:07')
     (datetime.datetime(2012, 3, 4, 5, 6, 7), None)
-    >>> iso8601_to_datetime(u'2012-03-04T05:06:07')
+    >>> iso8601_input_to_datetime(u'2012-03-04T05:06:07')
     (datetime.datetime(2012, 3, 4, 5, 6, 7), None)
-    >>> iso8601_to_datetime(u'2012-03-04 05:06:07+01:00')
+    >>> iso8601_input_to_datetime(u'2012-03-04 05:06:07+01:00')
     (datetime.datetime(2012, 3, 4, 4, 6, 7), None)
-    >>> iso8601_to_datetime(u'2012-03-04 05:06:07-02:00')
+    >>> iso8601_input_to_datetime(u'2012-03-04 05:06:07-02:00')
     (datetime.datetime(2012, 3, 4, 7, 6, 7), None)
-    >>> iso8601_to_datetime(u'2012-03-04 05:06:07 +01:00')
+    >>> iso8601_input_to_datetime(u'2012-03-04 05:06:07 +01:00')
     (datetime.datetime(2012, 3, 4, 4, 6, 7), None)
-    >>> iso8601_to_datetime(u'2012-03-04 05:06:07 -02:00')
+    >>> iso8601_input_to_datetime(u'2012-03-04 05:06:07 -02:00')
     (datetime.datetime(2012, 3, 4, 7, 6, 7), None)
-    >>> iso8601_to_datetime(u'20120304 05:06:07')
+    >>> iso8601_input_to_datetime(u'20120304 05:06:07')
     (datetime.datetime(2012, 3, 4, 5, 6, 7), None)
-    >>> iso8601_to_datetime(u'   2012-03-04 05:06:07   ')
+    >>> iso8601_input_to_datetime(u'   2012-03-04 05:06:07   ')
     (datetime.datetime(2012, 3, 4, 5, 6, 7), None)
-    >>> iso8601_to_datetime(u'now')
+    >>> iso8601_input_to_datetime(u'now')
     (u'now', u'Value must be a date-time in ISO 8601 format')
-    >>> iso8601_to_datetime(u'   ')
+    >>> iso8601_input_to_datetime(u'   ')
     (None, None)
-    >>> iso8601_to_datetime(None)
+    >>> iso8601_input_to_datetime(None)
     (None, None)
     """

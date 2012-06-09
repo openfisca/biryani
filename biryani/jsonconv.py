@@ -32,41 +32,13 @@ from . import states
 
 
 __all__ = [
-    'make_clean_str_to_json',
+    'make_input_to_json',
     'make_json_to_str',
     'make_str_to_json',
     ]
 
 
-def make_clean_str_to_json(*args, **kwargs):
-    """Return a converter that decodes a clean string to a JSON data.
-
-    .. note:: For a converter that doesn't require a clean string, see :func:`make_str_to_json`.
-
-    >>> make_clean_str_to_json()(u'{"a": 1, "b": [2, "three"]}')
-    ({u'a': 1, u'b': [2, u'three']}, None)
-    >>> make_clean_str_to_json()(u'null')
-    (None, None)
-    >>> make_clean_str_to_json()(u'Hello World')
-    (u'Hello World', u'Invalid JSON')
-    >>> make_clean_str_to_json()(u'{"a": 1, "b":')
-    (u'{"a": 1, "b":', u'Invalid JSON')
-    >>> make_clean_str_to_json()(u'')
-    (u'', u'Invalid JSON')
-    >>> make_clean_str_to_json()(None)
-    (None, None)
-    """
-    def clean_str_to_json(value, state = None):
-        if value is None:
-            return value, None
-        if isinstance(value, str):
-            # Ensure that json.loads() uses unicode strings.
-            value = value.decode('utf-8')
-        try:
-            return json.loads(value, *args, **kwargs), None
-        except ValueError:
-            return value, (state or states.default_state)._(u'Invalid JSON')
-    return clean_str_to_json
+# Level-1 Converters
 
 
 def make_json_to_str(*args, **kwargs):
@@ -99,6 +71,8 @@ def make_json_to_str(*args, **kwargs):
 def make_str_to_json(*args, **kwargs):
     """Return a converter that decodes a clean string to a JSON data.
 
+    .. note:: For a converter that doesn't require a clean string, see :func:`make_input_to_json`.
+
     >>> make_str_to_json()(u'{"a": 1, "b": [2, "three"]}')
     ({u'a': 1, u'b': [2, u'three']}, None)
     >>> make_str_to_json()(u'null')
@@ -108,11 +82,43 @@ def make_str_to_json(*args, **kwargs):
     >>> make_str_to_json()(u'{"a": 1, "b":')
     (u'{"a": 1, "b":', u'Invalid JSON')
     >>> make_str_to_json()(u'')
-    (None, None)
+    (u'', u'Invalid JSON')
     >>> make_str_to_json()(None)
+    (None, None)
+    """
+    def str_to_json(value, state = None):
+        if value is None:
+            return value, None
+        if isinstance(value, str):
+            # Ensure that json.loads() uses unicode strings.
+            value = value.decode('utf-8')
+        try:
+            return json.loads(value, *args, **kwargs), None
+        except ValueError:
+            return value, (state or states.default_state)._(u'Invalid JSON')
+    return str_to_json
+
+
+# Level-2 Converters
+
+
+def make_input_to_json(*args, **kwargs):
+    """Return a converter that decodes a clean string to a JSON data.
+
+    >>> make_input_to_json()(u'{"a": 1, "b": [2, "three"]}')
+    ({u'a': 1, u'b': [2, u'three']}, None)
+    >>> make_input_to_json()(u'null')
+    (None, None)
+    >>> make_input_to_json()(u'Hello World')
+    (u'Hello World', u'Invalid JSON')
+    >>> make_input_to_json()(u'{"a": 1, "b":')
+    (u'{"a": 1, "b":', u'Invalid JSON')
+    >>> make_input_to_json()(u'')
+    (None, None)
+    >>> make_input_to_json()(None)
     (None, None)
     """
     return pipe(
         cleanup_line,
-        make_clean_str_to_json(*args, **kwargs),
+        make_str_to_json(*args, **kwargs),
         )

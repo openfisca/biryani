@@ -58,7 +58,7 @@ def test_email():
     Traceback (most recent call last):
     ValueError:
     >>> pipe(
-    ...     str_to_email,
+    ...     input_to_email,
     ...     test_email(),
     ...     )(u'')
     (None, None)
@@ -100,7 +100,7 @@ def test_http_url(valid_status_codes = None):
     Traceback (most recent call last):
     ValueError:
     >>> pipe(
-    ...     make_str_to_url(),
+    ...     make_input_to_url(),
     ...     test_http_url(),
     ...     )(u'')
     (None, None)

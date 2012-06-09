@@ -60,11 +60,11 @@ Once the state has been properly defined, you can use it for your conversions:
 (None, u'Missing value')
 >>> conv.not_none(None, state = french_state)
 (None, u'Valeur manquante')
->>> conv.pipe(conv.str_to_int, conv.not_none)(None, state = french_state)
+>>> conv.pipe(conv.input_to_int, conv.not_none)(None, state = french_state)
 (None, u'Valeur manquante')
->>> conv.pipe(conv.str_to_int, conv.not_none)(u'Hello world!')
+>>> conv.pipe(conv.input_to_int, conv.not_none)(u'Hello world!')
 (u'Hello world!', u'Value must be an integer')
->>> conv.pipe(conv.str_to_int, conv.not_none)(u'Hello world!', state = french_state)
+>>> conv.pipe(conv.input_to_int, conv.not_none)(u'Hello world!', state = french_state)
 (u'Hello world!', u'La valeur doit \xeatre un entier')
 
 
@@ -94,7 +94,7 @@ When using *Biryani* in web applications, for example, you will often need to di
 >>> french_user_state.languages = ['fr_FR', 'fr']
 >>> conv.not_none(None, state = french_user_state)
 (None, u'Valeur manquante')
->>> conv.pipe(conv.str_to_int, conv.not_none)(u'Hello world!', state = french_user_state)
+>>> conv.pipe(conv.input_to_int, conv.not_none)(u'Hello world!', state = french_user_state)
 (u'Hello world!', u'La valeur doit \xeatre un entier')
 
 

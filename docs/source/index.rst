@@ -28,11 +28,11 @@ Every converter returns the converted value and an optional error:
 
 >>> from biryani import baseconv as conv
 
->>> conv.str_to_email(u'John@DOE.name')
+>>> conv.input_to_email(u'John@DOE.name')
 (u'john@doe.name', None)
->>> conv.str_to_email(u'john.doe.name')
+>>> conv.input_to_email(u'john.doe.name')
 (u'john.doe.name', u'An email must contain exactly one "@"')
->>> conv.str_to_email(u'   ')
+>>> conv.input_to_email(u'   ')
 (None, None)
 
 
@@ -41,11 +41,11 @@ Example 2: Required email validator
 
 Converters can be combined together to form more complex converters:
 
->>> str_to_required_email = conv.pipe(conv.str_to_email, conv.not_none)
+>>> input_to_required_email = conv.pipe(conv.input_to_email, conv.not_none)
 
->>> str_to_required_email(u'John@DOE.name')
+>>> input_to_required_email(u'John@DOE.name')
 (u'john@doe.name', None)
->>> str_to_required_email(u'   ')
+>>> input_to_required_email(u'   ')
 (None, u'Missing value')
 
 
@@ -65,7 +65,7 @@ A sample validator for a web form containing the following fields:
 ...             error = u'Password mismatch'),
 ...         conv.function(lambda passwords: passwords[0]),
 ...         ),
-...     email = conv.str_to_email,
+...     email = conv.input_to_email,
 ...     ))
 
 >>> validate_form({

@@ -25,6 +25,9 @@ Boolean Converters
 .. autofunction:: biryani.baseconv.guess_bool
    :noindex:
 
+.. autofunction:: biryani.baseconv.input_to_bool
+   :noindex:
+
 .. autofunction:: biryani.baseconv.str_to_bool
    :noindex:
 
@@ -57,13 +60,22 @@ Collection (dict, list, set, tuple, etc) Converters
 Internet Data Converters
 ------------------------
 
+.. autofunction:: biryani.baseconv.input_to_email
+   :noindex:
+
+.. autofunction:: biryani.baseconv.input_to_url_name
+   :noindex:
+
+.. autofunction:: biryani.baseconv.input_to_url_path_and_query
+   :noindex:
+
+.. autofunction:: biryani.baseconv.make_input_to_url
+   :noindex:
+
 .. autofunction:: biryani.baseconv.make_str_to_url
    :noindex:
 
 .. autofunction:: biryani.baseconv.str_to_email
-   :noindex:
-
-.. autofunction:: biryani.baseconv.str_to_url_name
    :noindex:
 
 .. autofunction:: biryani.baseconv.str_to_url_path_and_query
@@ -79,10 +91,10 @@ Number Converters
 .. autofunction:: biryani.baseconv.anything_to_int
    :noindex:
 
-.. autofunction:: biryani.baseconv.str_to_float
+.. autofunction:: biryani.baseconv.input_to_float
    :noindex:
 
-.. autofunction:: biryani.baseconv.str_to_int
+.. autofunction:: biryani.baseconv.input_to_int
    :noindex:
 
 
@@ -90,12 +102,6 @@ String Converters
 -----------------
 
 .. autofunction:: biryani.baseconv.anything_to_str
-   :noindex:
-
-.. autofunction:: biryani.baseconv.make_str_to_normal_form
-   :noindex:
-
-.. autofunction:: biryani.baseconv.make_str_to_slug
    :noindex:
 
 .. autofunction:: biryani.baseconv.cleanup_line
@@ -113,7 +119,13 @@ String Converters
 .. autofunction:: biryani.baseconv.encode_str
    :noindex:
 
-.. autofunction:: biryani.baseconv.str_to_slug
+.. autofunction:: biryani.baseconv.input_to_slug
+   :noindex:
+
+.. autofunction:: biryani.baseconv.make_input_to_normal_form
+   :noindex:
+
+.. autofunction:: biryani.baseconv.make_input_to_slug
    :noindex:
 
 

@@ -42,9 +42,9 @@ from Crypto.Util import number
 
 from . import states
 from .base64conv import base64_to_bytes, make_base64url_to_bytes, make_bytes_to_base64url
-from .baseconv import (check, cleanup_line, get, make_str_to_url, N_, noop, not_none, pipe, struct, test,
+from .baseconv import (check, cleanup_line, get, make_input_to_url, N_, noop, not_none, pipe, struct, test,
     test_greater_or_equal, test_in, test_isinstance, test_less_or_equal, uniform_sequence)
-from .jsonconv import make_json_to_str, make_str_to_json
+from .jsonconv import make_json_to_str, make_input_to_json
 from .jwkconv import json_to_json_web_key
 
 
@@ -53,9 +53,9 @@ __all__ = [
     'decoded_json_web_token_to_json',
     'decrypt_json_web_token',
     'encrypt_json_web_token',
+    'input_to_json_web_token',
     'make_json_to_json_web_token',
     'sign_json_web_token',
-    'str_to_json_web_token',
     'verify_decoded_json_web_token_signature',
     'verify_decoded_json_web_token_time',
     ]
@@ -109,7 +109,7 @@ def decode_json_web_token(token, state = None):
     errors = {}
     header, error = pipe(
         make_base64url_to_bytes(add_padding = True),
-        make_str_to_json(),
+        make_input_to_json(),
         )(value['encoded_header'], state = state)
     if error is None:
         value['header'] = header
@@ -117,7 +117,7 @@ def decode_json_web_token(token, state = None):
         errors['encoded_header'] = (state or states.default_state)._(u'Invalid format')
     claims, error = pipe(
         make_base64url_to_bytes(add_padding = True),
-        make_str_to_json(),
+        make_input_to_json(),
         not_none,
         )(value['encoded_payload'], state = state)
     if error is not None:
@@ -196,7 +196,7 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
 
         header, error = pipe(
             make_base64url_to_bytes(add_padding = True),
-            make_str_to_json(),
+            make_input_to_json(),
             test_isinstance(dict),
             struct(
                 dict(
@@ -221,11 +221,11 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
                         ),
                     jku = pipe(
                         test_isinstance(basestring),
-                        make_str_to_url(add_prefix = None, error_if_fragment = True, full = True, schemes = ['https']),
+                        make_input_to_url(add_prefix = None, error_if_fragment = True, full = True, schemes = ['https']),
                         ),
                     jwk = pipe(
                         test_isinstance(basestring),
-                        make_str_to_json(),
+                        make_input_to_json(),
                         json_to_json_web_key,
                         ),
                     kid = test_isinstance(basestring),
@@ -253,7 +253,7 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
                         ),
                     x5u = pipe(
                         test_isinstance(basestring),
-                        make_str_to_url(add_prefix = None, error_if_fragment = True, full = True, schemes = ['https']),
+                        make_input_to_url(add_prefix = None, error_if_fragment = True, full = True, schemes = ['https']),
                         ),
                     zip = pipe(
                         test_isinstance(basestring),
@@ -466,7 +466,7 @@ def encrypt_json_web_token(algorithm = None, compression = None, integrity = Non
         encoded_header, token_without_header = token.split('.', 1)
         header, error = pipe(
             make_base64url_to_bytes(add_padding = True),
-            make_str_to_json(),
+            make_input_to_json(),
             )(encoded_header, state = state)
         if error is not None:
             return token, (state or states.default_state)._(u'Invalid header: {}').format(error)
@@ -538,6 +538,9 @@ def encrypt_json_web_token(algorithm = None, compression = None, integrity = Non
     return encrypt_json_web_token_converter
 
 
+input_to_json_web_token = cleanup_line
+
+
 def make_json_to_json_web_token(typ = None):
     """Return a converter that wraps JSON data into an unsigned and unencrypted JSON web token."""
     header = dict(
@@ -598,7 +601,7 @@ def sign_json_web_token(algorithm = None, json_web_key_url = None, key_id = None
         encoded_header, token_without_header = token.split('.', 1)
         header, error = pipe(
             make_base64url_to_bytes(add_padding = True),
-            make_str_to_json(),
+            make_input_to_json(),
             )(encoded_header, state = state)
         if error is not None:
             return token, (state or states.default_state)._(u'Invalid header: {}').format(error)
@@ -638,9 +641,6 @@ def sign_json_web_token(algorithm = None, json_web_key_url = None, key_id = None
         token = '{0}.{1}'.format(secured_input, encoded_signature)
         return token, None
     return sign_json_web_token_converter
-
-
-str_to_json_web_token = cleanup_line
 
 
 def verify_decoded_json_web_token_signature(allowed_algorithms = None, public_key_as_encoded_str = None,
