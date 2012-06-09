@@ -26,7 +26,7 @@
 
 
 from .base64conv import make_base64url_to_bytes
-from .baseconv import (exists, function, noop, pipe, struct, switch, test_conv, test_in, test_isinstance,
+from .baseconv import (function, noop, not_none, pipe, struct, switch, test_conv, test_in, test_isinstance,
     uniform_sequence)
 
 
@@ -46,7 +46,7 @@ json_to_json_web_key = pipe(
                     u'EC',
                     u'RSA',
                     ]),
-                exists,
+                not_none,
                 ),
             kid = test_isinstance(basestring),
             use = pipe(
@@ -71,19 +71,19 @@ json_to_json_web_key = pipe(
                         u'P-384',
                         u'P-521',
                         ]),
-                    exists,
+                    not_none,
                     ),
                 kid = noop,
                 use = noop,
                 x = pipe(
                     test_isinstance(basestring),
                     test_conv(make_base64url_to_bytes(add_padding = True)),
-                    exists,
+                    not_none,
                     ),
                 y = pipe(
                     test_isinstance(basestring),
                     test_conv(make_base64url_to_bytes(add_padding = True)),
-                    exists,
+                    not_none,
                     ),
                 )),
             RSA = struct(dict(
@@ -91,13 +91,13 @@ json_to_json_web_key = pipe(
                 exp = pipe(
                     test_isinstance(basestring),
                     test_conv(make_base64url_to_bytes(add_padding = True)),
-                    exists,
+                    not_none,
                     ),
                 kid = noop,
                 mod = pipe(
                     test_isinstance(basestring),
                     test_conv(make_base64url_to_bytes(add_padding = True)),
-                    exists,
+                    not_none,
                     ),
                 use = noop,
                 )),
@@ -117,7 +117,7 @@ json_to_json_web_key_set = pipe(
             jwk = pipe(
                 test_isinstance(list),
                 uniform_sequence(json_to_json_web_key),
-                exists,
+                not_none,
                 ),
             ),
         ),

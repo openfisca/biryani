@@ -43,16 +43,16 @@ Sample usage:
 ...     today = datetime.date.today()
 ...     converted_value, error = conv.struct(
 ...         dict(
-...             credit_card_type = conv.pipe(conv.str_to_credit_card_type, conv.exists),
+...             credit_card_type = conv.pipe(conv.str_to_credit_card_type, conv.not_none),
 ...             expiration_month = conv.pipe(
 ...                 conv.str_to_int,
 ...                 conv.test_between(1, 12, error = N_(u'Invalid expiration month')),
-...                 conv.exists,
+...                 conv.not_none,
 ...                 ),
 ...             expiration_year = conv.pipe(
 ...                 conv.str_to_int,
 ...                 conv.test_greater_or_equal(today.year, error = N_(u'Invalid expiration year')),
-...                 conv.exists,
+...                 conv.not_none,
 ...                 ),
 ...             ),
 ...         default = conv.noop,
@@ -74,11 +74,11 @@ Sample usage:
 ...         dict(
 ...             credit_card_number = conv.pipe(
 ...                 conv.make_str_to_credit_card_number(credit_card_type),
-...                 conv.exists,
+...                 conv.not_none,
 ...                 ),
 ...             credit_card_security_code = conv.pipe(
 ...                 conv.make_str_to_credit_card_security_code(credit_card_type),
-...                 conv.exists,
+...                 conv.not_none,
 ...                 ),
 ...             ),
 ...         default = conv.noop,

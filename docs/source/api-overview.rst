@@ -120,7 +120,7 @@ String Converters
 Tests
 -----
 
-.. autofunction:: biryani.baseconv.exists
+.. autofunction:: biryani.baseconv.not_none
    :noindex:
 
 .. autofunction:: biryani.baseconv.test
@@ -135,7 +135,7 @@ Tests
 .. autofunction:: biryani.baseconv.test_equals
    :noindex:
 
-.. autofunction:: biryani.baseconv.test_exists
+.. autofunction:: biryani.baseconv.test_not_none
    :noindex:
 
 .. autofunction:: biryani.baseconv.test_greater_or_equal

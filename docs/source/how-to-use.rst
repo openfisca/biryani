@@ -15,7 +15,7 @@ When you don't mind about memory consumption, import all conversion modules at o
 
     # Use the converters. For example:
     s = '5'
-    i = conv.check(conv.pipe(conv.str_to_int, conv.exists))(s)
+    i = conv.check(conv.pipe(conv.str_to_int, conv.not_none))(s)
     assert i == 5
     ...
 
@@ -61,7 +61,7 @@ In your others modules add::
 
     # Use the converters. For example:
     s = '5'
-    i = conv.check(conv.pipe(conv.str_to_int, conv.exists))(s)
+    i = conv.check(conv.pipe(conv.str_to_int, conv.not_none))(s)
     assert i == 5
     ...
 

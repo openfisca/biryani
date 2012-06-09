@@ -42,7 +42,7 @@ from Crypto.Util import number
 
 from . import states
 from .base64conv import base64_to_bytes, make_base64url_to_bytes, make_bytes_to_base64url
-from .baseconv import (check, cleanup_line, exists, get, make_str_to_url, N_, noop, pipe, struct, test,
+from .baseconv import (check, cleanup_line, get, make_str_to_url, N_, noop, not_none, pipe, struct, test,
     test_greater_or_equal, test_in, test_isinstance, test_less_or_equal, uniform_sequence)
 from .jsonconv import make_json_to_str, make_str_to_json
 from .jwkconv import json_to_json_web_key
@@ -118,7 +118,7 @@ def decode_json_web_token(token, state = None):
     claims, error = pipe(
         make_base64url_to_bytes(add_padding = True),
         make_str_to_json(),
-        exists,
+        not_none,
         )(value['encoded_payload'], state = state)
     if error is not None:
         claims = None
@@ -203,12 +203,12 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
                     alg = pipe(
                         test_isinstance(basestring),
                         test_in(valid_encryption_algorithms),
-                        exists,
+                        not_none,
                         ),
                     enc = pipe(
                         test_isinstance(basestring),
                         test_in(valid_encryption_methods),
-                        exists,
+                        not_none,
                         ),
                     # epk = TODO to support ECDH-ES
                     int = pipe(
@@ -266,7 +266,7 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
                 # default = None,  # For security reasons a header can only contain known attributes.
                 keep_none_values = True,
                 ),
-            exists,
+            not_none,
             )(encoded_header, state = state)
         if error is not None:
             return token, (state or states.default_state)._(u'Invalid header: {}').format(error)
