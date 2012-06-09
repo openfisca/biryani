@@ -37,10 +37,10 @@ from . import states
 
 
 __all__ = [
+    'anything_to_object_id',
     'clean_str_to_object_id',
     'object_id_re',
     'object_id_to_str',
-    'python_data_to_object_id',
     'str_to_object_id',
     ]
 
@@ -57,7 +57,7 @@ def clean_str_to_object_id(value, state = None):
     .. note:: For a converter that doesn't require a clean string, see :func:`str_to_object_id`.
 
     .. note:: For a converter that doesn't fail when input data is already an ObjectId,
-        use :func:`python_data_to_object_id`.
+        use :func:`anything_to_object_id`.
 
     >>> clean_str_to_object_id(u'4e333f53ff42e928000007d8')
     (ObjectId('4e333f53ff42e928000007d8'), None)
@@ -109,7 +109,7 @@ str_to_object_id = pipe(cleanup_line, clean_str_to_object_id)
 """Convert a string to a BSON ObjectId.
 
     .. note:: For a converter that doesn't fail when input data is already an ObjectId,
-        use :func:`python_data_to_object_id`.
+        use :func:`anything_to_object_id`.
 
     >>> str_to_object_id(u'4e333f53ff42e928000007d8')
     (ObjectId('4e333f53ff42e928000007d8'), None)
@@ -135,7 +135,7 @@ str_to_object_id = pipe(cleanup_line, clean_str_to_object_id)
 # Level-2 Converters
 
 
-python_data_to_object_id = first_match(
+anything_to_object_id = first_match(
     test_isinstance(bson.objectid.ObjectId),
     pipe(
         test_isinstance(basestring),
@@ -144,21 +144,21 @@ python_data_to_object_id = first_match(
     )
 """Convert any compatible Python data to a BSON ObjectId.
 
-    >>> python_data_to_object_id(u'4e333f53ff42e928000007d8')
+    >>> anything_to_object_id(u'4e333f53ff42e928000007d8')
     (ObjectId('4e333f53ff42e928000007d8'), None)
-    >>> python_data_to_object_id('4e333f53ff42e928000007d8')
+    >>> anything_to_object_id('4e333f53ff42e928000007d8')
     (ObjectId('4e333f53ff42e928000007d8'), None)
-    >>> python_data_to_object_id(u'4E333F53FF42E928000007D8')
+    >>> anything_to_object_id(u'4E333F53FF42E928000007D8')
     (ObjectId('4e333f53ff42e928000007d8'), None)
-    >>> python_data_to_object_id(u'   4e333f53ff42e928000007d8   ')
+    >>> anything_to_object_id(u'   4e333f53ff42e928000007d8   ')
     (ObjectId('4e333f53ff42e928000007d8'), None)
     >>> from bson.objectid import ObjectId
-    >>> python_data_to_object_id(ObjectId('4e333f53ff42e928000007d8'))
+    >>> anything_to_object_id(ObjectId('4e333f53ff42e928000007d8'))
     (ObjectId('4e333f53ff42e928000007d8'), None)
-    >>> python_data_to_object_id(u"ObjectId('4e333f53ff42e928000007d8')")
+    >>> anything_to_object_id(u"ObjectId('4e333f53ff42e928000007d8')")
     (u"ObjectId('4e333f53ff42e928000007d8')", u'Invalid value')
-    >>> python_data_to_object_id(u'  ')
+    >>> anything_to_object_id(u'  ')
     (None, None)
-    >>> python_data_to_object_id(None)
+    >>> anything_to_object_id(None)
     (None, None)
     """

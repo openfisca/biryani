@@ -38,6 +38,10 @@ from . import states, strings
 
 
 __all__ = [
+    'anything_to_bool',
+    'anything_to_float',
+    'anything_to_int',
+    'anything_to_str',
     'bool_to_str',
     'catch_error',
     'check',
@@ -69,10 +73,6 @@ __all__ = [
     'new_struct',
     'noop',
     'pipe',
-    'python_data_to_bool',
-    'python_data_to_float',
-    'python_data_to_int',
-    'python_data_to_str',
     'rename_item',
     'set_value',
     'str_to_bool',
@@ -112,6 +112,78 @@ username_re = re.compile(r"[^ \t\n\r@<>()]+$", re.I)
 
 
 # Level-1 Converters
+
+
+def anything_to_float(value, state = None):
+    """Convert any python data to a float.
+
+    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+
+    >>> anything_to_float(42)
+    (42.0, None)
+    >>> anything_to_float('42')
+    (42.0, None)
+    >>> anything_to_float(u'42')
+    (42.0, None)
+    >>> anything_to_float(42.75)
+    (42.75, None)
+    >>> anything_to_float(None)
+    (None, None)
+    """
+    if value is None:
+        return value, None
+    try:
+        return float(value), None
+    except ValueError:
+        return value, (state or states.default_state)._(u'Value must be a float')
+
+
+def anything_to_int(value, state = None):
+    """Convert any python data to an integer.
+
+    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+
+    >>> anything_to_int(42)
+    (42, None)
+    >>> anything_to_int('42')
+    (42, None)
+    >>> anything_to_int(u'42')
+    (42, None)
+    >>> anything_to_int(42.75)
+    (42, None)
+    >>> anything_to_int(u'42.75')
+    (u'42.75', u'Value must be an integer')
+    >>> anything_to_int(None)
+    (None, None)
+    """
+    if value is None:
+        return value, None
+    try:
+        return int(value), None
+    except ValueError:
+        return value, (state or states.default_state)._(u'Value must be an integer')
+
+
+def anything_to_str(value, state = None):
+    """Convert any Python data to unicode.
+
+    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+
+    >>> anything_to_str(42)
+    (u'42', None)
+    >>> anything_to_str('42')
+    (u'42', None)
+    >>> anything_to_str(None)
+    (None, None)
+    """
+    if value is None:
+        return value, None
+    if isinstance(value, str):
+        return value.decode('utf-8'), None
+    try:
+        return unicode(value), None
+    except UnicodeDecodeError:
+        return str(value).decode('utf-8'), None
 
 
 def bool_to_str(value, state = None):
@@ -1099,7 +1171,7 @@ def pipe(*converters):
     AttributeError:
     >>> pipe(test_isinstance(unicode), str_to_bool)(42)
     (42, u"Value is not an instance of <type 'unicode'>")
-    >>> pipe(python_data_to_str, test_isinstance(unicode), str_to_bool)(42)
+    >>> pipe(anything_to_str, test_isinstance(unicode), str_to_bool)(42)
     (True, None)
     >>> pipe()(42)
     (42, None)
@@ -1120,78 +1192,6 @@ def pipe(*converters):
                 kwargs['state'] = state
         return value, None
     return pipe_converter
-
-
-def python_data_to_float(value, state = None):
-    """Convert any python data to a float.
-
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
-
-    >>> python_data_to_float(42)
-    (42.0, None)
-    >>> python_data_to_float('42')
-    (42.0, None)
-    >>> python_data_to_float(u'42')
-    (42.0, None)
-    >>> python_data_to_float(42.75)
-    (42.75, None)
-    >>> python_data_to_float(None)
-    (None, None)
-    """
-    if value is None:
-        return value, None
-    try:
-        return float(value), None
-    except ValueError:
-        return value, (state or states.default_state)._(u'Value must be a float')
-
-
-def python_data_to_int(value, state = None):
-    """Convert any python data to an integer.
-
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
-
-    >>> python_data_to_int(42)
-    (42, None)
-    >>> python_data_to_int('42')
-    (42, None)
-    >>> python_data_to_int(u'42')
-    (42, None)
-    >>> python_data_to_int(42.75)
-    (42, None)
-    >>> python_data_to_int(u'42.75')
-    (u'42.75', u'Value must be an integer')
-    >>> python_data_to_int(None)
-    (None, None)
-    """
-    if value is None:
-        return value, None
-    try:
-        return int(value), None
-    except ValueError:
-        return value, (state or states.default_state)._(u'Value must be an integer')
-
-
-def python_data_to_str(value, state = None):
-    """Convert any Python data to unicode.
-
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
-
-    >>> python_data_to_str(42)
-    (u'42', None)
-    >>> python_data_to_str('42')
-    (u'42', None)
-    >>> python_data_to_str(None)
-    (None, None)
-    """
-    if value is None:
-        return value, None
-    if isinstance(value, str):
-        return value.decode('utf-8'), None
-    try:
-        return unicode(value), None
-    except UnicodeDecodeError:
-        return str(value).decode('utf-8'), None
 
 
 def rename_item(old_key, new_key):
@@ -1669,7 +1669,7 @@ def switch(key_converter, converters, default = None, handle_missing_value = Fal
     ...     function(lambda value: type(value)),
     ...     {
     ...         bool: set_value(u'boolean'),
-    ...         int: python_data_to_str,
+    ...         int: anything_to_str,
     ...         str: set_value(u'encoded string'),
     ...         },
     ...     handle_missing_value = True,
@@ -1689,7 +1689,7 @@ def switch(key_converter, converters, default = None, handle_missing_value = Fal
     ...     {
     ...         list: uniform_sequence(simple_type_switcher),
     ...         },
-    ...     default = python_data_to_str,
+    ...     default = anything_to_str,
     ...     )
     >>> type_switcher([False, 42])
     ([u'boolean', u'42'], None)
@@ -2149,32 +2149,32 @@ extract_when_singleton = condition(
 # Level-3 Converters
 
 
-python_data_to_bool = function(lambda value: bool(value))
+anything_to_bool = function(lambda value: bool(value))
 """Convert any Python data to a boolean.
 
     .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
 
         When you want ``None`` to be converted to ``False``, use::
 
-            pipe(python_data_to_bool, default(False))
+            pipe(anything_to_bool, default(False))
 
-    >>> python_data_to_bool(0)
+    >>> anything_to_bool(0)
     (False, None)
-    >>> python_data_to_bool(-1)
+    >>> anything_to_bool(-1)
     (True, None)
-    >>> python_data_to_bool(u'0')
+    >>> anything_to_bool(u'0')
     (True, None)
-    >>> python_data_to_bool(u'1')
+    >>> anything_to_bool(u'1')
     (True, None)
-    >>> python_data_to_bool(u'true')
+    >>> anything_to_bool(u'true')
     (True, None)
-    >>> python_data_to_bool(u'false')
+    >>> anything_to_bool(u'false')
     (True, None)
-    >>> python_data_to_bool(u'  0  ')
+    >>> anything_to_bool(u'  0  ')
     (True, None)
-    >>> python_data_to_bool(u'    ')
+    >>> anything_to_bool(u'    ')
     (True, None)
-    >>> python_data_to_bool(None)
+    >>> anything_to_bool(None)
     (None, None)
     """
 
@@ -2224,7 +2224,7 @@ str_to_email = pipe(cleanup_line, clean_str_to_email)
     (None, None)
     """
 
-str_to_float = pipe(cleanup_line, python_data_to_float)
+str_to_float = pipe(cleanup_line, anything_to_float)
 """Convert a string to float.
 
     >>> str_to_float('42')
@@ -2237,7 +2237,7 @@ str_to_float = pipe(cleanup_line, python_data_to_float)
     (None, None)
     """
 
-str_to_int = pipe(cleanup_line, python_data_to_int)
+str_to_int = pipe(cleanup_line, anything_to_int)
 """Convert a string to an integer.
 
     >>> str_to_int('42')
@@ -2297,7 +2297,7 @@ def check(converter_or_value_and_error, clear_on_error = False):
     >>> check(str_to_int)(u'hello world')
     Traceback (most recent call last):
     ValueError:
-    >>> check(pipe(python_data_to_str, test_isinstance(unicode), str_to_bool))(42)
+    >>> check(pipe(anything_to_str, test_isinstance(unicode), str_to_bool))(42)
     True
     >>> check(str_to_int, clear_on_error = True)(u'42')
     42
@@ -2311,7 +2311,7 @@ def check(converter_or_value_and_error, clear_on_error = False):
     >>> check(str_to_int(u'hello world'))
     Traceback (most recent call last):
     ValueError:
-    >>> check(pipe(python_data_to_str, test_isinstance(unicode), str_to_bool)(42))
+    >>> check(pipe(anything_to_str, test_isinstance(unicode), str_to_bool)(42))
     True
     >>> check(str_to_int(u'42'), clear_on_error = True)
     42

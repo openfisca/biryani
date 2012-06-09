@@ -16,13 +16,13 @@ Data Converters
 Boolean Converters
 ------------------
 
+.. autofunction:: biryani.baseconv.anything_to_bool
+   :noindex:
+
 .. autofunction:: biryani.baseconv.bool_to_str
    :noindex:
 
 .. autofunction:: biryani.baseconv.guess_bool
-   :noindex:
-
-.. autofunction:: biryani.baseconv.python_data_to_bool
    :noindex:
 
 .. autofunction:: biryani.baseconv.str_to_bool
@@ -73,21 +73,24 @@ Internet Data Converters
 Number Converters
 -----------------
 
+.. autofunction:: biryani.baseconv.anything_to_float
+   :noindex:
+
+.. autofunction:: biryani.baseconv.anything_to_int
+   :noindex:
+
 .. autofunction:: biryani.baseconv.str_to_float
    :noindex:
 
 .. autofunction:: biryani.baseconv.str_to_int
    :noindex:
 
-.. autofunction:: biryani.baseconv.python_data_to_float
-   :noindex:
-
-.. autofunction:: biryani.baseconv.python_data_to_int
-   :noindex:
-
 
 String Converters
 -----------------
+
+.. autofunction:: biryani.baseconv.anything_to_str
+   :noindex:
 
 .. autofunction:: biryani.baseconv.make_str_to_normal_form
    :noindex:
@@ -111,9 +114,6 @@ String Converters
    :noindex:
 
 .. autofunction:: biryani.baseconv.str_to_slug
-   :noindex:
-
-.. autofunction:: biryani.baseconv.python_data_to_str
    :noindex:
 
 

@@ -20,19 +20,19 @@ Example of a converter that returns the length of a value:
 
 >>> from biryani import baseconv as conv
 ...
->>> python_data_to_len = conv.function(lambda value: len(value))
+>>> anything_to_len = conv.function(lambda value: len(value))
 ...
->>> python_data_to_len(u'abc')
+>>> anything_to_len(u'abc')
 (3, None)
->>> python_data_to_len([1, 2, 3])
+>>> anything_to_len([1, 2, 3])
 (3, None)
->>> python_data_to_len([])
+>>> anything_to_len([])
 (0, None)
 
 By default, the function converter doesn't call its wrapped function when input value is None and always returns ``None``,
 so:
 
->>> python_data_to_len(None)
+>>> anything_to_len(None)
 (None, None)
 
 Most of the times this is the correct behaviour, because in *Biryani*, when the input value is missing (aka ``None``) a
@@ -40,17 +40,17 @@ converter is considered to have nothing to convert and should return nothing (ak
 
 But, if you want to change this behaviour, you can set the ``handle_missing_value`` flag:
 
->>> python_data_to_len = conv.function(lambda value: len(value), handle_missing_value = True)
+>>> anything_to_len = conv.function(lambda value: len(value), handle_missing_value = True)
 ...
->>> python_data_to_len(None)
+>>> anything_to_len(None)
 Traceback (most recent call last):
 TypeError:
 
 In this case, you will have to rewrite your function to handle the ``None`` input value:
 
->>> python_data_to_len = conv.function(lambda value: len(value or []), handle_missing_value = True)
+>>> anything_to_len = conv.function(lambda value: len(value or []), handle_missing_value = True)
 ...
->>> python_data_to_len(None)
+>>> anything_to_len(None)
 (0, None)
 
 In the same way, if your function needs to use the state (mainly for internationalization reasons), you need to set
