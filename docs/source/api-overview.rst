@@ -98,9 +98,6 @@ String Converters
 .. autofunction:: biryani.baseconv.make_str_to_slug
    :noindex:
 
-.. autofunction:: biryani.baseconv.cleanup_empty
-   :noindex:
-
 .. autofunction:: biryani.baseconv.cleanup_line
    :noindex:
 
@@ -108,6 +105,9 @@ String Converters
    :noindex:
 
 .. autofunction:: biryani.baseconv.decode_str
+   :noindex:
+
+.. autofunction:: biryani.baseconv.empty_to_none
    :noindex:
 
 .. autofunction:: biryani.baseconv.encode_str

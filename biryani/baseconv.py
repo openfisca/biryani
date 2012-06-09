@@ -48,12 +48,12 @@ __all__ = [
     'clean_str_to_bool',
     'clean_str_to_email',
     'clean_str_to_url_path_and_query',
-    'cleanup_empty',
     'cleanup_line',
     'cleanup_text',
     'condition',
     'decode_str',
     'default',
+    'empty_to_none',
     'encode_str',
     'exists',
     'extract_when_singleton',
@@ -338,29 +338,6 @@ def clean_str_to_url_path_and_query(value, state = None):
     return unicode(urlparse.urlunsplit(split_url)), None
 
 
-def cleanup_empty(value, state = None):
-    """When value is comparable to False (ie None, 0 , '', etc) replace it with None else keep it as is.
-
-    >>> cleanup_empty(0)
-    (None, None)
-    >>> cleanup_empty('')
-    (None, None)
-    >>> cleanup_empty([])
-    (None, None)
-    >>> cleanup_empty([42, 43])
-    ([42, 43], None)
-    >>> cleanup_empty({})
-    (None, None)
-    >>> cleanup_empty({'answer': 42})
-    ({'answer': 42}, None)
-    >>> cleanup_empty(u'hello world')
-    (u'hello world', None)
-    >>> cleanup_empty(u'   hello world   ')
-    (u'   hello world   ', None)
-    """
-    return value if value else None, None
-
-
 def condition(test_converter, ok_converter, error_converter = None):
     """When *test_converter* succeeds (ie no error), then apply *ok_converter*, otherwise apply *error_converter*.
 
@@ -419,6 +396,29 @@ def default(constant):
     (42, None)
     """
     return lambda value, state = None: (constant, None) if value is None else (value, None)
+
+
+def empty_to_none(value, state = None):
+    """When value is comparable to False (ie None, 0 , '', etc) replace it with None else keep it as is.
+
+    >>> empty_to_none(0)
+    (None, None)
+    >>> empty_to_none('')
+    (None, None)
+    >>> empty_to_none([])
+    (None, None)
+    >>> empty_to_none([42, 43])
+    ([42, 43], None)
+    >>> empty_to_none({})
+    (None, None)
+    >>> empty_to_none({'answer': 42})
+    ({'answer': 42}, None)
+    >>> empty_to_none(u'hello world')
+    (u'hello world', None)
+    >>> empty_to_none(u'   hello world   ')
+    (u'   hello world   ', None)
+    """
+    return value if value else None, None
 
 
 def encode_str(encoding = 'utf-8'):
@@ -2088,7 +2088,7 @@ def uniform_sequence(converter, constructor = list, keep_empty = False, keep_non
 
 cleanup_line = pipe(
     function(lambda value: value.strip()),
-    cleanup_empty,
+    empty_to_none,
     )
 """Strip spaces from a string and remove it when empty.
 
