@@ -153,7 +153,7 @@ Tests
 .. autofunction:: biryani.baseconv.test_less_or_equal
    :noindex:
 
-.. autofunction:: biryani.baseconv.test_missing
+.. autofunction:: biryani.baseconv.test_none
    :noindex:
 
 .. autofunction:: biryani.baseconv.test_not_in

@@ -264,7 +264,7 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
                         ),
                     ),
                 # default = None,  # For security reasons a header can only contain known attributes.
-                keep_missing_values = True,
+                keep_none_values = True,
                 ),
             exists,
             )(encoded_header, state = state)

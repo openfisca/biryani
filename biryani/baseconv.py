@@ -96,7 +96,7 @@ __all__ = [
     'test_is',
     'test_isinstance',
     'test_less_or_equal',
-    'test_missing',
+    'test_none',
     'test_not_in',
     'translate',
     'uniform_mapping',
@@ -117,7 +117,7 @@ username_re = re.compile(r"[^ \t\n\r@<>()]+$", re.I)
 def anything_to_float(value, state = None):
     """Convert any python data to a float.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+    .. warning:: Like most converters, a ``None`` value is not converted.
 
     >>> anything_to_float(42)
     (42.0, None)
@@ -141,7 +141,7 @@ def anything_to_float(value, state = None):
 def anything_to_int(value, state = None):
     """Convert any python data to an integer.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+    .. warning:: Like most converters, a ``None`` value is not converted.
 
     >>> anything_to_int(42)
     (42, None)
@@ -167,7 +167,7 @@ def anything_to_int(value, state = None):
 def anything_to_str(value, state = None):
     """Convert any Python data to unicode.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+    .. warning:: Like most converters, a ``None`` value is not converted.
 
     >>> anything_to_str(42)
     (u'42', None)
@@ -189,7 +189,7 @@ def anything_to_str(value, state = None):
 def bool_to_str(value, state = None):
     """Convert a boolean to a "0" or "1" string.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+    .. warning:: Like most converters, a ``None`` value is not converted.
 
         When you want ``None`` to be converted to ``"0"``, use::
 
@@ -244,7 +244,7 @@ def clean_str_to_bool(value, state = None):
 
     .. note:: For a converter that accepts special strings like "f", "off", "no", etc, see :func:`guess_bool`.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+    .. warning:: Like most converters, a ``None`` value is not converted.
 
         When you want ``None`` to be converted to ``False``, use::
 
@@ -403,9 +403,9 @@ def decode_str(encoding = 'utf-8'):
 
 
 def default(constant):
-    """Return a converter that replace a missing value (aka ``None``) by given one.
+    """Return a converter that replace a ``None`` value by given one.
 
-    .. note:: See converter :func:`set_value` to replace a non-missing value.
+    .. note:: See converter :func:`set_value` to replace a non-``None`` value.
 
     >>> default(42)(None)
     (42, None)
@@ -476,11 +476,11 @@ def first_match(*converters):
     return first_match_converter
 
 
-def function(function, handle_missing_value = False, handle_state = False):
+def function(function, handle_none_value = False, handle_state = False):
     """Return a converter that applies a function to value and returns a new value.
 
-    .. note:: Like most converters, by default a missing value (aka ``None``) is not converted (ie function is not
-       called). Set ``handle_missing_value`` to ``True`` to call function when value is ``None``.
+    .. note:: Like most converters, by default a ``None`` value is not converted (ie function is not
+       called). Set ``handle_none_value`` to ``True`` to call function when value is ``None``.
 
     .. note:: When your function doesn't modify value but may generate an error, use a :func:`test` instead.
 
@@ -499,12 +499,12 @@ def function(function, handle_missing_value = False, handle_state = False):
     >>> function(lambda value: value + 1)(u'hello world')
     Traceback (most recent call last):
     TypeError:
-    >>> function(lambda value: value + 1, handle_missing_value = True)(None)
+    >>> function(lambda value: value + 1, handle_none_value = True)(None)
     Traceback (most recent call last):
     TypeError:
     """
     def function_converter(value, state = None):
-        if value is None and not handle_missing_value or function is None:
+        if value is None and not handle_none_value or function is None:
             return value, None
         if handle_state:
             return function(value, state = state), None
@@ -573,7 +573,7 @@ def guess_bool(value, state = None):
 
     This converter accepts usual values for ``True`` and ``False``: "0", "f", "false", "n", etc.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+    .. warning:: Like most converters, a ``None`` value is not converted.
 
         When you want ``None`` to be converted to ``False``, use::
 
@@ -651,7 +651,7 @@ def guess_bool(value, state = None):
         return value, (state or states.default_state)._(u'Value must be a boolean')
 
 
-def item_or_sequence(converter, constructor = list, keep_missing_items = False):
+def item_or_sequence(converter, constructor = list, keep_none_items = False):
     """Return a converter that accepts either an item or a sequence of items and applies a converter to them.
 
     >>> item_or_sequence(str_to_int)(u'42')
@@ -666,11 +666,11 @@ def item_or_sequence(converter, constructor = list, keep_missing_items = False):
     ([42, 43], None)
     >>> item_or_sequence(str_to_int)([None, None])
     (None, None)
-    >>> item_or_sequence(str_to_int, keep_missing_items = True)([None, None])
+    >>> item_or_sequence(str_to_int, keep_none_items = True)([None, None])
     ([None, None], None)
-    >>> item_or_sequence(str_to_int, keep_missing_items = True)([u'42', None, u'43'])
+    >>> item_or_sequence(str_to_int, keep_none_items = True)([u'42', None, u'43'])
     ([42, None, 43], None)
-    >>> item_or_sequence(str_to_int, keep_missing_items = True)([u'42', u'43', u'Hello world!'])
+    >>> item_or_sequence(str_to_int, keep_none_items = True)([u'42', u'43', u'Hello world!'])
     ([42, 43, u'Hello world!'], {2: u'Value must be an integer'})
     >>> item_or_sequence(str_to_int, constructor = set)(set([u'42', u'43']))
     (set([42, 43]), None)
@@ -678,7 +678,7 @@ def item_or_sequence(converter, constructor = list, keep_missing_items = False):
     return condition(
         test_isinstance(constructor),
         pipe(
-            uniform_sequence(converter, constructor = constructor, keep_missing_items = keep_missing_items),
+            uniform_sequence(converter, constructor = constructor, keep_none_items = keep_none_items),
             extract_when_singleton,
             ),
         converter,
@@ -1214,18 +1214,18 @@ def rename_item(old_key, new_key):
     return rename_item_converter
 
 
-def set_value(constant, set_missing_value = False):
+def set_value(constant, set_none_value = False):
     """Return a converter that replaces any value by given one.
 
     >>> set_value(42)(u'Answer to the Ultimate Question of Life, the Universe, and Everything')
     (42, None)
     >>> set_value(42)(None)
     (None, None)
-    >>> set_value(42, set_missing_value = True)(None)
+    >>> set_value(42, set_none_value = True)(None)
     (42, None)
     """
     return lambda value, state = None: (constant, None) \
-        if value is not None or set_missing_value \
+        if value is not None or set_none_value \
         else (None, None)
 
 
@@ -1250,11 +1250,11 @@ def str_to_url_name(value, state = None):
     return value or None, None
 
 
-def struct(converters, constructor = None, default = None, keep_empty = False, keep_missing_values = False,
-        skip_missing_items = False):
+def struct(converters, constructor = None, default = None, keep_empty = False, keep_none_values = False,
+        skip_none_items = False):
     """Return a converter that maps a collection of converters to a collection (ie dict, list, set, etc) of values.
 
-    .. note:: Parameters ``keep_missing_values`` & ``skip_missing_items`` are not used for sequences.
+    .. note:: Parameters ``keep_none_values`` & ``skip_none_items`` are not used for sequences.
 
     Usage to convert a mapping (ie dict, etc):
 
@@ -1314,7 +1314,7 @@ def struct(converters, constructor = None, default = None, keep_empty = False, k
     ...         email = str_to_email,
     ...         ),
     ...     default = cleanup_line,
-    ...     keep_missing_values = True,
+    ...     keep_none_values = True,
     ...     )(dict(name = u'   ', email = None))
     ({'age': None, 'email': None, 'name': None}, None)
     >>> struct(
@@ -1324,8 +1324,8 @@ def struct(converters, constructor = None, default = None, keep_empty = False, k
     ...         email = str_to_email,
     ...         ),
     ...     default = cleanup_line,
-    ...     keep_missing_values = True,
-    ...     skip_missing_items = True,
+    ...     keep_none_values = True,
+    ...     skip_none_items = True,
     ...     )(dict(name = u'   ', email = None))
     ({'email': None, 'name': None}, None)
     >>> import collections
@@ -1419,15 +1419,15 @@ def struct(converters, constructor = None, default = None, keep_empty = False, k
 
     if isinstance(converters, collections.Mapping):
         return structured_mapping(converters, constructor = constructor, default = default,
-            keep_empty = keep_empty, keep_missing_values = keep_missing_values,
-            skip_missing_items = skip_missing_items)
+            keep_empty = keep_empty, keep_none_values = keep_none_values,
+            skip_none_items = skip_none_items)
     assert isinstance(converters, collections.Sequence), \
         'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
     return structured_sequence(converters, constructor = constructor, default = default, keep_empty = keep_empty)
 
 
-def structured_mapping(converters, constructor = None, default = None, keep_empty = False, keep_missing_values = False,
-        skip_missing_items = False):
+def structured_mapping(converters, constructor = None, default = None, keep_empty = False, keep_none_values = False,
+        skip_none_items = False):
     """Return a converter that maps a mapping of converters to a mapping (ie dict, etc) of values.
 
     .. note:: This converter should not be used directly. Use :func:`struct` instead.
@@ -1488,7 +1488,7 @@ def structured_mapping(converters, constructor = None, default = None, keep_empt
     ...         email = str_to_email,
     ...         ),
     ...     default = cleanup_line,
-    ...     keep_missing_values = True,
+    ...     keep_none_values = True,
     ...     )(dict(name = u'   ', email = None))
     ({'age': None, 'email': None, 'name': None}, None)
     >>> structured_mapping(
@@ -1498,8 +1498,8 @@ def structured_mapping(converters, constructor = None, default = None, keep_empt
     ...         email = str_to_email,
     ...         ),
     ...     default = cleanup_line,
-    ...     keep_missing_values = True,
-    ...     skip_missing_items = True,
+    ...     keep_none_values = True,
+    ...     skip_none_items = True,
     ...     )(dict(name = u'   ', email = None))
     ({'email': None, 'name': None}, None)
     >>> import collections
@@ -1550,10 +1550,10 @@ def structured_mapping(converters, constructor = None, default = None, keep_empt
         errors = {}
         converted_values = {}
         for name, converter in values_converter.iteritems():
-            if skip_missing_items and name not in values:
+            if skip_none_items and name not in values:
                 continue
             value, error = converter(values.get(name), state = state)
-            if value is not None or keep_missing_values:
+            if value is not None or keep_none_values:
                 converted_values[name] = value
             if error is not None:
                 errors[name] = error
@@ -1662,7 +1662,7 @@ def structured_sequence(converters, constructor = None, default = None, keep_emp
     return structured_sequence_converter
 
 
-def switch(key_converter, converters, default = None, handle_missing_value = False):
+def switch(key_converter, converters, default = None, handle_none_value = False):
     """Return a converter that extracts a key from value and then converts value using the converter matching the key.
 
     >>> simple_type_switcher = switch(
@@ -1672,7 +1672,7 @@ def switch(key_converter, converters, default = None, handle_missing_value = Fal
     ...         int: anything_to_str,
     ...         str: set_value(u'encoded string'),
     ...         },
-    ...     handle_missing_value = True,
+    ...     handle_none_value = True,
     ...     )
     >>> simple_type_switcher(True)
     (u'boolean', None)
@@ -1701,7 +1701,7 @@ def switch(key_converter, converters, default = None, handle_missing_value = Fal
     (None, {0: u'Expression "None" doesn\\'t match any key'})
     """
     def switch_converter(value, state = None):
-        if value is None and not handle_missing_value:
+        if value is None and not handle_none_value:
             return None, None
         key, error = key_converter(value, state = state)
         if error is not None:
@@ -1715,7 +1715,7 @@ def switch(key_converter, converters, default = None, handle_missing_value = Fal
     return switch_converter
 
 
-def test(function, error = N_(u'Test failed'), handle_missing_value = False, handle_state = False):
+def test(function, error = N_(u'Test failed'), handle_none_value = False, handle_state = False):
     """Return a converter that applies a test function to a value and returns an error when test fails.
 
     ``test`` always returns the initial value, even when test fails.
@@ -1730,7 +1730,7 @@ def test(function, error = N_(u'Test failed'), handle_missing_value = False, han
     (1, u'Value is not a string')
     """
     def test_converter(value, state = None):
-        if value is None and not handle_missing_value or function is None:
+        if value is None and not handle_none_value or function is None:
             return value, None
         ok = function(value, state = state) if handle_state else function(value)
         if ok:
@@ -1742,7 +1742,7 @@ def test(function, error = N_(u'Test failed'), handle_missing_value = False, han
 def test_between(min_value, max_value, error = None):
     """Return a converter that accepts only values between the two given bounds (included).
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared.
+    .. warning:: Like most converters, a ``None`` value is not compared.
 
     >>> test_between(0, 9)(5)
     (5, None)
@@ -1780,7 +1780,7 @@ def test_conv(converter):
 def test_equals(constant, error = None):
     """Return a converter that accepts only values equals to given constant.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared. Furthermore, when *constant* is
+    .. warning:: Like most converters, a ``None`` value is not compared. Furthermore, when *constant* is
        ``None``, value is never compared.
 
     >>> test_equals(42)(42)
@@ -1801,7 +1801,7 @@ def test_equals(constant, error = None):
 
 
 def test_exists(error = N_(u'Missing value')):
-    """Return a converters that signals an error when value is missing (aka ``None``).
+    """Return a converters that signals an error when value is ``None``.
 
     .. note:: When error message "Missing value" can be kept, use :func:`exists` instead.
 
@@ -1824,7 +1824,7 @@ def test_exists(error = N_(u'Missing value')):
 def test_greater_or_equal(constant, error = None):
     """Return a converter that accepts only values greater than or equal to given constant.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared.
+    .. warning:: Like most converters, a ``None`` value is not compared.
 
     >>> test_greater_or_equal(0)(5)
     (5, None)
@@ -1844,7 +1844,7 @@ def test_greater_or_equal(constant, error = None):
 def test_in(values, error = None):
     """Return a converter that accepts only values belonging to a given set (or list or...).
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared. Furthermore, when *values* is
+    .. warning:: Like most converters, a ``None`` value is not compared. Furthermore, when *values* is
        ``None``, value is never compared.
 
     >>> test_in('abcd')('a')
@@ -1869,7 +1869,7 @@ def test_in(values, error = None):
 def test_is(constant, error = None):
     """Return a converter that accepts only values that are strictly equal to given constant.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared. Furthermore, when *constant* is
+    .. warning:: Like most converters, a ``None`` value is not compared. Furthermore, when *constant* is
        ``None``, value is never compared.
 
     >>> test_is(42)(42)
@@ -1908,7 +1908,7 @@ def test_isinstance(class_or_classes, error = None):
 def test_less_or_equal(constant, error = None):
     """Return a converter that accepts only values less than or equal to given constant.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared.
+    .. warning:: Like most converters, a ``None`` value is not compared.
 
     >>> test_less_or_equal(9)(5)
     (5, None)
@@ -1925,29 +1925,29 @@ def test_less_or_equal(constant, error = None):
         error = error or N_(u'Value must be less than or equal to {0}').format(constant))
 
 
-def test_missing(error = N_(u'Unexpected value')):
-    """Return a converters that signals an error when value is not missing (aka not ``None``).
+def test_none(error = N_(u'Unexpected value')):
+    """Return a converters that signals an error when value is not ``None``.
 
-    >>> test_missing()(42)
+    >>> test_none()(42)
     (42, u'Unexpected value')
-    >>> test_missing(error = u'No value allowed')(42)
+    >>> test_none(error = u'No value allowed')(42)
     (42, u'No value allowed')
-    >>> test_missing()(u'')
+    >>> test_none()(u'')
     (u'', u'Unexpected value')
-    >>> test_missing()(None)
+    >>> test_none()(None)
     (None, None)
     """
-    def missing(value, state = None):
+    def none(value, state = None):
         if value is None:
             return value, None
         return value, (state or states.default_state)._(error) if isinstance(error, basestring) else error
-    return missing
+    return none
 
 
 def test_not_in(values, error = None):
     """Return a converter that rejects only values belonging to a given set (or list or...).
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared. Furthermore, when *values* is
+    .. warning:: Like most converters, a ``None`` value is not compared. Furthermore, when *values* is
        ``None``, value is never compared.
 
     >>> test_not_in('abcd')('e')
@@ -1974,7 +1974,7 @@ def test_not_in(values, error = None):
 def translate(conversions):
     """Return a converter that converts values found in given dictionary and keep others as is.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not handled => It is never translated.
+    .. warning:: Like most converters, a ``None`` value is not handled => It is never translated.
 
     >>> translate({0: u'bad', 1: u'OK'})(0)
     (u'bad', None)
@@ -1994,8 +1994,8 @@ def translate(conversions):
         else conversions[value])
 
 
-def uniform_mapping(key_converter, value_converter, constructor = dict, keep_empty = False, keep_missing_keys = False,
-        keep_missing_values = False):
+def uniform_mapping(key_converter, value_converter, constructor = dict, keep_empty = False, keep_none_keys = False,
+        keep_none_values = False):
     """Return a converter that applies a unique converter to each key and another unique converter to each value of a
     mapping.
 
@@ -2011,7 +2011,7 @@ def uniform_mapping(key_converter, value_converter, constructor = dict, keep_emp
     ({}, None)
     >>> uniform_mapping(cleanup_line, str_to_int)({None: u'42'})
     (None, None)
-    >>> uniform_mapping(cleanup_line, str_to_int, keep_missing_keys = True)({None: u'42'})
+    >>> uniform_mapping(cleanup_line, str_to_int, keep_none_keys = True)({None: u'42'})
     ({None: 42}, None)
     >>> uniform_mapping(cleanup_line, str_to_int)(None)
     (None, None)
@@ -2025,10 +2025,10 @@ def uniform_mapping(key_converter, value_converter, constructor = dict, keep_emp
             key, error = key_converter(key, state = state)
             if error is not None:
                 errors[key] = error
-            if key is None and not keep_missing_keys:
+            if key is None and not keep_none_keys:
                 continue
             value, error = value_converter(value, state = state)
-            if value is not None or keep_missing_values:
+            if value is not None or keep_none_values:
                 converted_values[key] = value
             if error is not None:
                 errors[key] = error
@@ -2040,7 +2040,7 @@ def uniform_mapping(key_converter, value_converter, constructor = dict, keep_emp
     return uniform_mapping_converter
 
 
-def uniform_sequence(converter, constructor = list, keep_empty = False, keep_missing_items = False):
+def uniform_sequence(converter, constructor = list, keep_empty = False, keep_none_items = False):
     """Return a converter that applies the same converter to each value of a list.
 
     >>> uniform_sequence(str_to_int)([u'42'])
@@ -2055,11 +2055,11 @@ def uniform_sequence(converter, constructor = list, keep_empty = False, keep_mis
     (None, None)
     >>> uniform_sequence(str_to_int, keep_empty = True)([None, None])
     ([], None)
-    >>> uniform_sequence(str_to_int, keep_empty = True, keep_missing_items = True)([None, None])
+    >>> uniform_sequence(str_to_int, keep_empty = True, keep_none_items = True)([None, None])
     ([None, None], None)
-    >>> uniform_sequence(str_to_int, keep_missing_items = True)([u'42', None, u'43'])
+    >>> uniform_sequence(str_to_int, keep_none_items = True)([u'42', None, u'43'])
     ([42, None, 43], None)
-    >>> uniform_sequence(str_to_int, keep_missing_items = True)([u'42', u'43', u'Hello world!'])
+    >>> uniform_sequence(str_to_int, keep_none_items = True)([u'42', u'43', u'Hello world!'])
     ([42, 43, u'Hello world!'], {2: u'Value must be an integer'})
     >>> uniform_sequence(str_to_int, constructor = set)(set([u'42', u'43']))
     (set([42, 43]), None)
@@ -2071,7 +2071,7 @@ def uniform_sequence(converter, constructor = list, keep_empty = False, keep_mis
         converted_values = []
         for i, value in enumerate(values):
             value, error = converter(value, state = state)
-            if keep_missing_items or value is not None:
+            if keep_none_items or value is not None:
                 converted_values.append(value)
             if error is not None:
                 errors[i] = error
@@ -2115,7 +2115,7 @@ cleanup_text = pipe(
     """
 
 exists = test_exists()
-"""Return an error when value is missing (aka ``None``).
+"""Return an error when value is ``None``.
 
     .. note:: To change error message "Missing value", use :func:`test_exists` instead.
 
@@ -2152,7 +2152,7 @@ extract_when_singleton = condition(
 anything_to_bool = function(lambda value: bool(value))
 """Convert any Python data to a boolean.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+    .. warning:: Like most converters, a ``None`` value is not converted.
 
         When you want ``None`` to be converted to ``False``, use::
 
@@ -2181,7 +2181,7 @@ anything_to_bool = function(lambda value: bool(value))
 str_to_bool = pipe(cleanup_line, clean_str_to_bool)
 """Convert a string to a boolean.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+    .. warning:: Like most converters, a ``None`` value is not converted.
 
         When you want ``None`` to be converted to ``False``, use::
 

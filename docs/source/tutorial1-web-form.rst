@@ -90,7 +90,7 @@ Now, we need to ensure that submitted form always contains an username:
 >>> validate_form(req3.POST)
 (None, u'Missing value')
 
-*Biryani* has a filter :func:`biryani.baseconv.exists` that checks for missing values:
+*Biryani* has a filter :func:`biryani.baseconv.exists` that checks for ``None`` values:
 
 >>> def validate_form(params):
 ...     username, error = conv.cleanup_line(params.get('username'))

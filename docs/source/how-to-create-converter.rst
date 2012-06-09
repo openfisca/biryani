@@ -35,12 +35,12 @@ so:
 >>> anything_to_len(None)
 (None, None)
 
-Most of the times this is the correct behaviour, because in *Biryani*, when the input value is missing (aka ``None``) a
+Most of the times this is the correct behaviour, because in *Biryani*, when the input value is ``None`` a
 converter is considered to have nothing to convert and should return nothing (aka ``None``).
 
-But, if you want to change this behaviour, you can set the ``handle_missing_value`` flag:
+But, if you want to change this behaviour, you can set the ``handle_none_value`` flag:
 
->>> anything_to_len = conv.function(lambda value: len(value), handle_missing_value = True)
+>>> anything_to_len = conv.function(lambda value: len(value), handle_none_value = True)
 ...
 >>> anything_to_len(None)
 Traceback (most recent call last):
@@ -48,7 +48,7 @@ TypeError:
 
 In this case, you will have to rewrite your function to handle the ``None`` input value:
 
->>> anything_to_len = conv.function(lambda value: len(value or []), handle_missing_value = True)
+>>> anything_to_len = conv.function(lambda value: len(value or []), handle_none_value = True)
 ...
 >>> anything_to_len(None)
 (0, None)
@@ -124,12 +124,12 @@ so:
 >>> test_valid_password(None)
 (None, None)
 
-Most of the times this is the correct behaviour, because in *Biryani*, when the input value is missing (aka ``None``) a
+Most of the times this is the correct behaviour, because in *Biryani*, when the input value is ``None`` a
 test is considered to have nothing to test and should return nothing (aka ``None``).
 
-But, if you want to change this behaviour, you can set the ``handle_missing_value`` flag:
+But, if you want to change this behaviour, you can set the ``handle_none_value`` flag:
 
->>> test_valid_password = conv.test(lambda password: len(password) >= 8, handle_missing_value = True)
+>>> test_valid_password = conv.test(lambda password: len(password) >= 8, handle_none_value = True)
 ...
 >>> test_valid_password(None)
 Traceback (most recent call last):
@@ -137,7 +137,7 @@ TypeError:
 
 In this case, you will have to rewrite your test to handle the ``None`` input value:
 
->>> test_valid_password = conv.test(lambda password: len(password or u'') >= 8, handle_missing_value = True)
+>>> test_valid_password = conv.test(lambda password: len(password or u'') >= 8, handle_none_value = True)
 ...
 >>> test_valid_password(None)
 (None, u'Test failed')

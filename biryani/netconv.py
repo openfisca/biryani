@@ -46,7 +46,7 @@ __all__ = [
 def test_email():
     """Try to ensure than a (already validated) email address really exists.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not tested.
+    .. warning:: Like most converters, a ``None`` value is not tested.
 
     >>> test_email()(u'info@easter-eggs.com')
     (u'info@easter-eggs.com', None)
@@ -86,7 +86,7 @@ def test_email():
 def test_http_url(valid_status_codes = None):
     """Return a converters that tries to ensure than a (already validated) URL really works.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not tested.
+    .. warning:: Like most converters, a ``None`` value is not tested.
 
     >>> test_http_url()(u'http://www.easter-eggs.com/')
     (u'http://www.easter-eggs.com/', None)

@@ -102,7 +102,7 @@ Add :func:`conv.cleanup_line <biryani.baseconv.cleanup_line>` to strip spaces fr
 >>> anything_to_float(u'     ')
 (None, None)
 
-Add :func:`conv.exists <biryani.baseconv.exists>` to generate an error when value is missing (ie is ``None``):
+Add :func:`conv.exists <biryani.baseconv.exists>` to generate an error when value is ``None``:
 
 >>> anything_to_float = conv.pipe(
 ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
