@@ -101,8 +101,8 @@ msgid "Unexpected item"
 msgstr "Élément inattendu"
 
 #: biryani/baseconv.py:1701
-msgid "Expression \"{}\" doesn't match any key"
-msgstr "L'expression \"{}\" ne correspond à aucune clé"
+msgid "Expression \"{0}\" doesn't match any key"
+msgstr "L'expression \"{0}\" ne correspond à aucune clé"
 
 #: biryani/baseconv.py:1707
 msgid "Test failed"
@@ -254,40 +254,40 @@ msgid "Invalid crypted JSON web token"
 msgstr "Jeton web JSON crypté incorrect"
 
 #: biryani/jwtconv.py:272 biryani/jwtconv.py:469 biryani/jwtconv.py:601
-msgid "Invalid header: {}"
-msgstr "Entête incorrect : {}"
+msgid "Invalid header: {0}"
+msgstr "Entête incorrect : {0}"
 
 #: biryani/jwtconv.py:275
-msgid "Invalid encrypted key: {}"
-msgstr "Clé cryptée incorrecte : {}"
+msgid "Invalid encrypted key: {0}"
+msgstr "Clé cryptée incorrecte : {0}"
 
 #: biryani/jwtconv.py:278
-msgid "Invalid cyphertext: {}"
-msgstr "Cryptogramme incorrect : {}"
+msgid "Invalid cyphertext: {0}"
+msgstr "Cryptogramme incorrect : {0}"
 
 #: biryani/jwtconv.py:281
-msgid "Invalid integrity value: {}"
-msgstr "Valeur d'intégrité incorrecte : {}"
+msgid "Invalid integrity value: {0}"
+msgstr "Valeur d'intégrité incorrecte : {0}"
 
 #: biryani/jwtconv.py:294 biryani/jwtconv.py:301
 msgid "Invalid content master key"
 msgstr "Clé maître de contenu incorrecte"
 
 #: biryani/jwtconv.py:307
-msgid "Unexpected \"int\" header forbidden by AEAD algorithm {}"
-msgstr "Entête \"int\" inattendu, interdit par l'algorithme AEAD {}"
+msgid "Unexpected \"int\" header forbidden by AEAD algorithm {0}"
+msgstr "Entête \"int\" inattendu, interdit par l'algorithme AEAD {0}"
 
 #: biryani/jwtconv.py:312
-msgid "Missing \"int\" header, required by non AEAD algorithm {}"
-msgstr "Entête \"int\" manquant, requis par l'algorithme non AEAD {}"
+msgid "Missing \"int\" header, required by non AEAD algorithm {0}"
+msgstr "Entête \"int\" manquant, requis par l'algorithme non AEAD {0}"
 
 #: biryani/jwtconv.py:325 biryani/jwtconv.py:690
 msgid "Non authentic signature"
 msgstr "Signature non authentique"
 
 #: biryani/jwtconv.py:329
-msgid "Invalid header: \"iv\" required for {} encryption method"
-msgstr "Entête incorrect : \"iv\" requis pour la méthode de cryptage {}"
+msgid "Invalid header: \"iv\" required for {0} encryption method"
+msgstr "Entête incorrect : \"iv\" requis pour la méthode de cryptage {0}"
 
 #: biryani/jwtconv.py:336
 msgid "Invalid cyphertext"
@@ -310,8 +310,8 @@ msgid "Unexpected signature in plaintext token"
 msgstr "Signature inattendue dans un jeton en clair"
 
 #: biryani/jwtconv.py:479
-msgid "Invalid encoded payload: {}"
-msgstr "Contenu utile encodé incorrect : {}"
+msgid "Invalid encoded payload: {0}"
+msgstr "Contenu utile encodé incorrect : {0}"
 
 #: biryani/jwtconv.py:655
 msgid "Unauthorized digital signature algorithm"
@@ -342,24 +342,24 @@ msgid "JSON web token not yet valid"
 msgstr "Jeton web JSON pas encore valide"
 
 #: biryani/netconv.py:78
-msgid "An error occured when trying to connect to the email server: {}"
-msgstr "Une erreur est survenue durant la tentative de connexion au serveur de courriel : {}"
+msgid "An error occured when trying to connect to the email server: {0}"
+msgstr "Une erreur est survenue durant la tentative de connexion au serveur de courriel : {0}"
 
 #: biryani/netconv.py:80
-msgid "Domain \"{}\" doesn't exist"
-msgstr "Le domaine \"{}\" n'existe pas"
+msgid "Domain \"{0}\" doesn't exist"
+msgstr "Le domaine \"{0}\" n'existe pas"
 
 #: biryani/netconv.py:118
-msgid "An error occured when trying to connect to the web server: {:d} {}"
-msgstr "Une erreur est survenue durant la tentative de connexion au serveur web : {:d} {}"
+msgid "An error occured when trying to connect to the web server: {0:d} {1}"
+msgstr "Une erreur est survenue durant la tentative de connexion au serveur web : {0:d} {1}"
 
 #: biryani/netconv.py:121
-msgid "The web server responded with a bad status code: {:d} {}"
-msgstr "Le serveur web a répondu avec un mauvais code d'état : {:d} {}"
+msgid "The web server responded with a bad status code: {0:d} {1}"
+msgstr "Le serveur web a répondu avec un mauvais code d'état : {0:d} {1}"
 
 #: biryani/netconv.py:124
-msgid "An error occured when trying to connect to the web server: {}"
-msgstr "Une erreur est survenue durant la tentative de connexion au serveur web : {}"
+msgid "An error occured when trying to connect to the web server: {0}"
+msgstr "Une erreur est survenue durant la tentative de connexion au serveur web : {0}"
 
 #: biryani/nonstandard/deprecatedbaseconv.py:124
 msgid "Invalid value format"

@@ -98,7 +98,7 @@ msgid "Unexpected item"
 msgstr ""
 
 #: biryani/baseconv.py:1701
-msgid "Expression \"{}\" doesn't match any key"
+msgid "Expression \"{0}\" doesn't match any key"
 msgstr ""
 
 #: biryani/baseconv.py:1707
@@ -251,19 +251,19 @@ msgid "Invalid crypted JSON web token"
 msgstr ""
 
 #: biryani/jwtconv.py:272 biryani/jwtconv.py:469 biryani/jwtconv.py:601
-msgid "Invalid header: {}"
+msgid "Invalid header: {0}"
 msgstr ""
 
 #: biryani/jwtconv.py:275
-msgid "Invalid encrypted key: {}"
+msgid "Invalid encrypted key: {0}"
 msgstr ""
 
 #: biryani/jwtconv.py:278
-msgid "Invalid cyphertext: {}"
+msgid "Invalid cyphertext: {0}"
 msgstr ""
 
 #: biryani/jwtconv.py:281
-msgid "Invalid integrity value: {}"
+msgid "Invalid integrity value: {0}"
 msgstr ""
 
 #: biryani/jwtconv.py:294 biryani/jwtconv.py:301
@@ -271,11 +271,11 @@ msgid "Invalid content master key"
 msgstr ""
 
 #: biryani/jwtconv.py:307
-msgid "Unexpected \"int\" header forbidden by AEAD algorithm {}"
+msgid "Unexpected \"int\" header forbidden by AEAD algorithm {0}"
 msgstr ""
 
 #: biryani/jwtconv.py:312
-msgid "Missing \"int\" header, required by non AEAD algorithm {}"
+msgid "Missing \"int\" header, required by non AEAD algorithm {0}"
 msgstr ""
 
 #: biryani/jwtconv.py:325 biryani/jwtconv.py:690
@@ -283,7 +283,7 @@ msgid "Non authentic signature"
 msgstr ""
 
 #: biryani/jwtconv.py:329
-msgid "Invalid header: \"iv\" required for {} encryption method"
+msgid "Invalid header: \"iv\" required for {0} encryption method"
 msgstr ""
 
 #: biryani/jwtconv.py:336
@@ -307,7 +307,7 @@ msgid "Unexpected signature in plaintext token"
 msgstr ""
 
 #: biryani/jwtconv.py:479
-msgid "Invalid encoded payload: {}"
+msgid "Invalid encoded payload: {0}"
 msgstr ""
 
 #: biryani/jwtconv.py:655
@@ -339,23 +339,23 @@ msgid "JSON web token not yet valid"
 msgstr ""
 
 #: biryani/netconv.py:78
-msgid "An error occured when trying to connect to the email server: {}"
+msgid "An error occured when trying to connect to the email server: {0}"
 msgstr ""
 
 #: biryani/netconv.py:80
-msgid "Domain \"{}\" doesn't exist"
+msgid "Domain \"{0}\" doesn't exist"
 msgstr ""
 
 #: biryani/netconv.py:118
-msgid "An error occured when trying to connect to the web server: {:d} {}"
+msgid "An error occured when trying to connect to the web server: {0:d} {1}"
 msgstr ""
 
 #: biryani/netconv.py:121
-msgid "The web server responded with a bad status code: {:d} {}"
+msgid "The web server responded with a bad status code: {0:d} {1}"
 msgstr ""
 
 #: biryani/netconv.py:124
-msgid "An error occured when trying to connect to the web server: {}"
+msgid "An error occured when trying to connect to the web server: {0}"
 msgstr ""
 
 #: biryani/nonstandard/deprecatedbaseconv.py:124
