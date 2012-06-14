@@ -29,6 +29,8 @@
 """
 
 
+from .. import states
+
 __all__ = [
     'mapping_replace_sequence',
     ]
@@ -42,6 +44,8 @@ def mapping_replace_sequence(keys, converter, sequence_constructor = list):
     def mapping_replace_sequence_converter(value, state = None):
         if value is None:
             return value, None
+        if state is None:
+            state = states.default_state
         sequence = sequence_constructor(
             value.get(key)
             for key in keys

@@ -97,6 +97,8 @@ valid_signature_algorithms = (
 def decode_json_web_token(token, state = None):
     if token is None:
         return None, None
+    if state is None:
+        state = states.default_state
 
     errors = {}
     value = dict(token = token)
@@ -104,7 +106,7 @@ def decode_json_web_token(token, state = None):
         value['secured_input'], value['encoded_signature'] = str(token).rsplit('.', 1)
         value['encoded_header'], value['encoded_payload'] = value['secured_input'].split('.', 1)
     except:
-        return value, dict(token = (state or states.default_state)._(u'Invalid format'))
+        return value, dict(token = state._(u'Invalid format'))
 
     errors = {}
     header, error = pipe(
@@ -114,7 +116,7 @@ def decode_json_web_token(token, state = None):
     if error is None:
         value['header'] = header
     else:
-        errors['encoded_header'] = (state or states.default_state)._(u'Invalid format')
+        errors['encoded_header'] = state._(u'Invalid format')
     claims, error = pipe(
         make_base64url_to_bytes(add_padding = True),
         make_input_to_json(),
@@ -122,14 +124,14 @@ def decode_json_web_token(token, state = None):
         )(value['encoded_payload'], state = state)
     if error is not None:
         claims = None
-        errors['encoded_payload'] = (state or states.default_state)._(u'Invalid format')
+        errors['encoded_payload'] = state._(u'Invalid format')
     signature, error = make_base64url_to_bytes(add_padding = True)(value['encoded_signature'], state = state)
     if error is None:
         value['signature'] = signature
     else:
-        errors['encoded_signature'] = (state or states.default_state)._(u'Invalid format')
+        errors['encoded_signature'] = state._(u'Invalid format')
     if value['header'].get('typ', u'JWT') not in (u'application/jwt', u'JWT'):
-        return value, dict(header = dict(typ = (state or states.default_state)._(u'Not a signed JSON Web Token (JWS)')))
+        return value, dict(header = dict(typ = state._(u'Not a signed JSON Web Token (JWS)')))
     if claims is not None:
         value['claims'], claims_errors = pipe(
             test_isinstance(dict),
@@ -187,10 +189,12 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
     def decrypt_json_web_token_converter(token, state = None):
         if token is None:
             return None, None
+        if state is None:
+            state = states.default_state
 
         if token.count('.') != 3:
             if require_encrypted_token:
-                return token, (state or states.default_state)._(u'Invalid crypted JSON web token')
+                return token, state._(u'Invalid crypted JSON web token')
             return token, None
         encoded_header, encoded_encrypted_key, encoded_cyphertext, encoded_integrity_value = token.split('.')
 
@@ -269,16 +273,16 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
             not_none,
             )(encoded_header, state = state)
         if error is not None:
-            return token, (state or states.default_state)._(u'Invalid header: {0}').format(error)
+            return token, state._(u'Invalid header: {0}').format(error)
         encrypted_key, error = make_base64url_to_bytes(add_padding = True)(encoded_encrypted_key, state = state)
         if error is not None:
-            return token, (state or states.default_state)._(u'Invalid encrypted key: {0}').format(error)
+            return token, state._(u'Invalid encrypted key: {0}').format(error)
         cyphertext, error = make_base64url_to_bytes(add_padding = True)(encoded_cyphertext, state = state)
         if error is not None:
-            return token, (state or states.default_state)._(u'Invalid cyphertext: {0}').format(error)
+            return token, state._(u'Invalid cyphertext: {0}').format(error)
         integrity_value, error = make_base64url_to_bytes(add_padding = True)(encoded_integrity_value, state = state)
         if error is not None:
-            return token, (state or states.default_state)._(u'Invalid integrity value: {0}').format(error)
+            return token, state._(u'Invalid integrity value: {0}').format(error)
 
         # TODO: Verify that the JWE Header references a key known to the recipient.
 
@@ -291,26 +295,26 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
             try:
                 content_master_key = cipher.decrypt(encrypted_key, sentinel)
             except:
-                return token, (state or states.default_state)._(u'Invalid content master key')
+                return token, state._(u'Invalid content master key')
         elif algorithm == u'RSA-OAEP':
             rsa_private_key = RSA.importKey(private_key)
             cipher = Cipher_PKCS1_OAEP.new(rsa_private_key)
             try:
                 content_master_key = cipher.decrypt(encrypted_key)
             except:
-                return token, (state or states.default_state)._(u'Invalid content master key')
+                return token, state._(u'Invalid content master key')
 
         method = header['enc']
         if method.endswith('GCM'):
             # Algorithm is an AEAD algorithm.
             if header['int'] is not None:
-                return token, (state or states.default_state)._(
+                return token, state._(
                     u'Unexpected "int" header forbidden by AEAD algorithm {0}').format(algorithm)
             content_encryption_key = content_master_key
             encoded_signature = ''
         else:
             if header['int'] is None:
-                return token, (state or states.default_state)._(
+                return token, state._(
                     u'Missing "int" header, required by non AEAD algorithm {0}').format(algorithm)
             method_size = int(method[1:4])
             encryption_key_length = method_size >> 3  # method_size is in bits, but length is in bytes.
@@ -324,11 +328,11 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
             signature = HMAC.new(content_integrity_key, msg = secured_input, digestmod = digest_constructor).digest()
             encoded_signature = check(make_bytes_to_base64url(remove_padding = True))(signature, state = state)
         if encoded_integrity_value != encoded_signature:
-            return token, (state or states.default_state)._(u'Non authentic signature')
+            return token, state._(u'Non authentic signature')
 
         if method.startswith(u'A') and method.endswith(u'CBC'):
             if header['iv'] is None:
-                return token, (state or states.default_state)._(
+                return token, state._(
                     u'Invalid header: "iv" required for {0} encryption method').format(method)
             cipher = Cipher_AES.new(content_encryption_key, mode = Cipher_AES.MODE_CBC, IV = header['iv'])
         else:
@@ -336,7 +340,7 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
         try:
             compressed_plaintext = cipher.decrypt(cyphertext)
         except:
-            return token, (state or states.default_state)._(u'Invalid cyphertext')
+            return token, state._(u'Invalid cyphertext')
         # Remove PKCS #5 padding.
         padding_number = ord(compressed_plaintext[-1])
         compressed_plaintext = compressed_plaintext[:-padding_number]
@@ -346,7 +350,7 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
             try:
                 plaintext = zlib.decompress(compressed_plaintext)
             except zlib.error:
-                return token, (state or states.default_state)._(u'Invalid compressed plaintext')
+                return token, state._(u'Invalid compressed plaintext')
         else:
             assert compression in (None, u'none'), compression
             plaintext = compressed_plaintext
@@ -460,26 +464,28 @@ def encrypt_json_web_token(algorithm = None, compression = None, integrity = Non
             return None, None
         if algorithm is None:
             return token, None
+        if state is None:
+            state = states.default_state
 
         if '.' not in token:
-            return token, (state or states.default_state)._(u'Missing header')
+            return token, state._(u'Missing header')
         encoded_header, token_without_header = token.split('.', 1)
         header, error = pipe(
             make_base64url_to_bytes(add_padding = True),
             make_input_to_json(),
             )(encoded_header, state = state)
         if error is not None:
-            return token, (state or states.default_state)._(u'Invalid header: {0}').format(error)
+            return token, state._(u'Invalid header: {0}').format(error)
 
         if header['alg'] == u'none':
             if '.' not in token_without_header:
-                return token, (state or states.default_state)._(u'Missing signature')
+                return token, state._(u'Missing signature')
             encoded_payload, encoded_signature = token_without_header.split('.', 1)
             if encoded_signature:
-                return token, (state or states.default_state)._(u'Unexpected signature in plaintext token')
+                return token, state._(u'Unexpected signature in plaintext token')
             plaintext, error = make_base64url_to_bytes(add_padding = True)(encoded_payload, state = state)
             if error is not None:
-                return token, (state or states.default_state)._(u'Invalid encoded payload: {0}').format(error)
+                return token, state._(u'Invalid encoded payload: {0}').format(error)
         else:
             # Token is already signed or encrypted. Use nested signing.
             header = dict(
@@ -556,6 +562,8 @@ def make_json_to_json_web_token(typ = None):
     def json_to_json_web_token(claims, state = None):
         if claims is None:
             return None, None
+        if state is None:
+            state = states.default_state
 
         encoded_payload, error = pipe(
             make_json_to_str(encoding = 'utf-8', ensure_ascii = False),
@@ -596,21 +604,23 @@ def sign_json_web_token(algorithm = None, json_web_key_url = None, key_id = None
             return None, None
         if algorithm == u'none':
             return token, None
+        if state is None:
+            state = states.default_state
         if '.' not in token:
-            return token, (state or states.default_state)._(u'Missing header')
+            return token, state._(u'Missing header')
         encoded_header, token_without_header = token.split('.', 1)
         header, error = pipe(
             make_base64url_to_bytes(add_padding = True),
             make_input_to_json(),
             )(encoded_header, state = state)
         if error is not None:
-            return token, (state or states.default_state)._(u'Invalid header: {0}').format(error)
+            return token, state._(u'Invalid header: {0}').format(error)
         if header['alg'] == u'none':
             if '.' not in token_without_header:
-                return token, (state or states.default_state)._(u'Missing signature')
+                return token, state._(u'Missing signature')
             encoded_payload, encoded_signature = token_without_header.split('.', 1)
             if encoded_signature:
-                return token, (state or states.default_state)._(u'Unexpected signature in plaintext token')
+                return token, state._(u'Unexpected signature in plaintext token')
         else:
             # Token is already signed or encrypted. Use nested signing.
             header = dict(
@@ -651,11 +661,13 @@ def verify_decoded_json_web_token_signature(allowed_algorithms = None, public_ke
     def verify_decoded_json_web_token_signature_converter(value, state = None):
         if value is None:
             return None, None
+        if state is None:
+            state = states.default_state
 
         errors = {}
         algorithm = value['header'].get('alg')
         if allowed_algorithms is not None and algorithm not in allowed_algorithms:
-            errors['header'] = dict(alg = (state or states.default_state)._(
+            errors['header'] = dict(alg = state._(
                 u'Unauthorized digital signature algorithm'))
         elif algorithm in valid_signature_algorithms:
             algorithm_prefix = algorithm[:2]
@@ -666,7 +678,7 @@ def verify_decoded_json_web_token_signature(allowed_algorithms = None, public_ke
 #            elif algorithm_prefix == u'HS':
             if algorithm_prefix == u'HS':
                 if shared_secret is None:
-                    errors['signature'] = (state or states.default_state)._(
+                    errors['signature'] = state._(
                         u'Unable to check signature: Missing shared secret')
                 else:
                     verified = HMAC.new(shared_secret, msg = value['secured_input'],
@@ -690,11 +702,11 @@ def verify_decoded_json_web_token_signature(allowed_algorithms = None, public_ke
                     digest = digest_constructor.new(value['secured_input'])
                     verified = verifier.verify(digest, value['signature'])
                 except:
-                    errors['signature'] = (state or states.default_state)._(u'Invalid signature')
+                    errors['signature'] = state._(u'Invalid signature')
             if 'signature' not in errors and not verified:
-                errors['signature'] = (state or states.default_state)._(u'Non authentic signature')
+                errors['signature'] = state._(u'Non authentic signature')
         elif algorithm != u'none':
-            errors['header'] = dict(alg = (state or states.default_state)._(
+            errors['header'] = dict(alg = state._(
                 u'Unimplemented digital signature algorithm'))
         return value, errors or None
     return verify_decoded_json_web_token_signature_converter

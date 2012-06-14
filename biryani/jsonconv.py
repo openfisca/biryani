@@ -60,10 +60,12 @@ def make_json_to_str(*args, **kwargs):
     def json_to_str(value, state = None):
         if value is None:
             return value, None
+        if state is None:
+            state = states.default_state
         try:
             value_str = unicode(json.dumps(value, *args, **kwargs))
         except TypeError:
-            return value, (state or states.default_state)._(u'Invalid JSON')
+            return value, state._(u'Invalid JSON')
         return value_str, None
     return json_to_str
 
@@ -89,13 +91,15 @@ def make_str_to_json(*args, **kwargs):
     def str_to_json(value, state = None):
         if value is None:
             return value, None
+        if state is None:
+            state = states.default_state
         if isinstance(value, str):
             # Ensure that json.loads() uses unicode strings.
             value = value.decode('utf-8')
         try:
             return json.loads(value, *args, **kwargs), None
         except ValueError:
-            return value, (state or states.default_state)._(u'Invalid JSON')
+            return value, state._(u'Invalid JSON')
     return str_to_json
 
 

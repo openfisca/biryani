@@ -39,6 +39,8 @@ Sample usage:
 ...
 ...     if value is None:
 ...         return None, None
+...     if state is None:
+...         state = states.default_state
 ...     errors = {}
 ...     today = datetime.date.today()
 ...     converted_value, error = conv.struct(
@@ -66,7 +68,7 @@ Sample usage:
 ...             expiration_month = 1
 ...             expiration_year += 1
 ...         if datetime.date(expiration_year, expiration_month, 1) <= today:
-...             errors['expiration_month'] = (state or states.default_state)._(u'Invalid expiration date')
+...             errors['expiration_month'] = state._(u'Invalid expiration date')
 ...     if 'credit_card_type' in errors:
 ...         return converted_value, errors
 ...     credit_card_type = converted_value['credit_card_type']
@@ -229,13 +231,15 @@ def make_str_to_credit_card_number(type):
     def str_to_credit_card_number(credit_card_number, state = None):
         if credit_card_number is None:
             return credit_card_number, None
+        if state is None:
+            state = states.default_state
 
         # Check that credit card number contains only digits.
         credit_card_number = strings.slugify(credit_card_number, separator = u'')
         if not credit_card_number:
-            return credit_card_number, (state or states.default_state)._(u'Credit card number must contain digits')
+            return credit_card_number, state._(u'Credit card number must contain digits')
         if not credit_card_number.isdigit():
-            return credit_card_number, (state or states.default_state)._(u'Credit card number must contain only digits')
+            return credit_card_number, state._(u'Credit card number must contain only digits')
 
         # Check prefix and length.
         length_found = False
@@ -246,9 +250,9 @@ def make_str_to_credit_card_number(type):
                     break
         else:
             if not length_found:
-                return credit_card_number, (state or states.default_state)._(
+                return credit_card_number, state._(
                     u'Wrong number of digits in credit card number')
-            return credit_card_number, (state or states.default_state)._(u'Invalid credit card number (unknown prefix)')
+            return credit_card_number, state._(u'Invalid credit card number (unknown prefix)')
 
         # Check checksum.
         checksum = 0
@@ -259,7 +263,7 @@ def make_str_to_credit_card_number(type):
             else:
                 checksum += int(digit)
         if checksum % 10 != 0:
-            return credit_card_number, (state or states.default_state)._(u'Invalid credit card number (wrong checksum)')
+            return credit_card_number, state._(u'Invalid credit card number (wrong checksum)')
         return credit_card_number, None
 
     return str_to_credit_card_number

@@ -54,11 +54,13 @@ def base64_to_bytes(value, state = None):
     """
     if value is None:
         return value, None
+    if state is None:
+        state = states.default_state
     value_str = str(value) if isinstance(value, unicode) else value
     try:
         decoded_value = base64.b64decode(value_str)
     except TypeError:
-        return value, (state or states.default_state)._(u'Invalid base64 string')
+        return value, state._(u'Invalid base64 string')
     return decoded_value, None
 
 
@@ -105,17 +107,19 @@ def make_base64url_to_bytes(add_padding = False):
     def base64url_to_bytes(value, state = None):
         if value is None:
             return value, None
+        if state is None:
+            state = states.default_state
         value_str = str(value) if isinstance(value, unicode) else value
         if add_padding:
             len_mod4 = len(value_str) % 4
             if len_mod4 == 1:
-                return value, (state or states.default_state)._(u'Invalid base64url string')
+                return value, state._(u'Invalid base64url string')
             if len_mod4 > 0:
                 value_str += '=' * (4 - len_mod4)
         try:
             decoded_value = base64.urlsafe_b64decode(value_str)
         except TypeError:
-            return value, (state or states.default_state)._(u'Invalid base64url string')
+            return value, state._(u'Invalid base64url string')
         return decoded_value, None
     return base64url_to_bytes
 

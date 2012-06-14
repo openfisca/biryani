@@ -99,9 +99,11 @@ def str_to_object_id(value, state = None):
     """
     if value is None:
         return value, None
+    if state is None:
+        state = states.default_state
     id = value.lower()
     if object_id_re.match(id) is None:
-        return value, (state or states.default_state)._(u'Invalid value')
+        return value, state._(u'Invalid value')
     return bson.objectid.ObjectId(id), None
 
 

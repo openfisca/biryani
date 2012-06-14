@@ -145,6 +145,8 @@ def datetime_to_timestamp(value, state = None):
     >>> datetime_to_timestamp(None)
     (None, None)
     """
+    if state is None:
+        state = states.default_state
     if not isinstance(value, datetime.datetime):
         return date_to_timestamp(value, state = state)
     utcoffset = value.utcoffset()
@@ -185,6 +187,8 @@ def iso8601_str_to_date(value, state = None):
     """
     if value is None:
         return value, None
+    if state is None:
+        state = states.default_state
     # mx.DateTime.ISO.ParseDateTimeUTC fails when time zone is preceded with a space. For example,
     # mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03 +01:00') raises a"ValueError: wrong format,
     # use YYYY-MM-DD HH:MM:SS" while mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03+01:00') works.
@@ -196,7 +200,7 @@ def iso8601_str_to_date(value, state = None):
     try:
         return datetime.date.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
     except ValueError:
-        return value, (state or states.default_state)._(u'Value must be a date in ISO 8601 format')
+        return value, state._(u'Value must be a date in ISO 8601 format')
 
 
 def iso8601_str_to_datetime(value, state = None):
@@ -231,6 +235,8 @@ def iso8601_str_to_datetime(value, state = None):
     """
     if value is None:
         return value, None
+    if state is None:
+        state = states.default_state
     # mx.DateTime.ISO.ParseDateTimeUTC fails when time zone is preceded with a space. For example,
     # mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03 +01:00') raises a"ValueError: wrong format,
     # use YYYY-MM-DD HH:MM:SS" while mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03+01:00') works.
@@ -242,7 +248,7 @@ def iso8601_str_to_datetime(value, state = None):
     try:
         return datetime.datetime.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
     except ValueError:
-        return value, (state or states.default_state)._(u'Value must be a date-time in ISO 8601 format')
+        return value, state._(u'Value must be a date-time in ISO 8601 format')
 
 
 def set_datetime_tzinfo(tzinfo = None):
@@ -276,10 +282,12 @@ def timestamp_to_date(value, state = None):
     """
     if value is None:
         return value, None
+    if state is None:
+        state = states.default_state
     try:
         return datetime.date.fromtimestamp(value / 1000), None
     except ValueError:
-        return value, (state or states.default_state)._(u'Value must be a timestamp')
+        return value, state._(u'Value must be a timestamp')
 
 
 def timestamp_to_datetime(value, state = None):
@@ -303,13 +311,15 @@ def timestamp_to_datetime(value, state = None):
     """
     if value is None:
         return value, None
+    if state is None:
+        state = states.default_state
     try:
         # Since a timestamp doesn't containe timezone information, the generated datetime has no timezone (ie naive
         # datetime), so we don't use pytz.utc.
         # return datetime.datetime.fromtimestamp(value / 1000, pytz.utc), None
         return datetime.datetime.fromtimestamp(value / 1000), None
     except ValueError:
-        return value, (state or states.default_state)._(u'Value must be a timestamp')
+        return value, state._(u'Value must be a timestamp')
 
 
 # Level-2 Converters

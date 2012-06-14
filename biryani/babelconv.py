@@ -58,8 +58,10 @@ def str_to_lang(value, state = None):
     """
     if value is None:
         return value, None
+    if state is None:
+        state = states.default_state
     if not babel.localedata.exists(value):
-        return value, (state or states.default_state)._(u'Invalid value')
+        return value, state._(u'Invalid value')
     return value, None
 
 
