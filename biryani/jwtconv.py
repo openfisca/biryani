@@ -52,6 +52,7 @@ __all__ = [
     'decode_json_web_token',
     'decoded_json_web_token_to_json',
     'decrypt_json_web_token',
+    'derive_key',
     'encrypt_json_web_token',
     'input_to_json_web_token',
     'make_json_to_json_web_token',
@@ -381,6 +382,37 @@ def derive_key(master_key, label, key_length):
     http://csrc.nist.gov/publications/nistpubs/800-56A/SP800-56A_Revision1_Mar08-2007.pdf
 
     .. note:: ``key_length`` is the length in bytes (not bits).
+
+    >>> cmk1_list = [4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106, 206,
+    ...     107, 124, 212, 45, 111, 107, 9, 219, 200, 177, 0, 240, 143, 156, 44, 207]
+    >>> cmk1_str = ''.join(chr(byte) for byte in cmk1_list)
+    >>> cek1_str = derive_key(cmk1_str, 'Encryption', 32)
+    >>> cek1_list = [ord(c) for c in cek1_str]
+    >>> cek1_list
+    [249, 255, 87, 218, 224, 223, 221, 53, 204, 121, 166, 130, 195, 184, 50, 69, \
+11, 237, 202, 71, 10, 96, 59, 199, 140, 88, 126, 147, 146, 113, 222, 41]
+    >>> cik1_str = derive_key(cmk1_str, 'Integrity', 32)
+    >>> cik1_list = [ord(c) for c in cik1_str]
+    >>> cik1_list
+    [218, 209, 130, 50, 169, 45, 70, 214, 29, 187, 123, 20, 3, 158, 111, 122, \
+182, 94, 57, 133, 245, 76, 97, 44, 193, 80, 81, 246, 115, 177, 225, 159]
+
+    >>> cmk2_list = [148, 116, 199, 126, 2, 117, 233, 76, 150, 149, 89, 193, 61, 34, 239, 226,
+    ...     109, 71, 59, 160, 192, 140, 150, 235, 106, 204, 49, 176, 68, 119, 13, 34,
+    ...     49, 19, 41, 69, 5, 20, 252, 145, 104, 129, 137, 138, 67, 23, 153, 83,
+    ...     81, 234, 82, 247, 48, 211, 41, 130, 35, 124, 45, 156, 249, 7, 225, 168]
+    >>> cmk2_str = ''.join(chr(byte) for byte in cmk2_list)
+    >>> cek2_str = derive_key(cmk2_str, 'Encryption', 16)
+    >>> cek2_list = [ord(c) for c in cek2_str]
+    >>> cek2_list
+    [137, 5, 92, 9, 17, 47, 17, 86, 253, 235, 34, 247, 121, 78, 11, 144]
+    >>> cik2_str = derive_key(cmk2_str, 'Integrity', 64)
+    >>> cik2_list = [ord(c) for c in cik2_str]
+    >>> cik2_list
+    [11, 179, 132, 177, 171, 24, 126, 19, 113, 1, 200, 102, 100, 74, 88, 149, \
+31, 41, 71, 57, 51, 179, 106, 242, 113, 211, 56, 56, 37, 198, 57, 17, \
+149, 209, 221, 113, 40, 191, 95, 252, 142, 254, 141, 230, 39, 113, 139, 84, \
+44, 156, 247, 47, 223, 101, 229, 180, 82, 231, 38, 96, 170, 119, 236, 81]
     """
     assert isinstance(master_key, str)
     assert isinstance(label, str)
