@@ -366,7 +366,7 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
             alg = u'none',
             )
         encoded_header = check(pipe(
-            make_json_to_str(encoding = 'utf-8', ensure_ascii = False),
+            make_json_to_str(encoding = 'utf-8', ensure_ascii = False, separators = (',', ':'), sort_keys = True),
             make_bytes_to_base64url(remove_padding = True),
             ))(header)
         encoded_payload, error = check(make_bytes_to_base64url(remove_padding = True))(plaintext, state = state)
@@ -559,7 +559,7 @@ def encrypt_json_web_token(algorithm = None, compression = None, integrity = Non
         if compression not in (None, 'none'):
             header['zip'] = compression
         encoded_header = check(pipe(
-            make_json_to_str(encoding = 'utf-8', ensure_ascii = False),
+            make_json_to_str(encoding = 'utf-8', ensure_ascii = False, separators = (',', ':'), sort_keys = True),
             make_bytes_to_base64url(remove_padding = True),
             ))(header, state = state)
 
@@ -672,7 +672,7 @@ def sign_json_web_token(algorithm = None, json_web_key_url = None, key_id = None
             if key_id is not None:
                 header['kid'] = key_id
         encoded_header = check(pipe(
-            make_json_to_str(encoding = 'utf-8', ensure_ascii = False),
+            make_json_to_str(encoding = 'utf-8', ensure_ascii = False, separators = (',', ':'), sort_keys = True),
             make_bytes_to_base64url(remove_padding = True),
             ))(header)
         secured_input = '{0}.{1}'.format(encoded_header, encoded_payload)
