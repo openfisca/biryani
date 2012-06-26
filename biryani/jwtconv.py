@@ -50,6 +50,7 @@ from .jwkconv import json_to_json_web_key
 
 __all__ = [
     'decode_json_web_token',
+    'decode_json_web_token_claims',
     'decoded_json_web_token_to_json',
     'decrypt_json_web_token',
     'derive_key',
@@ -97,88 +98,100 @@ valid_signature_algorithms = (
 
 
 def decode_json_web_token(token, state = None):
+    """Decode a JSON Web Token, without converting payload to JSON claims, nor verifying its content."""
     if token is None:
         return None, None
     if state is None:
         state = states.default_state
 
     errors = {}
-    value = dict(token = token)
+    decoded_token = dict(token = token)
     try:
-        value['secured_input'], value['encoded_signature'] = str(token).rsplit('.', 1)
-        value['encoded_header'], value['encoded_payload'] = value['secured_input'].split('.', 1)
+        decoded_token['secured_input'], decoded_token['encoded_signature'] = str(token).rsplit('.', 1)
+        decoded_token['encoded_header'], decoded_token['encoded_payload'] = decoded_token['secured_input'].split('.', 1)
     except:
-        return value, dict(token = state._(u'Invalid format'))
+        return decoded_token, dict(token = state._(u'Invalid format'))
 
     errors = {}
     header, error = pipe(
         make_base64url_to_bytes(add_padding = True),
         make_input_to_json(),
-        )(value['encoded_header'], state = state)
+        )(decoded_token['encoded_header'], state = state)
     if error is None:
-        value['header'] = header
+        decoded_token['header'] = header
     else:
         errors['encoded_header'] = state._(u'Invalid format')
-    claims, error = pipe(
+    payload, error = pipe(
         make_base64url_to_bytes(add_padding = True),
-        make_input_to_json(),
         not_none,
-        )(value['encoded_payload'], state = state)
-    if error is not None:
-        claims = None
-        errors['encoded_payload'] = state._(u'Invalid format')
-    signature, error = make_base64url_to_bytes(add_padding = True)(value['encoded_signature'], state = state)
+        )(decoded_token['encoded_payload'], state = state)
     if error is None:
-        value['signature'] = signature
+        decoded_token['payload'] = payload
+    else:
+        payload = None
+        errors['encoded_payload'] = state._(u'Invalid format')
+    signature, error = make_base64url_to_bytes(add_padding = True)(decoded_token['encoded_signature'], state = state)
+    if error is None:
+        decoded_token['signature'] = signature
     else:
         errors['encoded_signature'] = state._(u'Invalid format')
-    if value['header'].get('typ', u'JWT') not in (u'application/jwt', u'JWT'):
-        return value, dict(header = dict(typ = state._(u'Not a signed JSON Web Token (JWS)')))
-    if claims is not None:
-        value['claims'], claims_errors = pipe(
-            test_isinstance(dict),
-            struct(
-                dict(
-                    aud = pipe(
-                        test_isinstance(basestring),
-                        cleanup_line,
-                        ),
-                    exp = pipe(
-                        test_isinstance((int, long)),
-                        test_greater_or_equal(0),
-                        ),
-                    iat = pipe(
-                        test_isinstance((int, long)),
-                        test_greater_or_equal(0),
-                        ),
-                    iss = pipe(
-                        test_isinstance(basestring),
-                        cleanup_line,
-                        ),
-                    jti = pipe(
-                        test_isinstance(basestring),
-                        cleanup_line,
-                        ),
-                    nbf = pipe(
-                        test_isinstance((int, long)),
-                        test_greater_or_equal(0),
-                        ),
-                    prn = pipe(
-                        test_isinstance(basestring),
-                        cleanup_line,
-                        ),
-                    typ = pipe(
-                        test_isinstance(basestring),
-                        cleanup_line,
-                        ),
+    if decoded_token['header'].get('typ', u'JWT') not in (u'application/jwt', u'JWT'):
+        return decoded_token, dict(header = dict(typ = state._(u'Not a signed JSON Web Token (JWS)')))
+    return decoded_token, errors or None
+
+
+def decode_json_web_token_claims(decoded_token, state = None):
+    if decoded_token is None:
+        return None, None
+    if state is None:
+        state = states.default_state
+
+    claims, errors = pipe(
+        make_input_to_json(),
+        test_isinstance(dict),
+        struct(
+            dict(
+                aud = pipe(
+                    test_isinstance(basestring),
+                    cleanup_line,
                     ),
-                default = noop,
-                keep_empty = True,
+                exp = pipe(
+                    test_isinstance((int, long)),
+                    test_greater_or_equal(0),
+                    ),
+                iat = pipe(
+                    test_isinstance((int, long)),
+                    test_greater_or_equal(0),
+                    ),
+                iss = pipe(
+                    test_isinstance(basestring),
+                    cleanup_line,
+                    ),
+                jti = pipe(
+                    test_isinstance(basestring),
+                    cleanup_line,
+                    ),
+                nbf = pipe(
+                    test_isinstance((int, long)),
+                    test_greater_or_equal(0),
+                    ),
+                prn = pipe(
+                    test_isinstance(basestring),
+                    cleanup_line,
+                    ),
+                typ = pipe(
+                    test_isinstance(basestring),
+                    cleanup_line,
+                    ),
                 ),
-            )(claims, state = state)
-        if claims_errors is not None:
-            errors['claims'] = claims_errors
-    return value, errors or None
+            default = noop,
+            keep_empty = True,
+            ),
+        )(decoded_token.get('payload'), state = state)
+    if errors is None:
+        return decoded_token, dict(claims = errors)
+    decoded_token['claims'] = claims
+    return decoded_token, None
 
 
 decoded_json_web_token_to_json = get('claims')
