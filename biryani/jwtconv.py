@@ -382,7 +382,7 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
             make_json_to_str(encoding = 'utf-8', ensure_ascii = False, separators = (',', ':'), sort_keys = True),
             make_bytes_to_base64url(remove_padding = True),
             ))(header)
-        encoded_payload, error = check(make_bytes_to_base64url(remove_padding = True))(plaintext, state = state)
+        encoded_payload = check(make_bytes_to_base64url(remove_padding = True))(plaintext, state = state)
         return '{0}.{1}.'.format(encoded_header, encoded_payload), None
     return decrypt_json_web_token_converter
 
