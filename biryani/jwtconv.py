@@ -56,6 +56,7 @@ __all__ = [
     'encrypt_json_web_token',
     'input_to_json_web_token',
     'make_json_to_json_web_token',
+    'make_payload_to_json_web_token',
     'sign_json_web_token',
     'verify_decoded_json_web_token_signature',
     'verify_decoded_json_web_token_time',
@@ -581,33 +582,38 @@ input_to_json_web_token = cleanup_line
 
 def make_json_to_json_web_token(typ = None):
     """Return a converter that wraps JSON data into an unsigned and unencrypted JSON web token."""
+    return pipe(
+        make_json_to_str(encoding = 'utf-8', ensure_ascii = False, separators = (',', ':'), sort_keys = True),
+        make_payload_to_json_web_token(typ = typ),
+        )
+
+
+def make_payload_to_json_web_token(typ = None):
+    """Return a converter that wraps binary data into an unsigned and unencrypted JSON web token."""
     header = dict(
         alg = u'none',
         )
     if typ is not None:
         header['typ'] = typ
     encoded_header = check(pipe(
-        make_json_to_str(encoding = 'utf-8', ensure_ascii = False),
+        make_json_to_str(encoding = 'utf-8', ensure_ascii = False, separators = (',', ':'), sort_keys = True),
         make_bytes_to_base64url(remove_padding = True),
         ))(header)
 
-    def json_to_json_web_token(claims, state = None):
-        if claims is None:
+    def payload_to_json_web_token(payload, state = None):
+        if payload is None:
             return None, None
         if state is None:
             state = states.default_state
 
-        encoded_payload, error = pipe(
-            make_json_to_str(encoding = 'utf-8', ensure_ascii = False),
-            make_bytes_to_base64url(remove_padding = True),
-            )(claims, state = state)
+        encoded_payload, error = make_bytes_to_base64url(remove_padding = True)(payload, state = state)
         if error is not None:
             return encoded_payload, error
         secured_input = '{0}.{1}'.format(encoded_header, encoded_payload)
         encoded_signature = ''
         token = '{0}.{1}'.format(secured_input, encoded_signature)
         return token, None
-    return json_to_json_web_token
+    return payload_to_json_web_token
 
 
 def sign_json_web_token(algorithm = None, json_web_key_url = None, key_id = None, private_key = None,
