@@ -203,6 +203,8 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
     >>> from Crypto.PublicKey import RSA
     >>> from Crypto.Util import number
 
+    >>> # Mike Jones Test 
+
     >>> plaintext_bytes_list = [78, 111, 119, 32, 105, 115, 32, 116, 104, 101, 32, 116, 105, 109, 101, 32,
     ...    102, 111, 114, 32, 97, 108, 108, 32, 103, 111, 111, 100, 32, 109, 101, 110,
     ...    32, 116, 111, 32, 99, 111, 109, 101, 32, 116, 111, 32, 116, 104, 101, 32,
@@ -337,6 +339,18 @@ iFFypOFpvid7i6D0k'
     >>> decoded_jwt['payload']
     'Now is the time for all good men to come to the aid of their country.'
     >>> decoded_jwt['payload'] == plaintext
+    True
+
+    >>> # Same test with random keys.
+
+    >>> encryptor = encrypt_json_web_token(algorithm = 'RSA1_5', integrity = 'HS256', method = 'A128CBC',
+    ...     public_key_as_encoded_str = public_key_as_encoded_str)
+    >>> encrypted_jwt = check(encryptor)(jwt)
+    >>> decryptor = decrypt_json_web_token(private_key = private_key_as_encoded_str)
+    >>> decrypted_jwt = check(decryptor)(encrypted_jwt)
+    >>> decrypted_jwt
+    'eyJhbGciOiJub25lIn0.Tm93IGlzIHRoZSB0aW1lIGZvciBhbGwgZ29vZCBtZW4gdG8gY29tZSB0byB0aGUgYWlkIG9mIHRoZWlyIGNvdW50cnku.'
+    >>> decrypted_jwt == jwt
     True
     """
     if shared_secret is not None:
@@ -538,6 +552,8 @@ def derive_key(master_key, label, key_length):
 
     .. note:: ``key_length`` is the length in bytes (not bits).
 
+    >>> # Mike Jones Tests
+
     >>> cmk1_bytes_list = [4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106, 206,
     ...     107, 124, 212, 45, 111, 107, 9, 219, 200, 177, 0, 240, 143, 156, 44, 207]
     >>> cmk1 = ''.join(chr(byte) for byte in cmk1_bytes_list)
@@ -594,6 +610,8 @@ def encrypt_json_web_token(algorithm = None, compression = None, content_master_
 
     .. note:: ``content_master_key``, ``encrypted_key`` & ``initialization_vector`` parameters should be kept to
        ``None``, except for testing.
+
+    >>> # Mike Jones Tests
 
     >>> from Crypto.PublicKey import RSA
     >>> from Crypto.Util import number
