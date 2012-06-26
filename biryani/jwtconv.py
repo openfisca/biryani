@@ -198,6 +198,147 @@ decoded_json_web_token_to_json = get('claims')
 
 
 def decrypt_json_web_token(private_key = None, require_encrypted_token = False, shared_secret = None):
+    """Return a converter that decrypts a JSON Web Token and returns a non crypted JSON Web Token.
+
+    >>> from Crypto.PublicKey import RSA
+    >>> from Crypto.Util import number
+
+    >>> plaintext_bytes_list = [78, 111, 119, 32, 105, 115, 32, 116, 104, 101, 32, 116, 105, 109, 101, 32,
+    ...    102, 111, 114, 32, 97, 108, 108, 32, 103, 111, 111, 100, 32, 109, 101, 110,
+    ...    32, 116, 111, 32, 99, 111, 109, 101, 32, 116, 111, 32, 116, 104, 101, 32,
+    ...    97, 105, 100, 32, 111, 102, 32, 116, 104, 101, 105, 114, 32, 99, 111, 117,
+    ...    110, 116, 114, 121, 46]
+    >>> plaintext = ''.join(chr(byte) for byte in plaintext_bytes_list)
+    >>> jwt = check(make_payload_to_json_web_token())(plaintext)
+    >>> jwt
+    'eyJhbGciOiJub25lIn0.Tm93IGlzIHRoZSB0aW1lIGZvciBhbGwgZ29vZCBtZW4gdG8gY29tZSB0byB0aGUgYWlkIG9mIHRoZWlyIGNvdW50cnku.'
+
+    >>> cmk1_bytes_list = [4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106, 206,
+    ...     107, 124, 212, 45, 111, 107, 9, 219, 200, 177, 0, 240, 143, 156, 44, 207]
+    >>> cmk1 = ''.join(chr(byte) for byte in cmk1_bytes_list)
+    >>> iv1_bytes_list = [3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99, 111, 116, 104, 101]
+    >>> iv1 = ''.join(chr(byte) for byte in iv1_bytes_list)
+    >>> key_modulus_bytes_list = [177, 119, 33, 13, 164, 30, 108, 121, 207, 136, 107, 242, 12, 224, 19, 226,
+    ...    198, 134, 17, 71, 173, 75, 42, 61, 48, 162, 206, 161, 97, 108, 185, 234,
+    ...    226, 219, 118, 206, 118, 5, 169, 224, 60, 181, 90, 85, 51, 123, 6, 224,
+    ...    4, 122, 29, 230, 151, 12, 244, 127, 121, 25, 4, 85, 220, 144, 215, 110,
+    ...    130, 17, 68, 228, 129, 138, 7, 130, 231, 40, 212, 214, 17, 179, 28, 124,
+    ...    151, 178, 207, 20, 14, 154, 222, 113, 176, 24, 198, 73, 211, 113, 9, 33,
+    ...    178, 80, 13, 25, 21, 25, 153, 212, 206, 67, 154, 147, 70, 194, 192, 183,
+    ...    160, 83, 98, 236, 175, 85, 23, 97, 75, 199, 177, 73, 145, 50, 253, 206,
+    ...    32, 179, 254, 236, 190, 82, 73, 67, 129, 253, 252, 220, 108, 136, 138, 11,
+    ...    192, 1, 36, 239, 228, 55, 81, 113, 17, 25, 140, 63, 239, 146, 3, 172,
+    ...    96, 60, 227, 233, 64, 255, 224, 173, 225, 228, 229, 92, 112, 72, 99, 97,
+    ...    26, 87, 187, 123, 46, 50, 90, 202, 117, 73, 10, 153, 47, 224, 178, 163,
+    ...    77, 48, 46, 154, 33, 148, 34, 228, 33, 172, 216, 89, 46, 225, 127, 68,
+    ...    146, 234, 30, 147, 54, 146, 5, 133, 45, 78, 254, 85, 55, 75, 213, 86,
+    ...    194, 218, 215, 163, 189, 194, 54, 6, 83, 36, 18, 153, 53, 7, 48, 89,
+    ...    35, 66, 144, 7, 65, 154, 13, 97, 75, 55, 230, 132, 3, 13, 239, 71]
+    >>> key_modulus = ''.join(chr(byte) for byte in key_modulus_bytes_list)
+    >>> key_public_exponent_bytes_list = [1, 0, 1]
+    >>> key_public_exponent = ''.join(chr(byte) for byte in key_public_exponent_bytes_list)
+    >>> public_key = RSA.construct((number.bytes_to_long(key_modulus),
+    ...     number.bytes_to_long(key_public_exponent)))
+    >>> public_key_as_encoded_str = public_key.exportKey()
+    >>> print public_key_as_encoded_str
+    -----BEGIN PUBLIC KEY-----
+    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsXchDaQebHnPiGvyDOAT
+    4saGEUetSyo9MKLOoWFsueri23bOdgWp4Dy1WlUzewbgBHod5pcM9H95GQRV3JDX
+    boIRROSBigeC5yjU1hGzHHyXss8UDprecbAYxknTcQkhslANGRUZmdTOQ5qTRsLA
+    t6BTYuyvVRdhS8exSZEy/c4gs/7svlJJQ4H9/NxsiIoLwAEk7+Q3UXERGYw/75ID
+    rGA84+lA/+Ct4eTlXHBIY2EaV7t7LjJaynVJCpkv4LKjTTAumiGUIuQhrNhZLuF/
+    RJLqHpM2kgWFLU7+VTdL1VbC2tejvcI2BlMkEpk1BzBZI0KQB0GaDWFLN+aEAw3v
+    RwIDAQAB
+    -----END PUBLIC KEY-----
+    >>> encrypted_key_bytes_list = [32, 242, 63, 207, 94, 246, 133, 37, 135, 48, 88, 4, 15, 193, 6, 244,
+    ...     51, 58, 132, 133, 212, 255, 163, 90, 59, 80, 200, 152, 41, 244, 188, 215,
+    ...     174, 160, 26, 188, 227, 180, 165, 234, 172, 63, 24, 116, 152, 28, 149, 16,
+    ...     94, 213, 201, 171, 180, 191, 11, 21, 149, 172, 143, 54, 194, 58, 206, 201,
+    ...     164, 28, 107, 155, 75, 101, 22, 92, 227, 144, 95, 40, 119, 170, 7, 36,
+    ...     225, 40, 141, 186, 213, 7, 175, 16, 174, 122, 75, 32, 48, 193, 119, 202,
+    ...     41, 152, 210, 190, 68, 57, 119, 4, 197, 74, 7, 242, 239, 170, 204, 73,
+    ...     75, 213, 202, 113, 216, 18, 23, 66, 106, 208, 69, 244, 117, 147, 2, 37,
+    ...     207, 199, 184, 96, 102, 44, 70, 212, 87, 143, 253, 0, 166, 59, 41, 115,
+    ...     217, 80, 165, 87, 38, 5, 9, 184, 202, 68, 67, 176, 4, 87, 254, 166,
+    ...     227, 88, 124, 238, 249, 75, 114, 205, 148, 149, 45, 78, 193, 134, 64, 189,
+    ...     168, 76, 170, 76, 176, 72, 148, 77, 215, 159, 146, 55, 189, 213, 85, 253,
+    ...     135, 200, 59, 247, 79, 37, 22, 200, 32, 110, 53, 123, 54, 39, 9, 178,
+    ...     231, 238, 95, 25, 211, 143, 87, 220, 88, 138, 209, 13, 227, 72, 58, 102,
+    ...     164, 136, 241, 14, 14, 45, 32, 77, 44, 244, 162, 239, 150, 248, 181, 138,
+    ...     251, 116, 245, 205, 137, 78, 34, 34, 10, 6, 59, 4, 197, 2, 153, 251]
+    >>> encrypted_key = ''.join(chr(byte) for byte in encrypted_key_bytes_list)
+    >>> encryptor = encrypt_json_web_token(algorithm = 'RSA1_5', content_master_key = cmk1,
+    ...     encrypted_key = encrypted_key, initialization_vector = iv1, integrity = 'HS256', method = 'A128CBC',
+    ...     public_key_as_encoded_str = public_key_as_encoded_str)
+    >>> encrypted_jwt = check(encryptor)(jwt)
+    >>> encrypted_jwt
+    'eyJhbGciOiJSU0ExXzUiLCJlbmMiOiJBMTI4Q0JDIiwiaW50IjoiSFMyNTYiLCJpdiI6IkF4WThEQ3REYUdsc2JHbGpiM1JvWlEifQ.IPI_z172h\
+SWHMFgED8EG9DM6hIXU_6NaO1DImCn0vNeuoBq847Sl6qw_GHSYHJUQXtXJq7S_CxWVrI82wjrOyaQca5tLZRZc45BfKHeqByThKI261QevEK56SyAwwX\
+fKKZjSvkQ5dwTFSgfy76rMSUvVynHYEhdCatBF9HWTAiXPx7hgZixG1FeP_QCmOylz2VClVyYFCbjKREOwBFf-puNYfO75S3LNlJUtTsGGQL2oTKpMsEi\
+UTdefkje91VX9h8g7908lFsggbjV7NicJsufuXxnTj1fcWIrRDeNIOmakiPEODi0gTSz0ou-W-LWK-3T1zYlOIiIKBjsExQKZ-w._Z_djlIoC4MDSCKir\
+eWS2beti4Q6iSG2UjFujQvdz-_PQdUcFNkOulegD6BgjgdFLjeB4HHOO7UHvP8PEDu0a0sA2a_-CI0w2YQQ2QQe35M.c41k4T4eAgCCt63m8ZNmiOinMc\
+iFFypOFpvid7i6D0k'
+
+    >>> key_private_exponent_bytes_list = [84, 80, 150, 58, 165, 235, 242, 123, 217, 55, 38, 154, 36, 181, 221, 156,
+    ...    211, 215, 100, 164, 90, 88, 40, 228, 83, 148, 54, 122, 4, 16, 165, 48,
+    ...    76, 194, 26, 107, 51, 53, 179, 165, 31, 18, 198, 173, 78, 61, 56, 97,
+    ...    252, 158, 140, 80, 63, 25, 223, 156, 36, 203, 214, 252, 120, 67, 180, 167,
+    ...    3, 82, 243, 25, 97, 214, 83, 133, 69, 16, 104, 54, 160, 200, 41, 83,
+    ...    164, 187, 70, 153, 111, 234, 242, 158, 175, 28, 198, 48, 211, 45, 148, 58,
+    ...    23, 62, 227, 74, 52, 117, 42, 90, 41, 249, 130, 154, 80, 119, 61, 26,
+    ...    193, 40, 125, 10, 152, 174, 227, 225, 205, 32, 62, 66, 6, 163, 100, 99,
+    ...    219, 19, 253, 25, 105, 80, 201, 29, 252, 157, 237, 69, 1, 80, 171, 167,
+    ...    20, 196, 156, 109, 249, 88, 0, 3, 152, 38, 165, 72, 87, 6, 152, 71,
+    ...    156, 214, 16, 71, 30, 82, 51, 103, 76, 218, 63, 9, 84, 163, 249, 91,
+    ...    215, 44, 238, 85, 101, 240, 148, 1, 82, 224, 91, 135, 105, 127, 84, 171,
+    ...    181, 152, 210, 183, 126, 24, 46, 196, 90, 173, 38, 245, 219, 186, 222, 27,
+    ...    240, 212, 194, 15, 66, 135, 226, 178, 190, 52, 245, 74, 65, 224, 81, 100,
+    ...    85, 25, 204, 165, 203, 187, 175, 84, 100, 82, 15, 11, 23, 202, 151, 107,
+    ...    54, 41, 207, 3, 136, 229, 134, 131, 93, 139, 50, 182, 204, 93, 130, 89]
+    >>> key_private_exponent = ''.join(chr(byte) for byte in key_private_exponent_bytes_list)
+    >>> private_key = RSA.construct((number.bytes_to_long(key_modulus),
+    ...     number.bytes_to_long(key_public_exponent), number.bytes_to_long(key_private_exponent)))
+    >>> private_key_as_encoded_str = private_key.exportKey()
+    >>> print private_key_as_encoded_str
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIEpAIBAAKCAQEAsXchDaQebHnPiGvyDOAT4saGEUetSyo9MKLOoWFsueri23bO
+    dgWp4Dy1WlUzewbgBHod5pcM9H95GQRV3JDXboIRROSBigeC5yjU1hGzHHyXss8U
+    DprecbAYxknTcQkhslANGRUZmdTOQ5qTRsLAt6BTYuyvVRdhS8exSZEy/c4gs/7s
+    vlJJQ4H9/NxsiIoLwAEk7+Q3UXERGYw/75IDrGA84+lA/+Ct4eTlXHBIY2EaV7t7
+    LjJaynVJCpkv4LKjTTAumiGUIuQhrNhZLuF/RJLqHpM2kgWFLU7+VTdL1VbC2tej
+    vcI2BlMkEpk1BzBZI0KQB0GaDWFLN+aEAw3vRwIDAQABAoIBAFRQljql6/J72Tcm
+    miS13ZzT12SkWlgo5FOUNnoEEKUwTMIaazM1s6UfEsatTj04YfyejFA/Gd+cJMvW
+    /HhDtKcDUvMZYdZThUUQaDagyClTpLtGmW/q8p6vHMYw0y2UOhc+40o0dSpaKfmC
+    mlB3PRrBKH0KmK7j4c0gPkIGo2Rj2xP9GWlQyR38ne1FAVCrpxTEnG35WAADmCal
+    SFcGmEec1hBHHlIzZ0zaPwlUo/lb1yzuVWXwlAFS4FuHaX9Uq7WY0rd+GC7EWq0m
+    9du63hvw1MIPQofisr409UpB4FFkVRnMpcu7r1RkUg8LF8qXazYpzwOI5YaDXYsy
+    tsxdglkCgYEAuKlCKvKv/ZJMVcdIs5vVSU/6cPtYI1ljWytExV/skstvRSNi9r66
+    jdd9+yBhVfuG4shsp2j7rGnIio901RBeHo6TPKWVVykPu1iYhQXw1jIABfw+MVsN
+    +3bQ76WLdt2SDxsHs7q7zPyUyHXmps7ycZ5c72wGkUwNOjYelmkiNS0CgYEA9gY2
+    w6I6S6L0juEKsbeDAwpd9WMfgqFoeA9vEyEUuk4kLwBKcoe1x4HG68ik918hdDSE
+    9vDQSccA3xXHOAFOPJ8R9EeIAbTi1VwBYnbTp87X+xcPWlEPkrdoUKW60tgs1aNd
+    /Nnc9LEVVPMS390zbFxt8TN/biaBgelNgbC95sMCgYEAo/8V14SezckO6CNLKs/b
+    tPdFiO9/kC1DsuUTd2LAfIIVeMZ7jn1Gus/Ff7B7IVx3p5KuBGOVF8L+qifLb6nQ
+    nLysgHDh132NDioZkhH7mI7hPG+PYE/odApKdnqECHWw0J+F0JWnUd6D2B/1TvF9
+    mXA2Qx+iGYn8OVV1Bsmp6qUCgYEAw0kZbV63cVRvVX6yk3C8cMxo2qCM4Y8nsq1l
+    mMSYhG4EcL6FWbX5h9yuvngs4iLEFk6eALoUS4vIWEwcL4txw9LsWH/zKI+hwoRe
+    oP77cOdSL4AVcraHawlkpyd2TWjE5evgbhWtOxnZee3cXJBkAi64Ik6jZxbvk+RR
+    3pEhnCsCgYBd9Pl1dGQ/4PlGika1bezRFWlnNnPxIHPWrnWRxBCKYr+lycWOUPk1
+    clEAVQXzLHVIigANNKdVH6h4PfI/mgcrzkQnYCaBv68CjX2Rv9r42T6P2DALQfT+
+    2vQxZSMnRNS2mCV8et5ZnWcjHV9kN1aEjVU/o8fDuia+fAaDbe190g==
+    -----END RSA PRIVATE KEY-----
+    >>> decryptor = decrypt_json_web_token(private_key = private_key_as_encoded_str)
+    >>> decrypted_jwt = check(decryptor)(encrypted_jwt)
+    >>> decrypted_jwt
+    'eyJhbGciOiJub25lIn0.Tm93IGlzIHRoZSB0aW1lIGZvciBhbGwgZ29vZCBtZW4gdG8gY29tZSB0byB0aGUgYWlkIG9mIHRoZWlyIGNvdW50cnku.'
+    >>> decrypted_jwt == jwt
+    True
+    >>> decoded_jwt = check(decode_json_web_token)(decrypted_jwt)
+    >>> decoded_jwt['payload']
+    'Now is the time for all good men to come to the aid of their country.'
+    >>> decoded_jwt['payload'] == plaintext
+    True
+    """
     if shared_secret is not None:
         assert isinstance(shared_secret, str)  # Shared secret must not be unicode.
 
