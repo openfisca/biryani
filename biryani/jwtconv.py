@@ -40,7 +40,7 @@ from Crypto.Hash import HMAC, SHA256, SHA384, SHA512
 from Crypto.PublicKey import RSA
 from Crypto.Util import number
 
-from . import states
+from . import gcm, states
 from .base64conv import base64_to_bytes, make_base64url_to_bytes, make_bytes_to_base64url
 from .baseconv import (check, cleanup_line, get, make_input_to_url, N_, noop, not_none, pipe, struct, test,
     test_greater_or_equal, test_in, test_isinstance, test_less_or_equal, uniform_sequence)
@@ -78,8 +78,8 @@ valid_encryption_algorithms = (
 valid_encryption_methods = (
     u'A128CBC',
     u'A256CBC',
-#    u'A128GCM',
-#    u'A256GCM',
+    u'A128GCM',
+    u'A256GCM',
     )
 valid_integrity_algorithms = (
     u'HS256',
@@ -203,7 +203,7 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
     >>> from Crypto.PublicKey import RSA
     >>> from Crypto.Util import number
 
-    >>> # Mike Jones Test 
+    >>> # Mike Jones Test 1
 
     >>> plaintext_bytes_list = [78, 111, 119, 32, 105, 115, 32, 116, 104, 101, 32, 116, 105, 109, 101, 32,
     ...    102, 111, 114, 32, 97, 108, 108, 32, 103, 111, 111, 100, 32, 109, 101, 110,
@@ -215,11 +215,11 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
     >>> jwt
     'eyJhbGciOiJub25lIn0.Tm93IGlzIHRoZSB0aW1lIGZvciBhbGwgZ29vZCBtZW4gdG8gY29tZSB0byB0aGUgYWlkIG9mIHRoZWlyIGNvdW50cnku.'
 
-    >>> cmk1_bytes_list = [4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106, 206,
+    >>> cmk_bytes_list = [4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106, 206,
     ...     107, 124, 212, 45, 111, 107, 9, 219, 200, 177, 0, 240, 143, 156, 44, 207]
-    >>> cmk1 = ''.join(chr(byte) for byte in cmk1_bytes_list)
-    >>> iv1_bytes_list = [3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99, 111, 116, 104, 101]
-    >>> iv1 = ''.join(chr(byte) for byte in iv1_bytes_list)
+    >>> cmk = ''.join(chr(byte) for byte in cmk_bytes_list)
+    >>> iv_bytes_list = [3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99, 111, 116, 104, 101]
+    >>> iv = ''.join(chr(byte) for byte in iv_bytes_list)
     >>> key_modulus_bytes_list = [177, 119, 33, 13, 164, 30, 108, 121, 207, 136, 107, 242, 12, 224, 19, 226,
     ...    198, 134, 17, 71, 173, 75, 42, 61, 48, 162, 206, 161, 97, 108, 185, 234,
     ...    226, 219, 118, 206, 118, 5, 169, 224, 60, 181, 90, 85, 51, 123, 6, 224,
@@ -269,8 +269,8 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
     ...     164, 136, 241, 14, 14, 45, 32, 77, 44, 244, 162, 239, 150, 248, 181, 138,
     ...     251, 116, 245, 205, 137, 78, 34, 34, 10, 6, 59, 4, 197, 2, 153, 251]
     >>> encrypted_key = ''.join(chr(byte) for byte in encrypted_key_bytes_list)
-    >>> encryptor = encrypt_json_web_token(algorithm = 'RSA1_5', content_master_key = cmk1,
-    ...     encrypted_key = encrypted_key, initialization_vector = iv1, integrity = 'HS256', method = 'A128CBC',
+    >>> encryptor = encrypt_json_web_token(algorithm = 'RSA1_5', content_master_key = cmk,
+    ...     encrypted_key = encrypted_key, initialization_vector = iv, integrity = 'HS256', method = 'A128CBC',
     ...     public_key_as_encoded_str = public_key_as_encoded_str)
     >>> encrypted_jwt = check(encryptor)(jwt)
     >>> encrypted_jwt
@@ -351,6 +351,93 @@ iFFypOFpvid7i6D0k'
     >>> decrypted_jwt
     'eyJhbGciOiJub25lIn0.Tm93IGlzIHRoZSB0aW1lIGZvciBhbGwgZ29vZCBtZW4gdG8gY29tZSB0byB0aGUgYWlkIG9mIHRoZWlyIGNvdW50cnku.'
     >>> decrypted_jwt == jwt
+    True
+
+    >>> # Mike Jones Test 2
+
+    >>> plaintext_bytes_list = [76, 105, 118, 101, 32, 108, 111, 110, 103, 32, 97, 110, 100, 32, 112, 114,
+    ...     111, 115, 112, 101, 114, 46]
+    >>> plaintext = ''.join(chr(byte) for byte in plaintext_bytes_list)
+    >>> jwt = check(make_payload_to_json_web_token())(plaintext)
+    >>> cmk_bytes_list = [177, 161, 244, 128, 84, 143, 225, 115, 63, 180, 3, 255, 107, 154, 212, 246,
+    ...     138, 7, 110, 91, 112, 46, 34, 105, 47, 130, 203, 46, 122, 234, 64, 252]
+    >>> cmk = ''.join(chr(byte) for byte in cmk_bytes_list)
+    >>> iv_bytes_list = [227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219]
+    >>> iv = ''.join(chr(byte) for byte in iv_bytes_list)
+    >>> key_modulus_bytes_list = [161, 168, 84, 34, 133, 176, 208, 173, 46, 176, 163, 110, 57, 30, 135, 227,
+    ...     9, 31, 226, 128, 84, 92, 116, 241, 70, 248, 27, 227, 193, 62, 5, 91,
+    ...     241, 145, 224, 205, 141, 176, 184, 133, 239, 43, 81, 103, 9, 161, 153, 157,
+    ...     179, 104, 123, 51, 189, 34, 152, 69, 97, 69, 78, 93, 140, 131, 87, 182,
+    ...     169, 101, 92, 142, 3, 22, 167, 8, 212, 56, 35, 79, 210, 222, 192, 208,
+    ...     252, 49, 109, 138, 173, 253, 210, 166, 201, 63, 102, 74, 5, 158, 41, 90,
+    ...     144, 108, 160, 79, 10, 89, 222, 231, 172, 31, 227, 197, 0, 19, 72, 81,
+    ...     138, 78, 136, 221, 121, 118, 196, 17, 146, 10, 244, 188, 72, 113, 55, 221,
+    ...     162, 217, 171, 27, 57, 233, 210, 101, 236, 154, 199, 56, 138, 239, 101, 48,
+    ...     198, 186, 202, 160, 76, 111, 234, 71, 57, 183, 5, 211, 171, 136, 126, 64,
+    ...     40, 75, 58, 89, 244, 254, 107, 84, 103, 7, 236, 69, 163, 18, 180, 251,
+    ...     58, 153, 46, 151, 174, 12, 103, 197, 181, 161, 162, 55, 250, 235, 123, 110,
+    ...     17, 11, 158, 24, 47, 133, 8, 199, 235, 107, 126, 130, 246, 73, 195, 20,
+    ...     108, 202, 176, 214, 187, 45, 146, 182, 118, 54, 32, 200, 61, 201, 71, 243,
+    ...     1, 255, 131, 84, 37, 111, 211, 168, 228, 45, 192, 118, 27, 197, 235, 232,
+    ...     36, 10, 230, 248, 190, 82, 182, 140, 35, 204, 108, 190, 253, 186, 186, 27]
+    >>> key_modulus = ''.join(chr(byte) for byte in key_modulus_bytes_list)
+    >>> key_public_exponent_bytes_list = [1, 0, 1]
+    >>> key_public_exponent = ''.join(chr(byte) for byte in key_public_exponent_bytes_list)
+    >>> public_key = RSA.construct((number.bytes_to_long(key_modulus),
+    ...     number.bytes_to_long(key_public_exponent)))
+    >>> public_key_as_encoded_str = public_key.exportKey()
+    >>> encrypted_key_bytes_list = [142, 252, 40, 202, 21, 177, 56, 198, 232, 7, 151, 49, 95, 169, 220, 2,
+    ...     46, 214, 167, 116, 57, 20, 164, 109, 150, 98, 49, 223, 154, 95, 71, 209,
+    ...     233, 17, 174, 142, 203, 232, 132, 167, 17, 42, 51, 125, 22, 221, 135, 17,
+    ...     67, 197, 148, 246, 139, 145, 160, 238, 99, 119, 171, 95, 117, 202, 87, 251,
+    ...     101, 254, 58, 215, 135, 195, 135, 103, 49, 119, 76, 46, 49, 198, 27, 31,
+    ...     58, 44, 192, 222, 21, 16, 13, 216, 161, 179, 236, 65, 143, 38, 43, 218,
+    ...     195, 76, 140, 243, 71, 243, 79, 124, 216, 208, 242, 171, 34, 245, 57, 154,
+    ...     93, 76, 230, 204, 234, 82, 117, 248, 39, 13, 62, 60, 215, 8, 51, 248,
+    ...     254, 47, 150, 36, 46, 27, 247, 98, 77, 56, 92, 44, 19, 39, 12, 77,
+    ...     54, 101, 194, 126, 86, 0, 64, 239, 95, 211, 64, 26, 219, 93, 211, 36,
+    ...     154, 250, 117, 177, 213, 232, 142, 184, 216, 92, 20, 248, 69, 175, 180, 71,
+    ...     205, 221, 235, 224, 95, 113, 5, 33, 86, 18, 157, 61, 199, 8, 121, 0,
+    ...     0, 135, 65, 67, 220, 164, 15, 230, 155, 71, 53, 64, 253, 209, 169, 255,
+    ...     34, 64, 101, 7, 43, 102, 227, 83, 171, 52, 225, 119, 253, 182, 96, 195,
+    ...     225, 34, 156, 211, 202, 7, 194, 255, 137, 59, 170, 172, 72, 234, 222, 203,
+    ...     123, 249, 121, 254, 143, 173, 105, 65, 187, 189, 163, 64, 151, 145, 99, 17]
+    >>> encrypted_key = ''.join(chr(byte) for byte in encrypted_key_bytes_list)
+    >>> encryptor = encrypt_json_web_token(algorithm = 'RSA-OAEP', content_master_key = cmk,
+    ...     encrypted_key = encrypted_key, initialization_vector = iv, method = 'A256GCM',
+    ...     public_key_as_encoded_str = public_key_as_encoded_str)
+    >>> encrypted_jwt = check(encryptor)(jwt)
+    >>> encrypted_jwt
+    'eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00iLCJpdiI6IjQ4VjFfQUxiNlVTMDRVM2IifQ.jvwoyhWxOMboB5cxX6ncAi7Wp3Q5FKRtlmIx35pfR9HpEa6Oy-iEpxEqM30W3YcRQ8WU9ouRoO5jd6tfdcpX-2X-OteHw4dnMXdMLjHGGx86LMDeFRAN2KGz7EGPJivaw0yM80fzT3zY0PKrIvU5ml1M5szqUnX4Jw0-PNcIM_j-L5YkLhv3Yk04XCwTJwxNNmXCflYAQO9f00Aa213TJJr6dbHV6I642FwU-EWvtEfN3evgX3EFIVYSnT3HCHkAAIdBQ9ykD-abRzVA_dGp_yJAZQcrZuNTqzThd_22YMPhIpzTygfC_4k7qqxI6t7Le_l5_o-taUG7vaNAl5FjEQ.HliwxLcctkx_zFYJlpBHe0nJlHLDlQ.GaNUZq7_xWQhTNBlY6XoyA'
+
+    >>> key_private_exponent_bytes_list = [144, 183, 109, 34, 62, 134, 108, 57, 44, 252, 10, 66, 73, 54, 16, 181,
+    ...     233, 92, 54, 219, 101, 42, 35, 178, 63, 51, 43, 92, 119, 136, 251, 41,
+    ...     53, 23, 191, 164, 164, 60, 88, 227, 229, 152, 228, 213, 149, 228, 169, 237,
+    ...     104, 71, 151, 75, 88, 252, 216, 77, 251, 231, 28, 97, 88, 193, 215, 202,
+    ...     248, 216, 121, 195, 211, 245, 250, 112, 71, 243, 61, 129, 95, 39, 244, 122,
+    ...     225, 217, 169, 211, 165, 48, 253, 220, 59, 122, 219, 42, 86, 223, 32, 236,
+    ...     39, 48, 103, 78, 122, 216, 187, 88, 176, 89, 24, 1, 42, 177, 24, 99,
+    ...     142, 170, 1, 146, 43, 3, 108, 64, 194, 121, 182, 95, 187, 134, 71, 88,
+    ...     96, 134, 74, 131, 167, 69, 106, 143, 121, 27, 72, 44, 245, 95, 39, 194,
+    ...     179, 175, 203, 122, 16, 112, 183, 17, 200, 202, 31, 17, 138, 156, 184, 210,
+    ...     157, 184, 154, 131, 128, 110, 12, 85, 195, 122, 241, 79, 251, 229, 183, 117,
+    ...     21, 123, 133, 142, 220, 153, 9, 59, 57, 105, 81, 255, 138, 77, 82, 54,
+    ...     62, 216, 38, 249, 208, 17, 197, 49, 45, 19, 232, 157, 251, 131, 137, 175,
+    ...     72, 126, 43, 229, 69, 179, 117, 82, 157, 213, 83, 35, 57, 210, 197, 252,
+    ...     171, 143, 194, 11, 47, 163, 6, 253, 75, 252, 96, 11, 187, 84, 130, 210,
+    ...     7, 121, 78, 91, 79, 57, 251, 138, 132, 220, 60, 224, 173, 56, 224, 201]
+    >>> key_private_exponent = ''.join(chr(byte) for byte in key_private_exponent_bytes_list)
+    >>> private_key = RSA.construct((number.bytes_to_long(key_modulus),
+    ...     number.bytes_to_long(key_public_exponent), number.bytes_to_long(key_private_exponent)))
+    >>> private_key_as_encoded_str = private_key.exportKey()
+    >>> decryptor = decrypt_json_web_token(private_key = private_key_as_encoded_str)
+    >>> decrypted_jwt = check(decryptor)(encrypted_jwt)
+    >>> decrypted_jwt == jwt
+    True
+    >>> decoded_jwt = check(decode_json_web_token)(decrypted_jwt)
+    >>> decoded_jwt['payload']
+    'Live long and prosper.'
+    >>> decoded_jwt['payload'] == plaintext
     True
     """
     if shared_secret is not None:
@@ -481,8 +568,8 @@ iFFypOFpvid7i6D0k'
                 return token, state._(
                     u'Unexpected "int" header forbidden by AEAD algorithm {0}').format(algorithm)
             content_encryption_key = content_master_key
-            encoded_signature = ''
         else:
+            # Algorithm is not an AEAD algorithm.
             if header['int'] is None:
                 return token, state._(
                     u'Missing "int" header, required by non AEAD algorithm {0}').format(algorithm)
@@ -497,20 +584,30 @@ iFFypOFpvid7i6D0k'
             digest_constructor = digest_constructor_by_size[integrity_size]
             signature = HMAC.new(content_integrity_key, msg = secured_input, digestmod = digest_constructor).digest()
             encoded_signature = check(make_bytes_to_base64url(remove_padding = True))(signature, state = state)
-        if encoded_integrity_value != encoded_signature:
-            return token, state._(u'Non authentic signature')
+            if encoded_integrity_value != encoded_signature:
+                return token, state._(u'Non authentic signature')
 
         if method.startswith(u'A') and method.endswith(u'CBC'):
             if header['iv'] is None:
                 return token, state._(
                     u'Invalid header: "iv" required for {0} encryption method').format(method)
             cipher = Cipher_AES.new(content_encryption_key, mode = Cipher_AES.MODE_CBC, IV = header['iv'])
+            try:
+                compressed_plaintext = cipher.decrypt(cyphertext)
+            except:
+                return token, state._(u'Invalid cyphertext')
+        elif method.startswith(u'A') and method.endswith(u'GCM'):
+            if header['iv'] is None:
+                return token, state._(
+                    u'Invalid header: "iv" required for {0} encryption method').format(method)
+            additional_authenticated_data = '{0}.{1}'.format(encoded_header, encoded_encrypted_key)
+#            try:
+            compressed_plaintext = gcm.gcm_decrypt(content_encryption_key, header['iv'],
+                cyphertext, additional_authenticated_data, integrity_value)
+#            except:
+#                return token, state._(u'Invalid cyphertext')
         else:
             TODO
-        try:
-            compressed_plaintext = cipher.decrypt(cyphertext)
-        except:
-            return token, state._(u'Invalid cyphertext')
         # Remove PKCS #5 padding.
         padding_number = ord(compressed_plaintext[-1])
         compressed_plaintext = compressed_plaintext[:-padding_number]
@@ -625,12 +722,11 @@ def encrypt_json_web_token(algorithm = None, compression = None, content_master_
     >>> jwt = check(make_payload_to_json_web_token())(plaintext)
     >>> jwt
     'eyJhbGciOiJub25lIn0.Tm93IGlzIHRoZSB0aW1lIGZvciBhbGwgZ29vZCBtZW4gdG8gY29tZSB0byB0aGUgYWlkIG9mIHRoZWlyIGNvdW50cnku.'
-
-    >>> cmk1_bytes_list = [4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106, 206,
+    >>> cmk_bytes_list = [4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106, 206,
     ...     107, 124, 212, 45, 111, 107, 9, 219, 200, 177, 0, 240, 143, 156, 44, 207]
-    >>> cmk1 = ''.join(chr(byte) for byte in cmk1_bytes_list)
-    >>> iv1_bytes_list = [3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99, 111, 116, 104, 101]
-    >>> iv1 = ''.join(chr(byte) for byte in iv1_bytes_list)
+    >>> cmk = ''.join(chr(byte) for byte in cmk_bytes_list)
+    >>> iv_bytes_list = [3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99, 111, 116, 104, 101]
+    >>> iv = ''.join(chr(byte) for byte in iv_bytes_list)
     >>> key_modulus_bytes_list = [177, 119, 33, 13, 164, 30, 108, 121, 207, 136, 107, 242, 12, 224, 19, 226,
     ...    198, 134, 17, 71, 173, 75, 42, 61, 48, 162, 206, 161, 97, 108, 185, 234,
     ...    226, 219, 118, 206, 118, 5, 169, 224, 60, 181, 90, 85, 51, 123, 6, 224,
@@ -680,8 +776,8 @@ def encrypt_json_web_token(algorithm = None, compression = None, content_master_
     ...     164, 136, 241, 14, 14, 45, 32, 77, 44, 244, 162, 239, 150, 248, 181, 138,
     ...     251, 116, 245, 205, 137, 78, 34, 34, 10, 6, 59, 4, 197, 2, 153, 251]
     >>> encrypted_key = ''.join(chr(byte) for byte in encrypted_key_bytes_list)
-    >>> encryptor = encrypt_json_web_token(algorithm = 'RSA1_5', content_master_key = cmk1,
-    ...     encrypted_key = encrypted_key, initialization_vector = iv1, integrity = 'HS256', method = 'A128CBC',
+    >>> encryptor = encrypt_json_web_token(algorithm = 'RSA1_5', content_master_key = cmk,
+    ...     encrypted_key = encrypted_key, initialization_vector = iv, integrity = 'HS256', method = 'A128CBC',
     ...     public_key_as_encoded_str = public_key_as_encoded_str)
     >>> check(encryptor)(jwt)
     'eyJhbGciOiJSU0ExXzUiLCJlbmMiOiJBMTI4Q0JDIiwiaW50IjoiSFMyNTYiLCJpdiI6IkF4WThEQ3REYUdsc2JHbGpiM1JvWlEifQ.IPI_z172h\
@@ -690,6 +786,60 @@ fKKZjSvkQ5dwTFSgfy76rMSUvVynHYEhdCatBF9HWTAiXPx7hgZixG1FeP_QCmOylz2VClVyYFCbjKRE
 UTdefkje91VX9h8g7908lFsggbjV7NicJsufuXxnTj1fcWIrRDeNIOmakiPEODi0gTSz0ou-W-LWK-3T1zYlOIiIKBjsExQKZ-w._Z_djlIoC4MDSCKir\
 eWS2beti4Q6iSG2UjFujQvdz-_PQdUcFNkOulegD6BgjgdFLjeB4HHOO7UHvP8PEDu0a0sA2a_-CI0w2YQQ2QQe35M.c41k4T4eAgCCt63m8ZNmiOinMc\
 iFFypOFpvid7i6D0k'
+
+    >>> plaintext_bytes_list = [76, 105, 118, 101, 32, 108, 111, 110, 103, 32, 97, 110, 100, 32, 112, 114,
+    ...     111, 115, 112, 101, 114, 46]
+    >>> plaintext = ''.join(chr(byte) for byte in plaintext_bytes_list)
+    >>> jwt = check(make_payload_to_json_web_token())(plaintext)
+    >>> cmk_bytes_list = [177, 161, 244, 128, 84, 143, 225, 115, 63, 180, 3, 255, 107, 154, 212, 246,
+    ...     138, 7, 110, 91, 112, 46, 34, 105, 47, 130, 203, 46, 122, 234, 64, 252]
+    >>> cmk = ''.join(chr(byte) for byte in cmk_bytes_list)
+    >>> iv_bytes_list = [227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219]
+    >>> iv = ''.join(chr(byte) for byte in iv_bytes_list)
+    >>> key_modulus_bytes_list = [161, 168, 84, 34, 133, 176, 208, 173, 46, 176, 163, 110, 57, 30, 135, 227,
+    ...     9, 31, 226, 128, 84, 92, 116, 241, 70, 248, 27, 227, 193, 62, 5, 91,
+    ...     241, 145, 224, 205, 141, 176, 184, 133, 239, 43, 81, 103, 9, 161, 153, 157,
+    ...     179, 104, 123, 51, 189, 34, 152, 69, 97, 69, 78, 93, 140, 131, 87, 182,
+    ...     169, 101, 92, 142, 3, 22, 167, 8, 212, 56, 35, 79, 210, 222, 192, 208,
+    ...     252, 49, 109, 138, 173, 253, 210, 166, 201, 63, 102, 74, 5, 158, 41, 90,
+    ...     144, 108, 160, 79, 10, 89, 222, 231, 172, 31, 227, 197, 0, 19, 72, 81,
+    ...     138, 78, 136, 221, 121, 118, 196, 17, 146, 10, 244, 188, 72, 113, 55, 221,
+    ...     162, 217, 171, 27, 57, 233, 210, 101, 236, 154, 199, 56, 138, 239, 101, 48,
+    ...     198, 186, 202, 160, 76, 111, 234, 71, 57, 183, 5, 211, 171, 136, 126, 64,
+    ...     40, 75, 58, 89, 244, 254, 107, 84, 103, 7, 236, 69, 163, 18, 180, 251,
+    ...     58, 153, 46, 151, 174, 12, 103, 197, 181, 161, 162, 55, 250, 235, 123, 110,
+    ...     17, 11, 158, 24, 47, 133, 8, 199, 235, 107, 126, 130, 246, 73, 195, 20,
+    ...     108, 202, 176, 214, 187, 45, 146, 182, 118, 54, 32, 200, 61, 201, 71, 243,
+    ...     1, 255, 131, 84, 37, 111, 211, 168, 228, 45, 192, 118, 27, 197, 235, 232,
+    ...     36, 10, 230, 248, 190, 82, 182, 140, 35, 204, 108, 190, 253, 186, 186, 27]
+    >>> key_modulus = ''.join(chr(byte) for byte in key_modulus_bytes_list)
+    >>> key_public_exponent_bytes_list = [1, 0, 1]
+    >>> key_public_exponent = ''.join(chr(byte) for byte in key_public_exponent_bytes_list)
+    >>> public_key = RSA.construct((number.bytes_to_long(key_modulus),
+    ...     number.bytes_to_long(key_public_exponent)))
+    >>> public_key_as_encoded_str = public_key.exportKey()
+    >>> encrypted_key_bytes_list = [142, 252, 40, 202, 21, 177, 56, 198, 232, 7, 151, 49, 95, 169, 220, 2,
+    ...     46, 214, 167, 116, 57, 20, 164, 109, 150, 98, 49, 223, 154, 95, 71, 209,
+    ...     233, 17, 174, 142, 203, 232, 132, 167, 17, 42, 51, 125, 22, 221, 135, 17,
+    ...     67, 197, 148, 246, 139, 145, 160, 238, 99, 119, 171, 95, 117, 202, 87, 251,
+    ...     101, 254, 58, 215, 135, 195, 135, 103, 49, 119, 76, 46, 49, 198, 27, 31,
+    ...     58, 44, 192, 222, 21, 16, 13, 216, 161, 179, 236, 65, 143, 38, 43, 218,
+    ...     195, 76, 140, 243, 71, 243, 79, 124, 216, 208, 242, 171, 34, 245, 57, 154,
+    ...     93, 76, 230, 204, 234, 82, 117, 248, 39, 13, 62, 60, 215, 8, 51, 248,
+    ...     254, 47, 150, 36, 46, 27, 247, 98, 77, 56, 92, 44, 19, 39, 12, 77,
+    ...     54, 101, 194, 126, 86, 0, 64, 239, 95, 211, 64, 26, 219, 93, 211, 36,
+    ...     154, 250, 117, 177, 213, 232, 142, 184, 216, 92, 20, 248, 69, 175, 180, 71,
+    ...     205, 221, 235, 224, 95, 113, 5, 33, 86, 18, 157, 61, 199, 8, 121, 0,
+    ...     0, 135, 65, 67, 220, 164, 15, 230, 155, 71, 53, 64, 253, 209, 169, 255,
+    ...     34, 64, 101, 7, 43, 102, 227, 83, 171, 52, 225, 119, 253, 182, 96, 195,
+    ...     225, 34, 156, 211, 202, 7, 194, 255, 137, 59, 170, 172, 72, 234, 222, 203,
+    ...     123, 249, 121, 254, 143, 173, 105, 65, 187, 189, 163, 64, 151, 145, 99, 17]
+    >>> encrypted_key = ''.join(chr(byte) for byte in encrypted_key_bytes_list)
+    >>> encryptor = encrypt_json_web_token(algorithm = 'RSA-OAEP', content_master_key = cmk,
+    ...     encrypted_key = encrypted_key, initialization_vector = iv, method = 'A256GCM',
+    ...     public_key_as_encoded_str = public_key_as_encoded_str)
+    >>> check(encryptor)(jwt)
+    'eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00iLCJpdiI6IjQ4VjFfQUxiNlVTMDRVM2IifQ.jvwoyhWxOMboB5cxX6ncAi7Wp3Q5FKRtlmIx35pfR9HpEa6Oy-iEpxEqM30W3YcRQ8WU9ouRoO5jd6tfdcpX-2X-OteHw4dnMXdMLjHGGx86LMDeFRAN2KGz7EGPJivaw0yM80fzT3zY0PKrIvU5ml1M5szqUnX4Jw0-PNcIM_j-L5YkLhv3Yk04XCwTJwxNNmXCflYAQO9f00Aa213TJJr6dbHV6I642FwU-EWvtEfN3evgX3EFIVYSnT3HCHkAAIdBQ9ykD-abRzVA_dGp_yJAZQcrZuNTqzThd_22YMPhIpzTygfC_4k7qqxI6t7Le_l5_o-taUG7vaNAl5FjEQ.HliwxLcctkx_zFYJlpBHe0nJlHLDlQ.GaNUZq7_xWQhTNBlY6XoyA'
     """
     assert algorithm is None or algorithm in valid_encryption_algorithms, algorithm
     assert integrity is None or integrity in valid_integrity_algorithms, integrity
@@ -739,11 +889,17 @@ iFFypOFpvid7i6D0k'
 
         # Generate a random Initialization Vector (IV) (if required for the algorithm).
         if method in (u'A128CBC', u'A256CBC'):
-            # All AES ciphers use 128 bits (= 16 bytes) blocks
+            # All AES CBC ciphers use 128 bits (= 16 bytes) blocks
             if initialization_vector is None:
                 initialization_vector = Random.get_random_bytes(16)
             else:
                 assert len(initialization_vector) == 16
+        elif method in (u'A128GCM', u'A256GCM'):
+            # All AES GCM ciphers use 96 bits (= 12 bytes) blocks
+            if initialization_vector is None:
+                initialization_vector = Random.get_random_bytes(12)
+            else:
+                assert len(initialization_vector) == 12
         else:
             initialization_vector = None
 
@@ -776,8 +932,8 @@ iFFypOFpvid7i6D0k'
         if header['alg'] == u'none':
             if '.' not in token_without_header:
                 return token, state._(u'Missing signature')
-            encoded_payload, encoded_signature = token_without_header.split('.', 1)
-            if encoded_signature:
+            encoded_payload, encoded_integrity_value = token_without_header.split('.', 1)
+            if encoded_integrity_value:
                 return token, state._(u'Unexpected signature in plaintext token')
             plaintext, error = make_base64url_to_bytes(add_padding = True)(encoded_payload, state = state)
             if error is not None:
@@ -795,15 +951,9 @@ iFFypOFpvid7i6D0k'
             assert compression in (None, u'none'), compression
             compressed_plaintext = plaintext
 
-        if method.startswith(u'A') and method.endswith(u'CBC'):
-            cipher = Cipher_AES.new(content_encryption_key, mode = Cipher_AES.MODE_CBC, IV = initialization_vector)
-        else:
-            TODO
         # Add PKCS #5 padding.
         padding_number = 16 - len(compressed_plaintext) % 16
         compressed_plaintext += chr(padding_number) * padding_number
-        cyphertext = cipher.encrypt(compressed_plaintext)
-        encoded_cyphertext = check(make_bytes_to_base64url(remove_padding = True))(cyphertext, state = state)
 
         header['alg'] = algorithm
         header['enc'] = method
@@ -826,16 +976,30 @@ iFFypOFpvid7i6D0k'
             make_bytes_to_base64url(remove_padding = True),
             ))(header, state = state)
 
+        if method.startswith(u'A') and method.endswith(u'CBC'):
+            cipher = Cipher_AES.new(content_encryption_key, mode = Cipher_AES.MODE_CBC, IV = initialization_vector)
+            cyphertext = cipher.encrypt(compressed_plaintext)
+            integrity_value = None
+        elif method.startswith(u'A') and method.endswith(u'GCM'):
+            additional_authenticated_data = '{0}.{1}'.format(encoded_header, encoded_encrypted_key)
+            cyphertext, integrity_value = gcm.gcm_encrypt(content_encryption_key, initialization_vector,
+                compressed_plaintext, additional_authenticated_data)
+        else:
+            TODO
+        encoded_cyphertext = check(make_bytes_to_base64url(remove_padding = True))(cyphertext, state = state)
+
         secured_input = '{0}.{1}.{2}'.format(encoded_header, encoded_encrypted_key, encoded_cyphertext)
 
         if integrity is None:
-            encoded_signature = ''
+            assert integrity_value is not None
         else:
+            assert integrity_value is None
             digest_constructor = digest_constructor_by_size[integrity_size]
-            signature = HMAC.new(content_integrity_key, msg = secured_input, digestmod = digest_constructor).digest()
-            encoded_signature = check(make_bytes_to_base64url(remove_padding = True))(signature, state = state)
+            integrity_value = HMAC.new(content_integrity_key, msg = secured_input,
+                digestmod = digest_constructor).digest()
+        encoded_integrity_value = check(make_bytes_to_base64url(remove_padding = True))(integrity_value, state = state)
 
-        token = '{0}.{1}'.format(secured_input, encoded_signature)
+        token = '{0}.{1}'.format(secured_input, encoded_integrity_value)
         return token, None
     return encrypt_json_web_token_converter
 
