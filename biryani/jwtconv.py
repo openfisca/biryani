@@ -272,8 +272,8 @@ def decrypt_json_web_token(private_key = None, require_encrypted_token = False, 
     >>> encryptor = encrypt_json_web_token(algorithm = 'RSA1_5', content_master_key = cmk,
     ...     encrypted_key = encrypted_key, initialization_vector = iv, integrity = 'HS256', method = 'A128CBC',
     ...     public_key_as_encoded_str = public_key_as_encoded_str)
-    >>> encrypted_jwt = check(encryptor)(jwt)
-    >>> encrypted_jwt
+    >>> jwe = check(encryptor)(jwt)
+    >>> jwe
     'eyJhbGciOiJSU0ExXzUiLCJlbmMiOiJBMTI4Q0JDIiwiaW50IjoiSFMyNTYiLCJpdiI6IkF4WThEQ3REYUdsc2JHbGpiM1JvWlEifQ.IPI_z172h\
 SWHMFgED8EG9DM6hIXU_6NaO1DImCn0vNeuoBq847Sl6qw_GHSYHJUQXtXJq7S_CxWVrI82wjrOyaQca5tLZRZc45BfKHeqByThKI261QevEK56SyAwwX\
 fKKZjSvkQ5dwTFSgfy76rMSUvVynHYEhdCatBF9HWTAiXPx7hgZixG1FeP_QCmOylz2VClVyYFCbjKREOwBFf-puNYfO75S3LNlJUtTsGGQL2oTKpMsEi\
@@ -330,7 +330,7 @@ iFFypOFpvid7i6D0k'
     2vQxZSMnRNS2mCV8et5ZnWcjHV9kN1aEjVU/o8fDuia+fAaDbe190g==
     -----END RSA PRIVATE KEY-----
     >>> decryptor = decrypt_json_web_token(private_key = private_key_as_encoded_str)
-    >>> decrypted_jwt = check(decryptor)(encrypted_jwt)
+    >>> decrypted_jwt = check(decryptor)(jwe)
     >>> decrypted_jwt
     'eyJhbGciOiJub25lIn0.Tm93IGlzIHRoZSB0aW1lIGZvciBhbGwgZ29vZCBtZW4gdG8gY29tZSB0byB0aGUgYWlkIG9mIHRoZWlyIGNvdW50cnku.'
     >>> decrypted_jwt == jwt
@@ -345,9 +345,9 @@ iFFypOFpvid7i6D0k'
 
     >>> encryptor = encrypt_json_web_token(algorithm = 'RSA1_5', integrity = 'HS256', method = 'A128CBC',
     ...     public_key_as_encoded_str = public_key_as_encoded_str)
-    >>> encrypted_jwt = check(encryptor)(jwt)
+    >>> jwe = check(encryptor)(jwt)
     >>> decryptor = decrypt_json_web_token(private_key = private_key_as_encoded_str)
-    >>> decrypted_jwt = check(decryptor)(encrypted_jwt)
+    >>> decrypted_jwt = check(decryptor)(jwe)
     >>> decrypted_jwt
     'eyJhbGciOiJub25lIn0.Tm93IGlzIHRoZSB0aW1lIGZvciBhbGwgZ29vZCBtZW4gdG8gY29tZSB0byB0aGUgYWlkIG9mIHRoZWlyIGNvdW50cnku.'
     >>> decrypted_jwt == jwt
@@ -406,8 +406,8 @@ iFFypOFpvid7i6D0k'
     >>> encryptor = encrypt_json_web_token(algorithm = 'RSA-OAEP', content_master_key = cmk,
     ...     encrypted_key = encrypted_key, initialization_vector = iv, method = 'A256GCM',
     ...     public_key_as_encoded_str = public_key_as_encoded_str)
-    >>> encrypted_jwt = check(encryptor)(jwt)
-    >>> encrypted_jwt
+    >>> jwe = check(encryptor)(jwt)
+    >>> jwe
     'eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00iLCJpdiI6IjQ4VjFfQUxiNlVTMDRVM2IifQ.jvwoyhWxOMboB5cxX6ncAi7Wp3Q5FKRtlmIx35pfR9HpEa6Oy-iEpxEqM30W3YcRQ8WU9ouRoO5jd6tfdcpX-2X-OteHw4dnMXdMLjHGGx86LMDeFRAN2KGz7EGPJivaw0yM80fzT3zY0PKrIvU5ml1M5szqUnX4Jw0-PNcIM_j-L5YkLhv3Yk04XCwTJwxNNmXCflYAQO9f00Aa213TJJr6dbHV6I642FwU-EWvtEfN3evgX3EFIVYSnT3HCHkAAIdBQ9ykD-abRzVA_dGp_yJAZQcrZuNTqzThd_22YMPhIpzTygfC_4k7qqxI6t7Le_l5_o-taUG7vaNAl5FjEQ.HliwxLcctkx_zFYJlpBHe0nJlHLDlQ.GaNUZq7_xWQhTNBlY6XoyA'
 
     >>> key_private_exponent_bytes_list = [144, 183, 109, 34, 62, 134, 108, 57, 44, 252, 10, 66, 73, 54, 16, 181,
@@ -431,7 +431,7 @@ iFFypOFpvid7i6D0k'
     ...     number.bytes_to_long(key_public_exponent), number.bytes_to_long(key_private_exponent)))
     >>> private_key_as_encoded_str = private_key.exportKey()
     >>> decryptor = decrypt_json_web_token(private_key = private_key_as_encoded_str)
-    >>> decrypted_jwt = check(decryptor)(encrypted_jwt)
+    >>> decrypted_jwt = check(decryptor)(jwe)
     >>> decrypted_jwt == jwt
     True
     >>> decoded_jwt = check(decode_json_web_token)(decrypted_jwt)
