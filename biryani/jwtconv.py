@@ -486,7 +486,8 @@ BqAdzpROlyiw'
                         ),
                     jku = pipe(
                         test_isinstance(basestring),
-                        make_input_to_url(add_prefix = None, error_if_fragment = True, full = True, schemes = ['https']),
+                        make_input_to_url(add_prefix = None, error_if_fragment = True, full = True,
+                            schemes = ['https']),
                         ),
                     jwk = pipe(
                         test_isinstance(basestring),
@@ -518,7 +519,8 @@ BqAdzpROlyiw'
                         ),
                     x5u = pipe(
                         test_isinstance(basestring),
-                        make_input_to_url(add_prefix = None, error_if_fragment = True, full = True, schemes = ['https']),
+                        make_input_to_url(add_prefix = None, error_if_fragment = True, full = True,
+                            schemes = ['https']),
                         ),
                     zip = pipe(
                         test_isinstance(basestring),
@@ -881,8 +883,10 @@ BqAdzpROlyiw'
                     public_key_dict = public_key_as_json_web_key['jwk'][-1]  # TODO
                     assert public_key_dict['alg'] == u'RSA', public_key_as_json_web_key  # TODO
                     rsa_public_key = RSA.construct((
-                        number.bytes_to_long(check(make_base64url_to_bytes(add_padding = True))(public_key_dict['mod'])),
-                        number.bytes_to_long(check(make_base64url_to_bytes(add_padding = True))(public_key_dict['exp'])),
+                        number.bytes_to_long(check(make_base64url_to_bytes(add_padding = True))(
+                            public_key_dict['mod'])),
+                        number.bytes_to_long(check(make_base64url_to_bytes(add_padding = True))(
+                            public_key_dict['exp'])),
                         ))
                 else:
                     rsa_public_key = RSA.importKey(public_key_as_encoded_str)

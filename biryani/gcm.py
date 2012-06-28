@@ -48,8 +48,8 @@ def gcm_encrypt(k, iv, plaintext, auth_data):
 
 
 def gcm_gf_mult(a, b):
-    mask = [ 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 ]
-    poly = [ 0x00, 0xe1 ]
+    mask = [0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01]
+    poly = [0x00, 0xe1]
 
     Z = [0] * 16
     V = [c for c in a]
@@ -66,7 +66,7 @@ def gcm_gf_mult(a, b):
 def gcm_rightshift(vec):
     for x in range(15, 0, -1):
         c = vec[x] >> 1
-        c |= (vec[x-1] << 7) & 0x80
+        c |= (vec[x - 1] << 7) & 0x80
         vec[x] = c
     vec[0] >>= 1
     return vec
@@ -83,7 +83,7 @@ def ghash(h, auth_data, data):
     vec_h = [ord(c) for c in h]
 
     for i in range(0, len(x), 16):
-        block = [ord(c) for c in x[i:i+16]]
+        block = [ord(c) for c in x[i:i + 16]]
         y = [y[j] ^ block[j] for j in range(16)]
         y = gcm_gf_mult(y, vec_h)
 
@@ -101,7 +101,7 @@ def gctr(k, icb, plaintext):
     for i in range(0, len(plaintext), aes.block_size):
         cb = inc32(cb)
         encrypted = aes.encrypt(cb)
-        plaintext_block = plaintext[i:i+aes.block_size]
+        plaintext_block = plaintext[i:i + aes.block_size]
         y += strxor.strxor(plaintext_block, encrypted[:len(plaintext_block)])
 
     return y
@@ -155,7 +155,7 @@ def main():
         D75E0065F1796F556EDF0DAA1AA758E0C85AE3951BD363F26B1D43F6CBAEE12D9
         7AD3B60CFA89C1C76BB29F2B54BE31B6CE166F4860C5E5DA92588EF53AA946DF1
         59E60E6F05009D12FB1E37''')
-    ciphertext = data[12+40:-16]
+    ciphertext = data[12 + 40:-16]
     tag = data[-16:]
     print repr(gcm_decrypt(key, '', ciphertext, '', tag))
 
