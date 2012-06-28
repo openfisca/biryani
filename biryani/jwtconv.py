@@ -605,11 +605,11 @@ iFFypOFpvid7i6D0k'
                 return token, state._(
                     u'Invalid header: "iv" required for {0} encryption method').format(method)
             additional_authenticated_data = '{0}.{1}'.format(encoded_header, encoded_encrypted_key)
-#            try:
-            compressed_plaintext = gcm.gcm_decrypt(content_encryption_key, header['iv'],
-                cyphertext, additional_authenticated_data, integrity_value)
-#            except:
-#                return token, state._(u'Invalid cyphertext')
+            try:
+                compressed_plaintext = gcm.gcm_decrypt(content_encryption_key, header['iv'],
+                    cyphertext, additional_authenticated_data, integrity_value)
+            except:
+                return token, state._(u'Invalid cyphertext')
         else:
             TODO
 
