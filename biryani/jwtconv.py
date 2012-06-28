@@ -946,15 +946,12 @@ iFFypOFpvid7i6D0k'
                 )
             plaintext = token
 
+        print 'plaintext =', str((plaintext,))
         if compression == u'DEF':
             compressed_plaintext = zlib.compress(plaintext, 9)
         else:
             assert compression in (None, u'none'), compression
             compressed_plaintext = plaintext
-
-        # Add PKCS #5 padding.
-        padding_number = 16 - len(compressed_plaintext) % 16
-        compressed_plaintext += chr(padding_number) * padding_number
 
         header['alg'] = algorithm
         header['enc'] = method
