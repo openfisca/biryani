@@ -596,6 +596,10 @@ iFFypOFpvid7i6D0k'
                 compressed_plaintext = cipher.decrypt(cyphertext)
             except:
                 return token, state._(u'Invalid cyphertext')
+
+            # Remove PKCS #5 padding.
+            padding_number = ord(compressed_plaintext[-1])
+            compressed_plaintext = compressed_plaintext[:-padding_number]
         elif method.startswith(u'A') and method.endswith(u'GCM'):
             if header['iv'] is None:
                 return token, state._(
@@ -608,9 +612,6 @@ iFFypOFpvid7i6D0k'
 #                return token, state._(u'Invalid cyphertext')
         else:
             TODO
-        # Remove PKCS #5 padding.
-        padding_number = ord(compressed_plaintext[-1])
-        compressed_plaintext = compressed_plaintext[:-padding_number]
 
         compression = header['zip']
         if compression == u'DEF':
@@ -977,6 +978,10 @@ iFFypOFpvid7i6D0k'
             ))(header, state = state)
 
         if method.startswith(u'A') and method.endswith(u'CBC'):
+            # Add PKCS #5 padding.
+            padding_number = 16 - len(compressed_plaintext) % 16
+            compressed_plaintext += chr(padding_number) * padding_number
+
             cipher = Cipher_AES.new(content_encryption_key, mode = Cipher_AES.MODE_CBC, IV = initialization_vector)
             cyphertext = cipher.encrypt(compressed_plaintext)
             integrity_value = None
