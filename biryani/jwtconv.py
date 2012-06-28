@@ -947,7 +947,7 @@ iFFypOFpvid7i6D0k'
             plaintext = token
 
         if compression == u'DEF':
-            compressed_plaintext = zlib.compress(plaintext, level = 9)
+            compressed_plaintext = zlib.compress(plaintext, 9)
         else:
             assert compression in (None, u'none'), compression
             compressed_plaintext = plaintext
