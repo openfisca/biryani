@@ -715,7 +715,7 @@ def encrypt_json_web_token(algorithm = None, compression = None, content_master_
     .. note:: ``content_master_key``, ``encrypted_key`` & ``initialization_vector`` parameters should be kept to
        ``None``, except for testing.
 
-    >>> # Mike Jones Tests
+    >>> # Mike Jones Test 1
 
     >>> from Crypto.PublicKey import RSA
     >>> from Crypto.Util import number
@@ -793,6 +793,8 @@ fKKZjSvkQ5dwTFSgfy76rMSUvVynHYEhdCatBF9HWTAiXPx7hgZixG1FeP_QCmOylz2VClVyYFCbjKRE
 UTdefkje91VX9h8g7908lFsggbjV7NicJsufuXxnTj1fcWIrRDeNIOmakiPEODi0gTSz0ou-W-LWK-3T1zYlOIiIKBjsExQKZ-w._Z_djlIoC4MDSCKir\
 eWS2beti4Q6iSG2UjFujQvdz-_PQdUcFNkOulegD6BgjgdFLjeB4HHOO7UHvP8PEDu0a0sA2a_-CI0w2YQQ2QQe35M.c41k4T4eAgCCt63m8ZNmiOinMc\
 iFFypOFpvid7i6D0k'
+
+    >>> # Mike Jones Test 2
 
     >>> plaintext_bytes_list = [76, 105, 118, 101, 32, 108, 111, 110, 103, 32, 97, 110, 100, 32, 112, 114,
     ...     111, 115, 112, 101, 114, 46]
