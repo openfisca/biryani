@@ -188,7 +188,7 @@ def decode_json_web_token_claims(decoded_token, state = None):
             keep_empty = True,
             ),
         )(decoded_token.get('payload'), state = state)
-    if errors is None:
+    if errors is not None:
         return decoded_token, dict(claims = errors)
     decoded_token['claims'] = claims
     return decoded_token, None
