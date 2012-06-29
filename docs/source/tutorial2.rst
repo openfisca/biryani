@@ -2,7 +2,7 @@
 Tutorial 2
 **********
 
->>> from biryani import allconv as conv
+>>> from biryani import baseconv as conv
 >>> input_value = u'42'
 >>> output_value, error = conv.input_to_float(input_value)
 >>> output_value, error

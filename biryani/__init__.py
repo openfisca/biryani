@@ -40,16 +40,10 @@ class CustomConv(object):
 def custom_conv(*modules_path):
     """Import given conversion modules and return a module-like object containing their aggregated content.
 
-    This allow you to replace::
-
-        from biryani import allconv as conv
-
-    with::
+    How to use::
 
         importy biryani
         conv = biryani.custom_conv('biryani.baseconv', 'biryani.datetimeconv', 'name.of.an.external.module', ...)
-
-    and import only needed modules.
 
     >>> conv = custom_conv('biryani.baseconv', 'biryani.datetimeconv')
     >>> conv.input_to_int(u'42') # input_to_int is defined in baseconv module.

@@ -9,17 +9,7 @@ How to to use *Biryani* in a project
 How to use *Biryani* in a simple project
 ========================================
 
-When you don't mind about memory consumption, import all conversion modules at once::
-
-    from biryani import allconv as conv
-
-    # Use the converters. For example:
-    s = '5'
-    i = conv.check(conv.pipe(conv.input_to_int, conv.not_none))(s)
-    assert i == 5
-    ...
-
-Or, to import only the modules you really use::
+*Biryani* allows you to import only the modules you really need and to merge them in a single pseudo-module::
 
     import byriani
     conv = biryani.custom_conv('biryani.baseconv', 'biryani.datetimeconv')
@@ -36,13 +26,7 @@ How to use *Biryani* in a multi-modules project
 
 In your project, create a module named ``conv.py``.
 
-In this file, either import every converter, all in once::
-
-    from biryani.allconv import *
-    from biryani import states
-
-
-Or specify the converters you want::
+In this file, specify the converters you want::
 
     from biryani.babelconv import *
     from biryani.baseconv import *

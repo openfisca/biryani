@@ -29,9 +29,9 @@
 Sample usage:
 
 >>> import pprint
->>> from biryani import allconv as conv
->>> from biryani import states
+>>> from biryani import custom_conv, states
 ...
+>>> conv = custom_conv('biryani.baseconv', 'biryani.creditcardconv')
 >>> N_ = lambda message: message
 ...
 >>> def validate_credit_card(value, state = None):

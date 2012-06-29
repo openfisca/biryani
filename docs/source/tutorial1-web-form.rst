@@ -39,12 +39,10 @@ u'   John Doe'
 First steps with *Biryani*
 ==========================
 
-*Biryani* is a Python package split into several modules to allow you to ony import the converters you need for your
-application.
+*Biryani* is a Python package split into several modules, to allow you to ony import the converters you need for your
+application. The most frequently used converters are in package :mod:`biryani.baseconv`.
 
-However for this tutorial, we will import all converters at once, using the meta module :mod:`biryani.allconv`:
-
->>> from biryani import allconv as conv
+>>> from biryani import baseconv as conv
 
 First we need to cleanup username:
 
@@ -115,8 +113,8 @@ Converting structures
 =====================
 
 Now that username is converted, we need to do the same thing for email. Let's transform function `validate_form` to
-return a dictionary containing username and email, and a dictionary containing the errors (or ``None`` when there is no
-error):
+accept a dictionary containing submitted username & email, and to return a couple with another dictionary containing
+converted username & email, and a dictionary containing the errors (or ``None`` when there is no error):
 
 >>> def validate_form(params):
 ...     data = {}
@@ -143,13 +141,12 @@ error):
 >>> validate_form(req6.POST)
 ({'email': u'john.doe.name'}, {'username': u'Missing value', 'email': u'An email must contain exactly one "@"'})
 
-Using the converters :func:`biryani.webobconv.multidict_get` and :func:`biryani.baseconv.new_struct`, the fonction can
-be simplified to:
+Using the converter :func:`biryani.baseconv.struct`, the fonction can be simplified to:
 
 >>> def validate_form(params):
-...     return conv.new_struct(dict(
-...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.not_none),
-...         email = conv.pipe(conv.multidict_get('email'), conv.input_to_email),
+...     return conv.struct(dict(
+...         username = conv.pipe(conv.cleanup_line, conv.not_none),
+...         email = conv.input_to_email,
 ...         ))(params)
 ...
 >>> validate_form(req4.POST)
@@ -159,6 +156,44 @@ be simplified to:
 >>> validate_form(req6.POST)
 ({'email': u'john.doe.name'}, {'username': u'Missing value', 'email': u'An email must contain exactly one "@"'})
 
+This form validator is slightly different from the previous one, because it doesn't accept unexpected parameters:
+
+>>> req7 = webob.Request.blank('/', POST = 'username=John Doe&email=john@doe.name&password=secret')
+>>> validate_form(req7.POST)
+({'username': u'John Doe', u'password': u'secret', 'email': u'john@doe.name'}, {u'password': u'Unexpected item'})
+
+If we want to drop unexpected parameters, we need to use the ``default`` option of the :func:`biryani.baseconv.struct`
+converter:
+
+>>> def validate_form(params):
+...     return conv.struct(
+...         dict(
+...             username = conv.pipe(conv.cleanup_line, conv.not_none),
+...             email = conv.input_to_email,
+...             ),
+...         default = 'drop',
+...         )(params)
+...
+>>> req7 = webob.Request.blank('/', POST = 'username=John Doe&email=john@doe.name&password=secret')
+>>> validate_form(req7.POST)
+({'username': u'John Doe', 'email': u'john@doe.name'}, None)
+
+If instead, we want to apply a default conversion, to the unexpected parameters, we can specify a converter in the
+``default`` option. For example, to keep all unexpected parameters unchanged:
+
+>>> def validate_form(params):
+...     return conv.struct(
+...         dict(
+...             username = conv.pipe(conv.cleanup_line, conv.not_none),
+...             email = conv.input_to_email,
+...             ),
+...         default = conv.noop,
+...         )(params)
+...
+>>> req7 = webob.Request.blank('/', POST = 'username=John Doe&email=john@doe.name&password=secret')
+>>> validate_form(req7.POST)
+({'username': u'John Doe', u'password': u'secret', 'email': u'john@doe.name'}, None)
+
 
 Using custom converters and filters
 ===================================
@@ -167,10 +202,13 @@ For the password, we need to ensure that it is present twice in submitted form a
 Let's add it to our function:
 
 >>> def validate_form(params):
-...     data, errors = conv.new_struct(dict(
-...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.not_none),
-...         email = conv.pipe(conv.multidict_get('email'), conv.input_to_email),
-...         ))(params)
+...     data, errors = conv.struct(
+...         dict(
+...             username = conv.pipe(conv.cleanup_line, conv.not_none),
+...             email = conv.input_to_email,
+...             ),
+...         default = 'drop',
+...         )(params)
 ...     passwords = params.getall('password')
 ...     if len(passwords) == 2 and passwords[0] == passwords[1]:
 ...         data['password'] = passwords[0]
@@ -181,14 +219,14 @@ Let's add it to our function:
 ...         data['password'] = passwords # Return the erroneous values of password to show the error.
 ...     return data, errors
 ...
->>> req7 = webob.Request.blank('/', POST = 'username=   John Doe&password=secret&password=secret')
->>> validate_form(req7.POST)
+>>> req8 = webob.Request.blank('/', POST = 'username=   John Doe&password=secret&password=secret')
+>>> validate_form(req8.POST)
 ({'username': u'John Doe', 'password': u'secret'}, None)
 >>> req1 = webob.Request.blank('/', POST = 'username=   John Doe&password=secret&password=bad')
 >>> validate_form(req1.POST)
 ({'username': u'John Doe', 'password': [u'secret', u'bad']}, {'password': u'Password mismatch'})
->>> req8 = webob.Request.blank('/', POST = 'username=   John Doe&password=secret')
->>> validate_form(req8.POST)
+>>> req9 = webob.Request.blank('/', POST = 'username=   John Doe&password=secret')
+>>> validate_form(req9.POST)
 ({'username': u'John Doe', 'password': [u'secret']}, {'password': u'Password mismatch'})
 
 In *Biryani*, there is no filter that checks that there is two passwords and that they are equal.
@@ -213,6 +251,34 @@ We can improve the error message of our test:
 >>> test_passwords([u'secret', u'bad'])
 ([u'secret', u'bad'], u'Password mismatch')
 
+But, when no password is given, we don't want to compare them. Currently, we obtain:
+
+>>> test_passwords(None)
+(None, None)
+
+But:
+
+>>> test_passwords([])
+([], u'Password mismatch')
+
+So we add the :func:`biryani.baseconv.empty_to_none` converter to convert an empty list of password to ``None``:
+
+>>> test_passwords = conv.pipe(
+...     conv.empty_to_none,
+...     conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1]),
+...     )
+...
+>>> test_passwords([u'secret', u'secret'])
+([u'secret', u'secret'], None)
+>>> test_passwords([u'secret', u'bad'])
+([u'secret', u'bad'], u'Test failed')
+>>> test_passwords([u'secret'])
+([u'secret'], u'Test failed')
+>>> test_passwords(None)
+(None, None)
+>>> test_passwords([])
+(None, None)
+
 Now, when the two passwords are the same we must extract the first one. There is no standard converter in *Biryani* to
 extract the first item of a list, but we can create it using :func:`biryani.baseconv.function`:
 
@@ -224,22 +290,27 @@ extract the first item of a list, but we can create it using :func:`biryani.base
 Let's combine `test_passwords` and `extract_first_item` to rewrite our `validate_form` function:
 
 >>> def validate_form(params):
-...     return conv.new_struct(dict(
-...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.not_none),
+...     inputs = dict(
+...         username = params.get('username'),
+...         password = params.getall('password'),
+...         email = params.get('email'),
+...         )
+...     return conv.struct(dict(
+...         username = conv.pipe(conv.cleanup_line, conv.not_none),
 ...         password = conv.pipe(
-...             conv.multidict_getall('password'),
+...             conv.empty_to_none,
 ...             conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
 ...                 error = u'Password mismatch'),
 ...             conv.function(lambda passwords: passwords[0]),
 ...             ),
-...         email = conv.pipe(conv.multidict_get('email'), conv.input_to_email),
-...         ))(params)
+...         email = conv.input_to_email,
+...         ))(inputs)
 ...
->>> validate_form(req7.POST)
+>>> validate_form(req8.POST)
 ({'username': u'John Doe', 'password': u'secret'}, None)
 >>> validate_form(req1.POST)
 ({'username': u'John Doe', 'password': [u'secret', u'bad']}, {'password': u'Password mismatch'})
->>> validate_form(req8.POST)
+>>> validate_form(req9.POST)
 ({'username': u'John Doe', 'password': [u'secret']}, {'password': u'Password mismatch'})
 
 
@@ -288,9 +359,32 @@ Add removal of duplicate tags and sort the result:
 >>> cleanup_tags([u'friend', u'user,ADMIN', u'', u'customer, friend'])
 [u'admin', u'customer', u'friend', u'user']
 
+Replace the empty tags array to ``None`` when it is empty:
+
+
+>>> def cleanup_tags(tags):
+...     return sorted(set([
+...         clean_tag
+...         for clean_tag in (
+...             tag.strip().lower()
+...             for tag in u','.join(tags).split(u',')
+...             )
+...         if clean_tag
+...         ])) or None
+...
+>>> cleanup_tags([u'friend', u'user,ADMIN', u'', u'customer, friend'])
+[u'admin', u'customer', u'friend', u'user']
+>>> cleanup_tags([u'', u'    '])
+
 Now use this function in `validate_form`:
 
 >>> def validate_form(params):
+...     inputs = dict(
+...         username = params.get('username'),
+...         password = params.getall('password'),
+...         email = params.get('email'),
+...         tags = params.getall('tag'),
+...         )
 ...     def cleanup_tags(tags):
 ...         return sorted(set([
 ...             clean_tag
@@ -299,24 +393,28 @@ Now use this function in `validate_form`:
 ...                 for tag in u','.join(tags).split(u',')
 ...                 )
 ...             if clean_tag
-...             ]))
-...     return conv.new_struct(dict(
-...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.not_none),
+...             ])) or None
+...     return conv.struct(dict(
+...         username = conv.pipe(conv.cleanup_line, conv.not_none),
 ...         password = conv.pipe(
-...             conv.multidict_getall('password'),
+...             conv.empty_to_none,
 ...             conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
 ...                 error = u'Password mismatch'),
 ...             conv.function(lambda passwords: passwords[0]),
 ...             ),
-...         email = conv.pipe(conv.multidict_get('email'), conv.input_to_email),
-...         tags = conv.pipe(conv.multidict_getall('tag'), conv.function(cleanup_tags)),
-...         ))(params)
+...         email = conv.input_to_email,
+...         tags = conv.function(cleanup_tags),
+...         ))(inputs)
 ...
->>> req9 = webob.Request.blank('/', POST = 'username=   John Doe&tag=friend&tag=user,ADMIN&tag=&tag=customer, friend')
->>> validate_form(req9.POST)
+>>> req10 = webob.Request.blank('/', POST = 'username=   John Doe&tag=friend&tag=user,ADMIN&tag=&tag=customer, friend')
+>>> validate_form(req10.POST)
 ({'username': u'John Doe', 'tags': [u'admin', u'customer', u'friend', u'user']}, None)
 
-It works well, but let's rewrite the tags converter in a more "biryanic" way:
+
+The end
+=======
+
+Our form validator works well, but let's rewrite the tags converter in a more "biryanic" way:
 
 * To split tags in a single list, we can use::
 
@@ -339,70 +437,33 @@ It works well, but let's rewrite the tags converter in a more "biryanic" way:
 Let's combine everything in a new version of `validate_form`:
 
 >>> def validate_form(params):
-...     def cleanup_tags(tags):
-...         return sorted(set([
-...             clean_tag
-...             for clean_tag in (
-...                 tag.strip().lower()
-...                 for tag in u','.join(tags).split(u',')
-...                 )
-...             if clean_tag
-...             ]))
-...     return conv.new_struct(dict(
-...         username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.not_none),
+...     inputs = dict(
+...         username = params.get('username'),
+...         password = params.getall('password'),
+...         email = params.get('email'),
+...         tags = params.getall('tag'),
+...         )
+...     return conv.struct(dict(
+...         username = conv.pipe(conv.cleanup_line, conv.not_none),
 ...         password = conv.pipe(
-...             conv.multidict_getall('password'),
+...             conv.empty_to_none,
 ...             conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
 ...                 error = u'Password mismatch'),
 ...             conv.function(lambda passwords: passwords[0]),
 ...             ),
-...         email = conv.pipe(conv.multidict_get('email'), conv.input_to_email),
+...         email = conv.input_to_email,
 ...         tags = conv.pipe(
-...             conv.multidict_getall('tag'),
 ...             conv.function(lambda tags: u','.join(tags).split(u',')),
 ...             conv.uniform_sequence(conv.input_to_slug, constructor = set),
 ...             conv.function(sorted),
 ...             ),
-...         ))(params)
+...         ))(inputs)
 ...
->>> validate_form(req9.POST)
-({'username': u'John Doe', 'tags': [u'admin', u'customer', u'friend', u'user']}, None)
->>> req10 = webob.Request.blank('/', POST = 'username=Jean Dupont&tag=Rêveur, Œil de Lynx&tag=COLLÈGUE')
 >>> validate_form(req10.POST)
-({'username': u'Jean Dupont', 'tags': [u'collegue', u'oeil-de-lynx', u'reveur']}, None)
-
-
-The end
-=======
-
-By the way, we don't need to define a function for `validate_form`. Declaring a variable is sufficient. Here is the
-final form of the form validator:
-
->>> validate_form = conv.new_struct(dict(
-...     username = conv.pipe(conv.multidict_get('username'), conv.cleanup_line, conv.not_none),
-...     password = conv.pipe(
-...         conv.multidict_getall('password'),
-...         conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
-...             error = u'Password mismatch'),
-...         conv.function(lambda passwords: passwords[0]),
-...         ),
-...     email = conv.pipe(conv.multidict_get('email'), conv.input_to_email),
-...     tags = conv.pipe(
-...         conv.multidict_getall('tag'),
-...         conv.function(lambda tags: u','.join(tags).split(u',')),
-...         conv.uniform_sequence(conv.input_to_slug, constructor = set),
-...         conv.function(sorted),
-...         ),
-...     ))
-...
->>> validate_form(req9.POST)
 ({'username': u'John Doe', 'tags': [u'admin', u'customer', u'friend', u'user']}, None)
->>> validate_form(req10.POST)
-({'username': u'Jean Dupont', 'tags': [u'collegue', u'oeil-de-lynx', u'reveur']}, None)
->>> req11 = webob.Request.blank('/',
-...     POST = 'username=   John Doe&password=secret&password=secret&email=john@doe.name&tag=friend&tag=user,ADMIN')
+>>> req11 = webob.Request.blank('/', POST = 'username=Jean Dupont&tag=Rêveur, Œil de Lynx&tag=COLLÈGUE')
 >>> validate_form(req11.POST)
-({'username': u'John Doe', 'password': u'secret', 'email': u'john@doe.name', 'tags': [u'admin', u'friend', u'user']}, None)
+({'username': u'Jean Dupont', 'tags': [u'collegue', u'oeil-de-lynx', u'reveur']}, None)
 
 Our form converter is now completed.
 
