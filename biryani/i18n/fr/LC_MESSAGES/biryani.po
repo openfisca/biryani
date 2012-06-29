@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Biryani\n"
 "Report-Msgid-Bugs-To: eraviart@easter-eggs.com\n"
-"POT-Creation-Date: 2012-06-14 22:05+0200\n"
-"PO-Revision-Date: 2012-06-14 20:08+0000\n"
+"POT-Creation-Date: 2012-06-29 12:53+0200\n"
+"PO-Revision-Date: 2012-06-29 10:55+0000\n"
 "Last-Translator: Emmanuel <emmanuel@raviart.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -240,104 +240,104 @@ msgstr "Un code postal doit avoir 5 chiffres"
 msgid "Invalid JSON"
 msgstr "JSON incorrect"
 
-#: biryani/jwtconv.py:109 biryani/jwtconv.py:119 biryani/jwtconv.py:127
-#: biryani/jwtconv.py:132
+#: biryani/jwtconv.py:113 biryani/jwtconv.py:123 biryani/jwtconv.py:132
+#: biryani/jwtconv.py:137
 msgid "Invalid format"
 msgstr "Format incorrect"
 
-#: biryani/jwtconv.py:134
+#: biryani/jwtconv.py:139
 msgid "Not a signed JSON Web Token (JWS)"
 msgstr "Ce n'est pas un jeton web JSON signé (JWS)"
 
-#: biryani/jwtconv.py:197
+#: biryani/jwtconv.py:458
 msgid "Invalid crypted JSON web token"
 msgstr "Jeton web JSON crypté incorrect"
 
-#: biryani/jwtconv.py:276 biryani/jwtconv.py:478 biryani/jwtconv.py:617
+#: biryani/jwtconv.py:539 biryani/jwtconv.py:945 biryani/jwtconv.py:1097
 msgid "Invalid header: {0}"
 msgstr "Entête incorrect : {0}"
 
-#: biryani/jwtconv.py:279
+#: biryani/jwtconv.py:542
 msgid "Invalid encrypted key: {0}"
 msgstr "Clé cryptée incorrecte : {0}"
 
-#: biryani/jwtconv.py:282
+#: biryani/jwtconv.py:545
 msgid "Invalid cyphertext: {0}"
 msgstr "Cryptogramme incorrect : {0}"
 
-#: biryani/jwtconv.py:285
+#: biryani/jwtconv.py:548
 msgid "Invalid integrity value: {0}"
 msgstr "Valeur d'intégrité incorrecte : {0}"
 
-#: biryani/jwtconv.py:298 biryani/jwtconv.py:305
+#: biryani/jwtconv.py:561 biryani/jwtconv.py:568
 msgid "Invalid content master key"
 msgstr "Clé maître de contenu incorrecte"
 
-#: biryani/jwtconv.py:311
+#: biryani/jwtconv.py:574
 msgid "Unexpected \"int\" header forbidden by AEAD algorithm {0}"
 msgstr "Entête \"int\" inattendu, interdit par l'algorithme AEAD {0}"
 
-#: biryani/jwtconv.py:317
+#: biryani/jwtconv.py:580
 msgid "Missing \"int\" header, required by non AEAD algorithm {0}"
 msgstr "Entête \"int\" manquant, requis par l'algorithme non AEAD {0}"
 
-#: biryani/jwtconv.py:331 biryani/jwtconv.py:707
+#: biryani/jwtconv.py:594 biryani/jwtconv.py:1187
 msgid "Non authentic signature"
 msgstr "Signature non authentique"
 
-#: biryani/jwtconv.py:335
+#: biryani/jwtconv.py:598 biryani/jwtconv.py:611
 msgid "Invalid header: \"iv\" required for {0} encryption method"
 msgstr "Entête incorrect : \"iv\" requis pour la méthode de cryptage {0}"
 
-#: biryani/jwtconv.py:343
+#: biryani/jwtconv.py:604 biryani/jwtconv.py:618
 msgid "Invalid cyphertext"
 msgstr "Cryptogramme incorrect"
 
-#: biryani/jwtconv.py:353
+#: biryani/jwtconv.py:627
 msgid "Invalid compressed plaintext"
 msgstr "Text en clair compressé incorrect"
 
-#: biryani/jwtconv.py:471 biryani/jwtconv.py:610
+#: biryani/jwtconv.py:938 biryani/jwtconv.py:1090
 msgid "Missing header"
 msgstr "Entête manquant"
 
-#: biryani/jwtconv.py:482 biryani/jwtconv.py:620
+#: biryani/jwtconv.py:949 biryani/jwtconv.py:1100
 msgid "Missing signature"
 msgstr "Signature manquante"
 
-#: biryani/jwtconv.py:485 biryani/jwtconv.py:623
+#: biryani/jwtconv.py:952 biryani/jwtconv.py:1103
 msgid "Unexpected signature in plaintext token"
 msgstr "Signature inattendue dans un jeton en clair"
 
-#: biryani/jwtconv.py:488
+#: biryani/jwtconv.py:955
 msgid "Invalid encoded payload: {0}"
 msgstr "Contenu utile encodé incorrect : {0}"
 
-#: biryani/jwtconv.py:670
+#: biryani/jwtconv.py:1150
 msgid "Unauthorized digital signature algorithm"
 msgstr "Algorithme de signature numérique non autorisé"
 
-#: biryani/jwtconv.py:681
+#: biryani/jwtconv.py:1161
 msgid "Unable to check signature: Missing shared secret"
 msgstr "Impossible de vérfier la signature : Le secret partagé est manquant"
 
-#: biryani/jwtconv.py:705
+#: biryani/jwtconv.py:1185
 msgid "Invalid signature"
 msgstr "Signature incorrecte"
 
-#: biryani/jwtconv.py:709
+#: biryani/jwtconv.py:1189
 msgid "Unimplemented digital signature algorithm"
 msgstr "Algorithme de signature numérique non implémenté"
 
-#: biryani/jwtconv.py:722
+#: biryani/jwtconv.py:1202
 msgid "Expired JSON web token"
 msgstr "Jeton web JSON expiré"
 
-#: biryani/jwtconv.py:725
+#: biryani/jwtconv.py:1205
 msgid "JSON web token issued in the future"
 msgstr "Jeton web JSON émis dans le futur"
 
-#: biryani/jwtconv.py:728
+#: biryani/jwtconv.py:1208
 msgid "JSON web token not yet valid"
 msgstr "Jeton web JSON pas encore valide"
 
@@ -349,15 +349,15 @@ msgstr "Une erreur est survenue durant la tentative de connexion au serveur de c
 msgid "Domain \"{0}\" doesn't exist"
 msgstr "Le domaine \"{0}\" n'existe pas"
 
-#: biryani/netconv.py:123
+#: biryani/netconv.py:124
 msgid "An error occured when trying to connect to the web server: {0:d} {1}"
 msgstr "Une erreur est survenue durant la tentative de connexion au serveur web : {0:d} {1}"
 
-#: biryani/netconv.py:127
+#: biryani/netconv.py:128
 msgid "The web server responded with a bad status code: {0:d} {1}"
 msgstr "Le serveur web a répondu avec un mauvais code d'état : {0:d} {1}"
 
-#: biryani/netconv.py:130
+#: biryani/netconv.py:131
 msgid "An error occured when trying to connect to the web server: {0}"
 msgstr "Une erreur est survenue durant la tentative de connexion au serveur web : {0}"
 
