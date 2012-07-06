@@ -86,6 +86,11 @@ valid_integrity_algorithms = (
     u'HS384',
     u'HS512',
     )
+valid_key_derivation_functions = (
+    u'CS256',
+    u'CS384',
+    u'CS512',
+    )
 valid_signature_algorithms = (
 #    u'ES256',
     u'HS256',
@@ -494,14 +499,15 @@ BqAdzpROlyiw'
                         make_input_to_json(),
                         json_to_json_web_key,
                         ),
+                    kdf = pipe(
+                        test_isinstance(basestring),
+                        test_in(valid_key_derivation_functions),
+                        ),
                     kid = test_isinstance(basestring),
                     typ = pipe(
                         test_isinstance(basestring),
                         test_in([
-                            u'application/jwe',
-                            u'application/jwt',
                             u'JWE',
-                            u'JWT',
                             ]),
                         ),
                     x5c = pipe(
@@ -580,12 +586,13 @@ BqAdzpROlyiw'
                 return token, state._(
                     u'Missing "int" header, required by non AEAD algorithm {0}').format(algorithm)
             method_size = int(method[1:4])
-            encryption_key_length = method_size >> 3  # method_size is in bits, but length is in bytes.
-            content_encryption_key = derive_key(content_master_key, 'Encryption', encryption_key_length)
+            key_derivation_digest_size = int((header['kdf'] or u'CS256')[2:])
+            content_encryption_key = derive_key(content_master_key, 'Encryption',
+                digest_size = key_derivation_digest_size, key_size = method_size)
             integrity = header['int']
             integrity_size = int(integrity[2:])
-            integrity_key_length = integrity_size >> 3
-            content_integrity_key = derive_key(content_master_key, 'Integrity', integrity_key_length)
+            content_integrity_key = derive_key(content_master_key, 'Integrity',
+                digest_size = key_derivation_digest_size, key_size = integrity_size)
             secured_input = token.rsplit('.', 1)[0]
             digest_constructor = digest_constructor_by_size[integrity_size]
             signature = HMAC.new(content_integrity_key, msg = secured_input, digestmod = digest_constructor).digest()
@@ -646,7 +653,7 @@ BqAdzpROlyiw'
     return decrypt_json_web_token_converter
 
 
-def derive_key(master_key, label, key_length):
+def derive_key(master_key, label, digest_size = None, key_size = None):
     """Concatenation Key Derivation Function
 
     This is a simplified version of the algorithm described in  section "5.8.1 Concatenation Key Derivation Function
@@ -654,19 +661,19 @@ def derive_key(master_key, label, key_length):
     Cryptography" (NIST SP 800-56 A).
     http://csrc.nist.gov/publications/nistpubs/800-56A/SP800-56A_Revision1_Mar08-2007.pdf
 
-    .. note:: ``key_length`` is the length in bytes (not bits).
+    .. note:: ``key_size`` & ``digest_size`` are the length in bits (not bytes).
 
     >>> # Mike Jones Tests
 
     >>> cmk1_bytes_list = [4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106, 206,
     ...     107, 124, 212, 45, 111, 107, 9, 219, 200, 177, 0, 240, 143, 156, 44, 207]
     >>> cmk1 = ''.join(chr(byte) for byte in cmk1_bytes_list)
-    >>> cek1 = derive_key(cmk1, 'Encryption', 32)
+    >>> cek1 = derive_key(cmk1, 'Encryption', key_size = 256)
     >>> cek1_bytes_list = [ord(c) for c in cek1]
     >>> cek1_bytes_list
     [249, 255, 87, 218, 224, 223, 221, 53, 204, 121, 166, 130, 195, 184, 50, 69, \
 11, 237, 202, 71, 10, 96, 59, 199, 140, 88, 126, 147, 146, 113, 222, 41]
-    >>> cik1 = derive_key(cmk1, 'Integrity', 32)
+    >>> cik1 = derive_key(cmk1, 'Integrity', key_size = 256)
     >>> cik1_bytes_list = [ord(c) for c in cik1]
     >>> cik1_bytes_list
     [218, 209, 130, 50, 169, 45, 70, 214, 29, 187, 123, 20, 3, 158, 111, 122, \
@@ -677,11 +684,11 @@ def derive_key(master_key, label, key_length):
     ...     49, 19, 41, 69, 5, 20, 252, 145, 104, 129, 137, 138, 67, 23, 153, 83,
     ...     81, 234, 82, 247, 48, 211, 41, 130, 35, 124, 45, 156, 249, 7, 225, 168]
     >>> cmk2 = ''.join(chr(byte) for byte in cmk2_bytes_list)
-    >>> cek2 = derive_key(cmk2, 'Encryption', 16)
+    >>> cek2 = derive_key(cmk2, 'Encryption', key_size = 128)
     >>> cek2_bytes_list = [ord(c) for c in cek2]
     >>> cek2_bytes_list
     [137, 5, 92, 9, 17, 47, 17, 86, 253, 235, 34, 247, 121, 78, 11, 144]
-    >>> cik2 = derive_key(cmk2, 'Integrity', 64)
+    >>> cik2 = derive_key(cmk2, 'Integrity', key_size = 512)
     >>> cik2_bytes_list = [ord(c) for c in cik2]
     >>> cik2_bytes_list
     [11, 179, 132, 177, 171, 24, 126, 19, 113, 1, 200, 102, 100, 74, 88, 149, \
@@ -691,16 +698,21 @@ def derive_key(master_key, label, key_length):
     """
     assert isinstance(master_key, str)
     assert isinstance(label, str)
+    if digest_size is None:
+        digest_size = 256
+    digest_constructor = digest_constructor_by_size[digest_size]
+    if key_size is None:
+        key_size = 256
     hashes = []
-    for index in range(key_length >> 5):  # SHA256 hash has a length of 32 bytes == 2**5.
-        hash_object = SHA256.new(pack('>I', index + 1))
+    block_count, remaining_length = divmod(key_size >> 3, digest_size >> 3)
+    for index in range(block_count):
+        hash_object = digest_constructor.new(pack('>I', index + 1))
         hash_object.update(master_key)
         hash_object.update(label)
         hashes.append(hash_object.digest())
-    remaining_length = key_length & 0x1F
     if remaining_length != 0:
-        # Generated key length is not a multiple of 256 bits (= 32 bytes).
-        hash_object = SHA256.new(pack('>I', len(hashes) + 1))
+        # Generated key length is not a multiple of digest length.
+        hash_object = digest_constructor.new(pack('>I', len(hashes) + 1))
         hash_object.update(master_key)
         hash_object.update(label)
         hashes.append(hash_object.digest()[:remaining_length])
@@ -708,8 +720,9 @@ def derive_key(master_key, label, key_length):
 
 
 def encrypt_json_web_token(algorithm = None, compression = None, content_master_key = None, encrypted_key = None,
-        integrity = None, initialization_vector = None, json_web_key_url = None, key_id = None, method = None,
-        public_key_as_encoded_str = None, public_key_as_json_web_key = None, shared_secret = None):
+        integrity = None, initialization_vector = None, json_web_key_url = None, key_derivation_function = None,
+        key_id = None, method = None, public_key_as_encoded_str = None, public_key_as_json_web_key = None,
+        shared_secret = None):
     """Return a converter that encrypts a JSON Web Token.
 
     .. note:: ``content_master_key``, ``encrypted_key`` & ``initialization_vector`` parameters should be kept to
@@ -856,6 +869,8 @@ BqAdzpROlyiw'
     """
     assert algorithm is None or algorithm in valid_encryption_algorithms, algorithm
     assert integrity is None or integrity in valid_integrity_algorithms, integrity
+    assert key_derivation_function is None or key_derivation_function in valid_key_derivation_functions, \
+        key_derivation_function
     assert method is None or method in valid_encryption_methods, method
 
     if algorithm is not None:
@@ -922,9 +937,13 @@ BqAdzpROlyiw'
             # Algorithm is an AEAD algorithm.
             content_encryption_key = content_master_key
             content_integrity_key = None
+            assert key_derivation_function is None
         else:
-            content_encryption_key = derive_key(content_master_key, 'Encryption', encryption_key_length)
-            content_integrity_key = derive_key(content_master_key, 'Integrity', integrity_key_length)
+            key_derivation_digest_size = int((key_derivation_function or u'CS256')[2:])
+            content_encryption_key = derive_key(content_master_key, 'Encryption',
+                digest_size = key_derivation_digest_size, key_size = method_size)
+            content_integrity_key = derive_key(content_master_key, 'Integrity',
+                digest_size = key_derivation_digest_size, key_size = integrity_size)
 
     def encrypt_json_web_token_converter(token, state = None):
         if token is None:
