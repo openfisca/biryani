@@ -71,6 +71,7 @@ __all__ = [
     'make_input_to_slug',
     'make_input_to_url',
     'make_str_to_url',
+    'merge',
     'new_mapping',
     'new_sequence',
     'new_struct',
@@ -840,6 +841,62 @@ def make_input_to_url(add_prefix = u'http://', error_if_fragment = False, error_
             remove_fragment = remove_fragment, remove_path = remove_path, remove_query = remove_query,
             schemes = schemes),
         )
+
+
+def merge(*converters):
+    """Return a converter that merge the resulsts of several :func:`structured_mapping` converters.
+
+    >>> ab_converter = struct(
+    ... dict(
+    ...     a = input_to_int,
+    ...     b = input_to_float,
+    ...     ),
+    ... default = 'drop',
+    ... )
+    >>> c_converter = struct(
+    ... dict(
+    ...     c = input_to_email,
+    ...     ),
+    ... default = 'drop',
+    ... )
+    >>> abc_converter = merge(ab_converter, c_converter)
+    >>> abc_converter(dict(a = u'1', b = u'2', c = u'john@doe.name'))
+    ({'a': 1, 'c': u'john@doe.name', 'b': 2.0}, None)
+    >>> abc_converter(dict(a = u'1'))
+    ({'a': 1}, None)
+    >>> abc_converter(dict(c = u'john@doe.name'))
+    ({'c': u'john@doe.name'}, None)
+    >>> abc_converter(dict(a = u'a', b = u'b', c = u'1'))
+    ({'a': u'a', 'c': u'1', 'b': u'b'}, {'a': u'Value must be an integer', \
+'c': u'An email must contain exactly one "@"', 'b': u'Value must be a float'})
+    >>> abc_converter({})
+    (None, None)
+    >>> abc_converter(None)
+    (None, None)
+    """
+    def merge_converter(values, state = None):
+        if values is None:
+            return values, None
+        if state is None:
+            state = states.default_state
+        merged_values = None
+        merged_errors = None
+        for converter in converters:
+            converter_values, converter_errors = converter(values, state = state)
+            if converter_errors is not None:
+                if not isinstance(converter_errors, dict):
+                    return converter_values, converter_errors
+                if merged_errors is None:
+                    merged_errors = {}
+                merged_errors.update(converter_errors)
+            if converter_values is not None:
+                if not isinstance(converter_values, dict):
+                    return converter_values, converter_errors
+                if merged_values is None:
+                    merged_values = {}
+                merged_values.update(converter_values)
+        return merged_values, merged_errors
+    return merge_converter
 
 
 def new_mapping(converters, constructor = None, keep_empty = False):
