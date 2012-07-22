@@ -32,13 +32,15 @@ import re
 
 import bson
 
-from .baseconv import cleanup_line, first_match, pipe, test_isinstance
+from .baseconv import cleanup_line, first_match, function, pipe, test_isinstance
 from . import states
 
 
 __all__ = [
     'anything_to_object_id',
+    'bson_to_json',
     'input_to_object_id',
+    'json_to_bson',
     'object_id_re',
     'object_id_to_str',
     'str_to_object_id',
@@ -48,7 +50,78 @@ __all__ = [
 object_id_re = re.compile(r'[\da-f]{24}$')
 
 
+# Utility functions
+
+
+def transform_bson_to_json(value):
+    """Recursively convert a BSON value to JSON.
+
+    A MongoDB document can't have an item with a key containing a ".". So they are replaced with "->".
+    """
+    if value is None:
+        return value
+    if isinstance(value, dict):
+        return dict(
+            (item_name.replace('->', '.'), transform_bson_to_json(item_value))
+            for item_name, item_value in value.iteritems()
+            )
+    if isinstance(value, list):
+        return [
+            transform_bson_to_json(item)
+            for item in value
+            ]
+    return value
+
+
+def transform_json_to_bson(value):
+    """Recursively convert a JSON value to BSON.
+
+    A MongoDB document can't have an item with a key containing a ".". So they are replaced with "->".
+    """
+    if value is None:
+        return value
+    if isinstance(value, dict):
+        return dict(
+            (item_name.replace('.', '->'), transform_json_to_bson(item_value))
+            for item_name, item_value in value.iteritems()
+            )
+    if isinstance(value, list):
+        return [
+            transform_json_to_bson(item)
+            for item in value
+            ]
+    return value
+
+
 # Level-1 Converters
+
+
+bson_to_json = function(transform_bson_to_json)
+"""Convert a BSON value to JSON.
+
+    A MongoDB document can't have an item with a key containing a ".". So they are replaced with "->".
+
+    >>> bson_to_json({'a': 1, 'b': [2, 3], 'c->d': {'e': 4}})
+    ({'a': 1, 'c.d': {'e': 4}, 'b': [2, 3]}, None)
+    >>> bson_to_json({})
+    ({}, None)
+    >>> bson_to_json(None)
+    (None, None)
+    """
+
+
+json_to_bson = function(transform_json_to_bson)
+"""Convert a JSON value to BSON.
+
+    A MongoDB document can't have an item with a key containing a ".". So they are replaced with "->".
+
+    >>> json_to_bson({'a': 1, 'b': [2, 3], 'c.d': {'e': 4}})
+    ({'a': 1, 'b': [2, 3], 'c->d': {'e': 4}}, None)
+    >>> json_to_bson({})
+    ({}, None)
+    >>> json_to_bson(None)
+    (None, None)
+    """
 
 
 def object_id_to_str(value, state = None):
