@@ -448,6 +448,58 @@ BqAdzpROlyiw'
     'Live long and prosper.'
     >>> decoded_jwt['payload'] == plaintext
     True
+
+    >>> # Mike Jones Test 3:  RSA-OAEP/AES-GSM
+
+    >>> jwe = 'eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00iLCJpdiI6Il9fNzlfUHY2LWZqMzl2WDAifQ.LX4rQictZUJSYrVH3-TmCeH\
+08qlpMrbFpKhEBVyAFX6h4V3Xt6omuTyMmkeiMIR6gbkn9ww4A0xDRnRu2GuM-v30Ri6OHx04fP1l1osYRngALuzMplcreyFCErm5asXTghweg_oI2y6f\
+fhgR8P0ONWSlv0Bg-y58nAiNMi9Z51P42sx1f2JknAhG_oJ2u4Dy-6xY3tWCS4hXolMt5NMZm1dUN56RKvGlp-nspa9mYONfV-CITnjA3zMVWGdpTF4SX\
+Nq0fK5gWM3CgxJEtuW1gk69q9k_zOAEqCph_urnx0T7_6ZaBa90nV3TvX0cC5bq75alEqGWkqJLwTMsEnAg-A.ykqmBHvu8Yhqf5jafmUKcgDY8kZ0vw.\
+_3cYrFHM7X640lLd_QoUKw'
+    >>> key_modulus_bytes_list = [152, 66, 27, 221, 242, 12, 205, 109, 3, 3, 73, 191, 7, 43, 214, 144,
+    ...     254, 253, 173, 139, 211, 33, 139, 34, 95, 176, 106, 246, 5, 176, 94, 78,
+    ...     150, 102, 87, 240, 113, 118, 40, 137, 1, 245, 201, 181, 133, 9, 175, 161,
+    ...     119, 134, 19, 81, 38, 21, 100, 25, 214, 68, 37, 66, 189, 149, 75, 143,
+    ...     148, 24, 249, 69, 38, 236, 119, 81, 118, 149, 244, 115, 242, 43, 3, 90,
+    ...     107, 238, 42, 3, 9, 90, 173, 192, 72, 175, 165, 17, 77, 92, 175, 8,
+    ...     22, 252, 201, 168, 30, 109, 167, 12, 23, 56, 114, 122, 217, 30, 241, 127,
+    ...     233, 130, 119, 100, 190, 121, 77, 95, 106, 107, 109, 19, 5, 103, 110, 0,
+    ...     208, 248, 166, 68, 213, 22, 203, 25, 50, 35, 207, 165, 188, 185, 62, 103,
+    ...     164, 45, 172, 183, 49, 132, 72, 72, 159, 223, 180, 22, 157, 253, 197, 185,
+    ...     77, 67, 236, 72, 99, 14, 155, 255, 100, 159, 208, 199, 50, 4, 232, 132,
+    ...     147, 61, 84, 150, 56, 13, 109, 17, 6, 247, 76, 172, 122, 185, 142, 120,
+    ...     207, 117, 90, 94, 96, 161, 216, 2, 221, 17, 89, 107, 229, 214, 154, 97,
+    ...     2, 17, 14, 222, 116, 61, 249, 198, 194, 55, 187, 13, 243, 34, 151, 65,
+    ...     197, 17, 145, 225, 124, 238, 155, 235, 84, 192, 107, 107, 118, 185, 67, 196,
+    ...     4, 75, 15, 89, 140, 30, 169, 51, 94, 160, 20, 98, 153, 156, 216, 51]
+    >>> key_modulus = ''.join(chr(byte) for byte in key_modulus_bytes_list)
+    >>> key_public_exponent_bytes_list = [1, 0, 1]
+    >>> key_public_exponent = ''.join(chr(byte) for byte in key_public_exponent_bytes_list)
+    >>> key_private_exponent_bytes_list = [107, 210, 84, 253, 165, 77, 95, 164, 21, 0, 29, 23, 68, 50, 205, 45,
+    ...     189, 5, 84, 2, 178, 175, 12, 98, 121, 52, 235, 105, 241, 185, 101, 239,
+    ...     109, 30, 104, 164, 3, 21, 83, 187, 66, 66, 22, 103, 143, 32, 190, 217,
+    ...     47, 85, 41, 20, 204, 77, 85, 167, 222, 78, 63, 188, 181, 152, 165, 251,
+    ...     181, 58, 194, 59, 48, 71, 64, 111, 213, 244, 119, 58, 44, 130, 61, 75,
+    ...     169, 38, 237, 101, 93, 24, 115, 246, 185, 2, 121, 120, 121, 58, 107, 80,
+    ...     229, 70, 122, 95, 173, 188, 165, 17, 48, 216, 110, 105, 132, 156, 31, 21,
+    ...     31, 253, 158, 35, 31, 167, 179, 29, 32, 181, 150, 118, 99, 219, 76, 207,
+    ...     251, 137, 174, 83, 77, 177, 19, 244, 49, 154, 248, 255, 112, 107, 231, 233,
+    ...     96, 24, 96, 218, 77, 28, 47, 208, 75, 221, 69, 210, 226, 175, 61, 65,
+    ...     106, 13, 8, 127, 96, 188, 205, 210, 251, 101, 176, 46, 22, 245, 249, 13,
+    ...     174, 22, 109, 117, 255, 141, 126, 39, 90, 231, 44, 51, 49, 54, 95, 99,
+    ...     149, 61, 238, 4, 17, 48, 239, 76, 198, 16, 193, 252, 160, 213, 155, 98,
+    ...     51, 21, 155, 203, 163, 238, 112, 23, 29, 231, 76, 141, 93, 115, 91, 83,
+    ...     103, 66, 110, 227, 188, 231, 105, 78, 23, 172, 126, 196, 130, 181, 226, 214,
+    ...     178, 46, 56, 1, 181, 180, 154, 182, 80, 186, 154, 158, 79, 15, 177, 65]
+    >>> key_private_exponent = ''.join(chr(byte) for byte in key_private_exponent_bytes_list)
+    >>> private_key = RSA.construct((number.bytes_to_long(key_modulus),
+    ...     number.bytes_to_long(key_public_exponent), number.bytes_to_long(key_private_exponent)))
+    >>> private_key_as_encoded_str = private_key.exportKey()
+    >>> decryptor = decrypt_json_web_token(private_key = private_key_as_encoded_str)
+    >>> decrypted_jwt = check(decryptor)(jwe)
+    >>> decoded_jwt = check(decode_json_web_token)(decrypted_jwt)
+    >>> decoded_jwt['payload']
+    'What hath God wrought?'
     """
     if shared_secret is not None:
         assert isinstance(shared_secret, str)  # Shared secret must not be unicode.
