@@ -87,6 +87,7 @@ __all__ = [
     'struct',
     'structured_mapping',
     'structured_sequence',
+    'submapping',
     'switch',
     'test',
     'test_between',
@@ -1786,6 +1787,85 @@ def structured_sequence(converters, constructor = None, default = None, keep_emp
         converted_values = constructor(converted_values) if not is_empty or keep_empty else None
         return converted_values, errors or None
     return structured_sequence_converter
+
+
+def submapping(keys, converter, remaining_converter = None, constructor = None):
+    """Return a converter that splits a mapping into 2 mappings, converts them separately and merge both results.
+
+    >>> submapping(
+    ...     ['x', 'y'],
+    ...     function(lambda subdict: dict(a = subdict['x'], b = subdict['y'])),
+    ...     )(dict(x = 1, y = 2, z = 3, t = 4))
+    ({'a': 1, 'b': 2, 'z': 3, 't': 4}, None)
+    >>> submapping(
+    ...     ['x', 'y'],
+    ...     function(lambda subdict: dict(a = subdict['x'], b = subdict['y'])),
+    ...     uniform_mapping(noop, anything_to_str),
+    ...     )(dict(x = 1, y = 2, z = 3, t = 4))
+    ({'a': 1, 'b': 2, 'z': u'3', 't': u'4'}, None)
+    >>> submapping(
+    ...     ['x', 'y'],
+    ...     uniform_mapping(noop, test_equals(1)),
+    ...     uniform_mapping(noop, anything_to_str),
+    ...     )(dict(x = 1, y = 2, z = 3, t = 4))
+    ({'y': 2, 'x': 1, 'z': u'3', 't': u'4'}, {'y': u'Value must be equal to 1'})
+    >>> submapping(
+    ...     ['x', 'y'],
+    ...     uniform_mapping(noop, test_equals(1)),
+    ...     uniform_mapping(noop, test_equals(3)),
+    ...     )(dict(x = 1, y = 2, z = 3, t = 4))
+    ({'y': 2, 'x': 1, 'z': 3, 't': 4}, {'y': u'Value must be equal to 1', 't': u'Value must be equal to 3'})
+    >>> submapping(
+    ...     ['x', 'y'],
+    ...     test_equals(1),
+    ...     uniform_mapping(noop, test_equals(3)),
+    ...     )(dict(x = 1, y = 2, z = 3, t = 4))
+    ({'y': 2, 'x': 1, 'z': 3, 't': 4}, u'Value must be equal to 1')
+    >>> submapping(
+    ...     ['x', 'y'],
+    ...     uniform_mapping(noop, test_equals(1)),
+    ...     uniform_mapping(noop, test_equals(3)),
+    ...     )({})
+    ({}, None)
+    >>> submapping(
+    ...     ['x', 'y'],
+    ...     uniform_mapping(noop, test_equals(1)),
+    ...     uniform_mapping(noop, test_equals(3)),
+    ...     )(None)
+    (None, None)
+    """
+    def submapping_converter(value, state = None):
+        if value is None:
+            return value, None
+        if state is None:
+            state = states.default_state
+        mapping_constructor = type(value) if constructor is None else constructor
+        submapping = mapping_constructor()
+        remaining = mapping_constructor()
+        for item_key, item_value in value.iteritems():
+            if item_key in keys:
+                submapping[item_key] = item_value
+            else:
+                remaining[item_key] = item_value
+        submapping_value, submapping_error = converter(submapping, state = state)
+        remaining_value, remaining_error = (remaining_converter or noop)(remaining, state = state)
+        merged_value = mapping_constructor()
+        if submapping_value is not None:
+            merged_value.update(submapping_value)
+        if remaining_value is not None:
+            merged_value.update(remaining_value)
+        if submapping_error is None:
+            merged_error = remaining_error
+        elif remaining_error is None:
+            merged_error = submapping_error
+        elif isinstance(submapping_error, dict) and isinstance(remaining_error, dict):
+            merged_error = submapping_error.copy()
+            merged_error.update(remaining_error)
+        else:
+            # The errors are not compatible (at least one of them is not a dict) => Return only the first one.
+            merged_error = submapping_error
+        return merged_value, merged_error
+    return submapping_converter
 
 
 def switch(key_converter, converters, default = None, handle_none_value = False):

@@ -53,6 +53,12 @@ Collection (dict, list, set, tuple, etc) Converters
 .. autofunction:: biryani.baseconv.struct
    :noindex:
 
+.. autofunction:: biryani.baseconv.submapping
+   :noindex:
+
+.. autofunction:: biryani.baseconv.uniform_mapping
+   :noindex:
+
 .. autofunction:: biryani.baseconv.uniform_sequence
    :noindex:
 
