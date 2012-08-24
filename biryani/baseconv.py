@@ -1972,7 +1972,7 @@ def test_between(min_value, max_value, error = None):
 
 
 def test_conv(converter):
-    """Return a converter that applies a applies a converter to test a value without modifying it.
+    """Return a converter that applies a converter to test a value without modifying it.
 
     ``test_conv`` always returns the initial value, even when test fails.
 
