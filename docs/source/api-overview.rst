@@ -222,6 +222,9 @@ Converters-related Utilities
 .. autofunction:: biryani.custom_conv
    :noindex:
 
+.. autofunction:: biryani.baseconv.ok
+   :noindex:
+
 
 String Functions
 ================

@@ -77,6 +77,7 @@ __all__ = [
     'new_struct',
     'noop',
     'not_none',
+    'ok',
     'pipe',
     'rename_item',
     'set_value',
@@ -1161,6 +1162,38 @@ def noop(value, state = None):
     (None, None)
     """
     return value, None
+
+
+def ok(converter_or_value_and_error):
+    """Run a conversion and return ``True`` when it doesn't generate an error or ``False`` otherwise.
+
+    This function can be called with either a converter or the result of a conversion.
+
+    Usage with a converter:
+
+    >>> ok(input_to_int)(u'42')
+    True
+    >>> ok(input_to_int)(u'hello world')
+    False
+
+    Usage with a conversion result :
+
+    >>> ok(input_to_int(u'42'))
+    True
+    >>> ok(input_to_int(u'hello world'))
+    False
+    """
+    import collections
+
+    if isinstance(converter_or_value_and_error, collections.Sequence):
+        value, error = converter_or_value_and_error
+        return error is None
+    else:
+        # converter_or_value_and_error is a converter.
+        def ok_converter(*args, **kwargs):
+            value, error = converter_or_value_and_error(*args, **kwargs)
+            return error is None
+        return ok_converter
 
 
 def pipe(*converters):
