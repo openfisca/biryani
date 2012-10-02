@@ -157,7 +157,9 @@ def anything_to_int(value, state = None):
     >>> anything_to_int(42.75)
     (42, None)
     >>> anything_to_int(u'42.75')
-    (u'42.75', u'Value must be an integer')
+    (42, None)
+    >>> anything_to_int(u'42,75')
+    (u'42,75', u'Value must be an integer')
     >>> anything_to_int(None)
     (None, None)
     """
@@ -168,7 +170,10 @@ def anything_to_int(value, state = None):
     try:
         return int(value), None
     except ValueError:
-        return value, state._(u'Value must be an integer')
+        try:
+            return int(float(value)), None
+        except ValueError:
+            return value, state._(u'Value must be an integer')
 
 
 def anything_to_str(value, state = None):
