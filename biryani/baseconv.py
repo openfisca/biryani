@@ -1379,10 +1379,10 @@ def str_to_url_path_and_query(value, state = None):
 
 
 def struct(converters, constructor = None, default = None, keep_empty = False, keep_none_values = False,
-        skip_none_items = False):
+        skip_missing_items = False):
     """Return a converter that maps a collection of converters to a collection (ie dict, list, set, etc) of values.
 
-    .. note:: Parameters ``keep_none_values`` & ``skip_none_items`` are not used for sequences.
+    .. note:: Parameters ``keep_none_values`` & ``skip_missing_items`` are not used for sequences.
 
     Usage to convert a mapping (ie dict, etc):
 
@@ -1453,7 +1453,7 @@ def struct(converters, constructor = None, default = None, keep_empty = False, k
     ...         ),
     ...     default = cleanup_line,
     ...     keep_none_values = True,
-    ...     skip_none_items = True,
+    ...     skip_missing_items = True,
     ...     )(dict(name = u'   ', email = None))
     ({'email': None, 'name': None}, None)
     >>> import collections
@@ -1548,14 +1548,14 @@ def struct(converters, constructor = None, default = None, keep_empty = False, k
     if isinstance(converters, collections.Mapping):
         return structured_mapping(converters, constructor = constructor, default = default,
             keep_empty = keep_empty, keep_none_values = keep_none_values,
-            skip_none_items = skip_none_items)
+            skip_missing_items = skip_missing_items)
     assert isinstance(converters, collections.Sequence), \
         'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
     return structured_sequence(converters, constructor = constructor, default = default, keep_empty = keep_empty)
 
 
 def structured_mapping(converters, constructor = None, default = None, keep_empty = False, keep_none_values = False,
-        skip_none_items = False):
+        skip_missing_items = False):
     """Return a converter that maps a mapping of converters to a mapping (ie dict, etc) of values.
 
     .. note:: This converter should not be used directly. Use :func:`struct` instead.
@@ -1627,7 +1627,7 @@ def structured_mapping(converters, constructor = None, default = None, keep_empt
     ...         ),
     ...     default = cleanup_line,
     ...     keep_none_values = True,
-    ...     skip_none_items = True,
+    ...     skip_missing_items = True,
     ...     )(dict(name = u'   ', email = None))
     ({'email': None, 'name': None}, None)
     >>> import collections
@@ -1680,7 +1680,7 @@ def structured_mapping(converters, constructor = None, default = None, keep_empt
         errors = {}
         converted_values = {}
         for name, converter in values_converter.iteritems():
-            if skip_none_items and name not in values:
+            if skip_missing_items and name not in values:
                 continue
             value, error = converter(values.get(name), state = state)
             if value is not None or keep_none_values:
