@@ -62,7 +62,10 @@ def transform_bson_to_json(value):
         return value
     if isinstance(value, dict):
         return dict(
-            (item_name.replace('->', '.'), transform_bson_to_json(item_value))
+            (
+                item_name.replace('->', '.'),
+                transform_bson_to_json(item_value),
+                )
             for item_name, item_value in value.iteritems()
             )
     if isinstance(value, list):
@@ -82,7 +85,10 @@ def transform_json_to_bson(value):
         return value
     if isinstance(value, dict):
         return dict(
-            (item_name.replace('.', '->'), transform_json_to_bson(item_value))
+            (
+                item_name.replace('.', '->'),
+                transform_json_to_bson(item_value),
+                )
             for item_name, item_value in value.iteritems()
             )
     if isinstance(value, list):
