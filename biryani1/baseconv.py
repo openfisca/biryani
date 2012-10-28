@@ -2166,7 +2166,7 @@ def translate(conversions):
         else conversions[value])
 
 
-def uniform_mapping(key_converter, value_converter, constructor = dict, keep_none_keys = False,
+def uniform_mapping(key_converter, value_converter, constructor = dict, drop_none_keys = False,
         drop_none_values = False):
     """Return a converter that applies a unique converter to each key and another unique converter to each value of a
     mapping.
@@ -2180,9 +2180,9 @@ def uniform_mapping(key_converter, value_converter, constructor = dict, keep_non
     >>> uniform_mapping(cleanup_line, input_to_int)({})
     ({}, None)
     >>> uniform_mapping(cleanup_line, input_to_int)({None: u'42'})
-    ({}, None)
-    >>> uniform_mapping(cleanup_line, input_to_int, keep_none_keys = True)({None: u'42'})
     ({None: 42}, None)
+    >>> uniform_mapping(cleanup_line, input_to_int, drop_none_keys = True)({None: u'42'})
+    ({}, None)
     >>> uniform_mapping(cleanup_line, input_to_int)(None)
     (None, None)
     """
@@ -2197,7 +2197,7 @@ def uniform_mapping(key_converter, value_converter, constructor = dict, keep_non
             key, error = key_converter(key, state = state)
             if error is not None:
                 errors[key] = error
-            if key is None and not keep_none_keys:
+            if key is None and drop_none_keys:
                 continue
             value, error = value_converter(value, state = state)
             if value is not None or not drop_none_values:

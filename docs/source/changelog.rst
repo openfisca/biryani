@@ -32,6 +32,9 @@ Remove implicit actions from converters
 
   * :func:`biryani.baseconv.uniform_sequence`
 
+* Replace parameter ``keep_none_keys`` with inverse parameter ``drop_none_keys`` in
+  :func:`biryani.baseconv.uniform_mapping`.
+
 * Replace parameter ``keep_none_values`` with inverse parameter ``drop_none_values`` in:
 
   * :func:`biryani.baseconv.struct`
