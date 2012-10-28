@@ -454,7 +454,7 @@ Let's combine everything in a new version of `validate_form`:
 ...         email = conv.input_to_email,
 ...         tags = conv.pipe(
 ...             conv.function(lambda tags: u','.join(tags).split(u',')),
-...             conv.uniform_sequence(conv.input_to_slug, constructor = set),
+...             conv.uniform_sequence(conv.input_to_slug, constructor = set, drop_none_items = True),
 ...             conv.function(sorted),
 ...             ),
 ...         ))(inputs)

@@ -599,7 +599,7 @@ def input_to_url_name(value, state = None):
     return value or None, None
 
 
-def item_or_sequence(converter, constructor = list, keep_none_items = False):
+def item_or_sequence(converter, constructor = list, drop_none_items = False):
     """Return a converter that accepts either an item or a sequence of items and applies a converter to them.
 
     >>> item_or_sequence(input_to_int)(u'42')
@@ -610,15 +610,15 @@ def item_or_sequence(converter, constructor = list, keep_none_items = False):
     ([42, 43], None)
     >>> item_or_sequence(input_to_int)([u'42', u'43', u'Hello world!'])
     ([42, 43, u'Hello world!'], {2: u'Value must be an integer'})
-    >>> item_or_sequence(input_to_int)([u'42', None, u'43'])
-    ([42, 43], None)
     >>> item_or_sequence(input_to_int)([None, None])
-    ([], None)
-    >>> item_or_sequence(input_to_int, keep_none_items = True)([None, None])
     ([None, None], None)
-    >>> item_or_sequence(input_to_int, keep_none_items = True)([u'42', None, u'43'])
+    >>> item_or_sequence(input_to_int, drop_none_items = True)([None, None])
+    ([], None)
+    >>> item_or_sequence(input_to_int)([u'42', None, u'43'])
     ([42, None, 43], None)
-    >>> item_or_sequence(input_to_int, keep_none_items = True)([u'42', u'43', u'Hello world!'])
+    >>> item_or_sequence(input_to_int, drop_none_items = True)([u'42', None, u'43'])
+    ([42, 43], None)
+    >>> item_or_sequence(input_to_int)([u'42', u'43', u'Hello world!'])
     ([42, 43, u'Hello world!'], {2: u'Value must be an integer'})
     >>> item_or_sequence(input_to_int, constructor = set)(set([u'42', u'43']))
     (set([42, 43]), None)
@@ -626,7 +626,7 @@ def item_or_sequence(converter, constructor = list, keep_none_items = False):
     return condition(
         test_isinstance(constructor),
         pipe(
-            uniform_sequence(converter, constructor = constructor, keep_none_items = keep_none_items),
+            uniform_sequence(converter, constructor = constructor, drop_none_items = drop_none_items),
             extract_when_singleton,
             ),
         converter,
@@ -1860,7 +1860,7 @@ def switch(key_converter, converters, default = None, handle_none_value = False)
     >>> type_switcher(None)
     (None, None)
     >>> type_switcher([None])
-    ([], {0: u'Expression "None" doesn\\'t match any key'})
+    ([None], {0: u'Expression "None" doesn\\'t match any key'})
     """
     def switch_converter(value, state = None):
         if value is None and not handle_none_value:
@@ -2208,7 +2208,7 @@ def uniform_mapping(key_converter, value_converter, constructor = dict, drop_non
     return uniform_mapping_converter
 
 
-def uniform_sequence(converter, constructor = list, keep_none_items = False):
+def uniform_sequence(converter, constructor = list, drop_none_items = False):
     """Return a converter that applies the same converter to each value of a list.
 
     >>> uniform_sequence(input_to_int)([u'42'])
@@ -2217,15 +2217,15 @@ def uniform_sequence(converter, constructor = list, keep_none_items = False):
     ([42, 43], None)
     >>> uniform_sequence(input_to_int)([u'42', u'43', u'Hello world!'])
     ([42, 43, u'Hello world!'], {2: u'Value must be an integer'})
-    >>> uniform_sequence(input_to_int)([u'42', None, u'43'])
-    ([42, 43], None)
     >>> uniform_sequence(input_to_int)([None, None])
-    ([], None)
-    >>> uniform_sequence(input_to_int, keep_none_items = True)([None, None])
     ([None, None], None)
-    >>> uniform_sequence(input_to_int, keep_none_items = True)([u'42', None, u'43'])
+    >>> uniform_sequence(input_to_int, drop_none_items = True)([None, None])
+    ([], None)
+    >>> uniform_sequence(input_to_int)([u'42', None, u'43'])
     ([42, None, 43], None)
-    >>> uniform_sequence(input_to_int, keep_none_items = True)([u'42', u'43', u'Hello world!'])
+    >>> uniform_sequence(input_to_int, drop_none_items = True)([u'42', None, u'43'])
+    ([42, 43], None)
+    >>> uniform_sequence(input_to_int)([u'42', u'43', u'Hello world!'])
     ([42, 43, u'Hello world!'], {2: u'Value must be an integer'})
     >>> uniform_sequence(input_to_int, constructor = set)(set([u'42', u'43']))
     (set([42, 43]), None)
@@ -2239,7 +2239,7 @@ def uniform_sequence(converter, constructor = list, keep_none_items = False):
         converted_values = []
         for i, value in enumerate(values):
             value, error = converter(value, state = state)
-            if keep_none_items or value is not None:
+            if not drop_none_items or value is not None:
                 converted_values.append(value)
             if error is not None:
                 errors[i] = error
