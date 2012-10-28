@@ -870,14 +870,14 @@ def merge(*converters):
     >>> abc_converter(dict(a = u'1', b = u'2', c = u'john@doe.name'))
     ({'a': 1, 'c': u'john@doe.name', 'b': 2.0}, None)
     >>> abc_converter(dict(a = u'1'))
-    ({'a': 1}, None)
+    ({'a': 1, 'c': None, 'b': None}, None)
     >>> abc_converter(dict(c = u'john@doe.name'))
-    ({'c': u'john@doe.name'}, None)
+    ({'a': None, 'c': u'john@doe.name', 'b': None}, None)
     >>> abc_converter(dict(a = u'a', b = u'b', c = u'1'))
     ({'a': u'a', 'c': u'1', 'b': u'b'}, {'a': u'Value must be an integer', \
 'c': u'An email must contain exactly one "@"', 'b': u'Value must be a float'})
     >>> abc_converter({})
-    ({}, None)
+    ({'a': None, 'c': None, 'b': None}, None)
     >>> abc_converter(None)
     (None, None)
     """
@@ -1361,10 +1361,10 @@ def str_to_url_path_and_query(value, state = None):
     return unicode(urlparse.urlunsplit(split_url)), None
 
 
-def struct(converters, constructor = None, default = None, keep_none_values = False, skip_missing_items = False):
+def struct(converters, constructor = None, default = None, drop_none_values = False, skip_missing_items = False):
     """Return a converter that maps a collection of converters to a collection (ie dict, list, set, etc) of values.
 
-    .. note:: Parameters ``keep_none_values`` & ``skip_missing_items`` are not used for sequences.
+    .. note:: Parameters ``drop_none_values`` & ``skip_missing_items`` are not used for sequences.
 
     Usage to convert a mapping (ie dict, etc):
 
@@ -1377,11 +1377,11 @@ def struct(converters, constructor = None, default = None, keep_none_values = Fa
     >>> strict_converter(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
     ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', email = u'john@doe.name'))
-    ({'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    ({'age': None, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', age = None, email = u'john@doe.name'))
-    ({'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    ({'age': None, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', age = u'72', phone = u'   +33 9 12 34 56 78   '))
-    ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
+    ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'email': None, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
     >>> non_strict_converter = struct(
     ...     dict(
     ...         name = pipe(cleanup_line, not_none),
@@ -1394,7 +1394,7 @@ def struct(converters, constructor = None, default = None, keep_none_values = Fa
     >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
     ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> non_strict_converter(dict(name = u'John Doe', email = u'john@doe.name'))
-    ({'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    ({'age': None, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'john@doe.name',
     ...     phone = u'   +33 9 12 34 56 78   '))
     ({'phone': u'+33 9 12 34 56 78', 'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
@@ -1405,6 +1405,7 @@ def struct(converters, constructor = None, default = None, keep_none_values = Fa
     ...         email = input_to_email,
     ...         ),
     ...     default = cleanup_line,
+    ...     drop_none_values = True,
     ...     )(dict(name = u'   ', email = None))
     ({}, None)
     >>> struct(
@@ -1414,7 +1415,6 @@ def struct(converters, constructor = None, default = None, keep_none_values = Fa
     ...         email = input_to_email,
     ...         ),
     ...     default = cleanup_line,
-    ...     keep_none_values = True,
     ...     )(dict(name = u'   ', email = None))
     ({'age': None, 'email': None, 'name': None}, None)
     >>> struct(
@@ -1424,7 +1424,6 @@ def struct(converters, constructor = None, default = None, keep_none_values = Fa
     ...         email = input_to_email,
     ...         ),
     ...     default = cleanup_line,
-    ...     keep_none_values = True,
     ...     skip_missing_items = True,
     ...     )(dict(name = u'   ', email = None))
     ({'email': None, 'name': None}, None)
@@ -1519,13 +1518,13 @@ def struct(converters, constructor = None, default = None, keep_none_values = Fa
 
     if isinstance(converters, collections.Mapping):
         return structured_mapping(converters, constructor = constructor, default = default,
-            keep_none_values = keep_none_values, skip_missing_items = skip_missing_items)
+            drop_none_values = drop_none_values, skip_missing_items = skip_missing_items)
     assert isinstance(converters, collections.Sequence), \
         'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
     return structured_sequence(converters, constructor = constructor, default = default)
 
 
-def structured_mapping(converters, constructor = None, default = None, keep_none_values = False,
+def structured_mapping(converters, constructor = None, default = None, drop_none_values = False,
         skip_missing_items = False):
     """Return a converter that maps a mapping of converters to a mapping (ie dict, etc) of values.
 
@@ -1540,11 +1539,11 @@ def structured_mapping(converters, constructor = None, default = None, keep_none
     >>> strict_converter(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
     ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', email = u'john@doe.name'))
-    ({'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    ({'age': None, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', age = None, email = u'john@doe.name'))
-    ({'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    ({'age': None, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', age = u'72', phone = u'   +33 9 12 34 56 78   '))
-    ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
+    ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'email': None, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
     >>> non_strict_converter = structured_mapping(
     ...     dict(
     ...         name = pipe(cleanup_line, not_none),
@@ -1557,7 +1556,7 @@ def structured_mapping(converters, constructor = None, default = None, keep_none
     >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
     ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> non_strict_converter(dict(name = u'John Doe', email = u'john@doe.name'))
-    ({'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    ({'age': None, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'john@doe.name',
     ...     phone = u'   +33 9 12 34 56 78   '))
     ({'phone': u'+33 9 12 34 56 78', 'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
@@ -1568,6 +1567,7 @@ def structured_mapping(converters, constructor = None, default = None, keep_none
     ...         email = input_to_email,
     ...         ),
     ...     default = cleanup_line,
+    ...     drop_none_values = True,
     ...     )(dict(name = u'   ', email = None))
     ({}, None)
     >>> structured_mapping(
@@ -1577,7 +1577,6 @@ def structured_mapping(converters, constructor = None, default = None, keep_none
     ...         email = input_to_email,
     ...         ),
     ...     default = cleanup_line,
-    ...     keep_none_values = True,
     ...     )(dict(name = u'   ', email = None))
     ({'age': None, 'email': None, 'name': None}, None)
     >>> structured_mapping(
@@ -1587,7 +1586,6 @@ def structured_mapping(converters, constructor = None, default = None, keep_none
     ...         email = input_to_email,
     ...         ),
     ...     default = cleanup_line,
-    ...     keep_none_values = True,
     ...     skip_missing_items = True,
     ...     )(dict(name = u'   ', email = None))
     ({'email': None, 'name': None}, None)
@@ -1644,7 +1642,7 @@ def structured_mapping(converters, constructor = None, default = None, keep_none
             if skip_missing_items and name not in values:
                 continue
             value, error = converter(values.get(name), state = state)
-            if value is not None or keep_none_values:
+            if value is not None or not drop_none_values:
                 converted_values[name] = value
             if error is not None:
                 errors[name] = error
@@ -2169,7 +2167,7 @@ def translate(conversions):
 
 
 def uniform_mapping(key_converter, value_converter, constructor = dict, keep_none_keys = False,
-        keep_none_values = False):
+        drop_none_values = False):
     """Return a converter that applies a unique converter to each key and another unique converter to each value of a
     mapping.
 
@@ -2202,7 +2200,7 @@ def uniform_mapping(key_converter, value_converter, constructor = dict, keep_non
             if key is None and not keep_none_keys:
                 continue
             value, error = value_converter(value, state = state)
-            if value is not None or keep_none_values:
+            if value is not None or not drop_none_values:
                 converted_values[key] = value
             if error is not None:
                 errors[key] = error

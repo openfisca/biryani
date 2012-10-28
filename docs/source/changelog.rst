@@ -10,7 +10,11 @@ Next Release (Biryani1 1.0)
 
 * :func:`biryani1.custom_conv` now accepts modules instead of modules names.
 
-* Since explicit is better than implicit, empty collections are no more replaced with ``None`` and parameter ``keep_empty`` is removed from:
+
+Remove implicit actions from converters
+---------------------------------------
+
+* Empty collections are no more replaced with ``None`` and parameter ``keep_empty`` is removed from:
 
   * :func:`biryani.baseconv.new_mapping`
 
@@ -27,6 +31,14 @@ Next Release (Biryani1 1.0)
   * :func:`biryani.baseconv.uniform_mapping`
 
   * :func:`biryani.baseconv.uniform_sequence`
+
+* Replace parameter ``keep_none_values`` with inverse parameter ``drop_none_values`` in:
+
+  * :func:`biryani.baseconv.struct`
+
+  * :func:`biryani.baseconv.structured_mapping`
+
+  * :func:`biryani.baseconv.uniform_mapping`
 
 
 Biryani 0.9

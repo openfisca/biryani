@@ -154,7 +154,7 @@ Using the converter :func:`biryani1.baseconv.struct`, the fonction can be simpli
 >>> validate_form(req5.POST)
 ({'username': u'John Doe', 'email': u'john.doe.name'}, {'email': u'An email must contain exactly one "@"'})
 >>> validate_form(req6.POST)
-({'email': u'john.doe.name'}, {'username': u'Missing value', 'email': u'An email must contain exactly one "@"'})
+({'username': None, 'email': u'john.doe.name'}, {'username': u'Missing value', 'email': u'An email must contain exactly one "@"'})
 
 This form validator is slightly different from the previous one, because it doesn't accept unexpected parameters:
 
@@ -221,13 +221,13 @@ Let's add it to our function:
 ...
 >>> req8 = webob.Request.blank('/', POST = 'username=   John Doe&password=secret&password=secret')
 >>> validate_form(req8.POST)
-({'username': u'John Doe', 'password': u'secret'}, None)
+({'username': u'John Doe', 'password': u'secret', 'email': None}, None)
 >>> req1 = webob.Request.blank('/', POST = 'username=   John Doe&password=secret&password=bad')
 >>> validate_form(req1.POST)
-({'username': u'John Doe', 'password': [u'secret', u'bad']}, {'password': u'Password mismatch'})
+({'username': u'John Doe', 'password': [u'secret', u'bad'], 'email': None}, {'password': u'Password mismatch'})
 >>> req9 = webob.Request.blank('/', POST = 'username=   John Doe&password=secret')
 >>> validate_form(req9.POST)
-({'username': u'John Doe', 'password': [u'secret']}, {'password': u'Password mismatch'})
+({'username': u'John Doe', 'password': [u'secret'], 'email': None}, {'password': u'Password mismatch'})
 
 In *Biryani*, there is no filter that checks that there is two passwords and that they are equal.
 But we can easily write one using :func:`biryani1.baseconv.test`:
@@ -307,11 +307,11 @@ Let's combine `test_passwords` and `extract_first_item` to rewrite our `validate
 ...         ))(inputs)
 ...
 >>> validate_form(req8.POST)
-({'username': u'John Doe', 'password': u'secret'}, None)
+({'username': u'John Doe', 'password': u'secret', 'email': None}, None)
 >>> validate_form(req1.POST)
-({'username': u'John Doe', 'password': [u'secret', u'bad']}, {'password': u'Password mismatch'})
+({'username': u'John Doe', 'password': [u'secret', u'bad'], 'email': None}, {'password': u'Password mismatch'})
 >>> validate_form(req9.POST)
-({'username': u'John Doe', 'password': [u'secret']}, {'password': u'Password mismatch'})
+({'username': u'John Doe', 'password': [u'secret'], 'email': None}, {'password': u'Password mismatch'})
 
 
 Adding complexity
@@ -408,7 +408,7 @@ Now use this function in `validate_form`:
 ...
 >>> req10 = webob.Request.blank('/', POST = 'username=   John Doe&tag=friend&tag=user,ADMIN&tag=&tag=customer, friend')
 >>> validate_form(req10.POST)
-({'username': u'John Doe', 'tags': [u'admin', u'customer', u'friend', u'user']}, None)
+({'username': u'John Doe', 'password': None, 'email': None, 'tags': [u'admin', u'customer', u'friend', u'user']}, None)
 
 
 The end
@@ -429,8 +429,8 @@ Our form validator works well, but let's rewrite the tags converter in a more "b
 
     conv.uniform_sequence(conv.cleanup_str, constructor = set)
 
-* We can make a slight improvement by converting each tag to a slug, using :func:`biryani1.baseconv.input_to_slug` to remove
-  diacritical marks, etc::
+* We can make a slight improvement by converting each tag to a slug, using :func:`biryani1.baseconv.input_to_slug` to
+  remove diacritical marks, etc::
 
     conv.uniform_sequence(conv.input_to_slug, constructor = set)
 
@@ -460,10 +460,10 @@ Let's combine everything in a new version of `validate_form`:
 ...         ))(inputs)
 ...
 >>> validate_form(req10.POST)
-({'username': u'John Doe', 'tags': [u'admin', u'customer', u'friend', u'user']}, None)
+({'username': u'John Doe', 'password': None, 'email': None, 'tags': [u'admin', u'customer', u'friend', u'user']}, None)
 >>> req11 = webob.Request.blank('/', POST = 'username=Jean Dupont&tag=Rêveur, Œil de Lynx&tag=COLLÈGUE')
 >>> validate_form(req11.POST)
-({'username': u'Jean Dupont', 'tags': [u'collegue', u'oeil-de-lynx', u'reveur']}, None)
+({'username': u'Jean Dupont', 'password': None, 'email': None, 'tags': [u'collegue', u'oeil-de-lynx', u'reveur']}, None)
 
 Our form converter is now completed.
 

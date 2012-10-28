@@ -195,7 +195,7 @@ Use the generalized function to convert a dictionary containing both a latitude 
 >>> dict_to_lat_long(dict(latitude = '-12.34', longitude = u"45,6"))
 ({'latitude': -12.34, 'longitude': u'45,6'}, {'longitude': u'Value must be a float'})
 >>> dict_to_lat_long(dict(latitude = None, longitude = ''))
-({}, {'latitude': u'Missing value', 'longitude': u'Missing value'})
+({'latitude': None, 'longitude': None}, {'latitude': u'Missing value', 'longitude': u'Missing value'})
 >>> dict_to_lat_long(None)
 (None, None)
 

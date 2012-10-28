@@ -595,7 +595,6 @@ _3cYrFHM7X640lLd_QoUKw'
                         ),
                     ),
                 # default = None,  # For security reasons a header can only contain known attributes.
-                keep_none_values = True,
                 ),
             not_none,
             )(encoded_header, state = state)

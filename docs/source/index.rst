@@ -80,7 +80,7 @@ A sample validator for a web form containing the following fields:
 ...     'email': u'John@DOE.name',
 ...     })
 >>> result
-{'password': [u'secret', u'other secret'], 'email': u'john@doe.name'}
+{'username': None, 'password': [u'secret', u'other secret'], 'email': u'john@doe.name'}
 >>> errors
 {'username': u'Missing value', 'password': u'Password mismatch'}
 
