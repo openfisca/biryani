@@ -4,7 +4,7 @@
 # Biryani -- A conversion and validation toolbox
 # By: Emmanuel Raviart <eraviart@easter-eggs.com>
 #
-# Copyright (C) 2009, 2010, 2011 Easter-eggs
+# Copyright (C) 2009, 2010, 2011, 2012 Easter-eggs
 # http://packages.python.org/Biryani1/
 #
 # This file is part of Biryani.
