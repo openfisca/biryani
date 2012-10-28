@@ -10,6 +10,24 @@ Next Release (Biryani1 1.0)
 
 * :func:`biryani1.custom_conv` now accepts modules instead of modules names.
 
+* Since explicit is better than implicit, empty collections are no more replaced with ``None`` and parameter ``keep_empty`` is removed from:
+
+  * :func:`biryani.baseconv.new_mapping`
+
+  * :func:`biryani.baseconv.new_sequence`
+
+  * :func:`biryani.baseconv.new_struct`
+
+  * :func:`biryani.baseconv.struct`
+
+  * :func:`biryani.baseconv.structured_mapping`
+
+  * :func:`biryani.baseconv.structured_sequence`
+
+  * :func:`biryani.baseconv.uniform_mapping`
+
+  * :func:`biryani.baseconv.uniform_sequence`
+
 
 Biryani 0.9
 ===========

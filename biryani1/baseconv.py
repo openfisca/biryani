@@ -613,7 +613,7 @@ def item_or_sequence(converter, constructor = list, keep_none_items = False):
     >>> item_or_sequence(input_to_int)([u'42', None, u'43'])
     ([42, 43], None)
     >>> item_or_sequence(input_to_int)([None, None])
-    (None, None)
+    ([], None)
     >>> item_or_sequence(input_to_int, keep_none_items = True)([None, None])
     ([None, None], None)
     >>> item_or_sequence(input_to_int, keep_none_items = True)([u'42', None, u'43'])
@@ -877,7 +877,7 @@ def merge(*converters):
     ({'a': u'a', 'c': u'1', 'b': u'b'}, {'a': u'Value must be an integer', \
 'c': u'An email must contain exactly one "@"', 'b': u'Value must be a float'})
     >>> abc_converter({})
-    (None, None)
+    ({}, None)
     >>> abc_converter(None)
     (None, None)
     """
@@ -906,14 +906,14 @@ def merge(*converters):
     return merge_converter
 
 
-def new_mapping(converters, constructor = None, keep_empty = False):
+def new_mapping(converters, constructor = None):
     """Return a converter that constructs a mapping (ie dict, etc) from any kind of value.
 
     .. note:: This converter should not be used directly. Use :func:`new_struct` instead.
 
     .. note:: When input value has the same structure, converter :func:`struct` should be used instead.
 
-    >>> def convert_list_to_dict(constructor = None, keep_empty = False):
+    >>> def convert_list_to_dict(constructor = None):
     ...     return new_mapping(
     ...         dict(
     ...             name = get(0),
@@ -921,7 +921,6 @@ def new_mapping(converters, constructor = None, keep_empty = False):
     ...             email = pipe(get(2), input_to_email),
     ...             ),
     ...         constructor = constructor,
-    ...         keep_empty = keep_empty,
     ...         )
     >>> convert_list_to_dict()([u'John Doe', u'72', u'john@doe.name'])
     ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
@@ -930,8 +929,6 @@ def new_mapping(converters, constructor = None, keep_empty = False):
     >>> convert_list_to_dict()([u'John Doe', u'72', None])
     ({'age': 72, 'name': u'John Doe'}, None)
     >>> convert_list_to_dict()([None, u' ', None])
-    (None, None)
-    >>> convert_list_to_dict(keep_empty = True)([None, u' ', None])
     ({}, None)
     >>> convert_list_to_dict()(None)
     (None, None)
@@ -975,22 +972,18 @@ def new_mapping(converters, constructor = None, keep_empty = False):
                 converted_values[name] = converted_value
             if error is not None:
                 errors[name] = error
-        if keep_empty or converted_values:
-            converted_values = constructor(converted_values)
-        else:
-            converted_values = None
-        return converted_values, errors or None
+        return constructor(converted_values), errors or None
     return new_mapping_converter
 
 
-def new_sequence(converters, constructor = None, keep_empty = False):
+def new_sequence(converters, constructor = None):
     """Return a converter that constructs a sequence (ie list, tuple, etc) from any kind of value.
 
     .. note:: This converter should not be used directly. Use :func:`new_struct` instead.
 
     .. note:: When input value has the same structure, converter :func:`struct` should be used instead.
 
-    >>> def convert_dict_to_list(constructor = None, keep_empty = False):
+    >>> def convert_dict_to_list(constructor = None):
     ...     return new_sequence(
     ...         [
     ...             get('name', default = None),
@@ -998,7 +991,6 @@ def new_sequence(converters, constructor = None, keep_empty = False):
     ...             pipe(get('email', default = None), input_to_email),
     ...             ],
     ...         constructor = constructor,
-    ...         keep_empty = keep_empty,
     ...         )
     >>> convert_dict_to_list()({'age': u'72', 'email': u'john@doe.name', 'name': u'John Doe'})
     ([u'John Doe', 72, u'john@doe.name'], None)
@@ -1007,8 +999,6 @@ def new_sequence(converters, constructor = None, keep_empty = False):
     >>> convert_dict_to_list()({'email': u'john@doe.name', 'name': u'John Doe'})
     ([u'John Doe', None, u'john@doe.name'], None)
     >>> convert_dict_to_list()({})
-    (None, None)
-    >>> convert_dict_to_list(keep_empty = True)({})
     ([None, None, None], None)
     >>> convert_dict_to_list()(None)
     (None, None)
@@ -1054,19 +1044,18 @@ def new_sequence(converters, constructor = None, keep_empty = False):
             converted_values.append(converted_value)
             if error is not None:
                 errors[i] = error
-        converted_values = constructor(converted_values) if not is_empty or keep_empty else None
-        return converted_values, errors or None
+        return constructor(converted_values), errors or None
     return new_sequence_converter
 
 
-def new_struct(converters, constructor = None, keep_empty = False):
+def new_struct(converters, constructor = None):
     """Return a converter that constructs a collection (ie dict, list, set, etc) from any kind of value.
 
     .. note:: When input value has the same structure, converter :func:`struct` should be used instead.
 
     Usage to create a mapping (ie dict, etc):
 
-    >>> def convert_list_to_dict(constructor = None, keep_empty = False):
+    >>> def convert_list_to_dict(constructor = None):
     ...     return new_struct(
     ...         dict(
     ...             name = get(0),
@@ -1074,7 +1063,6 @@ def new_struct(converters, constructor = None, keep_empty = False):
     ...             email = pipe(get(2), input_to_email),
     ...             ),
     ...         constructor = constructor,
-    ...         keep_empty = keep_empty,
     ...         )
     >>> convert_list_to_dict()([u'John Doe', u'72', u'john@doe.name'])
     ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
@@ -1083,8 +1071,6 @@ def new_struct(converters, constructor = None, keep_empty = False):
     >>> convert_list_to_dict()([u'John Doe', u'72', None])
     ({'age': 72, 'name': u'John Doe'}, None)
     >>> convert_list_to_dict()([None, u' ', None])
-    (None, None)
-    >>> convert_list_to_dict(keep_empty = True)([None, u' ', None])
     ({}, None)
     >>> convert_list_to_dict()(None)
     (None, None)
@@ -1109,7 +1095,7 @@ def new_struct(converters, constructor = None, keep_empty = False):
 
     Usage to create a sequence (ie list, tuple, etc) or a set:
 
-    >>> def convert_dict_to_list(constructor = None, keep_empty = False):
+    >>> def convert_dict_to_list(constructor = None):
     ...     return new_struct(
     ...         [
     ...             get('name', default = None),
@@ -1117,7 +1103,6 @@ def new_struct(converters, constructor = None, keep_empty = False):
     ...             pipe(get('email', default = None), input_to_email),
     ...             ],
     ...         constructor = constructor,
-    ...         keep_empty = keep_empty,
     ...         )
     >>> convert_dict_to_list()({'age': u'72', 'email': u'john@doe.name', 'name': u'John Doe'})
     ([u'John Doe', 72, u'john@doe.name'], None)
@@ -1126,8 +1111,6 @@ def new_struct(converters, constructor = None, keep_empty = False):
     >>> convert_dict_to_list()({'email': u'john@doe.name', 'name': u'John Doe'})
     ([u'John Doe', None, u'john@doe.name'], None)
     >>> convert_dict_to_list()({})
-    (None, None)
-    >>> convert_dict_to_list(keep_empty = True)({})
     ([None, None, None], None)
     >>> convert_dict_to_list()(None)
     (None, None)
@@ -1153,10 +1136,10 @@ def new_struct(converters, constructor = None, keep_empty = False):
     import collections
 
     if isinstance(converters, collections.Mapping):
-        return new_mapping(converters, constructor = constructor, keep_empty = keep_empty)
+        return new_mapping(converters, constructor = constructor)
     assert isinstance(converters, collections.Sequence), \
         'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
-    return new_sequence(converters, constructor = constructor, keep_empty = keep_empty)
+    return new_sequence(converters, constructor = constructor)
 
 
 def noop(value, state = None):
@@ -1378,8 +1361,7 @@ def str_to_url_path_and_query(value, state = None):
     return unicode(urlparse.urlunsplit(split_url)), None
 
 
-def struct(converters, constructor = None, default = None, keep_empty = False, keep_none_values = False,
-        skip_missing_items = False):
+def struct(converters, constructor = None, default = None, keep_none_values = False, skip_missing_items = False):
     """Return a converter that maps a collection of converters to a collection (ie dict, list, set, etc) of values.
 
     .. note:: Parameters ``keep_none_values`` & ``skip_missing_items`` are not used for sequences.
@@ -1423,16 +1405,6 @@ def struct(converters, constructor = None, default = None, keep_empty = False, k
     ...         email = input_to_email,
     ...         ),
     ...     default = cleanup_line,
-    ...     )(dict(name = u'   ', email = None))
-    (None, None)
-    >>> struct(
-    ...     dict(
-    ...         name = cleanup_line,
-    ...         age = input_to_int,
-    ...         email = input_to_email,
-    ...         ),
-    ...     default = cleanup_line,
-    ...     keep_empty = True,
     ...     )(dict(name = u'   ', email = None))
     ({}, None)
     >>> struct(
@@ -1547,14 +1519,13 @@ def struct(converters, constructor = None, default = None, keep_empty = False, k
 
     if isinstance(converters, collections.Mapping):
         return structured_mapping(converters, constructor = constructor, default = default,
-            keep_empty = keep_empty, keep_none_values = keep_none_values,
-            skip_missing_items = skip_missing_items)
+            keep_none_values = keep_none_values, skip_missing_items = skip_missing_items)
     assert isinstance(converters, collections.Sequence), \
         'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
-    return structured_sequence(converters, constructor = constructor, default = default, keep_empty = keep_empty)
+    return structured_sequence(converters, constructor = constructor, default = default)
 
 
-def structured_mapping(converters, constructor = None, default = None, keep_empty = False, keep_none_values = False,
+def structured_mapping(converters, constructor = None, default = None, keep_none_values = False,
         skip_missing_items = False):
     """Return a converter that maps a mapping of converters to a mapping (ie dict, etc) of values.
 
@@ -1597,16 +1568,6 @@ def structured_mapping(converters, constructor = None, default = None, keep_empt
     ...         email = input_to_email,
     ...         ),
     ...     default = cleanup_line,
-    ...     )(dict(name = u'   ', email = None))
-    (None, None)
-    >>> structured_mapping(
-    ...     dict(
-    ...         name = cleanup_line,
-    ...         age = input_to_int,
-    ...         email = input_to_email,
-    ...         ),
-    ...     default = cleanup_line,
-    ...     keep_empty = True,
     ...     )(dict(name = u'   ', email = None))
     ({}, None)
     >>> structured_mapping(
@@ -1687,15 +1648,11 @@ def structured_mapping(converters, constructor = None, default = None, keep_empt
                 converted_values[name] = value
             if error is not None:
                 errors[name] = error
-        if keep_empty or converted_values:
-            converted_values = constructor(converted_values)
-        else:
-            converted_values = None
-        return converted_values, errors or None
+        return constructor(converted_values), errors or None
     return structured_mapping_converter
 
 
-def structured_sequence(converters, constructor = None, default = None, keep_empty = False):
+def structured_sequence(converters, constructor = None, default = None):
     """Return a converter that map a sequence of converters to a sequence of values.
 
     .. note:: This converter should not be used directly. Use :func:`struct` instead.
@@ -1780,17 +1737,13 @@ def structured_sequence(converters, constructor = None, default = None, keep_emp
         import itertools
         errors = {}
         converted_values = []
-        is_empty = True
         for i, (converter, value) in enumerate(itertools.izip_longest(
                 values_converter, itertools.islice(values, len(values_converter)))):
             value, error = converter(value, state = state)
-            if value is not None:
-                is_empty = False
             converted_values.append(value)
             if error is not None:
                 errors[i] = error
-        converted_values = constructor(converted_values) if not is_empty or keep_empty else None
-        return converted_values, errors or None
+        return constructor(converted_values), errors or None
     return structured_sequence_converter
 
 
@@ -1909,7 +1862,7 @@ def switch(key_converter, converters, default = None, handle_none_value = False)
     >>> type_switcher(None)
     (None, None)
     >>> type_switcher([None])
-    (None, {0: u'Expression "None" doesn\\'t match any key'})
+    ([], {0: u'Expression "None" doesn\\'t match any key'})
     """
     def switch_converter(value, state = None):
         if value is None and not handle_none_value:
@@ -2215,7 +2168,7 @@ def translate(conversions):
         else conversions[value])
 
 
-def uniform_mapping(key_converter, value_converter, constructor = dict, keep_empty = False, keep_none_keys = False,
+def uniform_mapping(key_converter, value_converter, constructor = dict, keep_none_keys = False,
         keep_none_values = False):
     """Return a converter that applies a unique converter to each key and another unique converter to each value of a
     mapping.
@@ -2227,11 +2180,9 @@ def uniform_mapping(key_converter, value_converter, constructor = dict, keep_emp
     >>> uniform_mapping(cleanup_line, pipe(test_isinstance(basestring), input_to_int))({u'a': u'1', u'b': u'2', 'c': 3})
     ({u'a': 1, 'c': 3, u'b': 2}, {'c': u"Value is not an instance of <type 'basestring'>"})
     >>> uniform_mapping(cleanup_line, input_to_int)({})
-    (None, None)
-    >>> uniform_mapping(cleanup_line, input_to_int, keep_empty = True)({})
     ({}, None)
     >>> uniform_mapping(cleanup_line, input_to_int)({None: u'42'})
-    (None, None)
+    ({}, None)
     >>> uniform_mapping(cleanup_line, input_to_int, keep_none_keys = True)({None: u'42'})
     ({None: 42}, None)
     >>> uniform_mapping(cleanup_line, input_to_int)(None)
@@ -2255,15 +2206,11 @@ def uniform_mapping(key_converter, value_converter, constructor = dict, keep_emp
                 converted_values[key] = value
             if error is not None:
                 errors[key] = error
-        if keep_empty or converted_values:
-            converted_values = constructor(converted_values)
-        else:
-            converted_values = None
-        return converted_values, errors or None
+        return constructor(converted_values), errors or None
     return uniform_mapping_converter
 
 
-def uniform_sequence(converter, constructor = list, keep_empty = False, keep_none_items = False):
+def uniform_sequence(converter, constructor = list, keep_none_items = False):
     """Return a converter that applies the same converter to each value of a list.
 
     >>> uniform_sequence(input_to_int)([u'42'])
@@ -2275,10 +2222,8 @@ def uniform_sequence(converter, constructor = list, keep_empty = False, keep_non
     >>> uniform_sequence(input_to_int)([u'42', None, u'43'])
     ([42, 43], None)
     >>> uniform_sequence(input_to_int)([None, None])
-    (None, None)
-    >>> uniform_sequence(input_to_int, keep_empty = True)([None, None])
     ([], None)
-    >>> uniform_sequence(input_to_int, keep_empty = True, keep_none_items = True)([None, None])
+    >>> uniform_sequence(input_to_int, keep_none_items = True)([None, None])
     ([None, None], None)
     >>> uniform_sequence(input_to_int, keep_none_items = True)([u'42', None, u'43'])
     ([42, None, 43], None)
@@ -2300,11 +2245,7 @@ def uniform_sequence(converter, constructor = list, keep_empty = False, keep_non
                 converted_values.append(value)
             if error is not None:
                 errors[i] = error
-        if keep_empty or converted_values:
-            converted_values = constructor(converted_values)
-        else:
-            converted_values = None
-        return converted_values, errors or None
+        return constructor(converted_values), errors or None
     return uniform_sequence_converter
 
 

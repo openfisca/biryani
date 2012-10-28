@@ -190,7 +190,6 @@ def decode_json_web_token_claims(decoded_token, state = None):
                     ),
                 ),
             default = noop,
-            keep_empty = True,
             ),
         )(decoded_token.get('payload'), state = state)
     if errors is not None:
