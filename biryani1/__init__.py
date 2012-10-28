@@ -5,7 +5,7 @@
 # By: Emmanuel Raviart <eraviart@easter-eggs.com>
 #
 # Copyright (C) 2009, 2010, 2011 Easter-eggs
-# http://packages.python.org/Biryani/
+# http://packages.python.org/Biryani1/
 #
 # This file is part of Biryani.
 #
@@ -22,7 +22,7 @@
 # limitations under the License.
 
 
-"""Biryani package
+"""Biryani1 package
 
 This root module is kept nearly empty to allow client applications to import only the converters they need, module by
 module.
@@ -37,15 +37,20 @@ class CustomConv(object):
     pass
 
 
-def custom_conv(*modules_path):
+def custom_conv(*modules):
     """Import given conversion modules and return a module-like object containing their aggregated content.
 
     How to use::
 
-        importy biryani
-        conv = biryani.custom_conv('biryani.baseconv', 'biryani.datetimeconv', 'name.of.an.external.module', ...)
+        importy biryani1
+        import biryani1.baseconv
+        import biryani1.datetimeconv
+        import any.custom.module
+        conv = biryani1.custom_conv(biryani1.baseconv, biryani1.datetimeconv, any.custom.module)
 
-    >>> conv = custom_conv('biryani.baseconv', 'biryani.datetimeconv')
+    >>> import biryani1.baseconv
+    >>> import biryani1.datetimeconv
+    >>> conv = custom_conv(biryani1.baseconv, biryani1.datetimeconv)
     >>> conv.input_to_int(u'42') # input_to_int is defined in baseconv module.
     (42, None)
     >>> conv.iso8601_input_to_date(u'1789-07-14') # iso8601_input_to_date is defined in datetimeconv module.
@@ -53,11 +58,7 @@ def custom_conv(*modules_path):
     """
 
     conv = CustomConv()
-    for module_path in modules_path:
-        module = __import__(module_path)
-        # Since __import__ returns a package instead of a module, walk to the imported module.
-        for module_name in module_path.split('.')[1:]:
-            module = getattr(module, module_name)
+    for module in modules:
         module_public_keys = getattr(module, '__all__', None)
         if module_public_keys is None:
             conv.__dict__.update(module.__dict__)

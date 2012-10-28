@@ -5,7 +5,7 @@
 # By: Emmanuel Raviart <eraviart@easter-eggs.com>
 #
 # Copyright (C) 2009, 2010, 2011 Easter-eggs
-# http://packages.python.org/Biryani/
+# http://packages.python.org/Biryani1/
 #
 # This file is part of Biryani.
 #
@@ -29,10 +29,10 @@
 """
 
 
-from .. import custom_conv
+from .. import baseconv, custom_conv, objectconv
 
 
-conv = custom_conv('biryani.baseconv', 'biryani.objectconv')
+conv = custom_conv(baseconv, objectconv)
 N_ = lambda message: message
 
 
@@ -108,7 +108,7 @@ def strip(chars = None):
     This converter is non-standard, because:
 
     * It is a simple one-liner.
-    * Most of the times, converters :func:`biryani.baseconv.cleanup_line` or :func:`biryani.baseconv.cleanup_text` are
+    * Most of the times, converters :func:`biryani1.baseconv.cleanup_line` or :func:`biryani1.baseconv.cleanup_text` are
       used instead.
 
     >>> strip()(u'   Hello world!   ')

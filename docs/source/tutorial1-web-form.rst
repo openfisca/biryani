@@ -40,9 +40,9 @@ First steps with *Biryani*
 ==========================
 
 *Biryani* is a Python package split into several modules, to allow you to ony import the converters you need for your
-application. The most frequently used converters are in package :mod:`biryani.baseconv`.
+application. The most frequently used converters are in package :mod:`biryani1.baseconv`.
 
->>> from biryani import baseconv as conv
+>>> from biryani1 import baseconv as conv
 
 First we need to cleanup username:
 
@@ -58,7 +58,7 @@ First we need to cleanup username:
 >>> validate_form(req1.POST)
 (u'John Doe', None)
 
-*Biryani* has a converter :func:`biryani.baseconv.cleanup_line` that just does what the above function do.
+*Biryani* has a converter :func:`biryani1.baseconv.cleanup_line` that just does what the above function do.
 So we can rewrite the `validate_form` function using it:
 
 >>> def validate_form(params):
@@ -88,7 +88,7 @@ Now, we need to ensure that submitted form always contains an username:
 >>> validate_form(req3.POST)
 (None, u'Missing value')
 
-*Biryani* has a filter :func:`biryani.baseconv.not_none` that checks for ``None`` values:
+*Biryani* has a filter :func:`biryani1.baseconv.not_none` that checks for ``None`` values:
 
 >>> def validate_form(params):
 ...     username, error = conv.cleanup_line(params.get('username'))
@@ -96,7 +96,7 @@ Now, we need to ensure that submitted form always contains an username:
 ...         username, error = conv.not_none(username)
 ...     return username, error
 
-The :func:`biryani.baseconv.pipe` allows to chain several converters. This simplifies the function:
+The :func:`biryani1.baseconv.pipe` allows to chain several converters. This simplifies the function:
 
 >>> def validate_form(params):
 ...     return conv.pipe(conv.cleanup_line, conv.not_none)(params.get('username'))
@@ -141,7 +141,7 @@ converted username & email, and a dictionary containing the errors (or ``None`` 
 >>> validate_form(req6.POST)
 ({'email': u'john.doe.name'}, {'username': u'Missing value', 'email': u'An email must contain exactly one "@"'})
 
-Using the converter :func:`biryani.baseconv.struct`, the fonction can be simplified to:
+Using the converter :func:`biryani1.baseconv.struct`, the fonction can be simplified to:
 
 >>> def validate_form(params):
 ...     return conv.struct(dict(
@@ -162,7 +162,7 @@ This form validator is slightly different from the previous one, because it does
 >>> validate_form(req7.POST)
 ({'username': u'John Doe', u'password': u'secret', 'email': u'john@doe.name'}, {u'password': u'Unexpected item'})
 
-If we want to drop unexpected parameters, we need to use the ``default`` option of the :func:`biryani.baseconv.struct`
+If we want to drop unexpected parameters, we need to use the ``default`` option of the :func:`biryani1.baseconv.struct`
 converter:
 
 >>> def validate_form(params):
@@ -230,7 +230,7 @@ Let's add it to our function:
 ({'username': u'John Doe', 'password': [u'secret']}, {'password': u'Password mismatch'})
 
 In *Biryani*, there is no filter that checks that there is two passwords and that they are equal.
-But we can easily write one using :func:`biryani.baseconv.test`:
+But we can easily write one using :func:`biryani1.baseconv.test`:
 
 >>> test_passwords = conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1])
 ...
@@ -261,7 +261,7 @@ But:
 >>> test_passwords([])
 ([], u'Password mismatch')
 
-So we add the :func:`biryani.baseconv.empty_to_none` converter to convert an empty list of password to ``None``:
+So we add the :func:`biryani1.baseconv.empty_to_none` converter to convert an empty list of password to ``None``:
 
 >>> test_passwords = conv.pipe(
 ...     conv.empty_to_none,
@@ -280,7 +280,7 @@ So we add the :func:`biryani.baseconv.empty_to_none` converter to convert an emp
 (None, None)
 
 Now, when the two passwords are the same we must extract the first one. There is no standard converter in *Biryani* to
-extract the first item of a list, but we can create it using :func:`biryani.baseconv.function`:
+extract the first item of a list, but we can create it using :func:`biryani1.baseconv.function`:
 
 >>> extract_first_item = conv.function(lambda items: items[0])
 ...
@@ -420,16 +420,16 @@ Our form validator works well, but let's rewrite the tags converter in a more "b
 
     conv.function(lambda tags: u','.join(tags).split(u','))
 
-* To simplify each tag in the generated list, we can use our good friend :func:`biryani.baseconv.cleanup_line` in
-  combination with :func:`biryani.baseconv.uniform_sequence` that will applies it to each item of the list::
+* To simplify each tag in the generated list, we can use our good friend :func:`biryani1.baseconv.cleanup_line` in
+  combination with :func:`biryani1.baseconv.uniform_sequence` that will applies it to each item of the list::
 
     conv.uniform_sequence(conv.cleanup_str)
 
-* :func:`biryani.baseconv.cleanup_line` as even an option that generates a set instead of a list::
+* :func:`biryani1.baseconv.cleanup_line` as even an option that generates a set instead of a list::
 
     conv.uniform_sequence(conv.cleanup_str, constructor = set)
 
-* We can make a slight improvement by converting each tag to a slug, using :func:`biryani.baseconv.input_to_slug` to remove
+* We can make a slight improvement by converting each tag to a slug, using :func:`biryani1.baseconv.input_to_slug` to remove
   diacritical marks, etc::
 
     conv.uniform_sequence(conv.input_to_slug, constructor = set)
@@ -468,5 +468,5 @@ Let's combine everything in a new version of `validate_form`:
 Our form converter is now completed.
 
 Hopefully, this tutorial has shown you, that *Biryani* is both useful, elegant and powerful, that it can be easily mixed
-with *non-Byriani* code and that it can be incrementally extended to cover your needs.
+with *non-Biryani* code and that it can be incrementally extended to cover your needs.
 

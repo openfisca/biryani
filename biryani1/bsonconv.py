@@ -5,7 +5,7 @@
 # By: Emmanuel Raviart <eraviart@easter-eggs.com>
 #
 # Copyright (C) 2009, 2010, 2011 Easter-eggs
-# http://packages.python.org/Biryani/
+# http://packages.python.org/Biryani1/
 #
 # This file is part of Biryani.
 #
@@ -133,14 +133,14 @@ json_to_bson = function(transform_json_to_bson)
 def object_id_to_str(value, state = None):
     """Convert a BSON ObjectId to unicode.
 
-    .. note:: To ensure that input value is an ObjectId, first use :func:`biryani.baseconv.test_isinstance`.
+    .. note:: To ensure that input value is an ObjectId, first use :func:`biryani1.baseconv.test_isinstance`.
 
     >>> from bson.objectid import ObjectId
     >>> object_id_to_str(ObjectId('4e333f53ff42e928000007d8'))
     (u'4e333f53ff42e928000007d8', None)
     >>> object_id_to_str(u'4e333f53ff42e928000007d8')
     (u'4e333f53ff42e928000007d8', None)
-    >>> from biryani import baseconv as conv
+    >>> from biryani1 import baseconv as conv
     >>> conv.pipe(conv.test_isinstance(ObjectId), object_id_to_str)(ObjectId('4e333f53ff42e928000007d8'))
     (u'4e333f53ff42e928000007d8', None)
     >>> conv.pipe(conv.test_isinstance(ObjectId), object_id_to_str)(u'4e333f53ff42e928000007d8')

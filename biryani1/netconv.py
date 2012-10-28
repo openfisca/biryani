@@ -5,7 +5,7 @@
 # By: Emmanuel Raviart <eraviart@easter-eggs.com>
 #
 # Copyright (C) 2009, 2010, 2011 Easter-eggs
-# http://packages.python.org/Biryani/
+# http://packages.python.org/Biryani1/
 #
 # This file is part of Biryani.
 #
@@ -24,7 +24,7 @@
 
 """Network Related Converters
 
-.. note:: Network converters are not in :mod:`biryani.baseconv`, because they use non-standard network libraries.
+.. note:: Network converters are not in :mod:`biryani1.baseconv`, because they use non-standard network libraries.
 """
 
 

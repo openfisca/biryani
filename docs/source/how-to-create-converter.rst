@@ -18,7 +18,7 @@ the :func:`biryan.baseconv.function` converter.
 
 Example of a converter that returns the length of a value:
 
->>> from biryani import baseconv as conv
+>>> from biryani1 import baseconv as conv
 ...
 >>> anything_to_len = conv.function(lambda value: len(value))
 ...
@@ -59,7 +59,7 @@ the ``handle_state`` flag.
 For example, here is a function that counts if there is "zero", "one" or "many" items in input value and returns the
 localized response.
 
->>> from biryani import states
+>>> from biryani1 import states
 ...
 >>> def zero_one_or_many(value, state = None):
 ...     if state is None:

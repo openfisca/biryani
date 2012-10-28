@@ -5,7 +5,7 @@
 # By: Emmanuel Raviart <eraviart@easter-eggs.com>
 #
 # Copyright (C) 2009, 2010, 2011 Easter-eggs
-# http://packages.python.org/Biryani/
+# http://packages.python.org/Biryani1/
 #
 # This file is part of Biryani.
 #
@@ -640,26 +640,26 @@ def make_str_to_url(add_prefix = u'http://', error_if_fragment = False, error_if
 
     .. note:: For a converter that doesn't require a clean string, see :func:`make_input_to_url`.
 
-    >>> make_str_to_url()(u'http://packages.python.org/Biryani/')
-    (u'http://packages.python.org/Biryani/', None)
-    >>> make_str_to_url(full = True)(u'packages.python.org/Biryani/')
-    (u'http://packages.python.org/Biryani/', None)
-    >>> make_str_to_url()(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html#tutorial', None)
-    >>> make_str_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
-    >>> make_str_to_url(remove_path = True)(u'http://packages.python.org/Biryani/presentation.html')
+    >>> make_str_to_url()(u'http://packages.python.org/Biryani1/')
+    (u'http://packages.python.org/Biryani1/', None)
+    >>> make_str_to_url(full = True)(u'packages.python.org/Biryani1/')
+    (u'http://packages.python.org/Biryani1/', None)
+    >>> make_str_to_url()(u'/Biryani1/presentation.html#tutorial')
+    (u'/Biryani1/presentation.html#tutorial', None)
+    >>> make_str_to_url(full = True)(u'/Biryani1/presentation.html#tutorial')
+    (u'/Biryani1/presentation.html#tutorial', u'URL must be complete')
+    >>> make_str_to_url(remove_path = True)(u'http://packages.python.org/Biryani1/presentation.html')
     (u'http://packages.python.org/', None)
-    >>> make_str_to_url(error_if_path = True)(u'http://packages.python.org/Biryani/presentation.html')
-    (u'http://packages.python.org/Biryani/presentation.html', u'URL must not contain a path')
-    >>> make_str_to_url(remove_query = True)(u'http://packages.python.org/Biryani/presentation.html?tuto=1')
-    (u'http://packages.python.org/Biryani/presentation.html', None)
-    >>> make_str_to_url(error_if_query = True)(u'http://packages.python.org/Biryani/presentation.html?tuto=1')
-    (u'http://packages.python.org/Biryani/presentation.html?tuto=1', u'URL must not contain a query')
-    >>> make_str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
-    (u'http://packages.python.org/Biryani/presentation.html', None)
-    >>> make_str_to_url(error_if_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tuto')
-    (u'http://packages.python.org/Biryani/presentation.html#tuto', u'URL must not contain a fragment')
+    >>> make_str_to_url(error_if_path = True)(u'http://packages.python.org/Biryani1/presentation.html')
+    (u'http://packages.python.org/Biryani1/presentation.html', u'URL must not contain a path')
+    >>> make_str_to_url(remove_query = True)(u'http://packages.python.org/Biryani1/presentation.html?tuto=1')
+    (u'http://packages.python.org/Biryani1/presentation.html', None)
+    >>> make_str_to_url(error_if_query = True)(u'http://packages.python.org/Biryani1/presentation.html?tuto=1')
+    (u'http://packages.python.org/Biryani1/presentation.html?tuto=1', u'URL must not contain a query')
+    >>> make_str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani1/presentation.html#tutorial')
+    (u'http://packages.python.org/Biryani1/presentation.html', None)
+    >>> make_str_to_url(error_if_fragment = True)(u'http://packages.python.org/Biryani1/presentation.html#tuto')
+    (u'http://packages.python.org/Biryani1/presentation.html#tuto', u'URL must not contain a fragment')
     >>> make_str_to_url(full = True)(u'[www.nordnet.fr/grandmix/]')
     (u'[www.nordnet.fr/grandmix/]', u'Invalid URL')
     >>> make_str_to_url(full = True)(u'http://[www.nordnet.fr/grandmix/]')
@@ -766,7 +766,7 @@ def make_input_to_normal_form(encoding = 'utf-8', separator = u' ', transform = 
     (u'hello world!', None)
     >>> make_input_to_normal_form(separator = u'_')(u'Hello world!')
     (u'hello_world!', None)
-    >>> from biryani import strings
+    >>> from biryani1 import strings
     >>> make_input_to_normal_form(separator = u' ', transform = strings.upper)(u'Hello world!')
     (u'HELLO WORLD!', None)
     >>> make_input_to_normal_form()(u'')
@@ -797,7 +797,7 @@ def make_input_to_slug(encoding = 'utf-8', separator = u'-', transform = strings
     (u'hello-world', None)
     >>> make_input_to_slug(separator = u' ')(u'Hello world!')
     (u'hello world', None)
-    >>> from biryani import strings
+    >>> from biryani1 import strings
     >>> make_input_to_slug(separator = u' ', transform = strings.upper)(u'Hello world!')
     (u'HELLO WORLD', None)
     >>> make_input_to_slug()(u'')
@@ -818,28 +818,28 @@ def make_input_to_url(add_prefix = u'http://', error_if_fragment = False, error_
         schemes = (u'http', u'https')):
     """Return a converter that converts an string to an URL.
 
-    >>> make_input_to_url()(u'http://packages.python.org/Biryani/')
-    (u'http://packages.python.org/Biryani/', None)
-    >>> make_input_to_url(full = True)(u'packages.python.org/Biryani/')
-    (u'http://packages.python.org/Biryani/', None)
-    >>> make_input_to_url()(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html#tutorial', None)
-    >>> make_input_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
-    >>> make_input_to_url(remove_path = True)(u'http://packages.python.org/Biryani/presentation.html')
+    >>> make_input_to_url()(u'http://packages.python.org/Biryani1/')
+    (u'http://packages.python.org/Biryani1/', None)
+    >>> make_input_to_url(full = True)(u'packages.python.org/Biryani1/')
+    (u'http://packages.python.org/Biryani1/', None)
+    >>> make_input_to_url()(u'/Biryani1/presentation.html#tutorial')
+    (u'/Biryani1/presentation.html#tutorial', None)
+    >>> make_input_to_url(full = True)(u'/Biryani1/presentation.html#tutorial')
+    (u'/Biryani1/presentation.html#tutorial', u'URL must be complete')
+    >>> make_input_to_url(remove_path = True)(u'http://packages.python.org/Biryani1/presentation.html')
     (u'http://packages.python.org/', None)
-    >>> make_input_to_url(error_if_path = True)(u'http://packages.python.org/Biryani/presentation.html')
-    (u'http://packages.python.org/Biryani/presentation.html', u'URL must not contain a path')
-    >>> make_input_to_url(remove_query = True)(u'http://packages.python.org/Biryani/presentation.html?tuto=1')
-    (u'http://packages.python.org/Biryani/presentation.html', None)
-    >>> make_input_to_url(error_if_query = True)(u'http://packages.python.org/Biryani/presentation.html?tuto=1')
-    (u'http://packages.python.org/Biryani/presentation.html?tuto=1', u'URL must not contain a query')
-    >>> make_input_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
-    (u'http://packages.python.org/Biryani/presentation.html', None)
-    >>> make_input_to_url(error_if_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
-    (u'http://packages.python.org/Biryani/presentation.html#tutorial', u'URL must not contain a fragment')
-    >>> make_input_to_url()(u'    http://packages.python.org/Biryani/   ')
-    (u'http://packages.python.org/Biryani/', None)
+    >>> make_input_to_url(error_if_path = True)(u'http://packages.python.org/Biryani1/presentation.html')
+    (u'http://packages.python.org/Biryani1/presentation.html', u'URL must not contain a path')
+    >>> make_input_to_url(remove_query = True)(u'http://packages.python.org/Biryani1/presentation.html?tuto=1')
+    (u'http://packages.python.org/Biryani1/presentation.html', None)
+    >>> make_input_to_url(error_if_query = True)(u'http://packages.python.org/Biryani1/presentation.html?tuto=1')
+    (u'http://packages.python.org/Biryani1/presentation.html?tuto=1', u'URL must not contain a query')
+    >>> make_input_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani1/presentation.html#tutorial')
+    (u'http://packages.python.org/Biryani1/presentation.html', None)
+    >>> make_input_to_url(error_if_fragment = True)(u'http://packages.python.org/Biryani1/presentation.html#tutorial')
+    (u'http://packages.python.org/Biryani1/presentation.html#tutorial', u'URL must not contain a fragment')
+    >>> make_input_to_url()(u'    http://packages.python.org/Biryani1/   ')
+    (u'http://packages.python.org/Biryani1/', None)
     """
     return pipe(
         cleanup_line,
@@ -1344,12 +1344,12 @@ def str_to_url_path_and_query(value, state = None):
 
     .. note:: For a converter that doesn't require a clean string, see :func:`input_to_url_path_and_query`.
 
-    >>> str_to_url_path_and_query(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html', None)
-    >>> str_to_url_path_and_query(u'/Biryani/search.html?q=pipe')
-    (u'/Biryani/search.html?q=pipe', None)
-    >>> str_to_url_path_and_query(u'http://packages.python.org/Biryani/search.html?q=pipe')
-    (u'http://packages.python.org/Biryani/search.html?q=pipe', u'URL must not be complete')
+    >>> str_to_url_path_and_query(u'/Biryani1/presentation.html#tutorial')
+    (u'/Biryani1/presentation.html', None)
+    >>> str_to_url_path_and_query(u'/Biryani1/search.html?q=pipe')
+    (u'/Biryani1/search.html?q=pipe', None)
+    >>> str_to_url_path_and_query(u'http://packages.python.org/Biryani1/search.html?q=pipe')
+    (u'http://packages.python.org/Biryani1/search.html?q=pipe', u'URL must not be complete')
     >>> str_to_url_path_and_query(u'[www.nordnet.fr/grandmix/]')
     (u'[www.nordnet.fr/grandmix/]', None)
     >>> print str_to_url_path_and_query(None)
@@ -1359,8 +1359,8 @@ def str_to_url_path_and_query(value, state = None):
     ...     make_str_to_url(),
     ...     function(lambda value: urlparse.urlunsplit([u'', u''] + list(urlparse.urlsplit(value))[2:])),
     ...     str_to_url_path_and_query,
-    ...     )(u'http://packages.python.org/Biryani/search.html?q=pipe')
-    (u'/Biryani/search.html?q=pipe', None)
+    ...     )(u'http://packages.python.org/Biryani1/search.html?q=pipe')
+    (u'/Biryani1/search.html?q=pipe', None)
     """
     if value is None:
         return value, None
@@ -2496,14 +2496,14 @@ input_to_slug = make_input_to_slug()
 input_to_url_path_and_query = pipe(cleanup_line, str_to_url_path_and_query)
 """Convert a string to the path and query of an URL.
 
-    >>> input_to_url_path_and_query(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html', None)
-    >>> input_to_url_path_and_query(u'/Biryani/search.html?q=pipe')
-    (u'/Biryani/search.html?q=pipe', None)
-    >>> input_to_url_path_and_query(u'   /Biryani/search.html?q=pipe   ')
-    (u'/Biryani/search.html?q=pipe', None)
-    >>> input_to_url_path_and_query(u'http://packages.python.org/Biryani/search.html?q=pipe')
-    (u'http://packages.python.org/Biryani/search.html?q=pipe', u'URL must not be complete')
+    >>> input_to_url_path_and_query(u'/Biryani1/presentation.html#tutorial')
+    (u'/Biryani1/presentation.html', None)
+    >>> input_to_url_path_and_query(u'/Biryani1/search.html?q=pipe')
+    (u'/Biryani1/search.html?q=pipe', None)
+    >>> input_to_url_path_and_query(u'   /Biryani1/search.html?q=pipe   ')
+    (u'/Biryani1/search.html?q=pipe', None)
+    >>> input_to_url_path_and_query(u'http://packages.python.org/Biryani1/search.html?q=pipe')
+    (u'http://packages.python.org/Biryani1/search.html?q=pipe', u'URL must not be complete')
     >>> print input_to_url_path_and_query(None)
     (None, None)
     """

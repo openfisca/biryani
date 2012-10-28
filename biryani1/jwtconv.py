@@ -5,7 +5,7 @@
 # By: Emmanuel Raviart <eraviart@easter-eggs.com>
 #
 # Copyright (C) 2009, 2010, 2011 Easter-eggs
-# http://packages.python.org/Biryani/
+# http://packages.python.org/Biryani1/
 #
 # This file is part of Biryani.
 #
@@ -140,8 +140,8 @@ def decode_json_web_token(token, state = None):
         decoded_token['signature'] = signature
     else:
         errors['encoded_signature'] = state._(u'Invalid format')
-    if decoded_token['header'].get('typ', u'JWT') not in (u'application/jwt', u'JWT'):
-        return decoded_token, dict(header = dict(typ = state._(u'Not a signed JSON Web Token (JWS)')))
+    if decoded_token['header'].get('typ', u'JWT') not in (u'JWT', u'urn:ietf:params:oauth:token-type:jwt'):
+        return decoded_token, dict(header = dict(typ = state._(u'Not a JSON Web Token')))
     return decoded_token, errors or None
 
 
@@ -527,6 +527,13 @@ _3cYrFHM7X640lLd_QoUKw'
                         test_in(valid_encryption_algorithms),
                         not_none,
                         ),
+                    cty = pipe(
+                        test_isinstance(basestring),
+                        test_in([
+                            u'JWT',
+                            # u'urn:ietf:params:oauth:token-type:jwt',
+                            ]),
+                        ),
                     enc = pipe(
                         test_isinstance(basestring),
                         test_in(valid_encryption_methods),
@@ -609,6 +616,7 @@ _3cYrFHM7X640lLd_QoUKw'
 
         algorithm = header['alg']
         if algorithm == u'RSA1_5':
+            assert private_key is not None
             rsa_private_key = RSA.importKey(private_key)
             cipher = Cipher_PKCS1_v1_5.new(rsa_private_key)
             # Build a sentinel that has the same size of the plaintext (ie the content master key).
@@ -618,6 +626,7 @@ _3cYrFHM7X640lLd_QoUKw'
             except:
                 return token, state._(u'Invalid content master key')
         elif algorithm == u'RSA-OAEP':
+            assert private_key is not None
             rsa_private_key = RSA.importKey(private_key)
             cipher = Cipher_PKCS1_OAEP.new(rsa_private_key)
             try:
@@ -688,7 +697,7 @@ _3cYrFHM7X640lLd_QoUKw'
             assert compression in (None, u'none'), compression
             plaintext = compressed_plaintext
 
-        if header['typ'] in (u'application/jwe', u'JWE'):
+        if header['cty'] == u'JWT':
             # Token was a nested token and plaintext is also a token.
             return plaintext, None
 
@@ -1025,9 +1034,10 @@ BqAdzpROlyiw'
             if error is not None:
                 return token, state._(u'Invalid encoded payload: {0}').format(error)
         else:
-            # Token is already signed or encrypted. Use nested signing.
+            # Token is already signed. Use nested encryption.
             header = dict(
-                typ = u'JWE',
+                cty = u'JWT',
+                typ = u'JWE',  # optional
                 )
             plaintext = token
 
@@ -1175,7 +1185,8 @@ def sign_json_web_token(algorithm = None, json_web_key_url = None, key_id = None
         else:
             # Token is already signed or encrypted. Use nested signing.
             header = dict(
-                typ = u'JWS',
+                cty = u'JWT',
+                typ = u'JWS',  # optional
                 )
             encoded_payload = check(make_bytes_to_base64url(remove_padding = True))(token, state = state)
         header['alg'] = algorithm

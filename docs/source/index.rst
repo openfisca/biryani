@@ -26,7 +26,7 @@ Example 1: Email validator
 
 Every converter returns the converted value and an optional error:
 
->>> from biryani import baseconv as conv
+>>> from biryani1 import baseconv as conv
 
 >>> conv.input_to_email(u'John@DOE.name')
 (u'john@doe.name', None)

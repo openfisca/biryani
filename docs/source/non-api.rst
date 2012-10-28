@@ -4,16 +4,16 @@ Experimental, deprecated or non-standard converters
 
 .. testsetup::
 
-   from biryani import baseconv as conv
-   from biryani.frconv import *
-   from biryani.nonstandard.deprecatedbaseconv import *
-   from biryani.nonstandard.experimentalbaseconv import *
+   from biryani1 import baseconv as conv
+   from biryani1.frconv import *
+   from biryani1.nonstandard.deprecatedbaseconv import *
+   from biryani1.nonstandard.experimentalbaseconv import *
 
 
 Deprecated Converters
 ---------------------
 
-.. automodule:: biryani.nonstandard.deprecatedbaseconv
+.. automodule:: biryani1.nonstandard.deprecatedbaseconv
    :members:
    :undoc-members:
 
@@ -21,7 +21,7 @@ Deprecated Converters
 Experimental Converters
 -----------------------
 
-.. automodule:: biryani.nonstandard.experimentalbaseconv
+.. automodule:: biryani1.nonstandard.experimentalbaseconv
    :members:
    :undoc-members:
 
@@ -29,7 +29,7 @@ Experimental Converters
 French Converters
 -----------------
 
-.. automodule:: biryani.frconv
+.. automodule:: biryani1.frconv
    :members:
    :undoc-members:
 

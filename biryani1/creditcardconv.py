@@ -5,7 +5,7 @@
 # By: Emmanuel Raviart <eraviart@easter-eggs.com>
 #
 # Copyright (C) 2009, 2010, 2011 Easter-eggs
-# http://packages.python.org/Biryani/
+# http://packages.python.org/Biryani1/
 #
 # This file is part of Biryani.
 #
@@ -29,9 +29,9 @@
 Sample usage:
 
 >>> import pprint
->>> from biryani import custom_conv, states
+>>> from biryani1 import baseconv, creditcardconv, custom_conv, states
 ...
->>> conv = custom_conv('biryani.baseconv', 'biryani.creditcardconv')
+>>> conv = custom_conv(baseconv, creditcardconv)
 >>> N_ = lambda message: message
 ...
 >>> def validate_credit_card(value, state = None):

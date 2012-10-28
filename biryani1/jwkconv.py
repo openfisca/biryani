@@ -5,7 +5,7 @@
 # By: Emmanuel Raviart <eraviart@easter-eggs.com>
 #
 # Copyright (C) 2009, 2010, 2011 Easter-eggs
-# http://packages.python.org/Biryani/
+# http://packages.python.org/Biryani1/
 #
 # This file is part of Biryani.
 #
@@ -141,7 +141,7 @@ json_to_json_web_key_set = pipe(
                'y': u'4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM'}]},
      None)
 
-    >>> from biryani.jsonconv import make_input_to_json
+    >>> from biryani1.jsonconv import make_input_to_json
     >>> pprint(conv.pipe(make_input_to_json(), json_to_json_web_key_set)('''
     ... {"jwk":
     ...   [

@@ -6,7 +6,7 @@
 # By: Emmanuel Raviart <eraviart@easter-eggs.com>
 #
 # Copyright (C) 2009, 2010, 2011 Easter-eggs
-# http://packages.python.org/Biryani/
+# http://packages.python.org/Biryani1/
 #
 # This file is part of Biryani.
 #
@@ -48,7 +48,7 @@ doc_lines = __doc__.split('\n')
 
 
 setup(
-    name = 'Biryani',
+    name = 'Biryani1',
     version = '0.9dev',
 
     author = 'Emmanuel Raviart',
@@ -58,20 +58,20 @@ setup(
     keywords = 'conversion form python validation web',
     license = 'http://www.apache.org/licenses/LICENSE-2.0',
     long_description = '\n'.join(doc_lines[2:]),
-    url = 'http://packages.python.org/Biryani/',
+    url = 'http://packages.python.org/Biryani1/',
 
     data_files = [
-        ('share/locale/fr/LC_MESSAGES', ['biryani/i18n/fr/LC_MESSAGES/biryani.mo']),
+        ('share/locale/fr/LC_MESSAGES', ['biryani1/i18n/fr/LC_MESSAGES/biryani1.mo']),
         ],
     install_requires = [
         "Babel >= 0.9.4",
         ],
     message_extractors = {
-        'biryani': [
+        'biryani1': [
             ('**.py', 'python', None),
             ],
         },
-#    package_data = {'biryani': ['i18n/*/LC_MESSAGES/*.mo']},
+#    package_data = {'biryani1': ['i18n/*/LC_MESSAGES/*.mo']},
     packages = find_packages(exclude = ['ez_setup']),
     zip_safe = False,
     )

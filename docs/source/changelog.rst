@@ -3,12 +3,22 @@
 *******************
 
 
-Next Release
-============
+Next Release (Biryani1 1.0)
+===========================
+
+* Rename package to ``biryani1``.
+
+* :func:`biryani1.custom_conv` now accepts modules instead of modules names.
 
 
-0.8 (beta 1)
-============
+Biryani 0.9
+===========
+
+TODO
+
+
+Biryani 0.8
+===========
 
 * Rework boolean converters. New :func:`biryani.baseconv.guess_bool` converter. Remove ``form_data_to_bool`` converter.
 
@@ -62,7 +72,7 @@ Next Release
 * Complete documentation and tests.
 
 
-0.7
-===
+Biryani 0.7
+===========
 
 *No changelog till 0.7 release.*
