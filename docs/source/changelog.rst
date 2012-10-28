@@ -16,32 +16,32 @@ Remove implicit actions from converters
 
 * Empty collections are no more replaced with ``None`` and parameter ``keep_empty`` is removed from:
 
-  * :func:`biryani.baseconv.new_mapping`
+  * :func:`biryani1.baseconv.new_mapping`
 
-  * :func:`biryani.baseconv.new_sequence`
+  * :func:`biryani1.baseconv.new_sequence`
 
-  * :func:`biryani.baseconv.new_struct`
+  * :func:`biryani1.baseconv.new_struct`
 
-  * :func:`biryani.baseconv.struct`
+  * :func:`biryani1.baseconv.struct`
 
-  * :func:`biryani.baseconv.structured_mapping`
+  * :func:`biryani1.baseconv.structured_mapping`
 
-  * :func:`biryani.baseconv.structured_sequence`
+  * :func:`biryani1.baseconv.structured_sequence`
 
-  * :func:`biryani.baseconv.uniform_mapping`
+  * :func:`biryani1.baseconv.uniform_mapping`
 
-  * :func:`biryani.baseconv.uniform_sequence`
+  * :func:`biryani1.baseconv.uniform_sequence`
 
 * Replace parameter ``keep_none_keys`` with inverse parameter ``drop_none_keys`` in
-  :func:`biryani.baseconv.uniform_mapping`.
+  :func:`biryani1.baseconv.uniform_mapping`.
 
 * Replace parameter ``keep_none_values`` with inverse parameter ``drop_none_values`` in:
 
-  * :func:`biryani.baseconv.struct`
+  * :func:`biryani1.baseconv.struct`
 
-  * :func:`biryani.baseconv.structured_mapping`
+  * :func:`biryani1.baseconv.structured_mapping`
 
-  * :func:`biryani.baseconv.uniform_mapping`
+  * :func:`biryani1.baseconv.uniform_mapping`
 
 
 Biryani 0.9
