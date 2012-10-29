@@ -10,6 +10,8 @@ Next Release (Biryani1 1.0)
 
 * :func:`biryani1.custom_conv` now accepts modules instead of modules names.
 
+* Mapping conversions now preserve order when used with OrderedDict.
+
 
 Remove implicit actions from converters
 ---------------------------------------
