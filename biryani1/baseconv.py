@@ -965,14 +965,14 @@ def new_mapping(converters, constructor = None):
         if state is None:
             state = states.default_state
         errors = {}
-        converted_values = {}
+        converted_values = constructor()
         for name, converter in converters.iteritems():
             converted_value, error = converter(value, state = state)
             if converted_value is not None:
                 converted_values[name] = converted_value
             if error is not None:
                 errors[name] = error
-        return constructor(converted_values), errors or None
+        return converted_values, errors or None
     return new_mapping_converter
 
 
@@ -1618,7 +1618,7 @@ def structured_mapping(converters, constructor = None, default = None, drop_none
     """
     if constructor is None:
         constructor = type(converters)
-    converters = dict(
+    converters = constructor(
         (name, converter)
         for name, converter in (converters or {}).iteritems()
         if converter is not None
@@ -1637,7 +1637,7 @@ def structured_mapping(converters, constructor = None, default = None, drop_none
                 if name not in values_converter:
                     values_converter[name] = default if default is not None else fail(error = N_(u'Unexpected item'))
         errors = {}
-        converted_values = {}
+        converted_values = constructor()
         for name, converter in values_converter.iteritems():
             if skip_missing_items and name not in values:
                 continue
@@ -1646,7 +1646,7 @@ def structured_mapping(converters, constructor = None, default = None, drop_none
                 converted_values[name] = value
             if error is not None:
                 errors[name] = error
-        return constructor(converted_values), errors or None
+        return converted_values, errors or None
     return structured_mapping_converter
 
 
@@ -2192,7 +2192,7 @@ def uniform_mapping(key_converter, value_converter, constructor = dict, drop_non
         if state is None:
             state = states.default_state
         errors = {}
-        converted_values = {}
+        converted_values = constructor()
         for key, value in values.iteritems():
             key, error = key_converter(key, state = state)
             if error is not None:
@@ -2204,7 +2204,7 @@ def uniform_mapping(key_converter, value_converter, constructor = dict, drop_non
                 converted_values[key] = value
             if error is not None:
                 errors[key] = error
-        return constructor(converted_values), errors or None
+        return converted_values, errors or None
     return uniform_mapping_converter
 
 
