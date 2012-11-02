@@ -70,6 +70,7 @@ __all__ = [
     'make_input_to_normal_form',
     'make_input_to_slug',
     'make_input_to_url',
+    'make_input_to_url_name',
     'make_str_to_url',
     'merge',
     'new_mapping',
@@ -593,8 +594,26 @@ def input_to_url_name(value, state = None):
     """
     if value is None:
         return value, None
-    for character in u'\n\r/?&#':
-        value = value.replace(character, u' ')
+    if isinstance(value, str):
+        value = value.decode('utf-8')
+    # Replace unsafe characters (for URLs and file-systems).
+    value = value.translate({
+        u'\n': u'_',
+        u'\r': u'_',
+        u'\\': u'_',
+        u'/': u'_',
+        u';': u'_',
+        u':': u'_',
+        u'"': u'_',
+        u'#': u'_',
+        u'*': u'_',
+        u'?': u'_',
+        u'&': u'_',
+        u'<': u'_',
+        u'>': u'_',
+        u'|': u'_',
+        u'.': u'_',
+        })
     value = strings.normalize(value, separator = u'_')
     return value or None, None
 
@@ -848,6 +867,47 @@ def make_input_to_url(add_prefix = u'http://', error_if_fragment = False, error_
             remove_fragment = remove_fragment, remove_path = remove_path, remove_query = remove_query,
             schemes = schemes),
         )
+
+
+def make_input_to_url_name(encoding = 'utf-8', separator = u'_', transform = strings.lower):
+    """Return a converts that normalizes a string to allow its use in an URL (or file system) path or a query parameter.
+
+    .. note:: For a converter that keep only letters, digits and separator, see :func:`make_input_to_slug`
+        or :func:`input_to_slug`.
+
+    >>> make_input_to_url_name()(u'   Hello world!   ')
+    (u'hello_world!', None)
+    >>> make_input_to_url_name()(u'   ')
+    (None, None)
+    >>> make_input_to_url_name()(u'')
+    (None, None)
+    """
+    def input_to_url_name(value, state = None):
+        if value is None:
+            return value, None
+        if isinstance(value, str):
+            value = value.decode(encoding)
+        # Replace unsafe characters (for URLs and file-systems).
+        value = value.translate({
+            u'\n': separator,
+            u'\r': separator,
+            u'\\': separator,
+            u'/': separator,
+            u';': separator,
+            u':': separator,
+            u'"': separator,
+            u'#': separator,
+            u'*': separator,
+            u'?': separator,
+            u'&': separator,
+            u'<': separator,
+            u'>': separator,
+            u'|': separator,
+            u'.': separator,
+            })
+        value = strings.normalize(value, encoding = encoding, separator = separator, transform = transform)
+        return value or None, None
+    return input_to_url_name
 
 
 def merge(*converters):
@@ -2416,6 +2476,8 @@ input_to_int = pipe(cleanup_line, anything_to_int)
 input_to_slug = make_input_to_slug()
 """Convert a string to a slug.
 
+    .. note:: For a configurable converter, see :func:`make_input_to_slug`.
+
     .. note:: For a converter that doesn't use "-" as word separators or doesn't convert characters to lower case,
         see :func:`input_to_normal_form`.
 
@@ -2426,6 +2488,25 @@ input_to_slug = make_input_to_slug()
     >>> input_to_slug(u'')
     (None, None)
     >>> input_to_slug(u'   ')
+    (None, None)
+    """
+
+input_to_url_name = make_input_to_url_name()
+"""Normalize a string to allow its use in an URL (or file system) path or a query parameter.
+
+    .. note:: For a configurable converter, see :func:`make_input_to_url_name`.
+
+    .. note:: For a converter that keep only letters, digits and separator, see :func:`make_input_to_slug`
+        or :func:`input_to_slug`.
+
+    .. note:: For a converter that doesn't use "_" as word separators or doesn't convert characters to lower case,
+        see :func:`input_to_normal_form`.
+
+    >>> input_to_url_name(u'   Hello world!   ')
+    (u'hello_world!', None)
+    >>> input_to_url_name(u'   ')
+    (None, None)
+    >>> input_to_url_name(u'')
     (None, None)
     """
 
