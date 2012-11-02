@@ -579,45 +579,6 @@ def guess_bool(value, state = None):
         return value, state._(u'Value must be a boolean')
 
 
-def input_to_url_name(value, state = None):
-    """Convert a string to a normalized string that can be used in an URL path or a query parameter.
-
-    .. note:: For a converter that keep only letters, digits and separator, see :func:`make_input_to_slug`
-        or :func:`input_to_slug`.
-
-    >>> input_to_url_name(u'   Hello world!   ')
-    (u'hello_world!', None)
-    >>> input_to_url_name(u'   ')
-    (None, None)
-    >>> input_to_url_name(u'')
-    (None, None)
-    """
-    if value is None:
-        return value, None
-    if isinstance(value, str):
-        value = value.decode('utf-8')
-    # Replace unsafe characters (for URLs and file-systems).
-    value = value.translate({
-        u'\n': u'_',
-        u'\r': u'_',
-        u'\\': u'_',
-        u'/': u'_',
-        u';': u'_',
-        u':': u'_',
-        u'"': u'_',
-        u'#': u'_',
-        u'*': u'_',
-        u'?': u'_',
-        u'&': u'_',
-        u'<': u'_',
-        u'>': u'_',
-        u'|': u'_',
-        u'.': u'_',
-        })
-    value = strings.normalize(value, separator = u'_')
-    return value or None, None
-
-
 def item_or_sequence(converter, constructor = list, drop_none_items = False):
     """Return a converter that accepts either an item or a sequence of items and applies a converter to them.
 
