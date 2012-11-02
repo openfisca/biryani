@@ -53,47 +53,49 @@ object_id_re = re.compile(r'[\da-f]{24}$')
 # Utility functions
 
 
-def transform_bson_to_json(value):
+def convert_bson_to_json(value):
     """Recursively convert a BSON value to JSON.
 
-    A MongoDB document can't have an item with a key containing a ".". So they are replaced with "->".
+    A MongoDB document can't have an item with a key containing a ".". So they are escaped with "%".
     """
     if value is None:
         return value
     if isinstance(value, dict):
-        return dict(
+        # Note: Use type(value) instead of dict, to support OrderedDict.
+        return type(value)(
             (
-                item_name.replace('->', '.'),
-                transform_bson_to_json(item_value),
+                item_key.replace('%2e', '.').replace('%25', '%'),
+                convert_bson_to_json(item_value),
                 )
-            for item_name, item_value in value.iteritems()
+            for item_key, item_value in value.iteritems()
             )
     if isinstance(value, list):
         return [
-            transform_bson_to_json(item)
+            convert_bson_to_json(item)
             for item in value
             ]
     return value
 
 
-def transform_json_to_bson(value):
+def convert_json_to_bson(value):
     """Recursively convert a JSON value to BSON.
 
-    A MongoDB document can't have an item with a key containing a ".". So they are replaced with "->".
+    A MongoDB document can't have an item with a key containing a ".". So they are escaped with "%".
     """
     if value is None:
         return value
     if isinstance(value, dict):
-        return dict(
+        # Note: Use type(value) instead of dict, to support OrderedDict.
+        return type(value)(
             (
-                item_name.replace('.', '->'),
-                transform_json_to_bson(item_value),
+                item_key.replace('%', '%25').replace('.', '%2e'),
+                convert_json_to_bson(item_value),
                 )
-            for item_name, item_value in value.iteritems()
+            for item_key, item_value in value.iteritems()
             )
     if isinstance(value, list):
         return [
-            transform_json_to_bson(item)
+            convert_json_to_bson(item)
             for item in value
             ]
     return value
@@ -102,12 +104,12 @@ def transform_json_to_bson(value):
 # Level-1 Converters
 
 
-bson_to_json = function(transform_bson_to_json)
+bson_to_json = function(convert_bson_to_json)
 """Convert a BSON value to JSON.
 
-    A MongoDB document can't have an item with a key containing a ".". So they are replaced with "->".
+    A MongoDB document can't have an item with a key containing a ".". So they are escaped with "%".
 
-    >>> bson_to_json({'a': 1, 'b': [2, 3], 'c->d': {'e': 4}})
+    >>> bson_to_json({'a': 1, 'b': [2, 3], 'c%2ed': {'e': 4}})
     ({'a': 1, 'c.d': {'e': 4}, 'b': [2, 3]}, None)
     >>> bson_to_json({})
     ({}, None)
@@ -116,13 +118,13 @@ bson_to_json = function(transform_bson_to_json)
     """
 
 
-json_to_bson = function(transform_json_to_bson)
+json_to_bson = function(convert_json_to_bson)
 """Convert a JSON value to BSON.
 
-    A MongoDB document can't have an item with a key containing a ".". So they are replaced with "->".
+    A MongoDB document can't have an item with a key containing a ".". So they are escaped with "%".
 
     >>> json_to_bson({'a': 1, 'b': [2, 3], 'c.d': {'e': 4}})
-    ({'a': 1, 'b': [2, 3], 'c->d': {'e': 4}}, None)
+    ({'a': 1, 'b': [2, 3], 'c%2ed': {'e': 4}}, None)
     >>> json_to_bson({})
     ({}, None)
     >>> json_to_bson(None)
