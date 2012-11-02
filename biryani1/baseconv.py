@@ -1036,11 +1036,8 @@ def new_sequence(converters, constructor = None):
             state = states.default_state
         errors = {}
         converted_values = []
-        is_empty = True
         for i, converter in enumerate(converters):
             converted_value, error = converter(value, state = state)
-            if converted_value is not None:
-                is_empty = False
             converted_values.append(converted_value)
             if error is not None:
                 errors[i] = error
