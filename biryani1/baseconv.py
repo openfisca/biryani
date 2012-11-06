@@ -613,7 +613,7 @@ def item_or_sequence(converter, constructor = list, drop_none_items = False):
         )
 
 
-def make_str_to_url(add_prefix = u'http://', error_if_fragment = False, error_if_path = False,
+def make_str_to_url(add_prefix = None, error_if_fragment = False, error_if_path = False,
         error_if_query = False, full = False, remove_fragment = False, remove_path = False, remove_query = False,
         schemes = (u'http', u'https')):
     """Return a converter that converts a clean string to an URL.
@@ -622,7 +622,11 @@ def make_str_to_url(add_prefix = u'http://', error_if_fragment = False, error_if
 
     >>> make_str_to_url()(u'http://packages.python.org/Biryani1/')
     (u'http://packages.python.org/Biryani1/', None)
+    >>> make_str_to_url()(u'packages.python.org/Biryani1/')
+    (u'packages.python.org/Biryani1/', None)
     >>> make_str_to_url(full = True)(u'packages.python.org/Biryani1/')
+    (u'packages.python.org/Biryani1/', u'URL must be complete')
+    >>> make_str_to_url(add_prefix = u'http://', full = True)(u'packages.python.org/Biryani1/')
     (u'http://packages.python.org/Biryani1/', None)
     >>> make_str_to_url()(u'/Biryani1/presentation.html#tutorial')
     (u'/Biryani1/presentation.html#tutorial', None)
@@ -641,7 +645,7 @@ def make_str_to_url(add_prefix = u'http://', error_if_fragment = False, error_if
     >>> make_str_to_url(error_if_fragment = True)(u'http://packages.python.org/Biryani1/presentation.html#tuto')
     (u'http://packages.python.org/Biryani1/presentation.html#tuto', u'URL must not contain a fragment')
     >>> make_str_to_url(full = True)(u'[www.nordnet.fr/grandmix/]')
-    (u'[www.nordnet.fr/grandmix/]', u'Invalid URL')
+    (u'[www.nordnet.fr/grandmix/]', u'URL must be complete')
     >>> make_str_to_url(full = True)(u'http://[www.nordnet.fr/grandmix/]')
     (u'http://[www.nordnet.fr/grandmix/]', u'Invalid URL')
     """
@@ -658,7 +662,7 @@ def make_str_to_url(add_prefix = u'http://', error_if_fragment = False, error_if
         if full and add_prefix and not split_url[0] and not split_url[1] and split_url[2] \
                 and not split_url[2].startswith(u'/'):
             try:
-                split_url = list(urlparse.urlsplit(add_prefix + value))
+                split_url = list(urlparse.urlsplit(unicode(add_prefix) + value))
             except ValueError:
                 return value, state._(u'Invalid URL')
         scheme = split_url[0]
@@ -793,14 +797,18 @@ def make_input_to_slug(encoding = 'utf-8', separator = u'-', transform = strings
     return input_to_slug
 
 
-def make_input_to_url(add_prefix = u'http://', error_if_fragment = False, error_if_path = False,
+def make_input_to_url(add_prefix = None, error_if_fragment = False, error_if_path = False,
         error_if_query = False, full = False, remove_fragment = False, remove_path = False, remove_query = False,
         schemes = (u'http', u'https')):
     """Return a converter that converts an string to an URL.
 
     >>> make_input_to_url()(u'http://packages.python.org/Biryani1/')
     (u'http://packages.python.org/Biryani1/', None)
+    >>> make_input_to_url()(u'packages.python.org/Biryani1/')
+    (u'packages.python.org/Biryani1/', None)
     >>> make_input_to_url(full = True)(u'packages.python.org/Biryani1/')
+    (u'packages.python.org/Biryani1/', u'URL must be complete')
+    >>> make_input_to_url(add_prefix = u'http://', full = True)(u'packages.python.org/Biryani1/')
     (u'http://packages.python.org/Biryani1/', None)
     >>> make_input_to_url()(u'/Biryani1/presentation.html#tutorial')
     (u'/Biryani1/presentation.html#tutorial', None)

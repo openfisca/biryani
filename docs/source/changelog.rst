@@ -51,6 +51,9 @@ Remove implicit actions from converters
 
   * :func:`biryani1.baseconv.uniform_mapping`
 
+* Parameter ``add_prefix`` of :func:`biryani1.baseconv.make_input_to_url` and :func:`biryani1.baseconv.make_input_to_url`
+  is now ``None`` by default, instead of ``"http://"``.
+
 
 Biryani 0.9
 ===========
