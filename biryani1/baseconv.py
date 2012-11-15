@@ -1387,10 +1387,11 @@ def str_to_url_path_and_query(value, state = None):
     return unicode(urlparse.urlunsplit(split_url)), None
 
 
-def struct(converters, constructor = None, default = None, drop_none_values = False, skip_missing_items = False):
+def struct(converters, constructor = None, default = None, drop_none_values = False, keep_value_order = False,
+        skip_missing_items = False):
     """Return a converter that maps a collection of converters to a collection (ie dict, list, set, etc) of values.
 
-    .. note:: Parameters ``drop_none_values`` & ``skip_missing_items`` are not used for sequences.
+    .. note:: Parameters ``drop_none_values``, ``keep_value_order`` & ``skip_missing_items`` are not used for sequences.
 
     Usage to convert a mapping (ie dict, etc):
 
@@ -1544,14 +1545,15 @@ def struct(converters, constructor = None, default = None, drop_none_values = Fa
 
     if isinstance(converters, collections.Mapping):
         return structured_mapping(converters, constructor = constructor, default = default,
-            drop_none_values = drop_none_values, skip_missing_items = skip_missing_items)
+            drop_none_values = drop_none_values, keep_value_order = keep_value_order,
+            skip_missing_items = skip_missing_items)
     assert isinstance(converters, collections.Sequence), \
         'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
     return structured_sequence(converters, constructor = constructor, default = default)
 
 
 def structured_mapping(converters, constructor = None, default = None, drop_none_values = False,
-        skip_missing_items = False):
+        keep_value_order = False, skip_missing_items = False):
     """Return a converter that maps a mapping of converters to a mapping (ie dict, etc) of values.
 
     .. note:: This converter should not be used directly. Use :func:`struct` instead.
@@ -1655,14 +1657,26 @@ def structured_mapping(converters, constructor = None, default = None, drop_none
             return values, None
         if state is None:
             state = states.default_state
-        if default == 'drop':
+        if keep_value_order:
+            values_converter = constructor()
+            for name in values:
+                if name in converters:
+                    values_converter[name] = converters[name]
+                elif default != 'drop':
+                    values_converter[name] = default \
+                        if default is not None \
+                        else fail(error = N_(u'Unexpected item'))
+            for name, value_converter in converters.iteritems():
+                if name not in values_converter:
+                    values_converter[name] = value_converter
+        elif default == 'drop':
             values_converter = converters
         else:
             values_converter = converters.copy()
             for name in values:
                 if name not in values_converter:
                     values_converter[name] = default if default is not None else fail(error = N_(u'Unexpected item'))
-        errors = {}
+        errors = constructor()
         converted_values = constructor()
         for name, converter in values_converter.iteritems():
             if skip_missing_items and name not in values:
