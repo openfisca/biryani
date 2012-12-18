@@ -208,16 +208,27 @@ def str_to_phone(value, state = None):
         value = u'0' + value[2:]
 
     if value.startswith(u'00'):
-        # International phone number
+        # International phone number: cf https://en.wikipedia.org/wiki/Telephone_numbers_in_France
         country = {
+            u'262': N_(u'La Réunion, Mayotte'),
+            u'590': N_(u'Guadeloupe, Saint-Barthélemy and Saint-Martin'),
             u'594': N_(u'French Guyana'),
+            u'596': N_(u'Martinique'),
+            }.get(value[2:5])
+        if country is not None:
+            if len(value) == 14:
+                return u'+{0} {1} {2} {3}'.format(value[2:5], value[5:8], value[8:11], value[11:14]), None
+            return value, state._(u'Wrong number of digits for phone number of {0}').format(
+                state._(country))
+        country = {
+            u'508': N_(u'Saint Pierre and Miquelon'),
             u'681': N_(u'Wallis and Futuna'),
             u'687': N_(u'New Caledonia'),
             u'689': N_(u'French Polynesia'),
             }.get(value[2:5])
         if country is not None:
             if len(value) == 11:
-                return u'+{0} {1} {2} {3}'.format(value[2:5], value[5:7], value[7:9], value[9:11]), None
+                return u'+{0} {1} {2}'.format(value[2:5], value[5:8], value[8:11]), None
             return value, state._(u'Wrong number of digits for phone number of {0}').format(
                 state._(country))
         return value, state._(u'Unknown international phone number')
