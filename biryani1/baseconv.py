@@ -2085,7 +2085,7 @@ def test_in(values, error = None):
     (None, None)
     """
     return test(lambda value: value in values if values is not None else True,
-        error = error or N_(u'Value must belong to {0}').format(values if len(values) <= 5
+        error = error or N_(u'Value must belong to {0}').format(values if values is None or len(values) <= 5
             else sorted(values)[:5] + [N_(u'...')]))
 
 
