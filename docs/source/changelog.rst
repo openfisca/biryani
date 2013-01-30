@@ -15,6 +15,9 @@ Next Release (Biryani1 1.0)
 * Add parameter ``handle_none_value`` to func:`biryani1.baseconv.new_mapping`, func:`biryani1.baseconv.new_sequence` &
    func:`biryani1.baseconv.new_struct`.
 
+* Rename parameter ``set_none_value`` to ``handle_none_value`` in func:`biryani1.baseconv.set_value`.
+
+
 Remove implicit actions from converters
 ---------------------------------------
 

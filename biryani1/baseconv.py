@@ -1277,18 +1277,18 @@ def rename_item(old_key, new_key):
     return rename_item_converter
 
 
-def set_value(constant, set_none_value = False):
+def set_value(constant, handle_none_value = False):
     """Return a converter that replaces any value by given one.
 
     >>> set_value(42)(u'Answer to the Ultimate Question of Life, the Universe, and Everything')
     (42, None)
     >>> set_value(42)(None)
     (None, None)
-    >>> set_value(42, set_none_value = True)(None)
+    >>> set_value(42, handle_none_value = True)(None)
     (42, None)
     """
     return lambda value, state = None: (constant, None) \
-        if value is not None or set_none_value \
+        if value is not None or handle_none_value \
         else (None, None)
 
 
