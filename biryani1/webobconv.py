@@ -65,7 +65,7 @@ def multidict_get(key, default = None):
     ...     a = multidict_get('a'),
     ...     b = multidict_get('b'),
     ...     ))(req.GET)
-    ({'a': u'1'}, None)
+    ({'a': u'1', 'b': None}, None)
     """
     return function(lambda multidict: multidict.get(key, default = default))
 
@@ -87,7 +87,7 @@ def multidict_getall(key):
     ...     b = multidict_getall('b'),
     ...     tags = multidict_getall('tag'),
     ...     ))(req.GET)
-    ({'tags': [u'hello', u'World!']}, None)
+    ({'b': None, 'tags': [u'hello', u'World!']}, None)
     """
     return function(lambda multidict: multidict.getall(key) or None)
 

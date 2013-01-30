@@ -935,14 +935,14 @@ def merge(*converters):
     return merge_converter
 
 
-def new_mapping(converters, constructor = None, handle_none_value = False):
+def new_mapping(converters, constructor = None, drop_none_values = False, handle_none_value = False):
     """Return a converter that constructs a mapping (ie dict, etc) from any kind of value.
 
     .. note:: This converter should not be used directly. Use :func:`new_struct` instead.
 
     .. note:: When input value has the same structure, converter :func:`struct` should be used instead.
 
-    >>> def convert_list_to_dict(constructor = None, handle_none_value = False):
+    >>> def convert_list_to_dict(constructor = None, drop_none_values = False, handle_none_value = False):
     ...     return new_mapping(
     ...         dict(
     ...             name = get(0),
@@ -950,19 +950,24 @@ def new_mapping(converters, constructor = None, handle_none_value = False):
     ...             email = pipe(get(2), input_to_email),
     ...             ),
     ...         constructor = constructor,
+    ...         drop_none_values = drop_none_values,
     ...         handle_none_value = handle_none_value,
     ...         )
     >>> convert_list_to_dict()([u'John Doe', u'72', u'john@doe.name'])
     ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> convert_list_to_dict()([u'John Doe', u'72'])
-    ({'age': 72, 'name': u'John Doe'}, {'email': u'Index out of range: 2'})
+    ({'age': 72, 'email': None, 'name': u'John Doe'}, {'email': u'Index out of range: 2'})
     >>> convert_list_to_dict()([u'John Doe', u'72', None])
-    ({'age': 72, 'name': u'John Doe'}, None)
+    ({'age': 72, 'email': None, 'name': u'John Doe'}, None)
     >>> convert_list_to_dict()([None, u' ', None])
+    ({'age': None, 'email': None, 'name': None}, None)
+    >>> convert_list_to_dict(drop_none_values = True)([None, u' ', None])
     ({}, None)
     >>> convert_list_to_dict()(None)
     (None, None)
     >>> convert_list_to_dict(handle_none_value = True)(None)
+    ({'age': None, 'email': None, 'name': None}, None)
+    >>> convert_list_to_dict(drop_none_values = True, handle_none_value = True)(None)
     ({}, None)
     >>> import collections
     >>> new_mapping(
@@ -1000,7 +1005,7 @@ def new_mapping(converters, constructor = None, handle_none_value = False):
         converted_values = constructor()
         for name, converter in converters.iteritems():
             converted_value, error = converter(value, state = state)
-            if converted_value is not None:
+            if converted_value is not None or not drop_none_values:
                 converted_values[name] = converted_value
             if error is not None:
                 errors[name] = error
@@ -1080,14 +1085,16 @@ def new_sequence(converters, constructor = None, handle_none_value = False):
     return new_sequence_converter
 
 
-def new_struct(converters, constructor = None, handle_none_value = False):
+def new_struct(converters, constructor = None, drop_none_values = False, handle_none_value = False):
     """Return a converter that constructs a collection (ie dict, list, set, etc) from any kind of value.
 
     .. note:: When input value has the same structure, converter :func:`struct` should be used instead.
 
+    .. note:: Parameter ``drop_none_values`` is not used for sequences.
+
     Usage to create a mapping (ie dict, etc):
 
-    >>> def convert_list_to_dict(constructor = None, handle_none_value = False):
+    >>> def convert_list_to_dict(constructor = None, drop_none_values = False, handle_none_value = False):
     ...     return new_struct(
     ...         dict(
     ...             name = get(0),
@@ -1095,19 +1102,24 @@ def new_struct(converters, constructor = None, handle_none_value = False):
     ...             email = pipe(get(2), input_to_email),
     ...             ),
     ...         constructor = constructor,
+    ...         drop_none_values = drop_none_values,
     ...         handle_none_value = handle_none_value,
     ...         )
     >>> convert_list_to_dict()([u'John Doe', u'72', u'john@doe.name'])
     ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> convert_list_to_dict()([u'John Doe', u'72'])
-    ({'age': 72, 'name': u'John Doe'}, {'email': u'Index out of range: 2'})
+    ({'age': 72, 'email': None, 'name': u'John Doe'}, {'email': u'Index out of range: 2'})
     >>> convert_list_to_dict()([u'John Doe', u'72', None])
-    ({'age': 72, 'name': u'John Doe'}, None)
+    ({'age': 72, 'email': None, 'name': u'John Doe'}, None)
     >>> convert_list_to_dict()([None, u' ', None])
+    ({'age': None, 'email': None, 'name': None}, None)
+    >>> convert_list_to_dict(drop_none_values = True)([None, u' ', None])
     ({}, None)
     >>> convert_list_to_dict()(None)
     (None, None)
     >>> convert_list_to_dict(handle_none_value = True)(None)
+    ({'age': None, 'email': None, 'name': None}, None)
+    >>> convert_list_to_dict(drop_none_values = True, handle_none_value = True)(None)
     ({}, None)
     >>> import collections
     >>> new_struct(
@@ -1174,7 +1186,8 @@ def new_struct(converters, constructor = None, handle_none_value = False):
     import collections
 
     if isinstance(converters, collections.Mapping):
-        return new_mapping(converters, constructor = constructor, handle_none_value = handle_none_value)
+        return new_mapping(converters, constructor = constructor, drop_none_values = drop_none_values,
+            handle_none_value = handle_none_value)
     assert isinstance(converters, collections.Sequence), \
         'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
     return new_sequence(converters, constructor = constructor, handle_none_value = handle_none_value)
