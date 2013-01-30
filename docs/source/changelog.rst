@@ -12,6 +12,8 @@ Next Release (Biryani1 1.0)
 
 * Mapping conversions now preserve order when used with OrderedDict.
 
+* Add parameter ``handle_none_value`` to func:`biryani1.baseconv.new_mapping`, func:`biryani1.baseconv.new_sequence` &
+   func:`biryani1.baseconv.new_struct`.
 
 Remove implicit actions from converters
 ---------------------------------------

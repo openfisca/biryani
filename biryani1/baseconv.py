@@ -935,14 +935,14 @@ def merge(*converters):
     return merge_converter
 
 
-def new_mapping(converters, constructor = None):
+def new_mapping(converters, constructor = None, handle_none_value = False):
     """Return a converter that constructs a mapping (ie dict, etc) from any kind of value.
 
     .. note:: This converter should not be used directly. Use :func:`new_struct` instead.
 
     .. note:: When input value has the same structure, converter :func:`struct` should be used instead.
 
-    >>> def convert_list_to_dict(constructor = None):
+    >>> def convert_list_to_dict(constructor = None, handle_none_value = False):
     ...     return new_mapping(
     ...         dict(
     ...             name = get(0),
@@ -950,6 +950,7 @@ def new_mapping(converters, constructor = None):
     ...             email = pipe(get(2), input_to_email),
     ...             ),
     ...         constructor = constructor,
+    ...         handle_none_value = handle_none_value,
     ...         )
     >>> convert_list_to_dict()([u'John Doe', u'72', u'john@doe.name'])
     ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
@@ -961,6 +962,8 @@ def new_mapping(converters, constructor = None):
     ({}, None)
     >>> convert_list_to_dict()(None)
     (None, None)
+    >>> convert_list_to_dict(handle_none_value = True)(None)
+    ({}, None)
     >>> import collections
     >>> new_mapping(
     ...     dict(
@@ -989,7 +992,7 @@ def new_mapping(converters, constructor = None):
         )
 
     def new_mapping_converter(value, state = None):
-        if value is None:
+        if value is None and not handle_none_value:
             return value, None
         if state is None:
             state = states.default_state
@@ -1005,14 +1008,14 @@ def new_mapping(converters, constructor = None):
     return new_mapping_converter
 
 
-def new_sequence(converters, constructor = None):
+def new_sequence(converters, constructor = None, handle_none_value = False):
     """Return a converter that constructs a sequence (ie list, tuple, etc) from any kind of value.
 
     .. note:: This converter should not be used directly. Use :func:`new_struct` instead.
 
     .. note:: When input value has the same structure, converter :func:`struct` should be used instead.
 
-    >>> def convert_dict_to_list(constructor = None):
+    >>> def convert_dict_to_list(constructor = None, handle_none_value = False):
     ...     return new_sequence(
     ...         [
     ...             get('name', default = None),
@@ -1020,6 +1023,7 @@ def new_sequence(converters, constructor = None):
     ...             pipe(get('email', default = None), input_to_email),
     ...             ],
     ...         constructor = constructor,
+    ...         handle_none_value = handle_none_value,
     ...         )
     >>> convert_dict_to_list()({'age': u'72', 'email': u'john@doe.name', 'name': u'John Doe'})
     ([u'John Doe', 72, u'john@doe.name'], None)
@@ -1031,6 +1035,8 @@ def new_sequence(converters, constructor = None):
     ([None, None, None], None)
     >>> convert_dict_to_list()(None)
     (None, None)
+    >>> convert_dict_to_list(handle_none_value = True)(None)
+    ([None, None, None], None)
     >>> import collections
     >>> new_sequence(
     ...     [
@@ -1059,7 +1065,7 @@ def new_sequence(converters, constructor = None):
         ]
 
     def new_sequence_converter(value, state = None):
-        if value is None:
+        if value is None and not handle_none_value:
             return value, None
         if state is None:
             state = states.default_state
@@ -1074,14 +1080,14 @@ def new_sequence(converters, constructor = None):
     return new_sequence_converter
 
 
-def new_struct(converters, constructor = None):
+def new_struct(converters, constructor = None, handle_none_value = False):
     """Return a converter that constructs a collection (ie dict, list, set, etc) from any kind of value.
 
     .. note:: When input value has the same structure, converter :func:`struct` should be used instead.
 
     Usage to create a mapping (ie dict, etc):
 
-    >>> def convert_list_to_dict(constructor = None):
+    >>> def convert_list_to_dict(constructor = None, handle_none_value = False):
     ...     return new_struct(
     ...         dict(
     ...             name = get(0),
@@ -1089,6 +1095,7 @@ def new_struct(converters, constructor = None):
     ...             email = pipe(get(2), input_to_email),
     ...             ),
     ...         constructor = constructor,
+    ...         handle_none_value = handle_none_value,
     ...         )
     >>> convert_list_to_dict()([u'John Doe', u'72', u'john@doe.name'])
     ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
@@ -1100,6 +1107,8 @@ def new_struct(converters, constructor = None):
     ({}, None)
     >>> convert_list_to_dict()(None)
     (None, None)
+    >>> convert_list_to_dict(handle_none_value = True)(None)
+    ({}, None)
     >>> import collections
     >>> new_struct(
     ...     dict(
@@ -1121,7 +1130,7 @@ def new_struct(converters, constructor = None):
 
     Usage to create a sequence (ie list, tuple, etc) or a set:
 
-    >>> def convert_dict_to_list(constructor = None):
+    >>> def convert_dict_to_list(constructor = None, handle_none_value = False):
     ...     return new_struct(
     ...         [
     ...             get('name', default = None),
@@ -1129,6 +1138,7 @@ def new_struct(converters, constructor = None):
     ...             pipe(get('email', default = None), input_to_email),
     ...             ],
     ...         constructor = constructor,
+    ...         handle_none_value = handle_none_value,
     ...         )
     >>> convert_dict_to_list()({'age': u'72', 'email': u'john@doe.name', 'name': u'John Doe'})
     ([u'John Doe', 72, u'john@doe.name'], None)
@@ -1140,6 +1150,8 @@ def new_struct(converters, constructor = None):
     ([None, None, None], None)
     >>> convert_dict_to_list()(None)
     (None, None)
+    >>> convert_dict_to_list(handle_none_value = True)(None)
+    ([None, None, None], None)
     >>> import collections
     >>> new_struct(
     ...     [
@@ -1162,10 +1174,10 @@ def new_struct(converters, constructor = None):
     import collections
 
     if isinstance(converters, collections.Mapping):
-        return new_mapping(converters, constructor = constructor)
+        return new_mapping(converters, constructor = constructor, handle_none_value = handle_none_value)
     assert isinstance(converters, collections.Sequence), \
         'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
-    return new_sequence(converters, constructor = constructor)
+    return new_sequence(converters, constructor = constructor, handle_none_value = handle_none_value)
 
 
 def noop(value, state = None):
