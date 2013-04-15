@@ -36,7 +36,7 @@ class State(object):
         if self is default_state:
             return '{0}.default_state'.format(__name__)
         else:
-            return super(State, self).__repr__(self)
+            return super(State, self).__repr__()
 
 
 #: Minimal context, usable with converters
