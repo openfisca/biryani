@@ -94,7 +94,6 @@ __all__ = [
     'test_between',
     'test_conv',
     'test_equals',
-    'test_not_none',
     'test_greater_or_equal',
     'test_in',
     'test_is',
@@ -102,6 +101,7 @@ __all__ = [
     'test_less_or_equal',
     'test_none',
     'test_not_in',
+    'test_not_none',
     'translate',
     'uniform_mapping',
     'uniform_sequence',
@@ -2033,29 +2033,6 @@ def test_equals(constant, error = None):
         error = error or N_(u'Value must be equal to {0}').format(constant))
 
 
-def test_not_none(error = N_(u'Missing value')):
-    """Return a converters that signals an error when value is ``None``.
-
-    .. note:: When error message "Missing value" can be kept, use :func:`exists` instead.
-
-    >>> test_not_none()(42)
-    (42, None)
-    >>> test_not_none()(u'')
-    (u'', None)
-    >>> test_not_none()(None)
-    (None, u'Missing value')
-    >>> test_not_none(error = u'Required value')(None)
-    (None, u'Required value')
-    """
-    def not_none(value, state = None):
-        if state is None:
-            state = states.default_state
-        if value is None:
-            return value, state._(error) if isinstance(error, basestring) else error
-        return value, None
-    return not_none
-
-
 def test_greater_or_equal(constant, error = None):
     """Return a converter that accepts only values greater than or equal to given constant.
 
@@ -2207,6 +2184,29 @@ def test_not_in(values, error = None):
     """
     return test(lambda value: value not in (values or []),
         error = error or N_(u'Value must not belong to {0}').format(values))
+
+
+def test_not_none(error = N_(u'Missing value')):
+    """Return a converters that signals an error when value is ``None``.
+
+    .. note:: When error message "Missing value" can be kept, use :func:`exists` instead.
+
+    >>> test_not_none()(42)
+    (42, None)
+    >>> test_not_none()(u'')
+    (u'', None)
+    >>> test_not_none()(None)
+    (None, u'Missing value')
+    >>> test_not_none(error = u'Required value')(None)
+    (None, u'Required value')
+    """
+    def not_none(value, state = None):
+        if state is None:
+            state = states.default_state
+        if value is None:
+            return value, state._(error) if isinstance(error, basestring) else error
+        return value, None
+    return not_none
 
 
 def translate(conversions):
