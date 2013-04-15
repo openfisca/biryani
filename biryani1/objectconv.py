@@ -59,6 +59,7 @@ def make_dict_to_object(cls):
         # instance = cls()
         # instance.__dict__.update(value)
         instance = EmptyClass()
+        instance.__class__ = cls
         instance.__dict__ = value
         return instance, None
     return dict_to_object
