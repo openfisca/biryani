@@ -35,6 +35,10 @@ __all__ = [
     ]
 
 
+class EmptyClass(object):
+    pass
+
+
 def make_dict_to_object(cls):
     """Return a converter that creates in instance of a class from a dictionary.
 
@@ -51,7 +55,10 @@ def make_dict_to_object(cls):
     def dict_to_object(value, state = None):
         if value is None:
             return value, None
-        instance = cls()
+        # Dont do the following instructions, to ensure that cls __init__ method is not called.
+        # instance = cls()
+        # instance.__dict__.update(value)
+        instance = EmptyClass()
         instance.__dict__ = value
         return instance, None
     return dict_to_object
