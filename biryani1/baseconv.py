@@ -2212,7 +2212,7 @@ def test_not_none(error = N_(u'Missing value')):
 def translate(conversions):
     """Return a converter that converts values found in given dictionary and keep others as is.
 
-    .. warning:: Like most converters, a ``None`` value is not handled => It is never translated.
+    .. warning:: Unlike most converters, a ``None`` value is handled => It can be translated.
 
     >>> translate({0: u'bad', 1: u'OK'})(0)
     (u'bad', None)
@@ -2222,14 +2222,14 @@ def translate(conversions):
     (2, None)
     >>> translate({0: u'bad', 1: u'OK'})(u'three')
     (u'three', None)
-    >>> translate({None: u'problem', 0: u'bad', 1: u'OK'})(None)
-    (None, None)
-    >>> pipe(translate({0: u'bad', 1: u'OK'}), default(u'no problem'))(None)
+    >>> translate({None: u'no problem', 0: u'bad', 1: u'OK'})(None)
     (u'no problem', None)
     """
-    return function(lambda value: value
-        if value is None or conversions is None or value not in conversions
-        else conversions[value])
+    return function(
+        lambda value: value
+            if conversions is None or value not in conversions
+            else conversions[value],
+        handle_none_value = True)
 
 
 def uniform_mapping(key_converter, value_converter, constructor = dict, drop_none_keys = False,
