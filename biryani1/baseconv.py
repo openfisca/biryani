@@ -1937,8 +1937,7 @@ def switch(key_converter, converters, default = None, handle_none_value = False)
             return value, error
         if key not in converters:
             if default is None:
-                return value, state._(u'''Expression "{0}" doesn't match any key''').format(
-                    key)
+                return value, state._(u'''Expression "{0}" doesn't match any key''').format(key)
             return default(value, state = state)
         return converters[key](value, state = state)
     return switch_converter
@@ -2232,7 +2231,7 @@ def translate(conversions):
         handle_none_value = True)
 
 
-def uniform_mapping(key_converter, value_converter, constructor = dict, drop_none_keys = False,
+def uniform_mapping(key_converter, value_converter, constructor = None, drop_none_keys = False,
         drop_none_values = False):
     """Return a converter that applies a unique converter to each key and another unique converter to each value of a
     mapping.
@@ -2257,8 +2256,9 @@ def uniform_mapping(key_converter, value_converter, constructor = dict, drop_non
             return values, None
         if state is None:
             state = states.default_state
+        custom_constructor = type(values) if constructor is None else constructor
         errors = {}
-        converted_values = constructor()
+        converted_values = custom_constructor()
         for key, value in values.iteritems():
             key, error = key_converter(key, state = state)
             if error is not None:
@@ -2301,6 +2301,7 @@ def uniform_sequence(converter, constructor = list, drop_none_items = False):
             return values, None
         if state is None:
             state = states.default_state
+        custom_constructor = type(values) if constructor is None else constructor
         errors = {}
         converted_values = []
         for i, value in enumerate(values):
@@ -2309,7 +2310,7 @@ def uniform_sequence(converter, constructor = list, drop_none_items = False):
                 converted_values.append(value)
             if error is not None:
                 errors[i] = error
-        return constructor(converted_values), errors or None
+        return custom_constructor(converted_values), errors or None
     return uniform_sequence_converter
 
 
