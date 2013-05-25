@@ -25,14 +25,15 @@
 """Date and Time Related Converters
 
 .. note:: Date & time converters are not in :mod:`biryani1.baseconv`, because some of them depend from external
-   libraries (``mx.DateTime`` & ``pytz``).
+   libraries (``isodate`` & ``pytz``).
 """
 
 
 import calendar
 import datetime
 
-import mx.DateTime
+import isodate
+import pytz
 
 from .baseconv import cleanup_line, function, pipe
 from . import states
@@ -47,9 +48,12 @@ __all__ = [
     'datetime_to_timestamp',
     'iso8601_input_to_date',
     'iso8601_input_to_datetime',
+    'iso8601_input_to_time',
     'iso8601_str_to_date',
     'iso8601_str_to_datetime',
+    'iso8601_str_to_time',
     'set_datetime_tzinfo',
+    'time_to_iso8601_str',
     'timestamp_to_date',
     'timestamp_to_datetime',
     ]
@@ -189,17 +193,9 @@ def iso8601_str_to_date(value, state = None):
         return value, None
     if state is None:
         state = states.default_state
-    # mx.DateTime.ISO.ParseDateTimeUTC fails when time zone is preceded with a space. For example,
-    # mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03 +01:00') raises a"ValueError: wrong format,
-    # use YYYY-MM-DD HH:MM:SS" while mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03+01:00') works.
-    # So we remove space before "+" and "-".
-    while u' +' in value:
-        value = value.replace(u' +', '+')
-    while u' -' in value:
-        value = value.replace(u' -', '-')
     try:
-        return datetime.date.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
-    except ValueError:
+        return isodate.parse_date(value), None
+    except isodate.ISO8601Error:
         return value, state._(u'Value must be a date in ISO 8601 format')
 
 
@@ -237,18 +233,74 @@ def iso8601_str_to_datetime(value, state = None):
         return value, None
     if state is None:
         state = states.default_state
-    # mx.DateTime.ISO.ParseDateTimeUTC fails when time zone is preceded with a space. For example,
-    # mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03 +01:00') raises a"ValueError: wrong format,
-    # use YYYY-MM-DD HH:MM:SS" while mx.DateTime.ISO.ParseDateTimeUTC'2011-03-17 14:46:03+01:00') works.
-    # So we remove space before "+" and "-".
+    original_value = value
+    if u'T' not in value:
+        if u' ' in value:
+            # Accept a " " instead of a "T" for time separator.
+            value = value.replace(u' ', u'T', 1)
+        else:
+            # Time seems to be missing. Add a zero time.
+            value += u'T00:00:00'
+    # Parsing fails when time zone is preceded with a space. So we remove space before "+" and "-".
     while u' +' in value:
         value = value.replace(u' +', '+')
     while u' -' in value:
         value = value.replace(u' -', '-')
     try:
-        return datetime.datetime.fromtimestamp(mx.DateTime.ISO.ParseDateTimeUTC(value)), None
-    except ValueError:
-        return value, state._(u'Value must be a date-time in ISO 8601 format')
+        value = isodate.parse_datetime(value)
+    except isodate.ISO8601Error:
+        return original_value, state._(u'Value must be a date-time in ISO 8601 format')
+    if value.tzinfo is not None:
+        # Convert datetime to UTC.
+        value = value.astimezone(pytz.utc).replace(tzinfo = None)
+    return value, None
+
+
+def iso8601_str_to_time(value, state = None):
+    """Convert a clean string in ISO 8601 format to a time.
+
+    .. note:: For a converter that doesn't require a clean string, see :func:`iso8601_input_to_time`.
+
+    >>> iso8601_str_to_time(u'05:06:07')
+    (datetime.time(5, 6, 7), None)
+    >>> iso8601_str_to_time(u'T05:06:07')
+    (datetime.time(5, 6, 7), None)
+    >>> iso8601_str_to_time(u'05:06:07+01:00')
+    (datetime.time(4, 6, 7), None)
+    >>> iso8601_str_to_time(u'05:06:07-02:00')
+    (datetime.time(7, 6, 7), None)
+    >>> iso8601_str_to_time(u'05:06:07 +01:00')
+    (datetime.time(4, 6, 7), None)
+    >>> iso8601_str_to_time(u'05:06:07 -02:00')
+    (datetime.time(7, 6, 7), None)
+    >>> iso8601_str_to_time(u'05:06:07')
+    (datetime.time(5, 6, 7), None)
+    >>> iso8601_str_to_time(u'now')
+    (u'now', u'Value must be a time in ISO 8601 format')
+    >>> iso8601_str_to_time(u'')
+    (u'', u'Value must be a time in ISO 8601 format')
+    >>> iso8601_str_to_time(None)
+    (None, None)
+    """
+    if value is None:
+        return value, None
+    if state is None:
+        state = states.default_state
+    # Parsing fails when time zone is preceded with a space. So we remove space before "+" and "-".
+    while u' +' in value:
+        value = value.replace(u' +', '+')
+    while u' -' in value:
+        value = value.replace(u' -', '-')
+    try:
+        value = isodate.parse_time(value)
+    except isodate.ISO8601Error:
+        return value, state._(u'Value must be a time in ISO 8601 format')
+    if value.tzinfo is not None:
+        # Convert time to UTC (using a temporary datetime).
+        datetime_value = datetime.datetime.combine(datetime.date(2, 2, 2), value)
+        datetime_value = datetime_value.astimezone(pytz.utc).replace(tzinfo = None)
+        value = datetime_value.time()
+    return value, None
 
 
 def set_datetime_tzinfo(tzinfo = None):
@@ -265,6 +317,19 @@ def set_datetime_tzinfo(tzinfo = None):
     (datetime.datetime(2011, 1, 2, 3, 4, 5, tzinfo=<UTC>), None)
     """
     return function(lambda value: value.replace(tzinfo = tzinfo))
+
+
+def time_to_iso8601_str(value, state = None):
+    """Convert a time to a string using ISO 8601 format.
+
+    >>> time_to_iso8601_str(datetime.time(5, 6, 7))
+    (u'05:06:07', None)
+    >>> time_to_iso8601_str(None)
+    (None, None)
+    """
+    if value is None:
+        return value, None
+    return unicode(value.strftime('%H:%M:%S')), None
 
 
 def timestamp_to_date(value, state = None):
@@ -384,5 +449,32 @@ iso8601_input_to_datetime = pipe(cleanup_line, iso8601_str_to_datetime)
     >>> iso8601_input_to_datetime(u'   ')
     (None, None)
     >>> iso8601_input_to_datetime(None)
+    (None, None)
+    """
+
+iso8601_input_to_time = pipe(cleanup_line, iso8601_str_to_time)
+"""Convert a string in ISO 8601 format to a time.
+
+    >>> iso8601_input_to_time(u'05:06:07')
+    (datetime.time(5, 6, 7), None)
+    >>> iso8601_input_to_time(u'T05:06:07')
+    (datetime.time(5, 6, 7), None)
+    >>> iso8601_input_to_time(u'05:06:07+01:00')
+    (datetime.time(4, 6, 7), None)
+    >>> iso8601_input_to_time(u'05:06:07-02:00')
+    (datetime.time(7, 6, 7), None)
+    >>> iso8601_input_to_time(u'05:06:07 +01:00')
+    (datetime.time(4, 6, 7), None)
+    >>> iso8601_input_to_time(u'05:06:07 -02:00')
+    (datetime.time(7, 6, 7), None)
+    >>> iso8601_input_to_time(u'05:06:07')
+    (datetime.time(5, 6, 7), None)
+    >>> iso8601_input_to_time(u'   05:06:07   ')
+    (datetime.time(5, 6, 7), None)
+    >>> iso8601_input_to_time(u'now')
+    (u'now', u'Value must be a time in ISO 8601 format')
+    >>> iso8601_input_to_time(u'   ')
+    (None, None)
+    >>> iso8601_input_to_time(None)
     (None, None)
     """
