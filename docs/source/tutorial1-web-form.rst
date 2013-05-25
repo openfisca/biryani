@@ -160,7 +160,7 @@ This form validator is slightly different from the previous one, because it does
 
 >>> req7 = webob.Request.blank('/', POST = 'username=John Doe&email=john@doe.name&password=secret')
 >>> validate_form(req7.POST)
-({'username': u'John Doe', u'password': u'secret', 'email': u'john@doe.name'}, {u'password': u'Unexpected item'})
+({'username': u'John Doe', 'password': u'secret', 'email': u'john@doe.name'}, {'password': u'Unexpected item'})
 
 If we want to drop unexpected parameters, we need to use the ``default`` option of the :func:`biryani1.baseconv.struct`
 converter:
@@ -192,7 +192,7 @@ If instead, we want to apply a default conversion, to the unexpected parameters,
 ...
 >>> req7 = webob.Request.blank('/', POST = 'username=John Doe&email=john@doe.name&password=secret')
 >>> validate_form(req7.POST)
-({'username': u'John Doe', u'password': u'secret', 'email': u'john@doe.name'}, None)
+({'username': u'John Doe', 'password': u'secret', 'email': u'john@doe.name'}, None)
 
 
 Using custom converters and filters

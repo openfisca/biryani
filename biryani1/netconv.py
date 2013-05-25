@@ -98,7 +98,7 @@ def test_http_url(valid_status_codes = None):
     (u'http://www.comarquage.fr/unkown-page.html', None)
     >>> test_http_url()(u'http://unknown-server.easter-eggs.com/')
     (u'http://unknown-server.easter-eggs.com/', \
-u'An error occured when trying to connect to the web server: <urlopen error [Errno -2] Name or service not known>')
+u'An error occured when trying to connect to the web server: <urlopen error [Errno 2] No such file or directory>')
     >>> test_http_url()(u'')
     Traceback (most recent call last):
     ValueError:
