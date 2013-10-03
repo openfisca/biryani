@@ -90,7 +90,9 @@ def date_to_iso8601_str(value, state = None):
     """
     if value is None:
         return value, None
-    return unicode(value.strftime('%Y-%m-%d')), None
+    # the datetime strftime() methods require year >= 1900
+    # return unicode(value.strftime('%Y-%m-%d')), None
+    return u'{:04d}-{:02d}-{:02d}'.format(value.year, value.month, value.day), None
 
 
 def date_to_timestamp(value, state = None):
