@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Biryani1 0.9dev\n"
 "Report-Msgid-Bugs-To: eraviart@easter-eggs.com\n"
-"POT-Creation-Date: 2013-05-25 11:34+0200\n"
+"POT-Creation-Date: 2013-10-06 01:14+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -93,59 +93,59 @@ msgstr ""
 msgid "URL must not be complete"
 msgstr ""
 
-#: biryani1/baseconv.py:1693 biryani1/baseconv.py:1703 biryani1/baseconv.py:1799
+#: biryani1/baseconv.py:1713 biryani1/baseconv.py:1723 biryani1/baseconv.py:1819
 msgid "Unexpected item"
 msgstr ""
 
-#: biryani1/baseconv.py:1940
+#: biryani1/baseconv.py:1960
 msgid "Expression \"{0}\" doesn't match any key"
 msgstr ""
 
-#: biryani1/baseconv.py:1946
+#: biryani1/baseconv.py:1966
 msgid "Test failed"
 msgstr ""
 
-#: biryani1/baseconv.py:1991
+#: biryani1/baseconv.py:2011
 msgid "Value must be between {0} and {1}"
 msgstr ""
 
-#: biryani1/baseconv.py:2032
+#: biryani1/baseconv.py:2052
 msgid "Value must be equal to {0}"
 msgstr ""
 
-#: biryani1/baseconv.py:2052
+#: biryani1/baseconv.py:2072
 msgid "Value must be greater than or equal to {0}"
 msgstr ""
 
-#: biryani1/baseconv.py:2077
+#: biryani1/baseconv.py:2097
 msgid "Value must belong to {0}"
 msgstr ""
 
-#: biryani1/baseconv.py:2078
+#: biryani1/baseconv.py:2098
 msgid "..."
 msgstr ""
 
-#: biryani1/baseconv.py:2101
+#: biryani1/baseconv.py:2121
 msgid "Value must be {0}"
 msgstr ""
 
-#: biryani1/baseconv.py:2117
+#: biryani1/baseconv.py:2137
 msgid "Value is not an instance of {0}"
 msgstr ""
 
-#: biryani1/baseconv.py:2137
+#: biryani1/baseconv.py:2157
 msgid "Value must be less than or equal to {0}"
 msgstr ""
 
-#: biryani1/baseconv.py:2140
+#: biryani1/baseconv.py:2160
 msgid "Unexpected value"
 msgstr ""
 
-#: biryani1/baseconv.py:2185
+#: biryani1/baseconv.py:2205
 msgid "Value must not belong to {0}"
 msgstr ""
 
-#: biryani1/baseconv.py:2188
+#: biryani1/baseconv.py:2208
 msgid "Missing value"
 msgstr ""
 
@@ -177,19 +177,19 @@ msgstr ""
 msgid "Invalid credit card number (wrong checksum)"
 msgstr ""
 
-#: biryani1/datetimeconv.py:199
+#: biryani1/datetimeconv.py:201
 msgid "Value must be a date in ISO 8601 format"
 msgstr ""
 
-#: biryani1/datetimeconv.py:252
+#: biryani1/datetimeconv.py:254
 msgid "Value must be a date-time in ISO 8601 format"
 msgstr ""
 
-#: biryani1/datetimeconv.py:297
+#: biryani1/datetimeconv.py:299
 msgid "Value must be a time in ISO 8601 format"
 msgstr ""
 
-#: biryani1/datetimeconv.py:355 biryani1/datetimeconv.py:387
+#: biryani1/datetimeconv.py:357 biryani1/datetimeconv.py:389
 msgid "Value must be a timestamp"
 msgstr ""
 

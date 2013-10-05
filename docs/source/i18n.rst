@@ -33,22 +33,22 @@ Here is an example of how to have french error messages with *Biryani*:
 >>> import gettext
 >>> from biryani1 import states
 ...
->>> french_translation = gettext.translation('biryani', languages = ['fr'])
+>>> french_translation = gettext.translation('biryani1', languages = ['fr'])
 ...
 >>> class FrenchState(states.State):
 ...     _ = staticmethod(french_translation.ugettext)
 ...
 >>> french_state = FrenchState()
 
-.. note:: If you get an ``IOError: [Errno 2] No translation file found for domain: 'biryani'``, your *Biryani*
+.. note:: If you get an ``IOError: [Errno 2] No translation file found for domain: 'biryani1'``, your *Biryani*
     translations are not properly installed. To avoid this error, you can specify a ``localedir`` argument to
     ``gettext.translation``, like::
 
-        french_translation = gettext.translation('biryani', localedir = 'path/to/biryani1/i18n', languages = ['fr'])
+        french_translation = gettext.translation('biryani1', localedir = 'path/to/biryani1/i18n', languages = ['fr'])
 
     or, if the content of ``biryani1/i18n`` directory has been copied in ``/usr/local/share/local``::
 
-        french_translation = gettext.translation('biryani', '/usr/local/share/locale', languages = ['fr'])
+        french_translation = gettext.translation('biryani1', '/usr/local/share/locale', languages = ['fr'])
 
 Once the state has been properly defined, you can use it for your conversions:
 
@@ -83,7 +83,7 @@ When using *Biryani* in web applications, for example, you will often need to di
 ...         translation = self._translations_cache.get(languages)
 ...         if translation is None:
 ...             self._translations_cache[languages] = translation = gettext.translation(
-...                 'biryani', fallback = True, languages = languages)
+...                 'biryani1', fallback = True, languages = languages)
 ...         return translation.ugettext
 
 >>> user_state = UserState()
@@ -108,7 +108,7 @@ One way to do this is to chain the translations using the fallback mechanism.
 For example, if the application using *Biryani* is named **myapp** and stores its localized messages in ``myapp/i18n`` you could chain its translations with those of *Biryani* using some code like::
 
     languages = ['fr']
-    biryani_translation = gettext.translation('biryani', fallback = True, languages = languages)
+    biryani_translation = gettext.translation('biryani1', fallback = True, languages = languages)
     translation = gettext.translation('myapp', 'myapp/i18n', fallback = True, languages = languages)
     translation.add_fallback(biryani_translation)
 
