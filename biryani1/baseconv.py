@@ -1457,6 +1457,15 @@ def struct(converters, constructor = None, default = None, drop_none_values = Fa
     ...         email = input_to_email,
     ...         ),
     ...     default = cleanup_line,
+    ...     )(dict(name = u'   ', email = None))
+    ({'age': None, 'email': None, 'name': None}, None)
+    >>> struct(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = input_to_int,
+    ...         email = input_to_email,
+    ...         ),
+    ...     default = cleanup_line,
     ...     drop_none_values = True,
     ...     )(dict(name = u'   ', email = None))
     ({}, None)
@@ -1467,8 +1476,9 @@ def struct(converters, constructor = None, default = None, drop_none_values = Fa
     ...         email = input_to_email,
     ...         ),
     ...     default = cleanup_line,
+    ...     drop_none_values = 'missing',
     ...     )(dict(name = u'   ', email = None))
-    ({'age': None, 'email': None, 'name': None}, None)
+    ({'email': None, 'name': None}, None)
     >>> struct(
     ...     dict(
     ...         name = cleanup_line,
@@ -1620,6 +1630,15 @@ def structured_mapping(converters, constructor = None, default = None, drop_none
     ...         email = input_to_email,
     ...         ),
     ...     default = cleanup_line,
+    ...     )(dict(name = u'   ', email = None))
+    ({'age': None, 'email': None, 'name': None}, None)
+    >>> structured_mapping(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = input_to_int,
+    ...         email = input_to_email,
+    ...         ),
+    ...     default = cleanup_line,
     ...     drop_none_values = True,
     ...     )(dict(name = u'   ', email = None))
     ({}, None)
@@ -1630,8 +1649,9 @@ def structured_mapping(converters, constructor = None, default = None, drop_none
     ...         email = input_to_email,
     ...         ),
     ...     default = cleanup_line,
+    ...     drop_none_values = 'missing',
     ...     )(dict(name = u'   ', email = None))
-    ({'age': None, 'email': None, 'name': None}, None)
+    ({'email': None, 'name': None}, None)
     >>> structured_mapping(
     ...     dict(
     ...         name = cleanup_line,
@@ -1707,7 +1727,7 @@ def structured_mapping(converters, constructor = None, default = None, drop_none
             if skip_missing_items and name not in values:
                 continue
             value, error = converter(values.get(name), state = state)
-            if value is not None or not drop_none_values:
+            if value is not None or not drop_none_values or drop_none_values == 'missing' and name in values:
                 converted_values[name] = value
             if error is not None:
                 errors[name] = error
