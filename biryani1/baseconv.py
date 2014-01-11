@@ -2599,7 +2599,7 @@ def check(converter_or_value_and_error, clear_on_error = False):
         if error is not None:
             if clear_on_error:
                 return None
-            raise ValueError('Error: {0} for: {1}'.format(error, value))
+            raise ValueError(u'{0} for: {1}'.format(error, value).encode('utf-8'))
         return value
     else:
         # converter_or_value_and_error is a converter.
@@ -2608,6 +2608,6 @@ def check(converter_or_value_and_error, clear_on_error = False):
             if error is not None:
                 if clear_on_error:
                     return None
-                raise ValueError('Error: {0} for: {1}'.format(error, value))
+                raise ValueError(u'{0} for: {1}'.format(error, value).encode('utf-8'))
             return value
         return check_converter
