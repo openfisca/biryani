@@ -197,7 +197,7 @@ def iso8601_str_to_date(value, state = None):
         state = states.default_state
     try:
         return isodate.parse_date(value), None
-    except isodate.ISO8601Error:
+    except (isodate.ISO8601Error, ValueError):
         return value, state._(u'Value must be a date in ISO 8601 format')
 
 
@@ -250,7 +250,7 @@ def iso8601_str_to_datetime(value, state = None):
         value = value.replace(u' -', '-')
     try:
         value = isodate.parse_datetime(value)
-    except isodate.ISO8601Error:
+    except (isodate.ISO8601Error, ValueError):
         return original_value, state._(u'Value must be a date-time in ISO 8601 format')
     if value.tzinfo is not None:
         # Convert datetime to UTC.
