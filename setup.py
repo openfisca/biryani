@@ -64,7 +64,9 @@ setup(
         ('share/locale/fr/LC_MESSAGES', ['biryani1/i18n/fr/LC_MESSAGES/biryani1.mo']),
         ],
     extras_require = dict(
-        datetimeconv = 'isodate >= 0.4',
+        datetimeconv = [
+            'isodate >= 0.4',
+            ],
         ),
     install_requires = [
         'Babel >= 0.9.4',
