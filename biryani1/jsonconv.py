@@ -95,7 +95,13 @@ def make_str_to_json(*args, **kwargs):
             state = states.default_state
         if isinstance(value, str):
             # Ensure that json.loads() uses unicode strings.
-            value = value.decode('utf-8')
+            try:
+                value = value.decode('utf-8')
+            except UnicodeDecodeError:
+                try:
+                    value = value.decode('cp1252')
+                except UnicodeDecodeError:
+                    return value, state._(u'''JSON doesn't use "utf-8" encoding''')
         try:
             return json.loads(value, *args, **kwargs), None
         except ValueError:
