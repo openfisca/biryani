@@ -66,6 +66,7 @@ setup(
     extras_require = dict(
         datetimeconv = [
             'isodate >= 0.4',
+            'pytz',
             ],
         ),
     install_requires = [
