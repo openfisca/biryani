@@ -858,23 +858,28 @@ def make_input_to_url_name(encoding = 'utf-8', separator = u'_', transform = str
             value = value.decode(encoding)
         # Replace unsafe characters (for URLs and file-systems).
         value = value.translate({
-            u'\n': separator,
-            u'\r': separator,
-            u'\\': separator,
-            u'/': separator,
-            u';': separator,
-            u':': separator,
-            u'"': separator,
-            u'#': separator,
-            u'*': separator,
-            u'?': separator,
-            u'&': separator,
-            u'<': separator,
-            u'>': separator,
-            u'|': separator,
-            u'.': separator,
+            ord(u'\n'): separator,
+            ord(u'\r'): separator,
+            ord(u'\\'): separator,
+            ord(u'/'): separator,
+            ord(u';'): separator,
+            ord(u':'): separator,
+            ord(u'"'): separator,
+            ord(u'#'): separator,
+            ord(u'*'): separator,
+            ord(u'?'): separator,
+            ord(u'&'): separator,
+            ord(u'<'): separator,
+            ord(u'>'): separator,
+            ord(u'|'): separator,
+            ord(u'.'): separator,
             })
         value = strings.normalize(value, encoding = encoding, separator = separator, transform = transform)
+        two_separators = separator * 2
+        while two_separators in value:
+            value = value.replace(two_separators, separator)
+        value = value.strip(separator)
+
         return value or None, None
     return input_to_url_name
 
