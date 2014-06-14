@@ -31,9 +31,12 @@ Using a localized state
 Here is an example of how to have french error messages with *Biryani*:
 
 >>> import gettext
+>>> import os
+>>> import pkg_resources
 >>> from biryani1 import states
 ...
->>> french_translation = gettext.translation('biryani1', languages = ['fr'])
+>>> french_translation = gettext.translation('biryani1',
+...     os.path.join(pkg_resources.get_distribution('biryani1').location, 'biryani1', 'i18n'),languages = ['fr'])
 ...
 >>> class FrenchState(states.State):
 ...     _ = staticmethod(french_translation.ugettext)
@@ -82,8 +85,9 @@ When using *Biryani* in web applications, for example, you will often need to di
 ...         languages = tuple(self.languages)
 ...         translation = self._translations_cache.get(languages)
 ...         if translation is None:
-...             self._translations_cache[languages] = translation = gettext.translation(
-...                 'biryani1', fallback = True, languages = languages)
+...             self._translations_cache[languages] = translation = gettext.translation('biryani1',
+...                 os.path.join(pkg_resources.get_distribution('biryani1').location, 'biryani1', 'i18n'),
+...                 fallback = True, languages = languages)
 ...         return translation.ugettext
 
 >>> user_state = UserState()
@@ -108,7 +112,9 @@ One way to do this is to chain the translations using the fallback mechanism.
 For example, if the application using *Biryani* is named **myapp** and stores its localized messages in ``myapp/i18n`` you could chain its translations with those of *Biryani* using some code like::
 
     languages = ['fr']
-    biryani_translation = gettext.translation('biryani1', fallback = True, languages = languages)
+    biryani_translation = gettext.translation('biryani1',
+        os.path.join(pkg_resources.get_distribution('biryani1').location, 'biryani1', 'i18n'), fallback = True,
+        languages = languages)
     translation = gettext.translation('myapp', 'myapp/i18n', fallback = True, languages = languages)
     translation.add_fallback(biryani_translation)
 
