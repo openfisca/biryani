@@ -158,7 +158,7 @@ def datetime_to_timestamp(value, state = None):
     utcoffset = value.utcoffset()
     if utcoffset is not None:
         value -= utcoffset
-    return int(calendar.timegm(value.timetuple()) * 1000 + value.microsecond / 1000), None
+    return int(calendar.timegm(value.timetuple()) * 1000 + value.microsecond / 1000.0), None
 
 
 def iso8601_str_to_date(value, state = None):
@@ -352,7 +352,7 @@ def timestamp_to_date(value, state = None):
     if state is None:
         state = states.default_state
     try:
-        return datetime.date.fromtimestamp(value / 1000), None
+        return datetime.date.fromtimestamp(value / 1000.0), None
     except ValueError:
         return value, state._(u'Value must be a timestamp')
 
@@ -383,8 +383,8 @@ def timestamp_to_datetime(value, state = None):
     try:
         # Since a timestamp doesn't containe timezone information, the generated datetime has no timezone (ie naive
         # datetime), so we don't use pytz.utc.
-        # return datetime.datetime.fromtimestamp(value / 1000, pytz.utc), None
-        return datetime.datetime.fromtimestamp(value / 1000), None
+        # return datetime.datetime.fromtimestamp(value / 1000.0, pytz.utc), None
+        return datetime.datetime.fromtimestamp(value / 1000.0), None
     except ValueError:
         return value, state._(u'Value must be a timestamp')
 
