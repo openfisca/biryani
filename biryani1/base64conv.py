@@ -65,7 +65,7 @@ def base64_to_bytes(value, state = None):
 
 
 def bytes_to_base64(value, state = None):
-    """Convertsa string or bytes to a base64 encoding.
+    """Converts a string or bytes to a base64 encoding.
 
     >>> bytes_to_base64('Hello World')
     (u'SGVsbG8gV29ybGQ=', None)
