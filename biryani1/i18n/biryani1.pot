@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Biryani1 0.9dev\n"
 "Report-Msgid-Bugs-To: eraviart@easter-eggs.com\n"
-"POT-Creation-Date: 2014-06-15 00:51+0200\n"
+"POT-Creation-Date: 2014-06-15 13:05+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -384,6 +384,10 @@ msgstr ""
 
 #: biryani1/netconv.py:131
 msgid "An error occured when trying to connect to the web server: {0}"
+msgstr ""
+
+#: biryani1/uuidconv.py:49
+msgid "Invalid UUID"
 msgstr ""
 
 #: biryani1/nonstandard/deprecatedbaseconv.py:124

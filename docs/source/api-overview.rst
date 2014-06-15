@@ -256,6 +256,7 @@ Extension Modules
    from biryani1.jwtconv import *
    from biryani1.netconv import *
    from biryani1.objectconv import *
+   from biryani1.uuidconv import *
    from biryani1.webobconv import *
 
 
@@ -344,6 +345,15 @@ Object Converters
 -----------------
 
 .. automodule:: biryani1.objectconv
+   :members:
+   :undoc-members:
+   :noindex:
+
+
+UUID Converters
+---------------
+
+.. automodule:: biryani1.uuidconv
    :members:
    :undoc-members:
    :noindex:

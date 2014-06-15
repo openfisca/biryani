@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Biryani\n"
 "Report-Msgid-Bugs-To: eraviart@easter-eggs.com\n"
-"POT-Creation-Date: 2014-06-15 00:51+0200\n"
-"PO-Revision-Date: 2014-06-14 22:56+0000\n"
+"POT-Creation-Date: 2014-06-15 13:05+0200\n"
+"PO-Revision-Date: 2014-06-15 11:06+0000\n"
 "Last-Translator: Emmanuel <emmanuel@raviart.com>\n"
 "Language-Team: French (http://www.transifex.com/projects/p/biryani/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -388,6 +388,10 @@ msgstr "Le serveur web a répondu avec un mauvais code d'état : {0:d} {1}"
 #: biryani1/netconv.py:131
 msgid "An error occured when trying to connect to the web server: {0}"
 msgstr "Une erreur est survenue durant la tentative de connexion au serveur web : {0}"
+
+#: biryani1/uuidconv.py:49
+msgid "Invalid UUID"
+msgstr "UUID incorrect"
 
 #: biryani1/nonstandard/deprecatedbaseconv.py:124
 msgid "Invalid value format"

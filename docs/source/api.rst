@@ -163,6 +163,18 @@ biryani1.states
    :undoc-members:
 
 
+biryani1.uuidconv
+-----------------
+
+.. testsetup::
+
+   from biryani1.uuidconv import *
+
+.. automodule:: biryani1.uuidconv
+   :members:
+   :undoc-members:
+
+
 biryani1.webobconv
 ------------------
 
