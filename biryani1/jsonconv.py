@@ -113,7 +113,7 @@ def make_str_to_json(*args, **kwargs):
 
 
 def make_input_to_json(*args, **kwargs):
-    """Return a converter that decodes a clean string to a JSON data.
+    """Return a converter that decodes a string to a JSON data.
 
     >>> make_input_to_json()(u'{"a": 1, "b": [2, "three"]}')
     ({u'a': 1, u'b': [2, u'three']}, None)
