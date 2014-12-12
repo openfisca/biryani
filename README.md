@@ -6,4 +6,4 @@ A data conversion and validation toolbox
 Documentation
 -------------
 
-http://biryani.readthedocs.org/en/latest/
+http://biryani.readthedocs.org/
