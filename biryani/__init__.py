@@ -5,7 +5,7 @@
 # By: Emmanuel Raviart <eraviart@easter-eggs.com>
 #
 # Copyright (C) 2009, 2010, 2011, 2012 Easter-eggs
-# http://packages.python.org/Biryani1/
+# http://packages.python.org/Biryani/
 #
 # This file is part of Biryani.
 #
@@ -22,7 +22,7 @@
 # limitations under the License.
 
 
-"""Biryani1 package
+"""Biryani package
 
 This root module is kept nearly empty to allow client applications to import only the converters they need, module by
 module.
@@ -42,15 +42,15 @@ def custom_conv(*modules):
 
     How to use::
 
-        importy biryani1
-        import biryani1.baseconv
-        import biryani1.datetimeconv
+        import biryani
+        import biryani.baseconv
+        import biryani.datetimeconv
         import any.custom.module
-        conv = biryani1.custom_conv(biryani1.baseconv, biryani1.datetimeconv, any.custom.module)
+        conv = biryani.custom_conv(biryani.baseconv, biryani.datetimeconv, any.custom.module)
 
-    >>> import biryani1.baseconv
-    >>> import biryani1.datetimeconv
-    >>> conv = custom_conv(biryani1.baseconv, biryani1.datetimeconv)
+    >>> import biryani.baseconv
+    >>> import biryani.datetimeconv
+    >>> conv = custom_conv(biryani.baseconv, biryani.datetimeconv)
     >>> conv.input_to_int(u'42') # input_to_int is defined in baseconv module.
     (42, None)
     >>> conv.iso8601_input_to_date(u'1789-07-14') # iso8601_input_to_date is defined in datetimeconv module.

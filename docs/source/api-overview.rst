@@ -4,9 +4,9 @@ API Overview
 
 .. testsetup::
 
-   from biryani1 import *
-   from biryani1.baseconv import *
-   from biryani1.strings import *
+   from biryani import *
+   from biryani.baseconv import *
+   from biryani.strings import *
 
 
 Data Converters
@@ -16,226 +16,226 @@ Data Converters
 Boolean Converters
 ------------------
 
-.. autofunction:: biryani1.baseconv.anything_to_bool
+.. autofunction:: biryani.baseconv.anything_to_bool
    :noindex:
 
-.. autofunction:: biryani1.baseconv.bool_to_str
+.. autofunction:: biryani.baseconv.bool_to_str
    :noindex:
 
-.. autofunction:: biryani1.baseconv.guess_bool
+.. autofunction:: biryani.baseconv.guess_bool
    :noindex:
 
-.. autofunction:: biryani1.baseconv.input_to_bool
+.. autofunction:: biryani.baseconv.input_to_bool
    :noindex:
 
-.. autofunction:: biryani1.baseconv.str_to_bool
+.. autofunction:: biryani.baseconv.str_to_bool
    :noindex:
 
 
 Collection (dict, list, set, tuple, etc) Converters
 -------------------------------------------------------
 
-.. autofunction:: biryani1.baseconv.extract_when_singleton
+.. autofunction:: biryani.baseconv.extract_when_singleton
    :noindex:
 
-.. autofunction:: biryani1.baseconv.get
+.. autofunction:: biryani.baseconv.get
    :noindex:
 
-.. autofunction:: biryani1.baseconv.item_or_sequence
+.. autofunction:: biryani.baseconv.item_or_sequence
    :noindex:
 
-.. autofunction:: biryani1.baseconv.new_struct
+.. autofunction:: biryani.baseconv.new_struct
    :noindex:
 
-.. autofunction:: biryani1.baseconv.rename_item
+.. autofunction:: biryani.baseconv.rename_item
    :noindex:
 
-.. autofunction:: biryani1.baseconv.struct
+.. autofunction:: biryani.baseconv.struct
    :noindex:
 
-.. autofunction:: biryani1.baseconv.submapping
+.. autofunction:: biryani.baseconv.submapping
    :noindex:
 
-.. autofunction:: biryani1.baseconv.uniform_mapping
+.. autofunction:: biryani.baseconv.uniform_mapping
    :noindex:
 
-.. autofunction:: biryani1.baseconv.uniform_sequence
+.. autofunction:: biryani.baseconv.uniform_sequence
    :noindex:
 
 
 Internet Data Converters
 ------------------------
 
-.. autofunction:: biryani1.baseconv.input_to_email
+.. autofunction:: biryani.baseconv.input_to_email
    :noindex:
 
-.. autofunction:: biryani1.baseconv.input_to_url_name
+.. autofunction:: biryani.baseconv.input_to_url_name
    :noindex:
 
-.. autofunction:: biryani1.baseconv.input_to_url_path_and_query
+.. autofunction:: biryani.baseconv.input_to_url_path_and_query
    :noindex:
 
-.. autofunction:: biryani1.baseconv.make_input_to_url
+.. autofunction:: biryani.baseconv.make_input_to_url
    :noindex:
 
-.. autofunction:: biryani1.baseconv.make_str_to_url
+.. autofunction:: biryani.baseconv.make_str_to_url
    :noindex:
 
-.. autofunction:: biryani1.baseconv.str_to_email
+.. autofunction:: biryani.baseconv.str_to_email
    :noindex:
 
-.. autofunction:: biryani1.baseconv.str_to_url_path_and_query
+.. autofunction:: biryani.baseconv.str_to_url_path_and_query
    :noindex:
 
 
 Number Converters
 -----------------
 
-.. autofunction:: biryani1.baseconv.anything_to_float
+.. autofunction:: biryani.baseconv.anything_to_float
    :noindex:
 
-.. autofunction:: biryani1.baseconv.anything_to_int
+.. autofunction:: biryani.baseconv.anything_to_int
    :noindex:
 
-.. autofunction:: biryani1.baseconv.input_to_float
+.. autofunction:: biryani.baseconv.input_to_float
    :noindex:
 
-.. autofunction:: biryani1.baseconv.input_to_int
+.. autofunction:: biryani.baseconv.input_to_int
    :noindex:
 
 
 String Converters
 -----------------
 
-.. autofunction:: biryani1.baseconv.anything_to_str
+.. autofunction:: biryani.baseconv.anything_to_str
    :noindex:
 
-.. autofunction:: biryani1.baseconv.cleanup_line
+.. autofunction:: biryani.baseconv.cleanup_line
    :noindex:
 
-.. autofunction:: biryani1.baseconv.cleanup_text
+.. autofunction:: biryani.baseconv.cleanup_text
    :noindex:
 
-.. autofunction:: biryani1.baseconv.decode_str
+.. autofunction:: biryani.baseconv.decode_str
    :noindex:
 
-.. autofunction:: biryani1.baseconv.empty_to_none
+.. autofunction:: biryani.baseconv.empty_to_none
    :noindex:
 
-.. autofunction:: biryani1.baseconv.encode_str
+.. autofunction:: biryani.baseconv.encode_str
    :noindex:
 
-.. autofunction:: biryani1.baseconv.input_to_slug
+.. autofunction:: biryani.baseconv.input_to_slug
    :noindex:
 
-.. autofunction:: biryani1.baseconv.make_input_to_normal_form
+.. autofunction:: biryani.baseconv.make_input_to_normal_form
    :noindex:
 
-.. autofunction:: biryani1.baseconv.make_input_to_slug
+.. autofunction:: biryani.baseconv.make_input_to_slug
    :noindex:
 
 
 Tests
 -----
 
-.. autofunction:: biryani1.baseconv.not_none
+.. autofunction:: biryani.baseconv.not_none
    :noindex:
 
-.. autofunction:: biryani1.baseconv.test
+.. autofunction:: biryani.baseconv.test
    :noindex:
 
-.. autofunction:: biryani1.baseconv.test_between
+.. autofunction:: biryani.baseconv.test_between
    :noindex:
 
-.. autofunction:: biryani1.baseconv.test_conv
+.. autofunction:: biryani.baseconv.test_conv
    :noindex:
 
-.. autofunction:: biryani1.baseconv.test_equals
+.. autofunction:: biryani.baseconv.test_equals
    :noindex:
 
-.. autofunction:: biryani1.baseconv.test_not_none
+.. autofunction:: biryani.baseconv.test_not_none
    :noindex:
 
-.. autofunction:: biryani1.baseconv.test_greater_or_equal
+.. autofunction:: biryani.baseconv.test_greater_or_equal
    :noindex:
 
-.. autofunction:: biryani1.baseconv.test_in
+.. autofunction:: biryani.baseconv.test_in
    :noindex:
 
-.. autofunction:: biryani1.baseconv.test_is
+.. autofunction:: biryani.baseconv.test_is
    :noindex:
 
-.. autofunction:: biryani1.baseconv.test_isinstance
+.. autofunction:: biryani.baseconv.test_isinstance
    :noindex:
 
-.. autofunction:: biryani1.baseconv.test_less_or_equal
+.. autofunction:: biryani.baseconv.test_less_or_equal
    :noindex:
 
-.. autofunction:: biryani1.baseconv.test_none
+.. autofunction:: biryani.baseconv.test_none
    :noindex:
 
-.. autofunction:: biryani1.baseconv.test_not_in
+.. autofunction:: biryani.baseconv.test_not_in
    :noindex:
 
 
 Flow-Control Converters
 =======================
 
-.. autofunction:: biryani1.baseconv.condition
+.. autofunction:: biryani.baseconv.condition
    :noindex:
 
-.. autofunction:: biryani1.baseconv.first_match
+.. autofunction:: biryani.baseconv.first_match
    :noindex:
 
-.. autofunction:: biryani1.baseconv.pipe
+.. autofunction:: biryani.baseconv.pipe
    :noindex:
 
-.. autofunction:: biryani1.baseconv.switch
+.. autofunction:: biryani.baseconv.switch
    :noindex:
 
 
 Special Converters
 ==================
 
-.. autofunction:: biryani1.baseconv.catch_error
+.. autofunction:: biryani.baseconv.catch_error
    :noindex:
 
-.. autofunction:: biryani1.baseconv.default
+.. autofunction:: biryani.baseconv.default
    :noindex:
 
-.. autofunction:: biryani1.baseconv.fail
+.. autofunction:: biryani.baseconv.fail
    :noindex:
 
-.. autofunction:: biryani1.baseconv.function
+.. autofunction:: biryani.baseconv.function
    :noindex:
 
-.. autofunction:: biryani1.baseconv.noop
+.. autofunction:: biryani.baseconv.noop
    :noindex:
 
-.. autofunction:: biryani1.baseconv.set_value
+.. autofunction:: biryani.baseconv.set_value
    :noindex:
 
-.. autofunction:: biryani1.baseconv.translate
+.. autofunction:: biryani.baseconv.translate
    :noindex:
 
 
 Converters-related Utilities
 ============================
 
-.. autofunction:: biryani1.baseconv.check
+.. autofunction:: biryani.baseconv.check
    :noindex:
 
-.. autofunction:: biryani1.custom_conv
+.. autofunction:: biryani.custom_conv
    :noindex:
 
-.. autofunction:: biryani1.baseconv.ok
+.. autofunction:: biryani.baseconv.ok
    :noindex:
 
 
 String Functions
 ================
 
-.. automodule:: biryani1.strings
+.. automodule:: biryani.strings
    :members:
    :undoc-members:
    :noindex:
@@ -246,24 +246,24 @@ Extension Modules
 
 .. testsetup::
 
-   from biryani1.babelconv import *
-   from biryani1.base64conv import *
-   from biryani1.bsonconv import *
-   from biryani1.creditcardconv import *
-   from biryani1.datetimeconv import *
-   from biryani1.jsonconv import *
-   from biryani1.jwkconv import *
-   from biryani1.jwtconv import *
-   from biryani1.netconv import *
-   from biryani1.objectconv import *
-   from biryani1.uuidconv import *
-   from biryani1.webobconv import *
+   from biryani.babelconv import *
+   from biryani.base64conv import *
+   from biryani.bsonconv import *
+   from biryani.creditcardconv import *
+   from biryani.datetimeconv import *
+   from biryani.jsonconv import *
+   from biryani.jwkconv import *
+   from biryani.jwtconv import *
+   from biryani.netconv import *
+   from biryani.objectconv import *
+   from biryani.uuidconv import *
+   from biryani.webobconv import *
 
 
 Babel Converters
 ----------------
 
-.. automodule:: biryani1.babelconv
+.. automodule:: biryani.babelconv
    :members:
    :undoc-members:
    :noindex:
@@ -272,7 +272,7 @@ Babel Converters
 Base64 Converters
 -----------------
 
-.. automodule:: biryani1.base64conv
+.. automodule:: biryani.base64conv
    :members:
    :undoc-members:
    :noindex:
@@ -281,7 +281,7 @@ Base64 Converters
 BSON Converters
 ---------------
 
-.. automodule:: biryani1.bsonconv
+.. automodule:: biryani.bsonconv
    :members:
    :undoc-members:
    :noindex:
@@ -290,7 +290,7 @@ BSON Converters
 Credit Card Converters
 ----------------------
 
-.. automodule:: biryani1.creditcardconv
+.. automodule:: biryani.creditcardconv
    :members:
    :undoc-members:
    :noindex:
@@ -299,7 +299,7 @@ Credit Card Converters
 Date & Time Converters
 ----------------------
 
-.. automodule:: biryani1.datetimeconv
+.. automodule:: biryani.datetimeconv
    :members:
    :undoc-members:
    :noindex:
@@ -308,7 +308,7 @@ Date & Time Converters
 JSON Converters
 ---------------
 
-.. automodule:: biryani1.jsonconv
+.. automodule:: biryani.jsonconv
    :members:
    :undoc-members:
    :noindex:
@@ -317,7 +317,7 @@ JSON Converters
 JSON Web Keys (JWK) Converters
 ------------------------------
 
-.. automodule:: biryani1.jwkconv
+.. automodule:: biryani.jwkconv
    :members:
    :undoc-members:
    :noindex:
@@ -326,7 +326,7 @@ JSON Web Keys (JWK) Converters
 JSON Web Tokens (JWK) Converters
 --------------------------------
 
-.. automodule:: biryani1.jwtconv
+.. automodule:: biryani.jwtconv
    :members:
    :undoc-members:
    :noindex:
@@ -335,7 +335,7 @@ JSON Web Tokens (JWK) Converters
 Network Converters
 ------------------
 
-.. automodule:: biryani1.netconv
+.. automodule:: biryani.netconv
    :members:
    :undoc-members:
    :noindex:
@@ -344,7 +344,7 @@ Network Converters
 Object Converters
 -----------------
 
-.. automodule:: biryani1.objectconv
+.. automodule:: biryani.objectconv
    :members:
    :undoc-members:
    :noindex:
@@ -353,7 +353,7 @@ Object Converters
 UUID Converters
 ---------------
 
-.. automodule:: biryani1.uuidconv
+.. automodule:: biryani.uuidconv
    :members:
    :undoc-members:
    :noindex:
@@ -362,7 +362,7 @@ UUID Converters
 WebOb Converters
 ----------------
 
-.. automodule:: biryani1.webobconv
+.. automodule:: biryani.webobconv
    :members:
    :undoc-members:
    :noindex:

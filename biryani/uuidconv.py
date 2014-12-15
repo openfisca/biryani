@@ -5,7 +5,7 @@
 # By: Emmanuel Raviart <eraviart@easter-eggs.com>
 #
 # Copyright (C) 2009, 2010, 2011, 2012 Easter-eggs
-# http://packages.python.org/Biryani1/
+# http://packages.python.org/Biryani/
 #
 # This file is part of Biryani.
 #

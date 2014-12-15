@@ -2,7 +2,7 @@
 Tutorial 2
 **********
 
->>> from biryani1 import baseconv as conv
+>>> from biryani import baseconv as conv
 >>> input_value = u'42'
 >>> output_value, error = conv.input_to_float(input_value)
 >>> output_value, error
@@ -34,7 +34,7 @@ So, to ensure that input value is an unicode string, we need to chain several co
 ...     )('42')
 ('42', u"Value is not an instance of <type 'unicode'>")
 
-Use :func:`conv.check <biryani1.baseconv.check>` to extract value from conversion result or raise an exception when an error occurs:
+Use :func:`conv.check <biryani.baseconv.check>` to extract value from conversion result or raise an exception when an error occurs:
 
 >>> conv.check(conv.pipe(
 ...     conv.test_isinstance(unicode),
@@ -61,7 +61,7 @@ Add a custom function to convert string to unicode when needed, and store result
 >>> any_string_to_float(u'42')
 (42.0, None)
 
-.. note:: The builtin converter :func:`biryani1.baseconv.decode_str`: does the same thing as the conversion function
+.. note:: The builtin converter :func:`biryani.baseconv.decode_str`: does the same thing as the conversion function
    above.
 
    So the converter could be simplified to:
@@ -88,7 +88,7 @@ We can harden the custom function to convert anything to unicode:
 >>> anything_to_float(42)
 (42.0, None)
 
-Add :func:`conv.cleanup_line <biryani1.baseconv.cleanup_line>` to strip spaces from string and convert it to None when empty:
+Add :func:`conv.cleanup_line <biryani.baseconv.cleanup_line>` to strip spaces from string and convert it to None when empty:
 
 >>> anything_to_float = conv.pipe(
 ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
@@ -102,7 +102,7 @@ Add :func:`conv.cleanup_line <biryani1.baseconv.cleanup_line>` to strip spaces f
 >>> anything_to_float(u'     ')
 (None, None)
 
-Add :func:`conv.not_none <biryani1.baseconv.not_none>` to generate an error when value is ``None``:
+Add :func:`conv.not_none <biryani.baseconv.not_none>` to generate an error when value is ``None``:
 
 >>> anything_to_float = conv.pipe(
 ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
@@ -115,7 +115,7 @@ Add :func:`conv.not_none <biryani1.baseconv.not_none>` to generate an error when
 >>> anything_to_float(u'     ')
 (None, u'Missing value')
 
-Use a custom :func:`test <biryani1.baseconv.test>` to ensure that float is a valid latitude:
+Use a custom :func:`test <biryani.baseconv.test>` to ensure that float is a valid latitude:
 
 >>> anything_to_latitude = conv.pipe(
 ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
@@ -165,7 +165,7 @@ Generalize the converter to a function that accepts any bound:
 >>> anything_to_bounded_float(-180, 180)(90)
 (90.0, None)
 
-.. note:: The builtin converter :func:`biryani1.baseconv.test_between`: does the same thing as the test on bounds above.
+.. note:: The builtin converter :func:`biryani.baseconv.test_between`: does the same thing as the test on bounds above.
 
    So the converter could be simplified to:
 

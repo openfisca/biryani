@@ -4,11 +4,11 @@ Internationalization & Localization
 
 *Biryani* uses ``gettext`` for internationalization and localization.
 
-Translations for *Biryani* messages are located in ``biryani1/i18n`` directory.
+Translations for *Biryani* messages are located in ``biryani/i18n`` directory.
 
 To translate messages, *Biryani* converters use the ``_()`` method of their ``state`` parameter.
 
-The defaut state parameter :data:`biryani1.states.default_state` (an instance of class :class:`biryani1.states.State`) has a ``_()`` method that returns the given message asis, without any translation. So, to translate *Biryani* messages you should define a new state that redefines it.
+The defaut state parameter :data:`biryani.states.default_state` (an instance of class :class:`biryani.states.State`) has a ``_()`` method that returns the given message asis, without any translation. So, to translate *Biryani* messages you should define a new state that redefines it.
 
 
 Translations status
@@ -21,7 +21,7 @@ Here is the current status of *Biryani* translations:
 .. raw:: html
 
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
-    <script type="text/javascript" src="https://www.transifex.net/projects/p/biryani/resource/biryani1pot/chart/inc_js/"></script>
+    <script type="text/javascript" src="https://www.transifex.net/projects/p/biryani/resource/biryanipot/chart/inc_js/"></script>
     <div id="transifex_chart">Loading chart...</div>
 
 
@@ -33,29 +33,29 @@ Here is an example of how to have french error messages with *Biryani*:
 >>> import gettext
 >>> import os
 >>> import pkg_resources
->>> from biryani1 import states
+>>> from biryani import states
 ...
->>> french_translation = gettext.translation('biryani1',
-...     os.path.join(pkg_resources.get_distribution('biryani1').location, 'biryani1', 'i18n'),languages = ['fr'])
+>>> french_translation = gettext.translation('biryani',
+...     os.path.join(pkg_resources.get_distribution('biryani').location, 'biryani', 'i18n'),languages = ['fr'])
 ...
 >>> class FrenchState(states.State):
 ...     _ = staticmethod(french_translation.ugettext)
 ...
 >>> french_state = FrenchState()
 
-.. note:: If you get an ``IOError: [Errno 2] No translation file found for domain: 'biryani1'``, your *Biryani*
+.. note:: If you get an ``IOError: [Errno 2] No translation file found for domain: 'biryani'``, your *Biryani*
     translations are not properly installed. To avoid this error, you can specify a ``localedir`` argument to
     ``gettext.translation``, like::
 
-        french_translation = gettext.translation('biryani1', localedir = 'path/to/biryani1/i18n', languages = ['fr'])
+        french_translation = gettext.translation('biryani', localedir = 'path/to/biryani/i18n', languages = ['fr'])
 
-    or, if the content of ``biryani1/i18n`` directory has been copied in ``/usr/local/share/local``::
+    or, if the content of ``biryani/i18n`` directory has been copied in ``/usr/local/share/local``::
 
-        french_translation = gettext.translation('biryani1', '/usr/local/share/locale', languages = ['fr'])
+        french_translation = gettext.translation('biryani', '/usr/local/share/locale', languages = ['fr'])
 
 Once the state has been properly defined, you can use it for your conversions:
 
->>> from biryani1 import baseconv as conv
+>>> from biryani import baseconv as conv
 ...
 >>> conv.not_none(None)
 (None, u'Missing value')
@@ -85,8 +85,8 @@ When using *Biryani* in web applications, for example, you will often need to di
 ...         languages = tuple(self.languages)
 ...         translation = self._translations_cache.get(languages)
 ...         if translation is None:
-...             self._translations_cache[languages] = translation = gettext.translation('biryani1',
-...                 os.path.join(pkg_resources.get_distribution('biryani1').location, 'biryani1', 'i18n'),
+...             self._translations_cache[languages] = translation = gettext.translation('biryani',
+...                 os.path.join(pkg_resources.get_distribution('biryani').location, 'biryani', 'i18n'),
 ...                 fallback = True, languages = languages)
 ...         return translation.ugettext
 
@@ -112,8 +112,8 @@ One way to do this is to chain the translations using the fallback mechanism.
 For example, if the application using *Biryani* is named **myapp** and stores its localized messages in ``myapp/i18n`` you could chain its translations with those of *Biryani* using some code like::
 
     languages = ['fr']
-    biryani_translation = gettext.translation('biryani1',
-        os.path.join(pkg_resources.get_distribution('biryani1').location, 'biryani1', 'i18n'), fallback = True,
+    biryani_translation = gettext.translation('biryani',
+        os.path.join(pkg_resources.get_distribution('biryani').location, 'biryani', 'i18n'), fallback = True,
         languages = languages)
     translation = gettext.translation('myapp', 'myapp/i18n', fallback = True, languages = languages)
     translation.add_fallback(biryani_translation)
