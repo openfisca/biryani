@@ -6,7 +6,7 @@
 # By: Emmanuel Raviart <eraviart@easter-eggs.com>
 #
 # Copyright (C) 2009, 2010, 2011, 2012 Easter-eggs
-# http://packages.python.org/Biryani1/
+# http://packages.python.org/Biryani/
 #
 # This file is part of Biryani.
 #
@@ -23,7 +23,8 @@
 # limitations under the License.
 
 
-"""Toolbox to convert and validate data (for web forms, CSV files, XML files, etc)"""
+"""Toolbox to convert and validate data (for web forms, CSV files, XML files,
+etc)"""
 
 
 try:
@@ -48,36 +49,34 @@ doc_lines = __doc__.split('\n')
 
 
 setup(
-    name = 'Biryani1',
-    version = '0.9dev',
+    name='Biryani',
+    version='0.10.0',
 
-    author = 'Emmanuel Raviart',
-    author_email = 'eraviart@easter-eggs.com',
-    classifiers = [classifier for classifier in classifiers.split('\n') if classifier],
-    description = doc_lines[0],
-    keywords = 'conversion form python validation web',
-    license = 'http://www.apache.org/licenses/LICENSE-2.0',
-    long_description = '\n'.join(doc_lines[2:]),
-    url = 'http://packages.python.org/Biryani1/',
+    author='Emmanuel Raviart',
+    author_email='emmanuel@raviart.com',
+    classifiers=[classifier for classifier in classifiers.split('\n')
+                 if classifier],
+    description=doc_lines[0],
+    keywords='conversion form python validation web',
+    license='http://www.apache.org/licenses/LICENSE-2.0',
+    long_description='\n'.join(doc_lines[2:]),
+    url='http://biryani.readthedocs.org/',
 
-    data_files = [
-        ('share/locale/fr/LC_MESSAGES', ['biryani1/i18n/fr/LC_MESSAGES/biryani1.mo']),
+    data_files=[
+        ('share/locale/fr/LC_MESSAGES',
+         ['biryani/i18n/fr/LC_MESSAGES/biryani.mo']),
         ],
-    extras_require = dict(
-        datetimeconv = [
-            'isodate >= 0.4',
-            'pytz',
-            ],
-        ),
-    install_requires = [
-        'Babel >= 0.9.4',
-        ],
-    message_extractors = {
-        'biryani1': [
-            ('**.py', 'python', None),
-            ],
-        },
-#    package_data = {'biryani1': ['i18n/*/LC_MESSAGES/*.mo']},
-    packages = find_packages(exclude = ['ez_setup']),
-    zip_safe = False,
+    extras_require=dict(
+        datetimeconv=['isodate >= 0.4', 'pytz'],
+        webobconv=['webob'],
+        netconv=['pydns'],
+        bsonconv=['pymongo'],
+        jwtconv=['pycrypto'],
+    ),
+    install_requires=['Babel >= 0.9.4'],
+    message_extractors={
+        'biryani': [('**.py', 'python', None)],
+    },
+    packages=find_packages(exclude=['ez_setup']),
+    zip_safe=False,
     )

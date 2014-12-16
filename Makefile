@@ -10,3 +10,20 @@ pep8:
 pyflakes:
 	rm -Rf cache/templates*/
 	pyflakes .
+
+distfile:
+	python setup.py sdist bdist_wheel
+
+test_publish:
+	python setup.py sdist bdist_wheel upload -r testpypi
+
+publish:
+	twine upload dist/*
+	make clean
+
+clean:
+	rm -f dist/*
+	rm -rf build/*
+
+test:
+	python setup.py build_sphinx -b doctest

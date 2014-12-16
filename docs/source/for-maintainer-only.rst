@@ -3,18 +3,18 @@ For *Biryani* maintainer only
 *****************************
 
 
-How to release a new version of *Biryani1*
+How to release a new version of *Biryani*
 ==========================================
 
 #. Extract strings to translate from source code::
 
     ./setup.py extract_messages
 
-#. Update catalog (aka ``.po`` files) from biryani1/i18n/biryani1.pot``::
+#. Update catalog (aka ``.po`` files) from biryani/i18n/biryani.pot``::
 
     ./setup.py update_catalog
 
-#. Ensure that Project-Id-Version in ``biryani1/i18n/biryani1.pot`` and ``.po`` files are correct.
+#. Ensure that Project-Id-Version in ``biryani/i18n/biryani.pot`` and ``.po`` files are correct.
 
 #. Send source file and translations to *Transifex*::
 

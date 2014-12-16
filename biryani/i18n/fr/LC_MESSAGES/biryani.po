@@ -1,398 +1,404 @@
-# Translations template for Biryani1.
+# French translations for Biryani.
 # Copyright (C) 2014 Easter-eggs
-# This file is distributed under the same license as the Biryani1 project.
-# 
+# This file is distributed under the same license as the Biryani project.
+#
 # Translators:
 # Emmanuel <emmanuel@raviart.com>, 2013-2014
 msgid ""
 msgstr ""
-"Project-Id-Version: Biryani\n"
+"Project-Id-Version:  Biryani\n"
 "Report-Msgid-Bugs-To: eraviart@easter-eggs.com\n"
-"POT-Creation-Date: 2014-06-15 13:05+0200\n"
+"POT-Creation-Date: 2014-12-12 18:37+0100\n"
 "PO-Revision-Date: 2014-06-15 11:06+0000\n"
 "Last-Translator: Emmanuel <emmanuel@raviart.com>\n"
-"Language-Team: French (http://www.transifex.com/projects/p/biryani/language/fr/)\n"
+"Language-Team: French "
+"(http://www.transifex.com/projects/p/biryani/language/fr/)\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
-"Language: fr\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: biryani1/babelconv.py:64 biryani1/bsonconv.py:187
+#: biryani/babelconv.py:64 biryani/bsonconv.py:186
 msgid "Invalid value"
 msgstr "Valeur incorrecte"
 
-#: biryani1/base64conv.py:63
+#: biryani/base64conv.py:63
 msgid "Invalid base64 string"
 msgstr "Chaîne base64 incorrecte"
 
-#: biryani1/base64conv.py:116 biryani1/base64conv.py:122
+#: biryani/base64conv.py:116 biryani/base64conv.py:122
 msgid "Invalid base64url string"
 msgstr "Chaîne base64url incorrecte"
 
-#: biryani1/baseconv.py:144
+#: biryani/baseconv.py:144
 msgid "Value must be a float"
 msgstr "La valeur doit être un nombre flottant"
 
-#: biryani1/baseconv.py:177
+#: biryani/baseconv.py:177
 msgid "Value must be an integer"
 msgstr "La valeur doit être un entier"
 
-#: biryani1/baseconv.py:357
+#: biryani/baseconv.py:357
 msgid "An error occured"
 msgstr "Une erreur est survenue"
 
-#: biryani1/baseconv.py:481
+#: biryani/baseconv.py:481
 msgid "Unknown key: {0}"
 msgstr "Clé inconnue : {0}"
 
-#: biryani1/baseconv.py:490
+#: biryani/baseconv.py:490
 msgid "Index out of range: {0}"
 msgstr "Index en dehors des limites : {0}"
 
-#: biryani1/baseconv.py:579 biryani1/baseconv.py:1344
+#: biryani/baseconv.py:579 biryani/baseconv.py:1344
 msgid "Value must be a boolean"
 msgstr "La valeur doit être booléenne"
 
-#: biryani1/baseconv.py:661 biryani1/baseconv.py:667 biryani1/baseconv.py:1412
+#: biryani/baseconv.py:661 biryani/baseconv.py:667 biryani/baseconv.py:1412
 msgid "Invalid URL"
 msgstr "URL incorrecte"
 
-#: biryani1/baseconv.py:672
+#: biryani/baseconv.py:672
 msgid "URL must be complete"
 msgstr "L'URL doit être complète"
 
-#: biryani1/baseconv.py:674
+#: biryani/baseconv.py:674
 msgid "Scheme must belong to {0}"
 msgstr "Le protocole doit faire partie de {0}"
 
-#: biryani1/baseconv.py:680
+#: biryani/baseconv.py:680
 msgid "URL must not contain a path"
 msgstr "L'URL ne doit pas contenir de chemin"
 
-#: biryani1/baseconv.py:688
+#: biryani/baseconv.py:688
 msgid "URL must not contain a query"
 msgstr "L'URL ne doit pas contenir de requête"
 
-#: biryani1/baseconv.py:693
+#: biryani/baseconv.py:693
 msgid "URL must not contain a fragment"
 msgstr "L'URL ne doit pas contenir de fragment"
 
-#: biryani1/baseconv.py:1373
+#: biryani/baseconv.py:1373
 msgid "An email must contain exactly one \"@\""
 msgstr "Un courriel doit contenir exactement un \"@\""
 
-#: biryani1/baseconv.py:1375
+#: biryani/baseconv.py:1375
 msgid "Invalid username"
 msgstr "Nom d'utilisateur incorrect"
 
-#: biryani1/baseconv.py:1377
+#: biryani/baseconv.py:1377
 msgid "Invalid domain name"
 msgstr "Nom de domaine incorrect"
 
-#: biryani1/baseconv.py:1414
+#: biryani/baseconv.py:1414
 msgid "URL must not be complete"
 msgstr "L'URL ne doit pas être complète"
 
-#: biryani1/baseconv.py:1718 biryani1/baseconv.py:1728
-#: biryani1/baseconv.py:1824
+#: biryani/baseconv.py:1718 biryani/baseconv.py:1728 biryani/baseconv.py:1824
 msgid "Unexpected item"
 msgstr "Élément inattendu"
 
-#: biryani1/baseconv.py:1965
+#: biryani/baseconv.py:1965
 msgid "Expression \"{0}\" doesn't match any key"
 msgstr "L'expression \"{0}\" ne correspond à aucune clé"
 
-#: biryani1/baseconv.py:1971
+#: biryani/baseconv.py:1971
 msgid "Test failed"
 msgstr "Échec du test"
 
-#: biryani1/baseconv.py:2016
+#: biryani/baseconv.py:2016
 msgid "Value must be between {0} and {1}"
 msgstr "La valeur doit être comprise entre {0} et {1}"
 
-#: biryani1/baseconv.py:2057
+#: biryani/baseconv.py:2057
 msgid "Value must be equal to {0}"
 msgstr "La valeur doit être égale à {0}"
 
-#: biryani1/baseconv.py:2077
+#: biryani/baseconv.py:2077
 msgid "Value must be greater than or equal to {0}"
 msgstr "La valeur doit être supérieure ou égale à {0}"
 
-#: biryani1/baseconv.py:2102
+#: biryani/baseconv.py:2102
 msgid "Value must belong to {0}"
 msgstr "La valeur doit faire partie de {0}"
 
-#: biryani1/baseconv.py:2103
+#: biryani/baseconv.py:2103
 msgid "..."
 msgstr "..."
 
-#: biryani1/baseconv.py:2126
+#: biryani/baseconv.py:2126
 msgid "Value must be {0}"
 msgstr "La valeur doit être {0}"
 
-#: biryani1/baseconv.py:2142
+#: biryani/baseconv.py:2142
 msgid "Value is not an instance of {0}"
 msgstr "La valeur n'est pas une instance de {0}"
 
-#: biryani1/baseconv.py:2162
+#: biryani/baseconv.py:2162
 msgid "Value must be less than or equal to {0}"
 msgstr "La valeur doit être inférieure ou égale à {0}"
 
-#: biryani1/baseconv.py:2165
+#: biryani/baseconv.py:2165
 msgid "Unexpected value"
 msgstr "Valeur inattendue"
 
-#: biryani1/baseconv.py:2210
+#: biryani/baseconv.py:2210
 msgid "Value must not belong to {0}"
 msgstr "La valeur ne doit pas appartenir à {0}"
 
-#: biryani1/baseconv.py:2213
+#: biryani/baseconv.py:2213
 msgid "Missing value"
 msgstr "Valeur manquante"
 
-#: biryani1/creditcardconv.py:194
+#: biryani/creditcardconv.py:194
 msgid "Unknown type of credit card"
 msgstr "Type de carte de crédit inconnu"
 
-#: biryani1/creditcardconv.py:204
+#: biryani/creditcardconv.py:204
 msgid "Invalid security code for credit card"
 msgstr "Code de sécurité incorrect pour la carte de crédit"
 
-#: biryani1/creditcardconv.py:240
+#: biryani/creditcardconv.py:240
 msgid "Credit card number must contain digits"
 msgstr "Un numéro de carte de crédit doit contenir des chiffres"
 
-#: biryani1/creditcardconv.py:242
+#: biryani/creditcardconv.py:242
 msgid "Credit card number must contain only digits"
 msgstr "Un numéro de carte de crédit doit contenir uniquement des chiffres"
 
-#: biryani1/creditcardconv.py:253
+#: biryani/creditcardconv.py:253
 msgid "Wrong number of digits in credit card number"
 msgstr "Mauvais nombre de chiffres dans le numéro de carte de crédit"
 
-#: biryani1/creditcardconv.py:255
+#: biryani/creditcardconv.py:255
 msgid "Invalid credit card number (unknown prefix)"
 msgstr "Numéro de carte de crédit incorrect (mauvais préfixe)"
 
-#: biryani1/creditcardconv.py:266
+#: biryani/creditcardconv.py:266
 msgid "Invalid credit card number (wrong checksum)"
 msgstr "Numéro de carte de crédit incorrect (mauvais code d'erreur)"
 
-#: biryani1/datetimeconv.py:201
+#: biryani/datetimeconv.py:201
 msgid "Value must be a date in ISO 8601 format"
 msgstr "La valeur doit être une date au format ISO 8601"
 
-#: biryani1/datetimeconv.py:254
+#: biryani/datetimeconv.py:254
 msgid "Value must be a date-time in ISO 8601 format"
 msgstr "La valeur doit être une date et heure au format ISO 8601"
 
-#: biryani1/datetimeconv.py:299
+#: biryani/datetimeconv.py:299
 msgid "Value must be a time in ISO 8601 format"
 msgstr "La valeur doit être une date au format ISO 8601"
 
-#: biryani1/datetimeconv.py:357 biryani1/datetimeconv.py:389
+#: biryani/datetimeconv.py:357 biryani/datetimeconv.py:389
 msgid "Value must be a timestamp"
 msgstr "La valeur doit être un horodatage"
 
-#: biryani1/frconv.py:201
+#: biryani/frconv.py:201
 msgid "Unexpected non numerical characters in phone number"
 msgstr "Caractère non numérique inattendu dans le numéro de téléphone"
 
-#: biryani1/frconv.py:213
+#: biryani/frconv.py:213
 msgid "La Réunion, Mayotte"
 msgstr "La Réunion, Mayotte"
 
-#: biryani1/frconv.py:214
+#: biryani/frconv.py:214
 msgid "Guadeloupe, Saint-Barthélemy and Saint-Martin"
 msgstr "Guadeloupe, Saint-Barthélemy et Saint-Martin"
 
-#: biryani1/frconv.py:215
+#: biryani/frconv.py:215
 msgid "French Guyana"
 msgstr "Guyane française"
 
-#: biryani1/frconv.py:216
+#: biryani/frconv.py:216
 msgid "Martinique"
 msgstr "Martinique"
 
-#: biryani1/frconv.py:221 biryani1/frconv.py:232
+#: biryani/frconv.py:221 biryani/frconv.py:232
 msgid "Wrong number of digits for phone number of {0}"
 msgstr "Mauvais nombre de chiffres dans le numéro de téléphone de {0}"
 
-#: biryani1/frconv.py:224
+#: biryani/frconv.py:224
 msgid "Saint Pierre and Miquelon"
 msgstr "Saint Pierre et Miquelon"
 
-#: biryani1/frconv.py:225
+#: biryani/frconv.py:225
 msgid "Wallis and Futuna"
 msgstr "Wallis et Futuna"
 
-#: biryani1/frconv.py:226
+#: biryani/frconv.py:226
 msgid "New Caledonia"
 msgstr "Nouvelle Calédonie"
 
-#: biryani1/frconv.py:227
+#: biryani/frconv.py:227
 msgid "French Polynesia"
 msgstr "Polynésie française"
 
-#: biryani1/frconv.py:234
+#: biryani/frconv.py:234
 msgid "Unknown international phone number"
 msgstr "Numéro de téléphone international inconnu"
 
-#: biryani1/frconv.py:241
+#: biryani/frconv.py:241
 msgid "Unexpected first digit in phone number: {0} instead of 0"
 msgstr "Le premier chiffre du numéro de téléphone est inattendu : {0} au lieu de 0"
 
-#: biryani1/frconv.py:245
+#: biryani/frconv.py:245
 msgid "Wrong number of digits in phone number"
 msgstr "Mauvais nombre de chiffres dans le numéro de téléphone"
 
-#: biryani1/frconv.py:281
+#: biryani/frconv.py:281
 msgid "INSEE code must contain only 5 digits or \"A\" or \"B\""
 msgstr "Un code INSEE doit contenir seulement 5 chiffres ou \"A\" ou \"B\""
 
-#: biryani1/frconv.py:344
+#: biryani/frconv.py:344
 msgid "Postal code must contain only digits"
 msgstr "Un code postal doit contenir seulement des chiffres"
 
-#: biryani1/frconv.py:345
+#: biryani/frconv.py:345
 msgid "Postal code must have 5 digits"
 msgstr "Un code postal doit havoir 5 chiffres"
 
-#: biryani1/jsonconv.py:68 biryani1/jsonconv.py:108
+#: biryani/jsonconv.py:68 biryani/jsonconv.py:108
 msgid "Invalid JSON"
 msgstr "JSON incorrect"
 
-#: biryani1/jsonconv.py:104
+#: biryani/jsonconv.py:104
 msgid "JSON doesn't use \"utf-8\" encoding"
 msgstr "Le JSON n'est pas encodé en \"utf-8\""
 
-#: biryani1/jwtconv.py:118 biryani1/jwtconv.py:128 biryani1/jwtconv.py:137
-#: biryani1/jwtconv.py:142
+#: biryani/jwtconv.py:118 biryani/jwtconv.py:128 biryani/jwtconv.py:137
+#: biryani/jwtconv.py:142
 msgid "Invalid format"
 msgstr "Format incorrect"
 
-#: biryani1/jwtconv.py:144
+#: biryani/jwtconv.py:144
 msgid "Not a JSON Web Token"
 msgstr "Ce n'est pas un jeton web JSON"
 
-#: biryani1/jwtconv.py:514
+#: biryani/jwtconv.py:514
 msgid "Invalid crypted JSON web token"
 msgstr "Jeton web JSON crypté incorrect"
 
-#: biryani1/jwtconv.py:602 biryani1/jwtconv.py:1023 biryani1/jwtconv.py:1176
+#: biryani/jwtconv.py:602 biryani/jwtconv.py:1023 biryani/jwtconv.py:1176
 msgid "Invalid header: {0}"
 msgstr "Entête incorrect : {0}"
 
-#: biryani1/jwtconv.py:605
+#: biryani/jwtconv.py:605
 msgid "Invalid encrypted key: {0}"
 msgstr "Clé cryptée incorrecte : {0}"
 
-#: biryani1/jwtconv.py:608
+#: biryani/jwtconv.py:608
 msgid "Invalid cyphertext: {0}"
 msgstr "Cryptogramme incorrect : {0}"
 
-#: biryani1/jwtconv.py:611
+#: biryani/jwtconv.py:611
 msgid "Invalid integrity value: {0}"
 msgstr "Valeur d'intégrité incorrecte : {0}"
 
-#: biryani1/jwtconv.py:625 biryani1/jwtconv.py:633
+#: biryani/jwtconv.py:625 biryani/jwtconv.py:633
 msgid "Invalid content master key"
 msgstr "Clé maître de contenu incorrecte"
 
-#: biryani1/jwtconv.py:639
+#: biryani/jwtconv.py:639
 msgid "Unexpected \"int\" header forbidden by AEAD algorithm {0}"
 msgstr "Entête \"int\" inattendu, interdit par l'algorithme AEAD {0}"
 
-#: biryani1/jwtconv.py:645
+#: biryani/jwtconv.py:645
 msgid "Missing \"int\" header, required by non AEAD algorithm {0}"
 msgstr "Entête \"int\" manquant, requis par l'algorithme non AEAD {0}"
 
-#: biryani1/jwtconv.py:660 biryani1/jwtconv.py:1267
+#: biryani/jwtconv.py:660 biryani/jwtconv.py:1267
 msgid "Non authentic signature"
 msgstr "Signature non authentique"
 
-#: biryani1/jwtconv.py:664 biryani1/jwtconv.py:677
+#: biryani/jwtconv.py:664 biryani/jwtconv.py:677
 msgid "Invalid header: \"iv\" required for {0} encryption method"
 msgstr "Entête incorrect : \"iv\" requis pour la méthode de cryptage {0}"
 
-#: biryani1/jwtconv.py:670 biryani1/jwtconv.py:684
+#: biryani/jwtconv.py:670 biryani/jwtconv.py:684
 msgid "Invalid cyphertext"
 msgstr "Cryptogramme incorrect"
 
-#: biryani1/jwtconv.py:693
+#: biryani/jwtconv.py:693
 msgid "Invalid compressed plaintext"
 msgstr "Text en clair compressé incorrect"
 
-#: biryani1/jwtconv.py:1016 biryani1/jwtconv.py:1169
+#: biryani/jwtconv.py:1016 biryani/jwtconv.py:1169
 msgid "Missing header"
 msgstr "Entête manquant"
 
-#: biryani1/jwtconv.py:1027 biryani1/jwtconv.py:1179
+#: biryani/jwtconv.py:1027 biryani/jwtconv.py:1179
 msgid "Missing signature"
 msgstr "Signature manquante"
 
-#: biryani1/jwtconv.py:1030 biryani1/jwtconv.py:1182
+#: biryani/jwtconv.py:1030 biryani/jwtconv.py:1182
 msgid "Unexpected signature in plaintext token"
 msgstr "Signature inattendue dans un jeton en clair"
 
-#: biryani1/jwtconv.py:1033
+#: biryani/jwtconv.py:1033
 msgid "Invalid encoded payload: {0}"
 msgstr "Contenu utile encodé incorrect : {0}"
 
-#: biryani1/jwtconv.py:1230
+#: biryani/jwtconv.py:1230
 msgid "Unauthorized digital signature algorithm"
 msgstr "Algorithme de signature numérique non autorisé"
 
-#: biryani1/jwtconv.py:1241
+#: biryani/jwtconv.py:1241
 msgid "Unable to check signature: Missing shared secret"
 msgstr "Impossible de vérfier la signature : Le secret partagé est manquant"
 
-#: biryani1/jwtconv.py:1265
+#: biryani/jwtconv.py:1265
 msgid "Invalid signature"
 msgstr "Signature incorrecte"
 
-#: biryani1/jwtconv.py:1269
+#: biryani/jwtconv.py:1269
 msgid "Unimplemented digital signature algorithm"
 msgstr "Algorithme de signature numérique non implémenté"
 
-#: biryani1/jwtconv.py:1282
+#: biryani/jwtconv.py:1282
 msgid "Expired JSON web token"
 msgstr "Jeton web JSON expiré"
 
-#: biryani1/jwtconv.py:1285
+#: biryani/jwtconv.py:1285
 msgid "JSON web token issued in the future"
 msgstr "Jeton web JSON émis dans le futur"
 
-#: biryani1/jwtconv.py:1288
+#: biryani/jwtconv.py:1288
 msgid "JSON web token not yet valid"
 msgstr "Jeton web JSON pas encore valide"
 
-#: biryani1/netconv.py:80
+#: biryani/netconv.py:80
 msgid "An error occured when trying to connect to the email server: {0}"
-msgstr "Une erreur est survenue durant la tentative de connexion au serveur de courriel : {0}"
+msgstr ""
+"Une erreur est survenue durant la tentative de connexion au serveur de "
+"courriel : {0}"
 
-#: biryani1/netconv.py:83
+#: biryani/netconv.py:83
 msgid "Domain \"{0}\" doesn't exist"
 msgstr "Le domaine \"{0}\" n'existe pas"
 
-#: biryani1/netconv.py:124
+#: biryani/netconv.py:124
 msgid "An error occured when trying to connect to the web server: {0:d} {1}"
-msgstr "Une erreur est survenue durant la tentative de connexion au serveur web : {0:d} {1}"
+msgstr ""
+"Une erreur est survenue durant la tentative de connexion au serveur web :"
+" {0:d} {1}"
 
-#: biryani1/netconv.py:128
+#: biryani/netconv.py:128
 msgid "The web server responded with a bad status code: {0:d} {1}"
 msgstr "Le serveur web a répondu avec un mauvais code d'état : {0:d} {1}"
 
-#: biryani1/netconv.py:131
+#: biryani/netconv.py:131
 msgid "An error occured when trying to connect to the web server: {0}"
-msgstr "Une erreur est survenue durant la tentative de connexion au serveur web : {0}"
+msgstr ""
+"Une erreur est survenue durant la tentative de connexion au serveur web :"
+" {0}"
 
-#: biryani1/uuidconv.py:49
+#: biryani/uuidconv.py:49
 msgid "Invalid UUID"
 msgstr "UUID incorrect"
 
-#: biryani1/nonstandard/deprecatedbaseconv.py:124
+#: biryani/nonstandard/deprecatedbaseconv.py:124
 msgid "Invalid value format"
 msgstr "Format de la valeur incorrect"
+

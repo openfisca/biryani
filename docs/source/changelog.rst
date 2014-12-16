@@ -3,19 +3,19 @@
 *******************
 
 
-Next Release (Biryani1 1.0)
+Next Release (Biryani 1.0)
 ===========================
 
-* Rename package to ``biryani1``.
+* Rename package to ``biryani``.
 
-* :func:`biryani1.custom_conv` now accepts modules instead of modules names.
+* :func:`biryani.custom_conv` now accepts modules instead of modules names.
 
 * Mapping conversions now preserve order when used with OrderedDict.
 
-* Add parameter ``handle_none_value`` to func:`biryani1.baseconv.new_mapping`, func:`biryani1.baseconv.new_sequence` &
-   func:`biryani1.baseconv.new_struct`.
+* Add parameter ``handle_none_value`` to func:`biryani.baseconv.new_mapping`, func:`biryani.baseconv.new_sequence` &
+   func:`biryani.baseconv.new_struct`.
 
-* Rename parameter ``set_none_value`` to ``handle_none_value`` in func:`biryani1.baseconv.set_value`.
+* Rename parameter ``set_none_value`` to ``handle_none_value`` in func:`biryani.baseconv.set_value`.
 
 
 Remove implicit actions from converters
@@ -23,40 +23,40 @@ Remove implicit actions from converters
 
 * Empty collections are no more replaced with ``None`` and parameter ``keep_empty`` is removed from:
 
-  * :func:`biryani1.baseconv.new_mapping`
+  * :func:`biryani.baseconv.new_mapping`
 
-  * :func:`biryani1.baseconv.new_sequence`
+  * :func:`biryani.baseconv.new_sequence`
 
-  * :func:`biryani1.baseconv.new_struct`
+  * :func:`biryani.baseconv.new_struct`
 
-  * :func:`biryani1.baseconv.struct`
+  * :func:`biryani.baseconv.struct`
 
-  * :func:`biryani1.baseconv.structured_mapping`
+  * :func:`biryani.baseconv.structured_mapping`
 
-  * :func:`biryani1.baseconv.structured_sequence`
+  * :func:`biryani.baseconv.structured_sequence`
 
-  * :func:`biryani1.baseconv.uniform_mapping`
+  * :func:`biryani.baseconv.uniform_mapping`
 
-  * :func:`biryani1.baseconv.uniform_sequence`
+  * :func:`biryani.baseconv.uniform_sequence`
 
 * Replace parameter ``keep_none_items`` with inverse parameter ``drop_none_items`` in:
 
-  * :func:`biryani1.baseconv.item_or_sequence`
+  * :func:`biryani.baseconv.item_or_sequence`
 
-  * :func:`biryani1.baseconv.structured_sequence`
+  * :func:`biryani.baseconv.structured_sequence`
 
 * Replace parameter ``keep_none_keys`` with inverse parameter ``drop_none_keys`` in
-  :func:`biryani1.baseconv.uniform_mapping`.
+  :func:`biryani.baseconv.uniform_mapping`.
 
 * Replace parameter ``keep_none_values`` with inverse parameter ``drop_none_values`` in:
 
-  * :func:`biryani1.baseconv.struct`
+  * :func:`biryani.baseconv.struct`
 
-  * :func:`biryani1.baseconv.structured_mapping`
+  * :func:`biryani.baseconv.structured_mapping`
 
-  * :func:`biryani1.baseconv.uniform_mapping`
+  * :func:`biryani.baseconv.uniform_mapping`
 
-* Parameter ``add_prefix`` of :func:`biryani1.baseconv.make_input_to_url` and :func:`biryani1.baseconv.make_input_to_url`
+* Parameter ``add_prefix`` of :func:`biryani.baseconv.make_input_to_url` and :func:`biryani.baseconv.make_input_to_url`
   is now ``None`` by default, instead of ``"http://"``.
 
 

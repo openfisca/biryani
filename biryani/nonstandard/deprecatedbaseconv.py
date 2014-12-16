@@ -5,7 +5,7 @@
 # By: Emmanuel Raviart <eraviart@easter-eggs.com>
 #
 # Copyright (C) 2009, 2010, 2011, 2012 Easter-eggs
-# http://packages.python.org/Biryani1/
+# http://packages.python.org/Biryani/
 #
 # This file is part of Biryani.
 #
@@ -108,7 +108,7 @@ def strip(chars = None):
     This converter is non-standard, because:
 
     * It is a simple one-liner.
-    * Most of the times, converters :func:`biryani1.baseconv.cleanup_line` or :func:`biryani1.baseconv.cleanup_text` are
+    * Most of the times, converters :func:`biryani.baseconv.cleanup_line` or :func:`biryani.baseconv.cleanup_text` are
       used instead.
 
     >>> strip()(u'   Hello world!   ')

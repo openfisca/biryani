@@ -7,182 +7,182 @@ Converters
 ==========
 
 
-biryani1
+biryani
 --------
 
 .. testsetup::
 
-   from biryani1 import *
+   from biryani import *
 
-.. automodule:: biryani1
+.. automodule:: biryani
    :members:
    :undoc-members:
 
 
-biryani1.baseconv
+biryani.baseconv
 -----------------
 
 .. testsetup::
 
-   from biryani1.baseconv import *
+   from biryani.baseconv import *
 
-.. automodule:: biryani1.baseconv
+.. automodule:: biryani.baseconv
    :members:
    :undoc-members:
 
 
-biryani1.babelconv
+biryani.babelconv
 ------------------
 
 .. testsetup::
 
-   from biryani1.babelconv import *
+   from biryani.babelconv import *
 
-.. automodule:: biryani1.babelconv
+.. automodule:: biryani.babelconv
    :members:
    :undoc-members:
 
 
-biryani1.base64conv
+biryani.base64conv
 -------------------
 
 .. testsetup::
 
-   from biryani1.base64conv import *
+   from biryani.base64conv import *
 
-.. automodule:: biryani1.base64conv
+.. automodule:: biryani.base64conv
    :members:
    :undoc-members:
 
 
-biryani1.bsonconv
+biryani.bsonconv
 -----------------
 
 .. testsetup::
 
-   from biryani1.bsonconv import *
+   from biryani.bsonconv import *
 
-.. automodule:: biryani1.bsonconv
+.. automodule:: biryani.bsonconv
    :members:
    :undoc-members:
 
 
-biryani1.creditcardconv
+biryani.creditcardconv
 -----------------------
 
 .. testsetup::
 
-   from biryani1.creditcardconv import *
+   from biryani.creditcardconv import *
 
-.. automodule:: biryani1.creditcardconv
+.. automodule:: biryani.creditcardconv
    :members:
    :undoc-members:
 
 
-biryani1.datetimeconv
+biryani.datetimeconv
 ---------------------
 
 .. testsetup::
 
-   from biryani1.datetimeconv import *
+   from biryani.datetimeconv import *
 
-.. automodule:: biryani1.datetimeconv
+.. automodule:: biryani.datetimeconv
    :members:
    :undoc-members:
 
 
-biryani1.jsonconv
+biryani.jsonconv
 -----------------
 
 .. testsetup::
 
-   from biryani1.jsonconv import *
+   from biryani.jsonconv import *
 
-.. automodule:: biryani1.jsonconv
+.. automodule:: biryani.jsonconv
    :members:
    :undoc-members:
 
 
-biryani1.jwkconv
+biryani.jwkconv
 -----------------
 
 .. testsetup::
 
-   from biryani1.jwkconv import *
+   from biryani.jwkconv import *
 
-.. automodule:: biryani1.jwkconv
+.. automodule:: biryani.jwkconv
    :members:
    :undoc-members:
 
 
-biryani1.jwtconv
+biryani.jwtconv
 -----------------
 
 .. testsetup::
 
-   from biryani1.jwtconv import *
+   from biryani.jwtconv import *
 
-.. automodule:: biryani1.jwtconv
+.. automodule:: biryani.jwtconv
    :members:
    :undoc-members:
 
 
-biryani1.netconv
+biryani.netconv
 ----------------
 
 .. testsetup::
 
-   from biryani1.netconv import *
+   from biryani.netconv import *
 
-.. automodule:: biryani1.netconv
+.. automodule:: biryani.netconv
    :members:
    :undoc-members:
 
 
-biryani1.objectconv
+biryani.objectconv
 -------------------
 
 .. testsetup::
 
-   from biryani1.objectconv import *
+   from biryani.objectconv import *
 
-.. automodule:: biryani1.objectconv
+.. automodule:: biryani.objectconv
    :members:
    :undoc-members:
 
 
-biryani1.states
+biryani.states
 ---------------
 
 .. testsetup::
 
-   from biryani1.states import *
+   from biryani.states import *
 
-.. automodule:: biryani1.states
+.. automodule:: biryani.states
    :members:
    :undoc-members:
 
 
-biryani1.uuidconv
+biryani.uuidconv
 -----------------
 
 .. testsetup::
 
-   from biryani1.uuidconv import *
+   from biryani.uuidconv import *
 
-.. automodule:: biryani1.uuidconv
+.. automodule:: biryani.uuidconv
    :members:
    :undoc-members:
 
 
-biryani1.webobconv
+biryani.webobconv
 ------------------
 
 .. testsetup::
 
-   from biryani1.webobconv import *
+   from biryani.webobconv import *
 
-.. automodule:: biryani1.webobconv
+.. automodule:: biryani.webobconv
    :members:
    :undoc-members:
 
@@ -190,14 +190,14 @@ biryani1.webobconv
 String Functions
 ================
 
-biryani1.strings
+biryani.strings
 ----------------
 
 .. testsetup::
 
-   from biryani1.strings import *
+   from biryani.strings import *
 
-.. automodule:: biryani1.strings
+.. automodule:: biryani.strings
    :members:
    :undoc-members:
 
