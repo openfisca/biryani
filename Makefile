@@ -18,8 +18,7 @@ test_publish:
 	python setup.py sdist bdist_wheel upload -r testpypi
 
 publish:
-	twine upload dist/*
-	make clean
+	python setup.py sdist bdist_wheel upload -r pypi
 
 clean:
 	rm -f dist/*
