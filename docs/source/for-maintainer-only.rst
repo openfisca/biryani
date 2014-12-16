@@ -6,13 +6,9 @@ For *Biryani* maintainer only
 How to release a new version of *Biryani*
 ==========================================
 
-#. Extract strings to translate from source code::
+#. Extract strings to translate from source code and update catalog (aka ``.po`` files) from biryani/i18n/biryani.pot``::
 
-    ./setup.py extract_messages
-
-#. Update catalog (aka ``.po`` files) from biryani/i18n/biryani.pot``::
-
-    ./setup.py update_catalog
+    make update-i18n
 
 #. Ensure that Project-Id-Version in ``biryani/i18n/biryani.pot`` and ``.po`` files are correct.
 
@@ -88,4 +84,3 @@ How to release a new version of *Biryani*
     version = 'NEW_FUTURE_MINOR_NUMBER'
     # The full version, including alpha/beta/rc tags.
     release = 'NEW_FUTURE_RELEASE_NUMBERdev'
-
