@@ -12,6 +12,9 @@ clean-pyc:
 compile-catalog:
 	python setup.py compile_catalog
 
+ctags:
+	ctags --recurse=yes --exclude=build --exclude=docs --exclude=dist .
+
 distfile: compile-catalog
 	python setup.py sdist bdist_wheel
 
