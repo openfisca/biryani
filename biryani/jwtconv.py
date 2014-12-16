@@ -71,7 +71,7 @@ digest_constructor_by_size = {
 valid_encryption_algorithms = (
     u'A128KW',
     u'A256KW',
-#    u'ECDH-ES',
+    # u'ECDH-ES',
     u'RSA1_5',
     u'RSA-OAEP',
     )
@@ -92,7 +92,7 @@ valid_key_derivation_functions = (
     u'CS512',
     )
 valid_signature_algorithms = (
-#    u'ES256',
+    # u'ES256',
     u'HS256',
     u'HS384',
     u'HS512',
@@ -683,7 +683,7 @@ _3cYrFHM7X640lLd_QoUKw'
             except:
                 return token, state._(u'Invalid cyphertext')
         else:
-            TODO
+            raise 'TODO'
 
         compression = header['zip']
         if compression == u'DEF':
@@ -973,7 +973,7 @@ BqAdzpROlyiw'
                     cipher = Cipher_PKCS1_OAEP.new(rsa_public_key)
                 encrypted_key = cipher.encrypt(content_master_key)
             else:
-                TODO
+                raise 'TODO'
         encoded_encrypted_key = check(make_bytes_to_base64url(remove_padding = True))(encrypted_key)
 
         # Generate a random Initialization Vector (IV) (if required for the algorithm).
@@ -1079,7 +1079,7 @@ BqAdzpROlyiw'
             cyphertext, integrity_value = gcm.gcm_encrypt(content_encryption_key, initialization_vector,
                 compressed_plaintext, additional_authenticated_data)
         else:
-            TODO
+            raise 'TODO'
         encoded_cyphertext = check(make_bytes_to_base64url(remove_padding = True))(cyphertext, state = state)
 
         secured_input = '{0}.{1}.{2}'.format(encoded_header, encoded_encrypted_key, encoded_cyphertext)
@@ -1278,13 +1278,15 @@ def verify_decoded_json_web_token_time():
         dict(
             claims = struct(
                 dict(
-                    exp = test(lambda timestamp: now_timestamp - 300 < timestamp,  # Allow 5 minutes drift.
+                    exp = test(
+                        lambda timestamp: now_timestamp - 300 < timestamp,  # Allow 5 minutes drift.
                         error = N_(u'Expired JSON web token'),
                         ),
                     iat = test_less_or_equal(now_timestamp + 300,  # Allow 5 minutes drift.
                         error = N_(u'JSON web token issued in the future'),
                         ),
-                    nbf = test(lambda timestamp: now_timestamp + 300 >= timestamp,  # Allow 5 minutes drift.
+                    nbf = test(
+                        lambda timestamp: now_timestamp + 300 >= timestamp,  # Allow 5 minutes drift.
                         error = N_(u'JSON web token not yet valid'),
                         ),
                     ),

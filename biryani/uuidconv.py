@@ -29,7 +29,6 @@ import re
 import uuid
 
 from .baseconv import cleanup_line, function, pipe, test
-from . import states
 
 
 __all__ = [
