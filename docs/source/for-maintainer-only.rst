@@ -73,12 +73,11 @@ How to release a new version of *Biryani*
 #. Build and upload the package to Pypi::
 
     ./setup.py upload_sphinx
-    ./setup.py sdist
-    ./setup.py register
+    ./setup.py sdist bdist_wheel upload -r pypi
 
 #. Announce the new release.
 
-#. Edit ``setup.py`` to change version number (ie increase minor and add "dev" suffix)::
+#. Edit ``setup.py`` to change version number (ie increase patch number and add "dev" suffix)::
 
     version = 'NEW_FUTURE_RELEASE_NUMBERdev',
 
