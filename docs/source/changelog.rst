@@ -58,7 +58,7 @@ Remove implicit actions from converters
   is now ``None`` by default, instead of ``"http://"``.
 
 
-Biryani 0.10.0
+Biryani 0.10.1
 ==============
 
 * Rename package to ``biryani``.

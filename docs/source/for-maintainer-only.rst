@@ -6,9 +6,13 @@ For *Biryani* maintainer only
 How to release a new version of *Biryani*
 ==========================================
 
-#. Extract strings to translate from source code and update catalog (aka ``.po`` files) from biryani/i18n/biryani.pot``::
+#. Extract strings to translate from source code::
 
-    make update-i18n
+    ./setup.py extract_messages
+
+#. Update catalog (aka ``.po`` files) from biryani/i18n/biryani.pot``::
+
+    ./setup.py update_catalog
 
 #. Ensure that Project-Id-Version in ``biryani/i18n/biryani.pot`` and ``.po`` files are correct.
 
@@ -61,10 +65,10 @@ How to release a new version of *Biryani*
 
 #. Commit changes.
 
-#. Tag the new release and upload it to Gitorious::
+#. Tag the new release and upload it to git server::
 
     git tag NEW_RELEASE_NUMBER
-    git push gitorious NEW_RELEASE_NUMBER
+    git push origin NEW_RELEASE_NUMBER
 
 #. Build and upload the package to Pypi::
 

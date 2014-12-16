@@ -1,8 +1,9 @@
-build/
 *.egg-info
-dist/
 *.mo
 *.pyc
 *.pyo
 *~
-
+/build/
+/dist/
+/docs/build/
+/tags

@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Biryani 0.10.0\n"
+"Project-Id-Version: Biryani 0.10.1\n"
 "Report-Msgid-Bugs-To: emmanuel@raviart.com\n"
-"POT-Creation-Date: 2014-12-12 18:37+0100\n"
+"POT-Creation-Date: 2014-12-16 15:51+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -354,15 +354,15 @@ msgstr ""
 msgid "Unimplemented digital signature algorithm"
 msgstr ""
 
-#: biryani/jwtconv.py:1282
+#: biryani/jwtconv.py:1283
 msgid "Expired JSON web token"
 msgstr ""
 
-#: biryani/jwtconv.py:1285
+#: biryani/jwtconv.py:1286
 msgid "JSON web token issued in the future"
 msgstr ""
 
-#: biryani/jwtconv.py:1288
+#: biryani/jwtconv.py:1290
 msgid "JSON web token not yet valid"
 msgstr ""
 
@@ -386,7 +386,7 @@ msgstr ""
 msgid "An error occured when trying to connect to the web server: {0}"
 msgstr ""
 
-#: biryani/uuidconv.py:49
+#: biryani/uuidconv.py:48
 msgid "Invalid UUID"
 msgstr ""
 

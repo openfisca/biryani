@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  Biryani\n"
 "Report-Msgid-Bugs-To: eraviart@easter-eggs.com\n"
-"POT-Creation-Date: 2014-12-12 18:37+0100\n"
+"POT-Creation-Date: 2014-12-16 15:51+0100\n"
 "PO-Revision-Date: 2014-06-15 11:06+0000\n"
 "Last-Translator: Emmanuel <emmanuel@raviart.com>\n"
 "Language-Team: French "
@@ -356,15 +356,15 @@ msgstr "Signature incorrecte"
 msgid "Unimplemented digital signature algorithm"
 msgstr "Algorithme de signature numérique non implémenté"
 
-#: biryani/jwtconv.py:1282
+#: biryani/jwtconv.py:1283
 msgid "Expired JSON web token"
 msgstr "Jeton web JSON expiré"
 
-#: biryani/jwtconv.py:1285
+#: biryani/jwtconv.py:1286
 msgid "JSON web token issued in the future"
 msgstr "Jeton web JSON émis dans le futur"
 
-#: biryani/jwtconv.py:1288
+#: biryani/jwtconv.py:1290
 msgid "JSON web token not yet valid"
 msgstr "Jeton web JSON pas encore valide"
 
@@ -394,7 +394,7 @@ msgstr ""
 "Une erreur est survenue durant la tentative de connexion au serveur web :"
 " {0}"
 
-#: biryani/uuidconv.py:49
+#: biryani/uuidconv.py:48
 msgid "Invalid UUID"
 msgstr "UUID incorrect"
 
