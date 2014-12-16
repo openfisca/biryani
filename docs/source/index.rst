@@ -111,8 +111,8 @@ Copyright and license
 
 *Biryani* is a free software.
 
-* Author: Emmanuel Raviart <eraviart@easter-eggs.com>
-* Copyright (C) 2009, 2010, 2011 `Easter-eggs <http://www.easter-eggs.com/>`_
+* Author: Emmanuel Raviart <emmanuel@raviart.com>
+* Copyright (C) 2009 - 2014 `Emmanuel Raviart`_
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -132,4 +132,3 @@ Get *Biryani*
 *Biryani* is available as an easy-installable package on the `Python Package Index <http://pypi.python.org/pypi/Biryani>`_.
 
 The code can be found in a Git repository, at http://gitorious.org/biryani.
-

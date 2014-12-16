@@ -1,5 +1,5 @@
 # French translations for Biryani.
-# Copyright (C) 2014 Easter-eggs
+# Copyright (C) 2009 - 2014 Emmanuel Raviart
 # This file is distributed under the same license as the Biryani project.
 #
 # Translators:
@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version:  Biryani\n"
-"Report-Msgid-Bugs-To: eraviart@easter-eggs.com\n"
+"Report-Msgid-Bugs-To: emmanuel@raviart.com\n"
 "POT-Creation-Date: 2014-12-16 15:51+0100\n"
 "PO-Revision-Date: 2014-06-15 11:06+0000\n"
 "Last-Translator: Emmanuel <emmanuel@raviart.com>\n"
@@ -401,4 +401,3 @@ msgstr "UUID incorrect"
 #: biryani/nonstandard/deprecatedbaseconv.py:124
 msgid "Invalid value format"
 msgstr "Format de la valeur incorrect"
-
