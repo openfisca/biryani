@@ -6,8 +6,6 @@
 Next Release (Biryani 1.0)
 ===========================
 
-* Rename package to ``biryani``.
-
 * :func:`biryani.custom_conv` now accepts modules instead of modules names.
 
 * Mapping conversions now preserve order when used with OrderedDict.
@@ -60,6 +58,12 @@ Remove implicit actions from converters
   is now ``None`` by default, instead of ``"http://"``.
 
 
+Biryani 0.10.0
+==============
+
+* Rename package to ``biryani``.
+
+
 Biryani 0.9
 ===========
 
@@ -84,7 +88,7 @@ Biryani 0.8
 
 * New :func:`biryani.baseconv.struct` converter that replaces both :func:`biryani.baseconv.structured_mapping` & :func:`biryani.baseconv.structured_sequence` converter.
 
-* Replace ``mapping`` and "sequence`` converters with :func:`biryani.baseconv.new_struct` (and :func:`biryani.baseconv.new_mapping` and :func:`biryani.baseconv.new_sequence`). 
+* Replace ``mapping`` and "sequence`` converters with :func:`biryani.baseconv.new_struct` (and :func:`biryani.baseconv.new_mapping` and :func:`biryani.baseconv.new_sequence`).
 
 * Add :func:`biryani.baseconv.get` converter.
 
