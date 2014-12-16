@@ -67,11 +67,12 @@ setup(
          ['biryani/i18n/fr/LC_MESSAGES/biryani.mo']),
         ],
     extras_require=dict(
-        datetimeconv=['isodate >= 0.4', 'pytz'],
-        webobconv=['webob'],
-        netconv=['pydns'],
         bsonconv=['pymongo'],
+        datetimeconv=['isodate >= 0.4', 'pytz'],
+        dev=['flake8'],
         jwtconv=['pycrypto'],
+        netconv=['pydns'],
+        webobconv=['webob'],
     ),
     install_requires=['Babel >= 0.9.4'],
     message_extractors={

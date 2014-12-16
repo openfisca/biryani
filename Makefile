@@ -1,15 +1,16 @@
-.PHONY: check pep8 pyflakes
+all: check test
 
-all: check
+check: flake8
 
-check: pep8 pyflakes
+clean: clean-pyc
+	rm -f dist/*
+	rm -rf build/*
 
-pep8:
-	pep8 --exclude=.git,cache,docs --ignore=E251 --max-line-length  120 .
+clean-pyc:
+	find -name '*.pyc' -exec rm \{\} \;
 
-pyflakes:
-	rm -Rf cache/templates*/
-	pyflakes .
+flake8: clean-pyc
+	python setup.py flake8
 
 distfile:
 	python setup.py sdist bdist_wheel
@@ -19,10 +20,6 @@ test_publish:
 
 publish:
 	python setup.py sdist bdist_wheel upload -r pypi
-
-clean:
-	rm -f dist/*
-	rm -rf build/*
 
 test:
 	python setup.py build_sphinx -b doctest
