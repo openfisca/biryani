@@ -50,7 +50,7 @@ doc_lines = __doc__.split('\n')
 
 setup(
     name='Biryani',
-    version='0.10.2',
+    version='0.10.3dev',
 
     author='Emmanuel Raviart',
     author_email='emmanuel@raviart.com',
