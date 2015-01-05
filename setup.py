@@ -62,10 +62,6 @@ setup(
     long_description='\n'.join(doc_lines[2:]),
     url='http://biryani.readthedocs.org/',
 
-    data_files=[
-        ('share/locale/fr/LC_MESSAGES',
-         ['biryani/i18n/fr/LC_MESSAGES/biryani.mo']),
-        ],
     extras_require=dict(
         bsonconv=['pymongo'],
         datetimeconv=['isodate >= 0.4', 'pytz'],
@@ -73,11 +69,12 @@ setup(
         jwtconv=['pycrypto'],
         netconv=['pydns'],
         webobconv=['webob'],
-    ),
+        ),
+    include_package_data=True,
     install_requires=['Babel >= 0.9.4'],
     message_extractors={
         'biryani': [('**.py', 'python', None)],
-    },
-    packages=find_packages(exclude=['ez_setup']),
+        },
+    packages=find_packages(),
     zip_safe=False,
     )
