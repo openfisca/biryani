@@ -112,7 +112,7 @@ Copyright and license
 *Biryani* is a free software.
 
 * Author: Emmanuel Raviart <emmanuel@raviart.com>
-* Copyright (C) 2009 - 2014 `Emmanuel Raviart`_
+* Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015 Emmanuel Raviart
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
