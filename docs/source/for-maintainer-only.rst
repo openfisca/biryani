@@ -63,7 +63,7 @@ How to release a new version of *Biryani*
 
     ./setup.py build_sphinx -b html
 
-#. Commit changes.
+#. Commit changes (message: "Release X.Y.Z") and push.
 
 #. Tag the new release and upload it to git server::
 
@@ -87,3 +87,5 @@ How to release a new version of *Biryani*
     version = 'NEW_FUTURE_MINOR_NUMBER'
     # The full version, including alpha/beta/rc tags.
     release = 'NEW_FUTURE_RELEASE_NUMBERdev'
+
+#. Commit changes (message: "Update to next dev version") and push.
