@@ -70,10 +70,16 @@ How to release a new version of *Biryani*
     git tag NEW_RELEASE_NUMBER
     git push origin NEW_RELEASE_NUMBER
 
-#. Build and upload the package to Pypi::
+#. Build and upload the documentation to PyPI and Read the Docs::
 
     ./setup.py upload_sphinx
-    ./setup.py sdist bdist_wheel upload -r pypi
+    curl -X POST http://readthedocs.org/build/biryani
+
+#. Build and upload the package to PyPI::
+
+    ./setup.py sdist bdist_wheel upload -r PyPI
+
+  ``upload_sphinx`` is provided by ``Sphinx-PyPI-upload`` which is listed as a ``dev`` extras_require dependency.
 
 #. Announce the new release.
 
