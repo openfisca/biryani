@@ -3,8 +3,26 @@
 *******************
 
 
-Next Release (Biryani 1.0)
-===========================
+Next release: Biryani 0.10.4dev
+===============================
+
+TODO
+
+
+Biryani 0.10.3
+==============
+
+* Add ``test_issubclass`` converter.
+
+
+Biryani 0.10.1
+==============
+
+* Rename package to ``biryani``.
+
+
+Biryani 0.9
+===========
 
 * :func:`biryani.custom_conv` now accepts modules instead of modules names.
 
@@ -56,30 +74,6 @@ Remove implicit actions from converters
 
 * Parameter ``add_prefix`` of :func:`biryani.baseconv.make_input_to_url` and :func:`biryani.baseconv.make_input_to_url`
   is now ``None`` by default, instead of ``"http://"``.
-
-
-Biryani 0.10.4
-==============
-
-TODO
-
-
-Biryani 0.10.3
-==============
-
-* Add ``test_issubclass`` converter.
-
-
-Biryani 0.10.1
-==============
-
-* Rename package to ``biryani``.
-
-
-Biryani 0.9
-===========
-
-TODO
 
 
 Biryani 0.8
