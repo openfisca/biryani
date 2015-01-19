@@ -1,14 +1,14 @@
 # Translations template for Biryani.
-# Copyright (C) 2014 Emmanuel Raviart
+# Copyright (C) 2015 Emmanuel Raviart
 # This file is distributed under the same license as the Biryani project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2015.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Biryani 0.10.1\n"
+"Project-Id-Version: Biryani 0.10.3dev\n"
 "Report-Msgid-Bugs-To: emmanuel@raviart.com\n"
-"POT-Creation-Date: 2014-12-16 15:51+0100\n"
+"POT-Creation-Date: 2015-01-19 11:40+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -133,19 +133,23 @@ msgstr ""
 msgid "Value is not an instance of {0}"
 msgstr ""
 
-#: biryani/baseconv.py:2162
+#: biryani/baseconv.py:2167
+msgid "Value is not a subclass of {0}"
+msgstr ""
+
+#: biryani/baseconv.py:2189
 msgid "Value must be less than or equal to {0}"
 msgstr ""
 
-#: biryani/baseconv.py:2165
+#: biryani/baseconv.py:2192
 msgid "Unexpected value"
 msgstr ""
 
-#: biryani/baseconv.py:2210
+#: biryani/baseconv.py:2237
 msgid "Value must not belong to {0}"
 msgstr ""
 
-#: biryani/baseconv.py:2213
+#: biryani/baseconv.py:2240
 msgid "Missing value"
 msgstr ""
 

@@ -98,6 +98,7 @@ __all__ = [
     'test_in',
     'test_is',
     'test_isinstance',
+    'test_issubclass',
     'test_less_or_equal',
     'test_none',
     'test_not_in',
@@ -2140,6 +2141,33 @@ def test_isinstance(class_or_classes, error = None):
     """
     return test(lambda value: isinstance(value, class_or_classes),
         error = error or N_(u'Value is not an instance of {0}').format(class_or_classes))
+
+
+def test_issubclass(class_or_classes, error = None):
+    """Return a converter that accepts only a class (or tuple of classes).
+
+    >>> test_issubclass(basestring)(int)
+    (<type 'int'>, u"Value is not a subclass of <type 'basestring'>")
+    >>> test_issubclass(basestring)('This is a string')
+    ('This is a string', u"Value is not a subclass of <type 'basestring'>")
+    >>> test_issubclass(basestring)(str)
+    (<type 'str'>, None)
+    >>> test_issubclass(basestring, error = u'Value is not a string')(int)
+    (<type 'int'>, u'Value is not a string')
+    >>> test_issubclass((float, int, basestring))(unicode)
+    (<type 'unicode'>, None)
+    """
+    def test_issubclass_converter(value, state = None):
+        if value is None:
+            return value, None
+        try:
+            result = issubclass(value, class_or_classes)
+        except TypeError:
+            result = False
+        if not result:
+            return value, error or N_(u'Value is not a subclass of {0}'.format(class_or_classes))
+        return value, None
+    return test_issubclass_converter
 
 
 def test_less_or_equal(constant, error = None):

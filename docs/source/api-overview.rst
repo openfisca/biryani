@@ -168,6 +168,9 @@ Tests
 .. autofunction:: biryani.baseconv.test_isinstance
    :noindex:
 
+.. autofunction:: biryani.baseconv.test_issubclass
+   :noindex:
+
 .. autofunction:: biryani.baseconv.test_less_or_equal
    :noindex:
 
@@ -366,4 +369,3 @@ WebOb Converters
    :members:
    :undoc-members:
    :noindex:
-
