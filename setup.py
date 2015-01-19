@@ -65,7 +65,7 @@ setup(
     extras_require=dict(
         bsonconv=['pymongo'],
         datetimeconv=['isodate >= 0.4', 'pytz'],
-        dev=['flake8', 'sphinx'],
+        dev=['flake8', 'sphinx', 'Sphinx-PyPI-upload'],
         jwtconv=['pycrypto'],
         netconv=['pydns'],
         webobconv=['webob'],
