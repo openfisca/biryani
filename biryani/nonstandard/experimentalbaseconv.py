@@ -2,9 +2,9 @@
 
 
 # Biryani -- A conversion and validation toolbox
-# By: Emmanuel Raviart <eraviart@easter-eggs.com>
+# By: Emmanuel Raviart <emmanuel@raviart.com>
 #
-# Copyright (C) 2009, 2010, 2011 Easter-eggs
+# Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015 Emmanuel Raviart
 # http://packages.python.org/Biryani/
 #
 # This file is part of Biryani.
@@ -29,9 +29,7 @@
 """
 
 
-from .. import baseconv as conv
 from .. import states
-
 
 __all__ = [
     'mapping_replace_sequence',
@@ -43,9 +41,11 @@ N_ = lambda message: message
 def mapping_replace_sequence(keys, converter, sequence_constructor = list):
     """Return a converter that extracts a sequence from a mapping, converts it and reinjects it into the mapping.
     """
-    def mapping_replace_sequence_converter(value, state = states.default_state):
+    def mapping_replace_sequence_converter(value, state = None):
         if value is None:
             return value, None
+        if state is None:
+            state = states.default_state
         sequence = sequence_constructor(
             value.get(key)
             for key in keys
@@ -75,4 +75,3 @@ def mapping_replace_sequence(keys, converter, sequence_constructor = list):
                     converted_value[key] = item_value
         return converted_value or None, None
     return mapping_replace_sequence_converter
-

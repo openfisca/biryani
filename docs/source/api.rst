@@ -8,7 +8,7 @@ Converters
 
 
 biryani
--------
+--------
 
 .. testsetup::
 
@@ -20,7 +20,7 @@ biryani
 
 
 biryani.baseconv
-----------------
+-----------------
 
 .. testsetup::
 
@@ -32,7 +32,7 @@ biryani.baseconv
 
 
 biryani.babelconv
------------------
+------------------
 
 .. testsetup::
 
@@ -43,8 +43,20 @@ biryani.babelconv
    :undoc-members:
 
 
+biryani.base64conv
+-------------------
+
+.. testsetup::
+
+   from biryani.base64conv import *
+
+.. automodule:: biryani.base64conv
+   :members:
+   :undoc-members:
+
+
 biryani.bsonconv
-----------------
+-----------------
 
 .. testsetup::
 
@@ -56,7 +68,7 @@ biryani.bsonconv
 
 
 biryani.creditcardconv
-----------------------
+-----------------------
 
 .. testsetup::
 
@@ -68,7 +80,7 @@ biryani.creditcardconv
 
 
 biryani.datetimeconv
---------------------
+---------------------
 
 .. testsetup::
 
@@ -79,8 +91,56 @@ biryani.datetimeconv
    :undoc-members:
 
 
+biryani.jsonconv
+-----------------
+
+.. testsetup::
+
+   from biryani.jsonconv import *
+
+.. automodule:: biryani.jsonconv
+   :members:
+   :undoc-members:
+
+
+biryani.jwkconv
+-----------------
+
+.. testsetup::
+
+   from biryani.jwkconv import *
+
+.. automodule:: biryani.jwkconv
+   :members:
+   :undoc-members:
+
+
+biryani.jwtconv
+-----------------
+
+.. testsetup::
+
+   from biryani.jwtconv import *
+
+.. automodule:: biryani.jwtconv
+   :members:
+   :undoc-members:
+
+
+biryani.netconv
+----------------
+
+.. testsetup::
+
+   from biryani.netconv import *
+
+.. automodule:: biryani.netconv
+   :members:
+   :undoc-members:
+
+
 biryani.objectconv
-------------------
+-------------------
 
 .. testsetup::
 
@@ -92,7 +152,7 @@ biryani.objectconv
 
 
 biryani.states
---------------
+---------------
 
 .. testsetup::
 
@@ -103,8 +163,20 @@ biryani.states
    :undoc-members:
 
 
-biryani.webobconv
+biryani.uuidconv
 -----------------
+
+.. testsetup::
+
+   from biryani.uuidconv import *
+
+.. automodule:: biryani.uuidconv
+   :members:
+   :undoc-members:
+
+
+biryani.webobconv
+------------------
 
 .. testsetup::
 
@@ -119,7 +191,7 @@ String Functions
 ================
 
 biryani.strings
----------------
+----------------
 
 .. testsetup::
 

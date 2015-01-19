@@ -2,9 +2,9 @@
 
 
 # Biryani -- A conversion and validation toolbox
-# By: Emmanuel Raviart <eraviart@easter-eggs.com>
+# By: Emmanuel Raviart <emmanuel@raviart.com>
 #
-# Copyright (C) 2009, 2010, 2011 Easter-eggs
+# Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015 Emmanuel Raviart
 # http://packages.python.org/Biryani/
 #
 # This file is part of Biryani.
@@ -30,15 +30,14 @@ class State(object):
 
     def __repr__(self):
         """Hack to improve ``default_state`` aspect in Sphinx autodoc
-        
+
         A state doesn't not need to implement this method.
         """
         if self is default_state:
             return '{0}.default_state'.format(__name__)
         else:
-            return super(State, self).__repr__(self)
+            return super(State, self).__repr__()
 
 
 #: Minimal context, usable with converters
 default_state = State()
-

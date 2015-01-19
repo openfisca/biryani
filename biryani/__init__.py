@@ -2,9 +2,9 @@
 
 
 # Biryani -- A conversion and validation toolbox
-# By: Emmanuel Raviart <eraviart@easter-eggs.com>
+# By: Emmanuel Raviart <emmanuel@raviart.com>
 #
-# Copyright (C) 2009, 2010, 2011 Easter-eggs
+# Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015 Emmanuel Raviart
 # http://packages.python.org/Biryani/
 #
 # This file is part of Biryani.
@@ -37,33 +37,28 @@ class CustomConv(object):
     pass
 
 
-def custom_conv(*modules_path):
+def custom_conv(*modules):
     """Import given conversion modules and return a module-like object containing their aggregated content.
 
-    This allow you to replace::
+    How to use::
 
-        from biryani import allconv as conv
+        import biryani
+        import biryani.baseconv
+        import biryani.datetimeconv
+        import any.custom.module
+        conv = biryani.custom_conv(biryani.baseconv, biryani.datetimeconv, any.custom.module)
 
-    with::
-
-        importy biryani
-        conv = biryani.custom_conv('biryani.baseconv', 'biryani.datetimeconv', 'name.of.an.external.module', ...)
-
-    and import only needed modules.
-
-    >>> conv = custom_conv('biryani.baseconv', 'biryani.datetimeconv')
-    >>> conv.str_to_int(u'42') # str_to_int is defined in baseconv module.
+    >>> import biryani.baseconv
+    >>> import biryani.datetimeconv
+    >>> conv = custom_conv(biryani.baseconv, biryani.datetimeconv)
+    >>> conv.input_to_int(u'42') # input_to_int is defined in baseconv module.
     (42, None)
-    >>> conv.iso8601_to_date(u'1789-07-14') # iso8601_to_date is defined in datetimeconv module.
+    >>> conv.iso8601_input_to_date(u'1789-07-14') # iso8601_input_to_date is defined in datetimeconv module.
     (datetime.date(1789, 7, 14), None)
     """
 
     conv = CustomConv()
-    for module_path in modules_path:
-        module = __import__(module_path)
-        # Since __import__ returns a package instead of a module, walk to the imported module.
-        for module_name in module_path.split('.')[1:]:
-            module = getattr(module, module_name)
+    for module in modules:
         module_public_keys = getattr(module, '__all__', None)
         if module_public_keys is None:
             conv.__dict__.update(module.__dict__)
@@ -71,4 +66,3 @@ def custom_conv(*modules_path):
             for key in module_public_keys:
                 setattr(conv, key, getattr(module, key))
     return conv
-

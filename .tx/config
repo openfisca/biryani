@@ -1,8 +1,8 @@
-[biryani.biryanipot]
+[main]
+host = https://www.transifex.com
+
+[biryani.biryani]
 file_filter = biryani/i18n/<lang>/LC_MESSAGES/biryani.po
 source_file = biryani/i18n/biryani.pot
 source_lang = en
-
-[main]
-host = https://www.transifex.net
-
+type = PO

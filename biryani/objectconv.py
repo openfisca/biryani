@@ -2,9 +2,9 @@
 
 
 # Biryani -- A conversion and validation toolbox
-# By: Emmanuel Raviart <eraviart@easter-eggs.com>
+# By: Emmanuel Raviart <emmanuel@raviart.com>
 #
-# Copyright (C) 2009, 2010, 2011 Easter-eggs
+# Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015 Emmanuel Raviart
 # http://packages.python.org/Biryani/
 #
 # This file is part of Biryani.
@@ -25,43 +25,50 @@
 """Object Related Converters"""
 
 
-from . import baseconv as conv
-from . import states
+from .baseconv import function
 
 
 __all__ = [
-    'dict_to_object',
+    'make_dict_to_object',
     'object_to_clean_dict',
     'object_to_dict',
     ]
 
 
-def dict_to_object(cls):
+class EmptyClass(object):
+    pass
+
+
+def make_dict_to_object(cls):
     """Return a converter that creates in instance of a class from a dictionary.
 
     >>> class C(object):
     ...     pass
-    >>> dict_to_object(C)(dict(a = 1, b = 2))
+    >>> make_dict_to_object(C)(dict(a = 1, b = 2))
     (<C object at 0x...>, None)
-    >>> c = check(dict_to_object(C))(dict(a = 1, b = 2))
+    >>> c = check(make_dict_to_object(C))(dict(a = 1, b = 2))
     >>> c.a, c.b
     (1, 2)
-    >>> dict_to_object(C)(None)
+    >>> make_dict_to_object(C)(None)
     (None, None)
     """
-    def dict_to_object_converter(value, state = states.default_state):
+    def dict_to_object(value, state = None):
         if value is None:
             return value, None
-        instance = cls()
+        # Dont do the following instructions, to ensure that cls __init__ method is not called.
+        # instance = cls()
+        # instance.__dict__.update(value)
+        instance = EmptyClass()
+        instance.__class__ = cls
         instance.__dict__ = value
         return instance, None
-    return dict_to_object_converter
+    return dict_to_object
 
 
-object_to_clean_dict = conv.function(lambda instance: dict(
+object_to_clean_dict = function(lambda instance: dict(
     (name, value)
     for name, value in instance.__dict__.iteritems()
-    if getattr(instance.__class__, name, None) is not value
+    if getattr(instance.__class__, name, UnboundLocalError) is not value
     ))
 """Convert an object's instance to a dictionary, by extracting the attributes whose value differs from the ones defined
     in the object's class.
@@ -71,6 +78,7 @@ object_to_clean_dict = conv.function(lambda instance: dict(
 
     >>> class C(object):
     ...     a = 1
+    ...     z = None
     >>> c = C()
     >>> object_to_clean_dict(c)
     ({}, None)
@@ -89,16 +97,18 @@ object_to_clean_dict = conv.function(lambda instance: dict(
     >>> f = C()
     >>> f.a = 1
     >>> f.b = 2
+    >>> f.y = None
+    >>> f.z = None
     >>> object_to_clean_dict(f)
-    ({'b': 2}, None)
+    ({'y': None, 'b': 2}, None)
     >>> object_to_clean_dict(None)
     (None, None)
     >>> object_to_clean_dict(42)
     Traceback (most recent call last):
-    AttributeError: 'int' object has no attribute '__dict__'
+    AttributeError:
     """
 
-object_to_dict = conv.function(lambda instance: getattr(instance, '__dict__'))
+object_to_dict = function(lambda instance: getattr(instance, '__dict__'))
 """Convert an object's instance to a dictionary, by returning its ``__dict__`` atribute.
 
     .. note:: Use converter :func:`object_to_clean_dict` when you want to remove defaut values from generated
@@ -130,6 +140,5 @@ object_to_dict = conv.function(lambda instance: getattr(instance, '__dict__'))
     (None, None)
     >>> object_to_dict(42)
     Traceback (most recent call last):
-    AttributeError: 'int' object has no attribute '__dict__'
+    AttributeError:
     """
-

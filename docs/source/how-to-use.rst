@@ -9,23 +9,15 @@ How to to use *Biryani* in a project
 How to use *Biryani* in a simple project
 ========================================
 
-When you don't mind about memory consumption, import all conversion modules at once::
+*Biryani* allows you to import only the modules you really need and to merge them in a single pseudo-module::
 
-    from biryani import allconv as conv
-
-    # Use the converters. For example:
-    s = '5'
-    i = conv.check(conv.pipe(conv.str_to_int, conv.test_exists))(s)
-    assert i == 5
-    ...
-
-Or, to import only the modules you really use::
-
-    import byriani
-    conv = biryani.custom_conv('biryani.baseconv', 'biryani.datetimeconv')
+    import biryani
+    import biryani.baseconv
+    import biryani.datetimeconv
+    conv = biryani.custom_conv(biryani.baseconv, biryani.datetimeconv)
 
     # Use the converters. For example:
-    d = conv.check(conv.iso8601_to_date)(u'1789-07-14')
+    d = conv.check(conv.iso8601_input_to_date)(u'1789-07-14')
     ...
 
 See :func:`biryani.custom_conv` for more informations.
@@ -36,13 +28,7 @@ How to use *Biryani* in a multi-modules project
 
 In your project, create a module named ``conv.py``.
 
-In this file, either import every converter, all in once::
-
-    from biryani.allconv import *
-    from biryani import states
-
-
-Or specify the converters you want::
+In this file, specify the converters you want::
 
     from biryani.babelconv import *
     from biryani.baseconv import *
@@ -61,7 +47,7 @@ In your others modules add::
 
     # Use the converters. For example:
     s = '5'
-    i = conv.check(conv.pipe(conv.str_to_int, conv.test_exists))(s)
+    i = conv.check(conv.pipe(conv.input_to_int, conv.not_none))(s)
     assert i == 5
     ...
 

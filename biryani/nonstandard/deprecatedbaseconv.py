@@ -2,9 +2,9 @@
 
 
 # Biryani -- A conversion and validation toolbox
-# By: Emmanuel Raviart <eraviart@easter-eggs.com>
+# By: Emmanuel Raviart <emmanuel@raviart.com>
 #
-# Copyright (C) 2009, 2010, 2011 Easter-eggs
+# Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015 Emmanuel Raviart
 # http://packages.python.org/Biryani/
 #
 # This file is part of Biryani.
@@ -29,10 +29,10 @@
 """
 
 
-from .. import custom_conv
+from .. import baseconv, custom_conv, objectconv
 
 
-conv = custom_conv('biryani.baseconv', 'biryani.objectconv')
+conv = custom_conv(baseconv, objectconv)
 N_ = lambda message: message
 
 
@@ -46,7 +46,7 @@ def attribute(name):
 
     >>> class C(object):
     ...     pass
-    >>> conv.pipe(conv.dict_to_object(C), attribute('a'))(dict(a = 1, b = 2))
+    >>> conv.pipe(conv.make_dict_to_object(C), attribute('a'))(dict(a = 1, b = 2))
     (1, None)
     """
     return conv.function(lambda value: getattr(value, name))
@@ -137,4 +137,3 @@ def test_match(regex, error = N_('Invalid value format')):
     (u'not OK', 'Invalid value format')
     """
     return conv.test(lambda value: regex.match(value), error = error)
-

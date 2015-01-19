@@ -1,8 +1,10 @@
-build/
 *.egg-info
-dist/
 *.mo
 *.pyc
 *.pyo
 *~
-
+/.tox
+/build/
+/dist/
+/docs/build/
+/tags

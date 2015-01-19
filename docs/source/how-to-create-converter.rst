@@ -20,37 +20,37 @@ Example of a converter that returns the length of a value:
 
 >>> from biryani import baseconv as conv
 ...
->>> python_data_to_len = conv.function(lambda value: len(value))
+>>> anything_to_len = conv.function(lambda value: len(value))
 ...
->>> python_data_to_len(u'abc')
+>>> anything_to_len(u'abc')
 (3, None)
->>> python_data_to_len([1, 2, 3])
+>>> anything_to_len([1, 2, 3])
 (3, None)
->>> python_data_to_len([])
+>>> anything_to_len([])
 (0, None)
 
 By default, the function converter doesn't call its wrapped function when input value is None and always returns ``None``,
 so:
 
->>> python_data_to_len(None)
+>>> anything_to_len(None)
 (None, None)
 
-Most of the times this is the correct behaviour, because in *Biryani*, when the input value is missing (aka ``None``) a
+Most of the times this is the correct behaviour, because in *Biryani*, when the input value is ``None`` a
 converter is considered to have nothing to convert and should return nothing (aka ``None``).
 
-But, if you want to change this behaviour, you can set the ``handle_missing_value`` flag:
+But, if you want to change this behaviour, you can set the ``handle_none_value`` flag:
 
->>> python_data_to_len = conv.function(lambda value: len(value), handle_missing_value = True)
+>>> anything_to_len = conv.function(lambda value: len(value), handle_none_value = True)
 ...
->>> python_data_to_len(None)
+>>> anything_to_len(None)
 Traceback (most recent call last):
-TypeError: object of type 'NoneType' has no len()
+TypeError:
 
 In this case, you will have to rewrite your function to handle the ``None`` input value:
 
->>> python_data_to_len = conv.function(lambda value: len(value or []), handle_missing_value = True)
+>>> anything_to_len = conv.function(lambda value: len(value or []), handle_none_value = True)
 ...
->>> python_data_to_len(None)
+>>> anything_to_len(None)
 (0, None)
 
 In the same way, if your function needs to use the state (mainly for internationalization reasons), you need to set
@@ -61,7 +61,9 @@ localized response.
 
 >>> from biryani import states
 ...
->>> def zero_one_or_many(value, state = states.default_state):
+>>> def zero_one_or_many(value, state = None):
+...     if state is None:
+...         state = states.default_state
 ...     size = len(value)
 ...     if size == 0:
 ...         return state._(u'zero')
@@ -124,20 +126,20 @@ so:
 >>> test_valid_password(None)
 (None, None)
 
-Most of the times this is the correct behaviour, because in *Biryani*, when the input value is missing (aka ``None``) a
+Most of the times this is the correct behaviour, because in *Biryani*, when the input value is ``None`` a
 test is considered to have nothing to test and should return nothing (aka ``None``).
 
-But, if you want to change this behaviour, you can set the ``handle_missing_value`` flag:
+But, if you want to change this behaviour, you can set the ``handle_none_value`` flag:
 
->>> test_valid_password = conv.test(lambda password: len(password) >= 8, handle_missing_value = True)
+>>> test_valid_password = conv.test(lambda password: len(password) >= 8, handle_none_value = True)
 ...
 >>> test_valid_password(None)
 Traceback (most recent call last):
-TypeError: object of type 'NoneType' has no len()
+TypeError:
 
 In this case, you will have to rewrite your test to handle the ``None`` input value:
 
->>> test_valid_password = conv.test(lambda password: len(password or u'') >= 8, handle_missing_value = True)
+>>> test_valid_password = conv.test(lambda password: len(password or u'') >= 8, handle_none_value = True)
 ...
 >>> test_valid_password(None)
 (None, u'Test failed')
@@ -147,7 +149,9 @@ the ``handle_state`` flag.
 
 For example, here is a filter that tests whether the localized version of a string as an even length:
 
->>> def has_even_len(value, state = states.default_state):
+>>> def has_even_len(value, state = None):
+...     if state is None:
+...         state = states.default_state
 ...     return len(state._(value)) % 2 == 0
 ...
 >>> test_has_even_len = conv.test(has_even_len, handle_state = True)
@@ -171,7 +175,9 @@ generates an error when they differ or are two short, or returns the valid passw
 A converter is a function that has two parameters, the input value and the state, and that returns a couple
 (output value, eventual error message).
 
->>> def validate_password(passwords, state = states.default_state):
+>>> def validate_password(passwords, state = None):
+...     if state is None:
+...         state = states.default_state
 ...     # Generally, a converter should ignore a ``None`` input value:
 ...     if passwords is None:
 ...         return passwords, None
@@ -180,10 +186,10 @@ A converter is a function that has two parameters, the input value and the state
 ...         # When an error occurs and output value can not be computed, return input value with the error message.
 ...         # Every error message is localized using ``state._()``.
 ...         return passwords, state._(u'Missing passwords')
-...     if passwords[0] != passwords[1]:
-...         return passwords, state._(u'Password mismatch')
 ...     password = passwords[0]
-...     if len(passwords[0]) < 8:
+...     if password != passwords[1]:
+...         return passwords, state._(u'Password mismatch')
+...     if len(password) < 8:
 ...         return password, state._(u'Password too short')
 ...     return password, None
 
@@ -200,7 +206,9 @@ a customized converters.
 For example, to transform our password validator to add a minimal password length:
 
 >>> def validate_password(min_len = 6):
-...     def validate_password_converter(passwords, state = states.default_state):
+...     def validate_password_converter(passwords, state = None):
+...         if state is None:
+...             state = states.default_state
 ...         # Generally, a converter should ignore a ``None`` input value:
 ...         if passwords is None:
 ...             return passwords, None
@@ -209,10 +217,10 @@ For example, to transform our password validator to add a minimal password lengt
 ...             # When an error occurs and output value can not be computed, return input value with the error message.
 ...             # Every error message is localized using ``state._()``.
 ...             return passwords, state._(u'Missing passwords')
-...         if passwords[0] != passwords[1]:
-...             return passwords, state._(u'Password mismatch')
 ...         password = passwords[0]
-...         if len(passwords[0]) < min_len:
+...         if password != passwords[1]:
+...             return passwords, state._(u'Password mismatch')
+...         if len(password) < min_len:
 ...             return password, state._(u'Password too short')
 ...         return password, None
 ...     return validate_password_converter

@@ -2,9 +2,9 @@
 
 
 # Biryani -- A conversion and validation toolbox
-# By: Emmanuel Raviart <eraviart@easter-eggs.com>
+# By: Emmanuel Raviart <emmanuel@raviart.com>
 #
-# Copyright (C) 2009, 2010, 2011 Easter-eggs
+# Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015 Emmanuel Raviart
 # http://packages.python.org/Biryani/
 #
 # This file is part of Biryani.
@@ -29,30 +29,32 @@
 Sample usage:
 
 >>> import pprint
->>> from biryani import allconv as conv
->>> from biryani import states
+>>> from biryani import baseconv, creditcardconv, custom_conv, states
 ...
+>>> conv = custom_conv(baseconv, creditcardconv)
 >>> N_ = lambda message: message
 ...
->>> def validate_credit_card(value, state = states.default_state):
+>>> def validate_credit_card(value, state = None):
 ...     import datetime
 ...
 ...     if value is None:
 ...         return None, None
+...     if state is None:
+...         state = states.default_state
 ...     errors = {}
 ...     today = datetime.date.today()
 ...     converted_value, error = conv.struct(
 ...         dict(
-...             credit_card_type = conv.pipe(conv.str_to_credit_card_type, conv.test_exists),
+...             credit_card_type = conv.pipe(conv.input_to_credit_card_type, conv.not_none),
 ...             expiration_month = conv.pipe(
-...                 conv.str_to_int,
+...                 conv.input_to_int,
 ...                 conv.test_between(1, 12, error = N_(u'Invalid expiration month')),
-...                 conv.test_exists,
+...                 conv.not_none,
 ...                 ),
 ...             expiration_year = conv.pipe(
-...                 conv.str_to_int,
+...                 conv.input_to_int,
 ...                 conv.test_greater_or_equal(today.year, error = N_(u'Invalid expiration year')),
-...                 conv.test_exists,
+...                 conv.not_none,
 ...                 ),
 ...             ),
 ...         default = conv.noop,
@@ -73,12 +75,12 @@ Sample usage:
 ...     converted_value, error = conv.struct(
 ...         dict(
 ...             credit_card_number = conv.pipe(
-...                 conv.str_to_credit_card_number(credit_card_type),
-...                 conv.test_exists,
+...                 conv.make_input_to_credit_card_number(credit_card_type),
+...                 conv.not_none,
 ...                 ),
 ...             credit_card_security_code = conv.pipe(
-...                 conv.str_to_credit_card_security_code(credit_card_type),
-...                 conv.test_exists,
+...                 conv.make_input_to_credit_card_security_code(credit_card_type),
+...                 conv.not_none,
 ...                 ),
 ...             ),
 ...         default = conv.noop,
@@ -113,14 +115,12 @@ Sample usage:
   'expiration_month': 12,
   'expiration_year': 2021},
  {'credit_card_number': u'Invalid credit card number (wrong checksum)'})
->>> import datetime
->>> today = datetime.date.today()
 >>> pprint.pprint(validate_credit_card(dict(
 ...     credit_card_type = u'Visa',
 ...     credit_card_number = u'4111_1111_1111',
 ...     credit_card_security_code = u'1234',
-...     expiration_month = unicode(today.month - 1),
-...     expiration_year = unicode(today.year),
+...     expiration_month = u'7',
+...     expiration_year = u'2011',
 ...     )))
 ({'credit_card_number': u'411111111111',
   'credit_card_security_code': u'1234',
@@ -129,19 +129,19 @@ Sample usage:
   'expiration_year': 2011},
  {'credit_card_number': u'Wrong number of digits in credit card number',
   'credit_card_security_code': u'Invalid security code for credit card',
-  'expiration_month': u'Invalid expiration date'})
+  'expiration_year': u'Invalid expiration year'})
 """
 
 
-from . import baseconv as conv
+from .baseconv import cleanup_line, N_, pipe, input_to_int, input_to_slug, test, test_in
 from . import states, strings
 
 
 __all__ = [
-    'clean_str_to_credit_card_number',
-    'str_to_credit_card_number',
-    'str_to_credit_card_security_code',
-    'str_to_credit_card_type',
+    'input_to_credit_card_type',
+    'make_input_to_credit_card_number',
+    'make_input_to_credit_card_security_code',
+    'make_str_to_credit_card_number',
     ]
 
 credit_cards_prefix_and_length = {
@@ -184,34 +184,55 @@ credit_cards_security_code_length = {
     "mastercard": 3,
     "visa": 3,
     }
-N_ = conv.N_
 
 
-def clean_str_to_credit_card_number(type):
+# Level-1 Converters
+
+
+input_to_credit_card_type = pipe(
+    input_to_slug,
+    test_in(credit_cards_prefix_and_length.keys(), error = N_(u'Unknown type of credit card')),
+    )
+
+
+def make_input_to_credit_card_security_code(type):
+    """Return a converter that converts a string to a security code for a given type of credit card.
+    """
+    return pipe(
+        cleanup_line,
+        test(lambda value: len(value) == credit_cards_security_code_length[type],
+            error = N_(u'Invalid security code for credit card')),
+        input_to_int,
+        )
+
+
+def make_str_to_credit_card_number(type):
     """Return a converter that converts a clean string to a credit card number of a given type.
 
-    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_credit_card_number`.
+    .. note:: For a converter that doesn't require a clean string, see :func:`make_input_to_credit_card_number`.
 
-    >>> clean_str_to_credit_card_number(u'visa')(u'4111111111111111')
+    >>> make_str_to_credit_card_number(u'visa')(u'4111111111111111')
     (u'4111111111111111', None)
-    >>> clean_str_to_credit_card_number(u'visa')(u'   4111 1111-1111.,1111   ')
+    >>> make_str_to_credit_card_number(u'visa')(u'   4111 1111-1111.,1111   ')
     (u'4111111111111111', None)
-    >>> clean_str_to_credit_card_number(u'visa')(u'411111111111111')
+    >>> make_str_to_credit_card_number(u'visa')(u'411111111111111')
     (u'411111111111111', u'Wrong number of digits in credit card number')
-    >>> clean_str_to_credit_card_number(u'visa')(u'4111111111111112')
+    >>> make_str_to_credit_card_number(u'visa')(u'4111111111111112')
     (u'4111111111111112', u'Invalid credit card number (wrong checksum)')
-    >>> clean_str_to_credit_card_number(u'visa')(u'5111111111111111')
+    >>> make_str_to_credit_card_number(u'visa')(u'5111111111111111')
     (u'5111111111111111', u'Invalid credit card number (unknown prefix)')
-    >>> clean_str_to_credit_card_number(u'visa')(u'')
+    >>> make_str_to_credit_card_number(u'visa')(u'')
     (u'', u'Credit card number must contain digits')
-    >>> clean_str_to_credit_card_number(u'visa')(u'   ')
+    >>> make_str_to_credit_card_number(u'visa')(u'   ')
     (u'', u'Credit card number must contain digits')
-    >>> clean_str_to_credit_card_number(u'visa')(None)
+    >>> make_str_to_credit_card_number(u'visa')(None)
     (None, None)
     """
-    def str_to_credit_card_number_converter(credit_card_number, state = states.default_state):
+    def str_to_credit_card_number(credit_card_number, state = None):
         if credit_card_number is None:
             return credit_card_number, None
+        if state is None:
+            state = states.default_state
 
         # Check that credit card number contains only digits.
         credit_card_number = strings.slugify(credit_card_number, separator = u'')
@@ -229,7 +250,8 @@ def clean_str_to_credit_card_number(type):
                     break
         else:
             if not length_found:
-                return credit_card_number, state._(u'Wrong number of digits in credit card number')
+                return credit_card_number, state._(
+                    u'Wrong number of digits in credit card number')
             return credit_card_number, state._(u'Invalid credit card number (unknown prefix)')
 
         # Check checksum.
@@ -244,45 +266,30 @@ def clean_str_to_credit_card_number(type):
             return credit_card_number, state._(u'Invalid credit card number (wrong checksum)')
         return credit_card_number, None
 
-    return str_to_credit_card_number_converter
+    return str_to_credit_card_number
 
 
-def str_to_credit_card_number(type):
+# Level-2 Converters
+
+
+def make_input_to_credit_card_number(type):
     """Return a converter that converts a string to a credit card number for a given credit card type.
 
-    >>> str_to_credit_card_number(u'visa')(u'4111111111111111')
+    >>> make_input_to_credit_card_number(u'visa')(u'4111111111111111')
     (u'4111111111111111', None)
-    >>> str_to_credit_card_number(u'visa')(u'   4111 1111-1111.,1111   ')
+    >>> make_input_to_credit_card_number(u'visa')(u'   4111 1111-1111.,1111   ')
     (u'4111111111111111', None)
-    >>> str_to_credit_card_number(u'visa')(u'411111111111111')
+    >>> make_input_to_credit_card_number(u'visa')(u'411111111111111')
     (u'411111111111111', u'Wrong number of digits in credit card number')
-    >>> str_to_credit_card_number(u'visa')(u'4111111111111112')
+    >>> make_input_to_credit_card_number(u'visa')(u'4111111111111112')
     (u'4111111111111112', u'Invalid credit card number (wrong checksum)')
-    >>> str_to_credit_card_number(u'visa')(u'5111111111111111')
+    >>> make_input_to_credit_card_number(u'visa')(u'5111111111111111')
     (u'5111111111111111', u'Invalid credit card number (unknown prefix)')
-    >>> str_to_credit_card_number(u'visa')(u'')
+    >>> make_input_to_credit_card_number(u'visa')(u'')
     (None, None)
-    >>> str_to_credit_card_number(u'visa')(u'   ')
+    >>> make_input_to_credit_card_number(u'visa')(u'   ')
     (None, None)
-    >>> str_to_credit_card_number(u'visa')(None)
+    >>> make_input_to_credit_card_number(u'visa')(None)
     (None, None)
     """
-    return conv.pipe(conv.cleanup_line, clean_str_to_credit_card_number(type))
-
-
-def str_to_credit_card_security_code(type):
-    """Return a converter that converts a string to a security code for a given type of credit card.
-    """
-    return conv.pipe(
-        conv.cleanup_line,
-        conv.test(lambda value: len(value) == credit_cards_security_code_length[type],
-            error = N_(u'Invalid security code for credit card')),
-        conv.str_to_int,
-        )
-
-
-str_to_credit_card_type = conv.pipe(
-    conv.str_to_slug,
-    conv.test_in(credit_cards_prefix_and_length.keys(), error = N_(u'Unknown type of credit card')),
-    )
-
+    return pipe(cleanup_line, make_str_to_credit_card_number(type))

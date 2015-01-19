@@ -2,9 +2,9 @@
 
 
 # Biryani -- A conversion and validation toolbox
-# By: Emmanuel Raviart <eraviart@easter-eggs.com>
+# By: Emmanuel Raviart <emmanuel@raviart.com>
 #
-# Copyright (C) 2009, 2010, 2011 Easter-eggs
+# Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015 Emmanuel Raviart
 # http://packages.python.org/Biryani/
 #
 # This file is part of Biryani.
@@ -197,6 +197,8 @@ def normalize(s, encoding = 'utf-8', separator = u' ', transform = lower):
     u'\u0153il, foret, ca, ou...'
     >>> normalize('Hello world!')
     u'hello world!'
+    >>> normalize(u'   ')
+    u''
     >>> print normalize(None)
     None
     """
@@ -274,7 +276,7 @@ def upper(s):
     """Convert a string to upper case.
 
     .. note:: This method is equivalent to the ``upper()`` method of strings, but can be used when a function is
-       expected, or example by the :func:`normalize` & :func:`slugify` functions.
+       expected, for example by the :func:`normalize` & :func:`slugify` functions.
 
     >>> upper('Hello world!')
     'HELLO WORLD!'
@@ -286,4 +288,3 @@ def upper(s):
     if s is None:
         return None
     return s.upper()
-

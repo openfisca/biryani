@@ -2,9 +2,9 @@
 
 
 # Biryani -- A conversion and validation toolbox
-# By: Emmanuel Raviart <eraviart@easter-eggs.com>
+# By: Emmanuel Raviart <emmanuel@raviart.com>
 #
-# Copyright (C) 2009, 2010, 2011 Easter-eggs
+# Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015 Emmanuel Raviart
 # http://packages.python.org/Biryani/
 #
 # This file is part of Biryani.
@@ -38,21 +38,19 @@ from . import states, strings
 
 
 __all__ = [
+    'anything_to_bool',
+    'anything_to_float',
+    'anything_to_int',
+    'anything_to_str',
     'bool_to_str',
+    'catch_error',
     'check',
-    'clean_str_to_bool',
-    'clean_str_to_email',
-    'clean_str_to_json',
-    'clean_str_to_slug',
-    'clean_str_to_url',
-    'clean_str_to_url_name',
-    'clean_str_to_url_path_and_query',
-    'cleanup_empty',
     'cleanup_line',
     'cleanup_text',
     'condition',
     'decode_str',
     'default',
+    'empty_to_none',
     'encode_str',
     'extract_when_singleton',
     'fail',
@@ -60,41 +58,53 @@ __all__ = [
     'function',
     'get',
     'guess_bool',
+    'input_to_bool',
+    'input_to_email',
+    'input_to_float',
+    'input_to_int',
+    'input_to_slug',
+    'input_to_url_name',
+    'input_to_url_path_and_query',
     'item_or_sequence',
+    'make_item_to_singleton',
+    'make_input_to_normal_form',
+    'make_input_to_slug',
+    'make_input_to_url',
+    'make_input_to_url_name',
+    'make_str_to_url',
+    'merge',
     'new_mapping',
     'new_sequence',
     'new_struct',
     'noop',
+    'not_none',
+    'ok',
     'pipe',
-    'python_data_to_bool',
-    'python_data_to_float',
-    'python_data_to_int',
-    'python_data_to_str',
     'rename_item',
     'set_value',
     'str_to_bool',
     'str_to_email',
-    'str_to_float',
-    'str_to_int',
-    'str_to_json',
-    'str_to_slug',
-    'str_to_url',
-    'str_to_url_name',
     'str_to_url_path_and_query',
     'struct',
     'structured_mapping',
     'structured_sequence',
+    'submapping',
+    'switch',
     'test',
     'test_between',
+    'test_conv',
     'test_equals',
-    'test_exists',
     'test_greater_or_equal',
     'test_in',
     'test_is',
     'test_isinstance',
+    'test_issubclass',
     'test_less_or_equal',
+    'test_none',
+    'test_not_in',
+    'test_not_none',
     'translate',
-#    'uniform_mapping',
+    'uniform_mapping',
     'uniform_sequence',
     ]
 
@@ -102,8 +112,6 @@ domain_re = re.compile(r'''
     (?:[a-z0-9][a-z0-9\-]{0,62}\.)+ # (sub)domain - alpha followed by 62max chars (63 total)
     [a-z]{2,}$                      # TLD
     ''', re.I | re.VERBOSE)
-html_id_re = re.compile(r'[A-Za-z][-A-Za-z0-9_:.]+$')
-html_name_re = html_id_re
 N_ = lambda message: message
 username_re = re.compile(r"[^ \t\n\r@<>()]+$", re.I)
 
@@ -111,10 +119,93 @@ username_re = re.compile(r"[^ \t\n\r@<>()]+$", re.I)
 # Level-1 Converters
 
 
-def bool_to_str(value, state = states.default_state):
+def anything_to_float(value, state = None):
+    """Convert any python data to a float.
+
+    .. warning:: Like most converters, a ``None`` value is not converted.
+
+    >>> anything_to_float(42)
+    (42.0, None)
+    >>> anything_to_float('42')
+    (42.0, None)
+    >>> anything_to_float(u'42')
+    (42.0, None)
+    >>> anything_to_float(42.75)
+    (42.75, None)
+    >>> anything_to_float(None)
+    (None, None)
+    """
+    if value is None:
+        return value, None
+    if state is None:
+        state = states.default_state
+    try:
+        return float(value), None
+    except ValueError:
+        return value, state._(u'Value must be a float')
+
+
+def anything_to_int(value, state = None):
+    """Convert any python data to an integer.
+
+    .. warning:: Like most converters, a ``None`` value is not converted.
+
+    >>> anything_to_int(42)
+    (42, None)
+    >>> anything_to_int('42')
+    (42, None)
+    >>> anything_to_int(u'42')
+    (42, None)
+    >>> anything_to_int(42.75)
+    (42, None)
+    >>> anything_to_int(u'42.75')
+    (42, None)
+    >>> anything_to_int(u'42,75')
+    (u'42,75', u'Value must be an integer')
+    >>> anything_to_int(None)
+    (None, None)
+    """
+    if value is None:
+        return value, None
+    if state is None:
+        state = states.default_state
+    try:
+        return int(value), None
+    except ValueError:
+        try:
+            return int(float(value)), None
+        except ValueError:
+            return value, state._(u'Value must be an integer')
+
+
+def anything_to_str(value, state = None):
+    """Convert any Python data to unicode.
+
+    .. warning:: Like most converters, a ``None`` value is not converted.
+
+    >>> anything_to_str(42)
+    (u'42', None)
+    >>> anything_to_str('42')
+    (u'42', None)
+    >>> anything_to_str(None)
+    (None, None)
+    """
+    if value is None:
+        return value, None
+    if state is None:
+        state = states.default_state
+    if isinstance(value, str):
+        return value.decode('utf-8'), None
+    try:
+        return unicode(value), None
+    except UnicodeDecodeError:
+        return str(value).decode('utf-8'), None
+
+
+def bool_to_str(value, state = None):
     """Convert a boolean to a "0" or "1" string.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+    .. warning:: Like most converters, a ``None`` value is not converted.
 
         When you want ``None`` to be converted to ``"0"``, use::
 
@@ -142,227 +233,26 @@ def bool_to_str(value, state = states.default_state):
     return unicode(int(bool(value))), None
 
 
-def clean_str_to_bool(value, state = states.default_state):
-    """Convert a clean string to a boolean.
+def catch_error(converter, error_value = None):
+    """Make a converter that calls another converter and ignore its errors.
 
-    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_bool`.
-
-    .. note:: For a converter that accepts special strings like "f", "off", "no", etc, see :func:`guess_bool`.
-
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
-
-        When you want ``None`` to be converted to ``False``, use::
-
-            pipe(clean_str_to_bool, default(False))
-
-    >>> clean_str_to_bool(u'0')
-    (False, None)
-    >>> clean_str_to_bool(u'1')
-    (True, None)
-    >>> clean_str_to_bool(None)
+    >>> catch_error(noop)(42)
+    (42, None)
+    >>> catch_error(fail())(42)
     (None, None)
-    >>> clean_str_to_bool(u'vrai')
-    (u'vrai', u'Value must be a boolean')
-    >>> clean_str_to_bool(u'on')
-    (u'on', u'Value must be a boolean')
+    >>> catch_error(noop, error_value = 0)(42)
+    (42, None)
+    >>> catch_error(fail(), error_value = 0)(42)
+    (0, None)
     """
-    if value is None:
-        return value, None
-    try:
-        return bool(int(value)), None
-    except ValueError:
-        return value, state._(u'Value must be a boolean')
-
-
-def clean_str_to_email(value, state = states.default_state):
-    """Convert a clean string to an email address.
-
-    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_email`.
-
-    >>> clean_str_to_email(u'john@doe.name')
-    (u'john@doe.name', None)
-    >>> clean_str_to_email(u'mailto:john@doe.name')
-    (u'john@doe.name', None)
-    >>> clean_str_to_email(u'root@localhost')
-    (u'root@localhost', None)
-    >>> clean_str_to_email(u'root@127.0.0.1')
-    (u'root@127.0.0.1', u'Invalid domain name')
-    >>> clean_str_to_email(u'root')
-    (u'root', u'An email must contain exactly one "@"')
-    """
-    if value is None:
-        return value, None
-    value = value.lower()
-    if value.startswith(u'mailto:'):
-        value = value.replace(u'mailto:', u'')
-    try:
-        username, domain = value.split('@', 1)
-    except ValueError:
-        return value, state._(u'An email must contain exactly one "@"')
-    if not username_re.match(username):
-        return value, state._(u'Invalid username')
-    if not domain_re.match(domain) and domain != 'localhost':
-        return value, state._(u'Invalid domain name')
-    return value, None
-
-
-def clean_str_to_json(value, state = states.default_state):
-    """Convert a clean string to a JSON value.
-
-    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_json`.
-
-    .. note:: This converter uses module ``simplejson``  when it is available, or module ``json`` otherwise.
-
-    >>> clean_str_to_json(u'{"a": 1, "b": 2}')
-    ({u'a': 1, u'b': 2}, None)
-    >>> clean_str_to_json(u'null')
-    (None, None)
-    >>> clean_str_to_json(None)
-    (None, None)
-    """
-    if value is None:
-        return value, None
-    try:
-        import simplejson as json
-    except ImportError:
-        import json
-    if isinstance(value, str):
-        # Ensure that json.loads() uses unicode strings.
-        value = value.decode('utf-8')
-    try:
-        return json.loads(value), None
-    except json.JSONDecodeError, e:
-        return value, unicode(e)
-
-
-def clean_str_to_slug(value, state = states.default_state):
-    """Convert a clean string to a slug.
-
-    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_slug`.
-
-    >>> clean_str_to_slug(u'Hello world!')
-    (u'hello-world', None)
-    >>> clean_str_to_slug('Hello world!')
-    (u'hello-world', None)
-    >>> clean_str_to_slug(u'')
-    (None, None)
-    """
-    if value is None:
-        return value, None
-    value = strings.slugify(value)
-    return unicode(value) if value else None, None
-
-
-def clean_str_to_url(add_prefix = u'http://', full = False, remove_fragment = False, schemes = (u'http', u'https')):
-    """Return a converter that converts a clean string to an URL.
-
-    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_url`.
-
-    >>> clean_str_to_url()(u'http://packages.python.org/Biryani/')
-    (u'http://packages.python.org/Biryani/', None)
-    >>> clean_str_to_url(full = True)(u'packages.python.org/Biryani/')
-    (u'http://packages.python.org/Biryani/', None)
-    >>> clean_str_to_url()(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html#tutorial', None)
-    >>> clean_str_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
-    >>> clean_str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
-    (u'http://packages.python.org/Biryani/presentation.html', None)
-    """
-    def clean_str_to_url_converter(value, state = states.default_state):
-        if value is None:
-            return value, None
-        import urlparse
-        split_url = list(urlparse.urlsplit(value))
-        if full and add_prefix and not split_url[0] and not split_url[1] and split_url[2] \
-                and not split_url[2].startswith(u'/'):
-            split_url = list(urlparse.urlsplit(add_prefix + value))
-        scheme = split_url[0]
-        if scheme != scheme.lower():
-            split_url[0] = scheme = scheme.lower()
-        if full and not scheme:
-            return value, state._(u'URL must be complete')
-        if scheme and schemes is not None and scheme not in schemes:
-            return value, state._(u'Scheme must belong to {0}').format(sorted(schemes))
-        network_location = split_url[1]
-        if network_location != network_location.lower():
-            split_url[1] = network_location = network_location.lower()
-        if scheme in (u'http', u'https') and not split_url[2]:
-            # By convention a full HTTP URL must always have at least a "/" in its path.
-            split_url[2] = u'/'
-        if remove_fragment and split_url[4]:
-            split_url[4] = u''
-        return unicode(urlparse.urlunsplit(split_url)), None
-    return clean_str_to_url_converter
-
-
-def clean_str_to_url_name(value, state = states.default_state):
-    """Convert a clean string to a normalized string that can be used in an URL path or a query parameter.
-
-    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_url_name`.
-
-    >>> clean_str_to_url_name(u'Hello world!')
-    (u'hello_world!', None)
-    >>> clean_str_to_url_name(u'')
-    (None, None)
-    """
-    if value is None:
-        return value, None
-    for character in u'\n\r/?&#':
-        value = value.replace(character, u' ')
-    value = strings.normalize(value, separator = u'_')
-    return value or None, None
-
-
-def clean_str_to_url_path_and_query(value, state = states.default_state):
-    """Convert a clean string to the path and query of an URL.
-
-    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_url_path_and_query`.
-
-    >>> clean_str_to_url_path_and_query(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html', None)
-    >>> clean_str_to_url_path_and_query(u'/Biryani/search.html?q=pipe')
-    (u'/Biryani/search.html?q=pipe', None)
-    >>> clean_str_to_url_path_and_query(u'http://packages.python.org/Biryani/search.html?q=pipe')
-    (u'http://packages.python.org/Biryani/search.html?q=pipe', u'URL must not be complete')
-    >>> print clean_str_to_url_path_and_query(None)
-    (None, None)
-    >>> import urlparse
-    >>> pipe(
-    ...     clean_str_to_url(),
-    ...     function(lambda value: urlparse.urlunsplit([u'', u''] + list(urlparse.urlsplit(value))[2:])),
-    ...     clean_str_to_url_path_and_query,
-    ...     )(u'http://packages.python.org/Biryani/search.html?q=pipe')
-    (u'/Biryani/search.html?q=pipe', None)
-    """
-    if value is None:
-        return value, None
-    import urlparse
-    split_url = list(urlparse.urlsplit(value))
-    if split_url[0] or split_url[1]:
-        return value, state._(u'URL must not be complete')
-    if split_url[4]:
-        split_url[4] = ''
-    return unicode(urlparse.urlunsplit(split_url)), None
-
-
-def cleanup_empty(value, state = states.default_state):
-    """When value is comparable to False (ie None, 0 , '', etc) replace it with None else keep it as is.
-
-    >>> cleanup_empty(0)
-    (None, None)
-    >>> cleanup_empty('')
-    (None, None)
-    >>> cleanup_empty([])
-    (None, None)
-    >>> cleanup_empty({})
-    (None, None)
-    >>> cleanup_empty(u'hello world')
-    (u'hello world', None)
-    >>> cleanup_empty(u'   hello world   ')
-    (u'   hello world   ', None)
-    """
-    return value if value else None, None
+    def catch_error_converter(value, state = None):
+        if state is None:
+            state = states.default_state
+        result, error = converter(value, state = state)
+        if error is not None:
+            return error_value, None
+        return result, None
+    return catch_error_converter
 
 
 def condition(test_converter, ok_converter, error_converter = None):
@@ -380,7 +270,9 @@ def condition(test_converter, ok_converter, error_converter = None):
     >>> detect_unknown_values(u'?')
     (False, None)
     """
-    def condition_converter(value, state = states.default_state):
+    def condition_converter(value, state = None):
+        if state is None:
+            state = states.default_state
         test, error = test_converter(value, state = state)
         if error is None:
             return ok_converter(value, state = state)
@@ -407,20 +299,45 @@ def decode_str(encoding = 'utf-8'):
 
 
 def default(constant):
-    """Return a converter that replace a missing value (aka ``None``) by given one.
+    """Return a converter that replace a ``None`` value by given one.
+
+    .. note:: See converter :func:`set_value` to replace a non-``None`` value.
 
     >>> default(42)(None)
     (42, None)
     >>> default(42)(u'1234')
     (u'1234', None)
-    >>> pipe(str_to_int, default(42))(u'1234')
+    >>> pipe(input_to_int, default(42))(u'1234')
     (1234, None)
-    >>> pipe(str_to_int, default(42))(u'    ')
+    >>> pipe(input_to_int, default(42))(u'    ')
     (42, None)
-    >>> pipe(str_to_int, default(42))(None)
+    >>> pipe(input_to_int, default(42))(None)
     (42, None)
     """
-    return lambda value, state = states.default_state: (constant, None) if value is None else (value, None)
+    return lambda value, state = None: (constant, None) if value is None else (value, None)
+
+
+def empty_to_none(value, state = None):
+    """When value is comparable to False (ie None, 0 , '', etc) replace it with None else keep it as is.
+
+    >>> empty_to_none(0)
+    (None, None)
+    >>> empty_to_none('')
+    (None, None)
+    >>> empty_to_none([])
+    (None, None)
+    >>> empty_to_none([42, 43])
+    ([42, 43], None)
+    >>> empty_to_none({})
+    (None, None)
+    >>> empty_to_none({'answer': 42})
+    ({'answer': 42}, None)
+    >>> empty_to_none(u'hello world')
+    (u'hello world', None)
+    >>> empty_to_none(u'   hello world   ')
+    (u'   hello world   ', None)
+    """
+    return value if value else None, None
 
 
 def encode_str(encoding = 'utf-8'):
@@ -438,34 +355,40 @@ def encode_str(encoding = 'utf-8'):
     return function(lambda value: value.encode(encoding) if isinstance(value, unicode) else value)
 
 
-def fail(msg = N_(u'An error occured')):
+def fail(error = N_(u'An error occured')):
     """Return a converter that always returns an error.
 
     >>> fail(u'Wrong answer')(42)
     (42, u'Wrong answer')
     >>> fail()(42)
     (42, u'An error occured')
+    >>> fail()(None)
+    (None, u'An error occured')
     """
-    def fail_converter(value, state = states.default_state):
-        return value, state._(msg)
+    def fail_converter(value, state = None):
+        if state is None:
+            state = states.default_state
+        return value, state._(error) if isinstance(error, basestring) else error
     return fail_converter
 
 
 def first_match(*converters):
     """Try each converter successively until one succeeds. When every converter fail, return the result of the last one.
 
-    >>> first_match(test_equals(u'NaN'), str_to_int)(u'NaN')
+    >>> first_match(test_equals(u'NaN'), input_to_int)(u'NaN')
     (u'NaN', None)
-    >>> first_match(test_equals(u'NaN'), str_to_int)(u'42')
+    >>> first_match(test_equals(u'NaN'), input_to_int)(u'42')
     (42, None)
-    >>> first_match(test_equals(u'NaN'), str_to_int)(u'abc')
+    >>> first_match(test_equals(u'NaN'), input_to_int)(u'abc')
     (u'abc', u'Value must be an integer')
-    >>> first_match(test_equals(u'NaN'), str_to_int, set_value(0))(u'Hello world!')
+    >>> first_match(test_equals(u'NaN'), input_to_int, set_value(0))(u'Hello world!')
     (0, None)
     >>> first_match()(u'Hello world!')
     (u'Hello world!', None)
     """
-    def first_match_converter(value, state = states.default_state):
+    def first_match_converter(value, state = None):
+        if state is None:
+            state = states.default_state
         converted_value = value
         error = None
         for converter in converters:
@@ -476,17 +399,17 @@ def first_match(*converters):
     return first_match_converter
 
 
-def function(function, handle_missing_value = False, handle_state = False):
+def function(function, handle_none_value = False, handle_state = False):
     """Return a converter that applies a function to value and returns a new value.
 
-    .. note:: Like most converters, by default a missing value (aka ``None``) is not converted (ie function is not
-       called). Set ``handle_missing_value`` to ``True`` to call function when value is ``None``.
+    .. note:: Like most converters, by default a ``None`` value is not converted (ie function is not
+       called). Set ``handle_none_value`` to ``True`` to call function when value is ``None``.
 
     .. note:: When your function doesn't modify value but may generate an error, use a :func:`test` instead.
 
     .. note:: When your function modifies value and may generate an error, write a full converter instead of a function.
 
-    See :doc:`how-to-create-converter` for more informations.
+    See :doc:`how-to-create-converter` for more information.
 
     >>> function(int)('42')
     (42, None)
@@ -498,14 +421,16 @@ def function(function, handle_missing_value = False, handle_state = False):
     (None, None)
     >>> function(lambda value: value + 1)(u'hello world')
     Traceback (most recent call last):
-    TypeError: coercing to Unicode: need string or buffer, int found
-    >>> function(lambda value: value + 1, handle_missing_value = True)(None)
+    TypeError:
+    >>> function(lambda value: value + 1, handle_none_value = True)(None)
     Traceback (most recent call last):
-    TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'
+    TypeError:
     """
-    def function_converter(value, state = states.default_state):
-        if value is None and not handle_missing_value or function is None:
+    def function_converter(value, state = None):
+        if value is None and not handle_none_value or function is None:
             return value, None
+        if state is None:
+            state = states.default_state
         if handle_state:
             return function(value, state = state), None
         return function(value), None
@@ -544,32 +469,38 @@ def get(key, default = UnboundLocalError, error = None):
     >>> get(0)(None)
     (None, None)
     """
-    def get_converter(value, state = states.default_state):
+    def get_converter(value, state = None):
         import collections
 
         if value is None:
             return value, None
+        if state is None:
+            state = states.default_state
         if isinstance(value, collections.Mapping):
             converted_value = value.get(key, default)
             if converted_value is UnboundLocalError:
-                return None, state._(u'Unknown key: {0}').format(key) if error is None else state._(error)
+                return None, state._(u'Unknown key: {0}').format(key) \
+                    if error is None \
+                    else state._(error) if isinstance(error, basestring) else error
             return converted_value, None
         assert isinstance(value, collections.Sequence), \
             'Value must be a mapping or a sequence. Got {0} instead.'.format(type(value))
         if 0 <= key < len(value):
             return value[key], None
         if default is UnboundLocalError:
-            return None, state._(u'Index out of range: {0}').format(key) if error is None else state._(error)
+            return None, state._(u'Index out of range: {0}').format(key) \
+                if error is None \
+                else state._(error) if isinstance(error, basestring) else error
         return default, None
     return get_converter
 
 
-def guess_bool(value, state = states.default_state):
+def guess_bool(value, state = None):
     """Convert the content of a string (or a number) to a boolean. Do nothing when input value is already a boolean.
 
     This converter accepts usual values for ``True`` and ``False``: "0", "f", "false", "n", etc.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+    .. warning:: Like most converters, a ``None`` value is not converted.
 
         When you want ``None`` to be converted to ``False``, use::
 
@@ -634,6 +565,8 @@ def guess_bool(value, state = states.default_state):
     """
     if value is None:
         return value, None
+    if state is None:
+        state = states.default_state
     try:
         return bool(int(value)), None
     except ValueError:
@@ -647,110 +580,461 @@ def guess_bool(value, state = states.default_state):
         return value, state._(u'Value must be a boolean')
 
 
-def item_or_sequence(converter, constructor = list, keep_missing_items = False):
+def item_or_sequence(converter, constructor = list, drop_none_items = False):
     """Return a converter that accepts either an item or a sequence of items and applies a converter to them.
 
-    >>> item_or_sequence(str_to_int)(u'42')
+    >>> item_or_sequence(input_to_int)(u'42')
     (42, None)
-    >>> item_or_sequence(str_to_int)([u'42'])
+    >>> item_or_sequence(input_to_int)([u'42'])
     (42, None)
-    >>> item_or_sequence(str_to_int)([u'42', u'43'])
+    >>> item_or_sequence(input_to_int)([u'42', u'43'])
     ([42, 43], None)
-    >>> item_or_sequence(str_to_int)([u'42', u'43', u'Hello world!'])
+    >>> item_or_sequence(input_to_int)([u'42', u'43', u'Hello world!'])
     ([42, 43, u'Hello world!'], {2: u'Value must be an integer'})
-    >>> item_or_sequence(str_to_int)([u'42', None, u'43'])
-    ([42, 43], None)
-    >>> item_or_sequence(str_to_int)([None, None])
-    (None, None)
-    >>> item_or_sequence(str_to_int, keep_missing_items = True)([None, None])
+    >>> item_or_sequence(input_to_int)([None, None])
     ([None, None], None)
-    >>> item_or_sequence(str_to_int, keep_missing_items = True)([u'42', None, u'43'])
+    >>> item_or_sequence(input_to_int, drop_none_items = True)([None, None])
+    ([], None)
+    >>> item_or_sequence(input_to_int)([u'42', None, u'43'])
     ([42, None, 43], None)
-    >>> item_or_sequence(str_to_int, keep_missing_items = True)([u'42', u'43', u'Hello world!'])
+    >>> item_or_sequence(input_to_int, drop_none_items = True)([u'42', None, u'43'])
+    ([42, 43], None)
+    >>> item_or_sequence(input_to_int)([u'42', u'43', u'Hello world!'])
     ([42, 43, u'Hello world!'], {2: u'Value must be an integer'})
-    >>> item_or_sequence(str_to_int, constructor = set)(set([u'42', u'43']))
+    >>> item_or_sequence(input_to_int, constructor = set)(set([u'42', u'43']))
     (set([42, 43]), None)
     """
     return condition(
         test_isinstance(constructor),
         pipe(
-            uniform_sequence(converter, constructor = constructor, keep_missing_items = keep_missing_items),
+            uniform_sequence(converter, constructor = constructor, drop_none_items = drop_none_items),
             extract_when_singleton,
             ),
         converter,
         )
 
 
-def new_mapping(converters, constructor = dict, keep_empty = False):
+def make_str_to_url(add_prefix = None, error_if_fragment = False, error_if_path = False,
+        error_if_query = False, full = False, remove_fragment = False, remove_path = False, remove_query = False,
+        schemes = (u'http', u'https')):
+    """Return a converter that converts a clean string to an URL.
+
+    .. note:: For a converter that doesn't require a clean string, see :func:`make_input_to_url`.
+
+    >>> make_str_to_url()(u'http://packages.python.org/Biryani/')
+    (u'http://packages.python.org/Biryani/', None)
+    >>> make_str_to_url()(u'packages.python.org/Biryani/')
+    (u'packages.python.org/Biryani/', None)
+    >>> make_str_to_url(full = True)(u'packages.python.org/Biryani/')
+    (u'packages.python.org/Biryani/', u'URL must be complete')
+    >>> make_str_to_url(add_prefix = u'http://', full = True)(u'packages.python.org/Biryani/')
+    (u'http://packages.python.org/Biryani/', None)
+    >>> make_str_to_url()(u'/Biryani/presentation.html#tutorial')
+    (u'/Biryani/presentation.html#tutorial', None)
+    >>> make_str_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
+    (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
+    >>> make_str_to_url(remove_path = True)(u'http://packages.python.org/Biryani/presentation.html')
+    (u'http://packages.python.org/', None)
+    >>> make_str_to_url(error_if_path = True)(u'http://packages.python.org/Biryani/presentation.html')
+    (u'http://packages.python.org/Biryani/presentation.html', u'URL must not contain a path')
+    >>> make_str_to_url(remove_query = True)(u'http://packages.python.org/Biryani/presentation.html?tuto=1')
+    (u'http://packages.python.org/Biryani/presentation.html', None)
+    >>> make_str_to_url(error_if_query = True)(u'http://packages.python.org/Biryani/presentation.html?tuto=1')
+    (u'http://packages.python.org/Biryani/presentation.html?tuto=1', u'URL must not contain a query')
+    >>> make_str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
+    (u'http://packages.python.org/Biryani/presentation.html', None)
+    >>> make_str_to_url(error_if_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tuto')
+    (u'http://packages.python.org/Biryani/presentation.html#tuto', u'URL must not contain a fragment')
+    >>> make_str_to_url(full = True)(u'[www.nordnet.fr/grandmix/]')
+    (u'[www.nordnet.fr/grandmix/]', u'URL must be complete')
+    >>> make_str_to_url(full = True)(u'http://[www.nordnet.fr/grandmix/]')
+    (u'http://[www.nordnet.fr/grandmix/]', u'Invalid URL')
+    """
+    def str_to_url(value, state = None):
+        if value is None:
+            return value, None
+        import urlparse
+        if state is None:
+            state = states.default_state
+        try:
+            split_url = list(urlparse.urlsplit(value))
+        except ValueError:
+            return value, state._(u'Invalid URL')
+        if full and add_prefix and not split_url[0] and not split_url[1] and split_url[2] \
+                and not split_url[2].startswith(u'/'):
+            try:
+                split_url = list(urlparse.urlsplit(unicode(add_prefix) + value))
+            except ValueError:
+                return value, state._(u'Invalid URL')
+        scheme = split_url[0]
+        if scheme != scheme.lower():
+            split_url[0] = scheme = scheme.lower()
+        if full and not scheme:
+            return value, state._(u'URL must be complete')
+        if scheme and schemes is not None and scheme not in schemes:
+            return value, state._(u'Scheme must belong to {0}').format(sorted(schemes))
+        network_location = split_url[1]
+        if network_location != network_location.lower():
+            split_url[1] = network_location = network_location.lower()
+        if split_url[2] and split_url[2] != u'/':
+            if error_if_path:
+                return value, state._(u'URL must not contain a path')
+            if remove_path:
+                split_url[2] = u'/'
+        if scheme in (u'http', u'https') and not split_url[2]:
+            # By convention a full HTTP URL must always have at least a "/" in its path.
+            split_url[2] = u'/'
+        if split_url[3]:
+            if error_if_query:
+                return value, state._(u'URL must not contain a query')
+            if remove_query:
+                split_url[3] = u''
+        if split_url[4]:
+            if error_if_fragment:
+                return value, state._(u'URL must not contain a fragment')
+            if remove_fragment:
+                split_url[4] = u''
+        return unicode(urlparse.urlunsplit(split_url)), None
+    return str_to_url
+
+
+def make_item_to_singleton(constructor = list):
+    """Convert an item to a singleton, but keep a sequence of items unchanged.
+
+    >>> make_item_to_singleton()(u'Hello world!')
+    ([u'Hello world!'], None)
+    >>> make_item_to_singleton()([u'Hello world!'])
+    ([u'Hello world!'], None)
+    >>> make_item_to_singleton()([42, u'Hello world!'])
+    ([42, u'Hello world!'], None)
+    >>> make_item_to_singleton()([])
+    ([], None)
+    >>> make_item_to_singleton()(None)
+    (None, None)
+    >>> make_item_to_singleton(constructor = set)(u'Hello world!')
+    (set([u'Hello world!']), None)
+    >>> make_item_to_singleton(constructor = set)(set([u'Hello world!']))
+    (set([u'Hello world!']), None)
+    >>> make_item_to_singleton(constructor = set)(set([42, u'Hello world!']))
+    (set([u'Hello world!', 42]), None)
+    >>> make_item_to_singleton(constructor = set)([42, u'Hello world!'])
+    Traceback (most recent call last):
+    TypeError:
+    >>> make_item_to_singleton(constructor = set)(set())
+    (set([]), None)
+    >>> make_item_to_singleton(constructor = set)(None)
+    (None, None)
+    """
+    return condition(
+        test_isinstance(constructor),
+        noop,
+        new_struct([noop], constructor = constructor),
+        )
+
+
+def make_input_to_normal_form(encoding = 'utf-8', separator = u' ', transform = strings.lower):
+    """Return a convert that simplifies a string to normal form using compatibility decomposition and removing combining
+    characters.
+
+    .. note:: For a converter that is dedicated to a name in an URL path, see :func:`input_to_url_name`.
+
+    .. note:: For a converter that keep only letters, digits and separator, see :func:`make_input_to_slug`
+        or :func:`input_to_slug`.
+
+    >>> make_input_to_normal_form()(u'Hello world!')
+    (u'hello world!', None)
+    >>> make_input_to_normal_form()('Hello world!')
+    (u'hello world!', None)
+    >>> make_input_to_normal_form()(u'   Hello world!   ')
+    (u'hello world!', None)
+    >>> make_input_to_normal_form(encoding = u'iso-8859-1')(u'Hello world!')
+    (u'hello world!', None)
+    >>> make_input_to_normal_form(separator = u'_')(u'Hello world!')
+    (u'hello_world!', None)
+    >>> from biryani import strings
+    >>> make_input_to_normal_form(separator = u' ', transform = strings.upper)(u'Hello world!')
+    (u'HELLO WORLD!', None)
+    >>> make_input_to_normal_form()(u'')
+    (None, None)
+    >>> make_input_to_normal_form()(u'   ')
+    (None, None)
+    """
+    def input_to_normal_form(value, state = None):
+        if value is None:
+            return value, None
+        value = strings.normalize(value, encoding = encoding, separator = separator, transform = transform)
+        return value or None, None
+    return input_to_normal_form
+
+
+def make_input_to_slug(encoding = 'utf-8', separator = u'-', transform = strings.lower):
+    """Return a convert that simplifies a string to a slug.
+
+    .. note:: For a converter that uses default parameters, see :func:`input_to_slug`.
+
+    >>> make_input_to_slug()(u'Hello world!')
+    (u'hello-world', None)
+    >>> make_input_to_slug()('Hello world!')
+    (u'hello-world', None)
+    >>> make_input_to_slug()(u'   Hello world!   ')
+    (u'hello-world', None)
+    >>> make_input_to_slug(encoding = u'iso-8859-1')(u'Hello world!')
+    (u'hello-world', None)
+    >>> make_input_to_slug(separator = u' ')(u'Hello world!')
+    (u'hello world', None)
+    >>> from biryani import strings
+    >>> make_input_to_slug(separator = u' ', transform = strings.upper)(u'Hello world!')
+    (u'HELLO WORLD', None)
+    >>> make_input_to_slug()(u'')
+    (None, None)
+    >>> make_input_to_slug()(u'   ')
+    (None, None)
+    """
+    def input_to_slug(value, state = None):
+        if value is None:
+            return value, None
+        value = strings.slugify(value, encoding = encoding, separator = separator, transform = transform)
+        return unicode(value) if value else None, None
+    return input_to_slug
+
+
+def make_input_to_url(add_prefix = None, error_if_fragment = False, error_if_path = False,
+        error_if_query = False, full = False, remove_fragment = False, remove_path = False, remove_query = False,
+        schemes = (u'http', u'https')):
+    """Return a converter that converts an string to an URL.
+
+    >>> make_input_to_url()(u'http://packages.python.org/Biryani/')
+    (u'http://packages.python.org/Biryani/', None)
+    >>> make_input_to_url()(u'packages.python.org/Biryani/')
+    (u'packages.python.org/Biryani/', None)
+    >>> make_input_to_url(full = True)(u'packages.python.org/Biryani/')
+    (u'packages.python.org/Biryani/', u'URL must be complete')
+    >>> make_input_to_url(add_prefix = u'http://', full = True)(u'packages.python.org/Biryani/')
+    (u'http://packages.python.org/Biryani/', None)
+    >>> make_input_to_url()(u'/Biryani/presentation.html#tutorial')
+    (u'/Biryani/presentation.html#tutorial', None)
+    >>> make_input_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
+    (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
+    >>> make_input_to_url(remove_path = True)(u'http://packages.python.org/Biryani/presentation.html')
+    (u'http://packages.python.org/', None)
+    >>> make_input_to_url(error_if_path = True)(u'http://packages.python.org/Biryani/presentation.html')
+    (u'http://packages.python.org/Biryani/presentation.html', u'URL must not contain a path')
+    >>> make_input_to_url(remove_query = True)(u'http://packages.python.org/Biryani/presentation.html?tuto=1')
+    (u'http://packages.python.org/Biryani/presentation.html', None)
+    >>> make_input_to_url(error_if_query = True)(u'http://packages.python.org/Biryani/presentation.html?tuto=1')
+    (u'http://packages.python.org/Biryani/presentation.html?tuto=1', u'URL must not contain a query')
+    >>> make_input_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
+    (u'http://packages.python.org/Biryani/presentation.html', None)
+    >>> make_input_to_url(error_if_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
+    (u'http://packages.python.org/Biryani/presentation.html#tutorial', u'URL must not contain a fragment')
+    >>> make_input_to_url()(u'    http://packages.python.org/Biryani/   ')
+    (u'http://packages.python.org/Biryani/', None)
+    """
+    return pipe(
+        cleanup_line,
+        make_str_to_url(add_prefix = add_prefix, error_if_fragment = error_if_fragment,
+            error_if_path = error_if_path, error_if_query = error_if_query, full = full,
+            remove_fragment = remove_fragment, remove_path = remove_path, remove_query = remove_query,
+            schemes = schemes),
+        )
+
+
+def make_input_to_url_name(encoding = 'utf-8', separator = u'_', transform = strings.lower):
+    """Return a converts that normalizes a string to allow its use in an URL (or file system) path or a query parameter.
+
+    .. note:: For a converter that keep only letters, digits and separator, see :func:`make_input_to_slug`
+        or :func:`input_to_slug`.
+
+    >>> make_input_to_url_name()(u'   Hello world!   ')
+    (u'hello_world!', None)
+    >>> make_input_to_url_name()(u'   ')
+    (None, None)
+    >>> make_input_to_url_name()(u'')
+    (None, None)
+    """
+    def input_to_url_name(value, state = None):
+        if value is None:
+            return value, None
+        if isinstance(value, str):
+            value = value.decode(encoding)
+        # Replace unsafe characters (for URLs and file-systems).
+        value = value.translate({
+            ord(u'\n'): separator,
+            ord(u'\r'): separator,
+            ord(u'\\'): separator,
+            ord(u'/'): separator,
+            ord(u';'): separator,
+            ord(u':'): separator,
+            ord(u'"'): separator,
+            ord(u'#'): separator,
+            ord(u'*'): separator,
+            ord(u'?'): separator,
+            ord(u'&'): separator,
+            ord(u'<'): separator,
+            ord(u'>'): separator,
+            ord(u'|'): separator,
+            ord(u'.'): separator,
+            })
+        value = strings.normalize(value, encoding = encoding, separator = separator, transform = transform)
+        two_separators = separator * 2
+        while two_separators in value:
+            value = value.replace(two_separators, separator)
+        value = value.strip(separator)
+
+        return value or None, None
+    return input_to_url_name
+
+
+def merge(*converters):
+    """Return a converter that merge the resulsts of several :func:`structured_mapping` converters.
+
+    >>> ab_converter = struct(
+    ... dict(
+    ...     a = input_to_int,
+    ...     b = input_to_float,
+    ...     ),
+    ... default = 'drop',
+    ... )
+    >>> c_converter = struct(
+    ... dict(
+    ...     c = input_to_email,
+    ...     ),
+    ... default = 'drop',
+    ... )
+    >>> abc_converter = merge(ab_converter, c_converter)
+    >>> abc_converter(dict(a = u'1', b = u'2', c = u'john@doe.name'))
+    ({'a': 1, 'c': u'john@doe.name', 'b': 2.0}, None)
+    >>> abc_converter(dict(a = u'1'))
+    ({'a': 1, 'c': None, 'b': None}, None)
+    >>> abc_converter(dict(c = u'john@doe.name'))
+    ({'a': None, 'c': u'john@doe.name', 'b': None}, None)
+    >>> abc_converter(dict(a = u'a', b = u'b', c = u'1'))
+    ({'a': u'a', 'c': u'1', 'b': u'b'}, {'a': u'Value must be an integer', \
+'c': u'An email must contain exactly one "@"', 'b': u'Value must be a float'})
+    >>> abc_converter({})
+    ({'a': None, 'c': None, 'b': None}, None)
+    >>> abc_converter(None)
+    (None, None)
+    """
+    def merge_converter(values, state = None):
+        if values is None:
+            return values, None
+        if state is None:
+            state = states.default_state
+        merged_values = None
+        merged_errors = None
+        for converter in converters:
+            converter_values, converter_errors = converter(values, state = state)
+            if converter_errors is not None:
+                if not isinstance(converter_errors, dict):
+                    return converter_values, converter_errors
+                if merged_errors is None:
+                    merged_errors = {}
+                merged_errors.update(converter_errors)
+            if converter_values is not None:
+                if not isinstance(converter_values, dict):
+                    return converter_values, converter_errors
+                if merged_values is None:
+                    merged_values = {}
+                merged_values.update(converter_values)
+        return merged_values, merged_errors
+    return merge_converter
+
+
+def new_mapping(converters, constructor = None, drop_none_values = False, handle_none_value = False):
     """Return a converter that constructs a mapping (ie dict, etc) from any kind of value.
 
     .. note:: This converter should not be used directly. Use :func:`new_struct` instead.
 
     .. note:: When input value has the same structure, converter :func:`struct` should be used instead.
 
-    >>> def convert_list_to_dict(constructor = dict, keep_empty = False):
+    >>> def convert_list_to_dict(constructor = None, drop_none_values = False, handle_none_value = False):
     ...     return new_mapping(
     ...         dict(
     ...             name = get(0),
-    ...             age = pipe(get(1), str_to_int),
-    ...             email = pipe(get(2), str_to_email),
+    ...             age = pipe(get(1), input_to_int),
+    ...             email = pipe(get(2), input_to_email),
     ...             ),
     ...         constructor = constructor,
-    ...         keep_empty = keep_empty,
+    ...         drop_none_values = drop_none_values,
+    ...         handle_none_value = handle_none_value,
     ...         )
     >>> convert_list_to_dict()([u'John Doe', u'72', u'john@doe.name'])
     ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> convert_list_to_dict()([u'John Doe', u'72'])
-    ({'age': 72, 'name': u'John Doe'}, {'email': u'Index out of range: 2'})
+    ({'age': 72, 'email': None, 'name': u'John Doe'}, {'email': u'Index out of range: 2'})
     >>> convert_list_to_dict()([u'John Doe', u'72', None])
-    ({'age': 72, 'name': u'John Doe'}, None)
+    ({'age': 72, 'email': None, 'name': u'John Doe'}, None)
     >>> convert_list_to_dict()([None, u' ', None])
-    (None, None)
-    >>> convert_list_to_dict(keep_empty = True)([None, u' ', None])
+    ({'age': None, 'email': None, 'name': None}, None)
+    >>> convert_list_to_dict(drop_none_values = True)([None, u' ', None])
     ({}, None)
     >>> convert_list_to_dict()(None)
     (None, None)
+    >>> convert_list_to_dict(handle_none_value = True)(None)
+    ({'age': None, 'email': None, 'name': None}, None)
+    >>> convert_list_to_dict(drop_none_values = True, handle_none_value = True)(None)
+    ({}, None)
+    >>> import collections
+    >>> new_mapping(
+    ...     dict(
+    ...         name = get(0),
+    ...         age = pipe(get(1), input_to_int),
+    ...         email = pipe(get(2), input_to_email),
+    ...         ),
+    ...     constructor = collections.OrderedDict,
+    ...     )([u'John Doe', u'72', u'john@doe.name'])
+    (OrderedDict([('age', 72), ('email', u'john@doe.name'), ('name', u'John Doe')]), None)
+    >>> new_mapping(
+    ...     collections.OrderedDict(
+    ...         name = get(0),
+    ...         age = pipe(get(1), input_to_int),
+    ...         email = pipe(get(2), input_to_email),
+    ...         ),
+    ...     )([u'John Doe', u'72', u'john@doe.name'])
+    (OrderedDict([('age', 72), ('email', u'john@doe.name'), ('name', u'John Doe')]), None)
     """
+    if constructor is None:
+        constructor = type(converters)
     converters = dict(
         (name, converter)
         for name, converter in (converters or {}).iteritems()
         if converter is not None
         )
-    def new_mapping_converter(value, state = states.default_state):
-        if value is None:
+
+    def new_mapping_converter(value, state = None):
+        if value is None and not handle_none_value:
             return value, None
+        if state is None:
+            state = states.default_state
         errors = {}
-        converted_values = {}
+        converted_values = constructor()
         for name, converter in converters.iteritems():
             converted_value, error = converter(value, state = state)
-            if converted_value is not None:
+            if converted_value is not None or not drop_none_values:
                 converted_values[name] = converted_value
             if error is not None:
                 errors[name] = error
-        if keep_empty or converted_values:
-            converted_values = constructor(converted_values)
-        else:
-            converted_values = None
         return converted_values, errors or None
     return new_mapping_converter
 
 
-def new_sequence(converters, constructor = list, keep_empty = False):
+def new_sequence(converters, constructor = None, handle_none_value = False):
     """Return a converter that constructs a sequence (ie list, tuple, etc) from any kind of value.
 
     .. note:: This converter should not be used directly. Use :func:`new_struct` instead.
 
     .. note:: When input value has the same structure, converter :func:`struct` should be used instead.
 
-    >>> def convert_dict_to_list(constructor = list, keep_empty = False):
+    >>> def convert_dict_to_list(constructor = None, handle_none_value = False):
     ...     return new_sequence(
     ...         [
     ...             get('name', default = None),
-    ...             pipe(get('age', default = None), str_to_int),
-    ...             pipe(get('email', default = None), str_to_email),
+    ...             pipe(get('age', default = None), input_to_int),
+    ...             pipe(get('email', default = None), input_to_email),
     ...             ],
     ...         constructor = constructor,
-    ...         keep_empty = keep_empty,
+    ...         handle_none_value = handle_none_value,
     ...         )
     >>> convert_dict_to_list()({'age': u'72', 'email': u'john@doe.name', 'name': u'John Doe'})
     ([u'John Doe', 72, u'john@doe.name'], None)
@@ -759,76 +1043,120 @@ def new_sequence(converters, constructor = list, keep_empty = False):
     >>> convert_dict_to_list()({'email': u'john@doe.name', 'name': u'John Doe'})
     ([u'John Doe', None, u'john@doe.name'], None)
     >>> convert_dict_to_list()({})
-    (None, None)
-    >>> convert_dict_to_list(keep_empty = True)({})
     ([None, None, None], None)
     >>> convert_dict_to_list()(None)
     (None, None)
+    >>> convert_dict_to_list(handle_none_value = True)(None)
+    ([None, None, None], None)
+    >>> import collections
+    >>> new_sequence(
+    ...     [
+    ...         get('name', default = None),
+    ...         pipe(get('age', default = None), input_to_int),
+    ...         pipe(get('email', default = None), input_to_email),
+    ...         ],
+    ...     constructor = tuple,
+    ...     )({'age': u'72', 'email': u'john@doe.name', 'name': u'John Doe'})
+    ((u'John Doe', 72, u'john@doe.name'), None)
+    >>> new_sequence(
+    ...     (
+    ...         get('name', default = None),
+    ...         pipe(get('age', default = None), input_to_int),
+    ...         pipe(get('email', default = None), input_to_email),
+    ...         ),
+    ...     )({'age': u'72', 'email': u'john@doe.name', 'name': u'John Doe'})
+    ((u'John Doe', 72, u'john@doe.name'), None)
     """
+    if constructor is None:
+        constructor = type(converters)
     converters = [
         converter
         for converter in converters or []
         if converter is not None
         ]
-    def new_sequence_converter(value, state = states.default_state):
-        if value is None:
+
+    def new_sequence_converter(value, state = None):
+        if value is None and not handle_none_value:
             return value, None
+        if state is None:
+            state = states.default_state
         errors = {}
         converted_values = []
-        is_empty = True
         for i, converter in enumerate(converters):
             converted_value, error = converter(value, state = state)
-            if converted_value is not None:
-                is_empty = False
             converted_values.append(converted_value)
             if error is not None:
                 errors[i] = error
-        converted_values = constructor(converted_values) if not is_empty or keep_empty else None
-        return converted_values, errors or None
+        return constructor(converted_values), errors or None
     return new_sequence_converter
 
 
-def new_struct(converters, constructor = None, keep_empty = False):
+def new_struct(converters, constructor = None, drop_none_values = False, handle_none_value = False):
     """Return a converter that constructs a collection (ie dict, list, set, etc) from any kind of value.
 
     .. note:: When input value has the same structure, converter :func:`struct` should be used instead.
 
+    .. note:: Parameter ``drop_none_values`` is not used for sequences.
+
     Usage to create a mapping (ie dict, etc):
 
-    >>> def convert_list_to_dict(constructor = dict, keep_empty = False):
+    >>> def convert_list_to_dict(constructor = None, drop_none_values = False, handle_none_value = False):
     ...     return new_struct(
     ...         dict(
     ...             name = get(0),
-    ...             age = pipe(get(1), str_to_int),
-    ...             email = pipe(get(2), str_to_email),
+    ...             age = pipe(get(1), input_to_int),
+    ...             email = pipe(get(2), input_to_email),
     ...             ),
     ...         constructor = constructor,
-    ...         keep_empty = keep_empty,
+    ...         drop_none_values = drop_none_values,
+    ...         handle_none_value = handle_none_value,
     ...         )
     >>> convert_list_to_dict()([u'John Doe', u'72', u'john@doe.name'])
     ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> convert_list_to_dict()([u'John Doe', u'72'])
-    ({'age': 72, 'name': u'John Doe'}, {'email': u'Index out of range: 2'})
+    ({'age': 72, 'email': None, 'name': u'John Doe'}, {'email': u'Index out of range: 2'})
     >>> convert_list_to_dict()([u'John Doe', u'72', None])
-    ({'age': 72, 'name': u'John Doe'}, None)
+    ({'age': 72, 'email': None, 'name': u'John Doe'}, None)
     >>> convert_list_to_dict()([None, u' ', None])
-    (None, None)
-    >>> convert_list_to_dict(keep_empty = True)([None, u' ', None])
+    ({'age': None, 'email': None, 'name': None}, None)
+    >>> convert_list_to_dict(drop_none_values = True)([None, u' ', None])
     ({}, None)
     >>> convert_list_to_dict()(None)
     (None, None)
+    >>> convert_list_to_dict(handle_none_value = True)(None)
+    ({'age': None, 'email': None, 'name': None}, None)
+    >>> convert_list_to_dict(drop_none_values = True, handle_none_value = True)(None)
+    ({}, None)
+    >>> import collections
+    >>> new_struct(
+    ...     dict(
+    ...         name = get(0),
+    ...         age = pipe(get(1), input_to_int),
+    ...         email = pipe(get(2), input_to_email),
+    ...         ),
+    ...     constructor = collections.OrderedDict,
+    ...     )([u'John Doe', u'72', u'john@doe.name'])
+    (OrderedDict([('age', 72), ('email', u'john@doe.name'), ('name', u'John Doe')]), None)
+    >>> new_struct(
+    ...     collections.OrderedDict(
+    ...         name = get(0),
+    ...         age = pipe(get(1), input_to_int),
+    ...         email = pipe(get(2), input_to_email),
+    ...         ),
+    ...     )([u'John Doe', u'72', u'john@doe.name'])
+    (OrderedDict([('age', 72), ('email', u'john@doe.name'), ('name', u'John Doe')]), None)
 
     Usage to create a sequence (ie list, tuple, etc) or a set:
 
-    >>> def convert_dict_to_list(constructor = list, keep_empty = False):
+    >>> def convert_dict_to_list(constructor = None, handle_none_value = False):
     ...     return new_struct(
     ...         [
     ...             get('name', default = None),
-    ...             pipe(get('age', default = None), str_to_int),
-    ...             pipe(get('email', default = None), str_to_email),
+    ...             pipe(get('age', default = None), input_to_int),
+    ...             pipe(get('email', default = None), input_to_email),
     ...             ],
     ...         constructor = constructor,
-    ...         keep_empty = keep_empty,
+    ...         handle_none_value = handle_none_value,
     ...         )
     >>> convert_dict_to_list()({'age': u'72', 'email': u'john@doe.name', 'name': u'John Doe'})
     ([u'John Doe', 72, u'john@doe.name'], None)
@@ -837,22 +1165,41 @@ def new_struct(converters, constructor = None, keep_empty = False):
     >>> convert_dict_to_list()({'email': u'john@doe.name', 'name': u'John Doe'})
     ([u'John Doe', None, u'john@doe.name'], None)
     >>> convert_dict_to_list()({})
-    (None, None)
-    >>> convert_dict_to_list(keep_empty = True)({})
     ([None, None, None], None)
     >>> convert_dict_to_list()(None)
     (None, None)
+    >>> convert_dict_to_list(handle_none_value = True)(None)
+    ([None, None, None], None)
+    >>> import collections
+    >>> new_struct(
+    ...     [
+    ...         get('name', default = None),
+    ...         pipe(get('age', default = None), input_to_int),
+    ...         pipe(get('email', default = None), input_to_email),
+    ...         ],
+    ...     constructor = tuple,
+    ...     )({'age': u'72', 'email': u'john@doe.name', 'name': u'John Doe'})
+    ((u'John Doe', 72, u'john@doe.name'), None)
+    >>> new_struct(
+    ...     (
+    ...         get('name', default = None),
+    ...         pipe(get('age', default = None), input_to_int),
+    ...         pipe(get('email', default = None), input_to_email),
+    ...         ),
+    ...     )({'age': u'72', 'email': u'john@doe.name', 'name': u'John Doe'})
+    ((u'John Doe', 72, u'john@doe.name'), None)
     """
     import collections
 
     if isinstance(converters, collections.Mapping):
-        return new_mapping(converters, constructor = constructor or dict,  keep_empty = keep_empty)
+        return new_mapping(converters, constructor = constructor, drop_none_values = drop_none_values,
+            handle_none_value = handle_none_value)
     assert isinstance(converters, collections.Sequence), \
         'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
-    return new_sequence(converters, constructor = constructor or list, keep_empty = keep_empty)
+    return new_sequence(converters, constructor = constructor, handle_none_value = handle_none_value)
 
 
-def noop(value, state = states.default_state):
+def noop(value, state = None):
     """Return value as is.
 
     >>> noop(42)
@@ -863,18 +1210,50 @@ def noop(value, state = states.default_state):
     return value, None
 
 
+def ok(converter_or_value_and_error):
+    """Run a conversion and return ``True`` when it doesn't generate an error or ``False`` otherwise.
+
+    This function can be called with either a converter or the result of a conversion.
+
+    Usage with a converter:
+
+    >>> ok(input_to_int)(u'42')
+    True
+    >>> ok(input_to_int)(u'hello world')
+    False
+
+    Usage with a conversion result :
+
+    >>> ok(input_to_int(u'42'))
+    True
+    >>> ok(input_to_int(u'hello world'))
+    False
+    """
+    import collections
+
+    if isinstance(converter_or_value_and_error, collections.Sequence):
+        value, error = converter_or_value_and_error
+        return error is None
+    else:
+        # converter_or_value_and_error is a converter.
+        def ok_converter(*args, **kwargs):
+            value, error = converter_or_value_and_error(*args, **kwargs)
+            return error is None
+        return ok_converter
+
+
 def pipe(*converters):
     """Return a compound converter that applies each of its converters till the end or an error occurs.
 
-    >>> str_to_bool(42)
+    >>> input_to_bool(42)
     Traceback (most recent call last):
-    AttributeError: 'int' object has no attribute 'strip'
-    >>> pipe(str_to_bool)(42)
+    AttributeError:
+    >>> pipe(input_to_bool)(42)
     Traceback (most recent call last):
-    AttributeError: 'int' object has no attribute 'strip'
-    >>> pipe(test_isinstance(unicode), str_to_bool)(42)
+    AttributeError:
+    >>> pipe(test_isinstance(unicode), input_to_bool)(42)
     (42, u"Value is not an instance of <type 'unicode'>")
-    >>> pipe(python_data_to_str, test_isinstance(unicode), str_to_bool)(42)
+    >>> pipe(anything_to_str, test_isinstance(unicode), input_to_bool)(42)
     (True, None)
     >>> pipe()(42)
     (42, None)
@@ -891,80 +1270,10 @@ def pipe(*converters):
                 return value, error
             args = [value]
             kwargs = {}
-            if state != UnboundLocalError:
+            if state is not UnboundLocalError:
                 kwargs['state'] = state
         return value, None
     return pipe_converter
-
-
-def python_data_to_float(value, state = states.default_state):
-    """Convert any python data to a float.
-
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
-
-    >>> python_data_to_float(42)
-    (42.0, None)
-    >>> python_data_to_float('42')
-    (42.0, None)
-    >>> python_data_to_float(u'42')
-    (42.0, None)
-    >>> python_data_to_float(42.75)
-    (42.75, None)
-    >>> python_data_to_float(None)
-    (None, None)
-    """
-    if value is None:
-        return value, None
-    try:
-        return float(value), None
-    except ValueError:
-        return value, state._(u'Value must be a float')
-
-
-def python_data_to_int(value, state = states.default_state):
-    """Convert any python data to an integer.
-
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
-
-    >>> python_data_to_int(42)
-    (42, None)
-    >>> python_data_to_int('42')
-    (42, None)
-    >>> python_data_to_int(u'42')
-    (42, None)
-    >>> python_data_to_int(42.75)
-    (42, None)
-    >>> python_data_to_int(None)
-    (None, None)
-    """
-    if value is None:
-        return value, None
-    try:
-        return int(value), None
-    except ValueError:
-        return value, state._(u'Value must be an integer')
-
-
-def python_data_to_str(value, state = states.default_state):
-    """Convert any Python data to unicode.
-
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
-
-    >>> python_data_to_str(42)
-    (u'42', None)
-    >>> python_data_to_str('42')
-    (u'42', None)
-    >>> python_data_to_str(None)
-    (None, None)
-    """
-    if value is None:
-        return value, None
-    if isinstance(value, str):
-        return value.decode('utf-8'), None
-    try:
-        return unicode(value), None
-    except UnicodeDecodeError:
-        return str(value).decode('utf-8'), None
 
 
 def rename_item(old_key, new_key):
@@ -977,75 +1286,165 @@ def rename_item(old_key, new_key):
     >>> rename_item('c', 'd')(None)
     (None, None)
     """
-    def rename_item_converter(value, state = states.default_state):
+    def rename_item_converter(value, state = None):
         if value is None:
             return value, None
         if old_key in value:
+            value = value.copy()  # Don't modify existing mapping.
             value[new_key] = value.pop(old_key)
         return value, None
     return rename_item_converter
 
 
-def set_value(constant):
-    """Return a converter that replaces any non-null value by given one.
-
-    .. note:: This is the opposite behaviour of func:`default`.
+def set_value(constant, handle_none_value = False):
+    """Return a converter that replaces any value by given one.
 
     >>> set_value(42)(u'Answer to the Ultimate Question of Life, the Universe, and Everything')
     (42, None)
     >>> set_value(42)(None)
     (None, None)
+    >>> set_value(42, handle_none_value = True)(None)
+    (42, None)
     """
-    return lambda value, state = states.default_state: (constant, None) if value is not None else (None, None)
+    return lambda value, state = None: (constant, None) \
+        if value is not None or handle_none_value \
+        else (None, None)
 
 
-def str_to_url(add_prefix = u'http://', full = False, remove_fragment = False, schemes = (u'http', u'https')):
-    """Return a converter that converts an string to an URL.
+def str_to_bool(value, state = None):
+    """Convert a clean string to a boolean.
 
-    >>> str_to_url()(u'http://packages.python.org/Biryani/')
-    (u'http://packages.python.org/Biryani/', None)
-    >>> str_to_url(full = True)(u'packages.python.org/Biryani/')
-    (u'http://packages.python.org/Biryani/', None)
-    >>> str_to_url()(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html#tutorial', None)
-    >>> str_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
-    >>> str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
-    (u'http://packages.python.org/Biryani/presentation.html', None)
-    >>> str_to_url()(u'    http://packages.python.org/Biryani/   ')
-    (u'http://packages.python.org/Biryani/', None)
+    .. note:: For a converter that doesn't require a clean string, see :func:`input_to_bool`.
+
+    .. note:: For a converter that accepts special strings like "f", "off", "no", etc, see :func:`guess_bool`.
+
+    .. warning:: Like most converters, a ``None`` value is not converted.
+
+        When you want ``None`` to be converted to ``False``, use::
+
+            pipe(str_to_bool, default(False))
+
+    >>> str_to_bool(u'0')
+    (False, None)
+    >>> str_to_bool(u'1')
+    (True, None)
+    >>> str_to_bool(None)
+    (None, None)
+    >>> str_to_bool(u'vrai')
+    (u'vrai', u'Value must be a boolean')
+    >>> str_to_bool(u'on')
+    (u'on', u'Value must be a boolean')
     """
-    return pipe(
-        cleanup_line,
-        clean_str_to_url(add_prefix = add_prefix, full = full, remove_fragment = remove_fragment,
-            schemes = schemes),
-        )
+    if value is None:
+        return value, None
+    if state is None:
+        state = states.default_state
+    try:
+        return bool(int(value)), None
+    except ValueError:
+        return value, state._(u'Value must be a boolean')
 
 
-def struct(converters, constructor = None, default = None, keep_empty = False):
+def str_to_email(value, state = None):
+    """Convert a clean string to an email address.
+
+    .. note:: For a converter that doesn't require a clean string, see :func:`input_to_email`.
+
+    >>> str_to_email(u'john@doe.name')
+    (u'john@doe.name', None)
+    >>> str_to_email(u'mailto:john@doe.name')
+    (u'john@doe.name', None)
+    >>> str_to_email(u'root@localhost')
+    (u'root@localhost', None)
+    >>> str_to_email(u'root@127.0.0.1')
+    (u'root@127.0.0.1', u'Invalid domain name')
+    >>> str_to_email(u'root')
+    (u'root', u'An email must contain exactly one "@"')
+    """
+    if value is None:
+        return value, None
+    if state is None:
+        state = states.default_state
+    value = value.lower()
+    if value.startswith(u'mailto:'):
+        value = value.replace(u'mailto:', u'')
+    try:
+        username, domain = value.split('@', 1)
+    except ValueError:
+        return value, state._(u'An email must contain exactly one "@"')
+    if not username_re.match(username):
+        return value, state._(u'Invalid username')
+    if not domain_re.match(domain) and domain != 'localhost':
+        return value, state._(u'Invalid domain name')
+    return value, None
+
+
+def str_to_url_path_and_query(value, state = None):
+    """Convert a clean string to the path and query of an URL.
+
+    .. note:: For a converter that doesn't require a clean string, see :func:`input_to_url_path_and_query`.
+
+    >>> str_to_url_path_and_query(u'/Biryani/presentation.html#tutorial')
+    (u'/Biryani/presentation.html', None)
+    >>> str_to_url_path_and_query(u'/Biryani/search.html?q=pipe')
+    (u'/Biryani/search.html?q=pipe', None)
+    >>> str_to_url_path_and_query(u'http://packages.python.org/Biryani/search.html?q=pipe')
+    (u'http://packages.python.org/Biryani/search.html?q=pipe', u'URL must not be complete')
+    >>> str_to_url_path_and_query(u'[www.nordnet.fr/grandmix/]')
+    (u'[www.nordnet.fr/grandmix/]', None)
+    >>> print str_to_url_path_and_query(None)
+    (None, None)
+    >>> import urlparse
+    >>> pipe(
+    ...     make_str_to_url(),
+    ...     function(lambda value: urlparse.urlunsplit([u'', u''] + list(urlparse.urlsplit(value))[2:])),
+    ...     str_to_url_path_and_query,
+    ...     )(u'http://packages.python.org/Biryani/search.html?q=pipe')
+    (u'/Biryani/search.html?q=pipe', None)
+    """
+    if value is None:
+        return value, None
+    import urlparse
+    if state is None:
+        state = states.default_state
+    try:
+        split_url = list(urlparse.urlsplit(value))
+    except ValueError:
+        return value, state._(u'Invalid URL')
+    if split_url[0] or split_url[1]:
+        return value, state._(u'URL must not be complete')
+    if split_url[4]:
+        split_url[4] = ''
+    return unicode(urlparse.urlunsplit(split_url)), None
+
+
+def struct(converters, constructor = None, default = None, drop_none_values = False, keep_value_order = False,
+        skip_missing_items = False):
     """Return a converter that maps a collection of converters to a collection (ie dict, list, set, etc) of values.
+
+    .. note:: Parameters ``drop_none_values``, ``keep_value_order`` & ``skip_missing_items`` are not used for sequences.
 
     Usage to convert a mapping (ie dict, etc):
 
     >>> strict_converter = struct(dict(
-    ...     name = pipe(cleanup_line, test_exists),
-    ...     age = str_to_int,
-    ...     email = str_to_email,
+    ...     name = pipe(cleanup_line, not_none),
+    ...     age = input_to_int,
+    ...     email = input_to_email,
     ...     ))
     ...
     >>> strict_converter(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
     ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', email = u'john@doe.name'))
-    ({'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    ({'age': None, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', age = None, email = u'john@doe.name'))
-    ({'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    ({'age': None, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', age = u'72', phone = u'   +33 9 12 34 56 78   '))
-    ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
+    ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'email': None, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
     >>> non_strict_converter = struct(
     ...     dict(
-    ...         name = pipe(cleanup_line, test_exists),
-    ...         age = str_to_int,
-    ...         email = str_to_email,
+    ...         name = pipe(cleanup_line, not_none),
+    ...         age = input_to_int,
+    ...         email = input_to_email,
     ...         ),
     ...     default = cleanup_line,
     ...     )
@@ -1053,36 +1452,82 @@ def struct(converters, constructor = None, default = None, keep_empty = False):
     >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
     ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> non_strict_converter(dict(name = u'John Doe', email = u'john@doe.name'))
-    ({'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    ({'age': None, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'john@doe.name',
     ...     phone = u'   +33 9 12 34 56 78   '))
     ({'phone': u'+33 9 12 34 56 78', 'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> struct(
     ...     dict(
     ...         name = cleanup_line,
-    ...         age = str_to_int,
-    ...         email = str_to_email,
+    ...         age = input_to_int,
+    ...         email = input_to_email,
     ...         ),
     ...     default = cleanup_line,
     ...     )(dict(name = u'   ', email = None))
-    (None, None)
+    ({'age': None, 'email': None, 'name': None}, None)
     >>> struct(
     ...     dict(
     ...         name = cleanup_line,
-    ...         age = str_to_int,
-    ...         email = str_to_email,
+    ...         age = input_to_int,
+    ...         email = input_to_email,
     ...         ),
     ...     default = cleanup_line,
-    ...     keep_empty = True,
+    ...     drop_none_values = True,
     ...     )(dict(name = u'   ', email = None))
     ({}, None)
+    >>> struct(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = input_to_int,
+    ...         email = input_to_email,
+    ...         ),
+    ...     default = cleanup_line,
+    ...     drop_none_values = 'missing',
+    ...     )(dict(name = u'   ', email = None))
+    ({'email': None, 'name': None}, None)
+    >>> struct(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = input_to_int,
+    ...         email = input_to_email,
+    ...         ),
+    ...     default = cleanup_line,
+    ...     skip_missing_items = True,
+    ...     )(dict(name = u'   ', email = None))
+    ({'email': None, 'name': None}, None)
+    >>> import collections
+    >>> struct(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = input_to_int,
+    ...         email = input_to_email,
+    ...         ),
+    ...     constructor = collections.OrderedDict,
+    ...     )(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
+    (OrderedDict([('age', 72), ('email', u'john@doe.name'), ('name', u'John Doe')]), None)
+    >>> struct(
+    ...     collections.OrderedDict(
+    ...         name = cleanup_line,
+    ...         age = input_to_int,
+    ...         email = input_to_email,
+    ...         ),
+    ...     )(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
+    (OrderedDict([('age', 72), ('email', u'john@doe.name'), ('name', u'John Doe')]), None)
+    >>> struct(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = input_to_int,
+    ...         email = input_to_email,
+    ...         ),
+    ...     )(collections.OrderedDict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
+    ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
 
     Usage to convert a sequence (ie list, tuple, etc) or a set:
 
     >>> strict_converter = struct([
-    ...     pipe(cleanup_line, test_exists),
-    ...     str_to_int,
-    ...     str_to_email,
+    ...     pipe(cleanup_line, not_none),
+    ...     input_to_int,
+    ...     input_to_email,
     ...     ])
     ...
     >>> strict_converter([u'John Doe', u'72', u'john@doe.name'])
@@ -1095,9 +1540,9 @@ def struct(converters, constructor = None, default = None, keep_empty = False):
     ([u'John Doe', 72, u'john@doe.name', u'   +33 9 12 34 56 78   '], {3: u'Unexpected item'})
     >>> non_strict_converter = struct(
     ...     [
-    ...         pipe(cleanup_line, test_exists),
-    ...         str_to_int,
-    ...         str_to_email,
+    ...         pipe(cleanup_line, not_none),
+    ...         input_to_int,
+    ...         input_to_email,
     ...         ],
     ...     default = cleanup_line,
     ...     )
@@ -1110,42 +1555,69 @@ def struct(converters, constructor = None, default = None, keep_empty = False):
     ([u'John Doe', None, u'john@doe.name'], None)
     >>> non_strict_converter([u'John Doe', u'72', u'john@doe.name', u'   +33 9 12 34 56 78   '])
     ([u'John Doe', 72, u'john@doe.name', u'+33 9 12 34 56 78'], None)
+    >>> import collections
+    >>> struct(
+    ...     [
+    ...         pipe(cleanup_line, not_none),
+    ...         input_to_int,
+    ...         input_to_email,
+    ...         ],
+    ...     constructor = tuple,
+    ...     )([u'John Doe', u'72', u'john@doe.name'])
+    ((u'John Doe', 72, u'john@doe.name'), None)
+    >>> struct(
+    ...     (
+    ...         pipe(cleanup_line, not_none),
+    ...         input_to_int,
+    ...         input_to_email,
+    ...         ),
+    ...     )([u'John Doe', u'72', u'john@doe.name'])
+    ((u'John Doe', 72, u'john@doe.name'), None)
+    >>> struct(
+    ...     [
+    ...         pipe(cleanup_line, not_none),
+    ...         input_to_int,
+    ...         input_to_email,
+    ...         ],
+    ...     )((u'John Doe', u'72', u'john@doe.name'))
+    ([u'John Doe', 72, u'john@doe.name'], None)
     """
     import collections
 
     if isinstance(converters, collections.Mapping):
-        return structured_mapping(converters, constructor = constructor or dict, default = default,
-            keep_empty = keep_empty)
+        return structured_mapping(converters, constructor = constructor, default = default,
+            drop_none_values = drop_none_values, keep_value_order = keep_value_order,
+            skip_missing_items = skip_missing_items)
     assert isinstance(converters, collections.Sequence), \
         'Converters must be a mapping or a sequence. Got {0} instead.'.format(type(converters))
-    return structured_sequence(converters, constructor = constructor or list, default = default,
-        keep_empty = keep_empty)
+    return structured_sequence(converters, constructor = constructor, default = default)
 
 
-def structured_mapping(converters, constructor = dict, default = None, keep_empty = False):
+def structured_mapping(converters, constructor = None, default = None, drop_none_values = False,
+        keep_value_order = False, skip_missing_items = False):
     """Return a converter that maps a mapping of converters to a mapping (ie dict, etc) of values.
 
     .. note:: This converter should not be used directly. Use :func:`struct` instead.
 
     >>> strict_converter = structured_mapping(dict(
-    ...     name = pipe(cleanup_line, test_exists),
-    ...     age = str_to_int,
-    ...     email = str_to_email,
+    ...     name = pipe(cleanup_line, not_none),
+    ...     age = input_to_int,
+    ...     email = input_to_email,
     ...     ))
     ...
     >>> strict_converter(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
     ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', email = u'john@doe.name'))
-    ({'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    ({'age': None, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', age = None, email = u'john@doe.name'))
-    ({'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    ({'age': None, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', age = u'72', phone = u'   +33 9 12 34 56 78   '))
-    ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
+    ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'email': None, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
     >>> non_strict_converter = structured_mapping(
     ...     dict(
-    ...         name = pipe(cleanup_line, test_exists),
-    ...         age = str_to_int,
-    ...         email = str_to_email,
+    ...         name = pipe(cleanup_line, not_none),
+    ...         age = input_to_int,
+    ...         email = input_to_email,
     ...         ),
     ...     default = cleanup_line,
     ...     )
@@ -1153,70 +1625,131 @@ def structured_mapping(converters, constructor = dict, default = None, keep_empt
     >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
     ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> non_strict_converter(dict(name = u'John Doe', email = u'john@doe.name'))
-    ({'email': u'john@doe.name', 'name': u'John Doe'}, None)
+    ({'age': None, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> non_strict_converter(dict(name = u'John Doe', age = u'72', email = u'john@doe.name',
     ...     phone = u'   +33 9 12 34 56 78   '))
     ({'phone': u'+33 9 12 34 56 78', 'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> structured_mapping(
     ...     dict(
     ...         name = cleanup_line,
-    ...         age = str_to_int,
-    ...         email = str_to_email,
+    ...         age = input_to_int,
+    ...         email = input_to_email,
     ...         ),
     ...     default = cleanup_line,
     ...     )(dict(name = u'   ', email = None))
-    (None, None)
+    ({'age': None, 'email': None, 'name': None}, None)
     >>> structured_mapping(
     ...     dict(
     ...         name = cleanup_line,
-    ...         age = str_to_int,
-    ...         email = str_to_email,
+    ...         age = input_to_int,
+    ...         email = input_to_email,
     ...         ),
     ...     default = cleanup_line,
-    ...     keep_empty = True,
+    ...     drop_none_values = True,
     ...     )(dict(name = u'   ', email = None))
     ({}, None)
+    >>> structured_mapping(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = input_to_int,
+    ...         email = input_to_email,
+    ...         ),
+    ...     default = cleanup_line,
+    ...     drop_none_values = 'missing',
+    ...     )(dict(name = u'   ', email = None))
+    ({'email': None, 'name': None}, None)
+    >>> structured_mapping(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = input_to_int,
+    ...         email = input_to_email,
+    ...         ),
+    ...     default = cleanup_line,
+    ...     skip_missing_items = True,
+    ...     )(dict(name = u'   ', email = None))
+    ({'email': None, 'name': None}, None)
+    >>> import collections
+    >>> structured_mapping(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = input_to_int,
+    ...         email = input_to_email,
+    ...         ),
+    ...     constructor = collections.OrderedDict,
+    ...     )(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
+    (OrderedDict([('age', 72), ('email', u'john@doe.name'), ('name', u'John Doe')]), None)
+    >>> structured_mapping(
+    ...     collections.OrderedDict(
+    ...         name = cleanup_line,
+    ...         age = input_to_int,
+    ...         email = input_to_email,
+    ...         ),
+    ...     )(dict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
+    (OrderedDict([('age', 72), ('email', u'john@doe.name'), ('name', u'John Doe')]), None)
+    >>> structured_mapping(
+    ...     dict(
+    ...         name = cleanup_line,
+    ...         age = input_to_int,
+    ...         email = input_to_email,
+    ...         ),
+    ...     )(collections.OrderedDict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
+    ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     """
-    converters = dict(
+    if constructor is None:
+        constructor = type(converters)
+    converters = constructor(
         (name, converter)
         for name, converter in (converters or {}).iteritems()
         if converter is not None
         )
-    def structured_mapping_converter(values, state = states.default_state):
+
+    def structured_mapping_converter(values, state = None):
         if values is None:
             return values, None
-        if default == 'ignore':
+        if state is None:
+            state = states.default_state
+        if keep_value_order:
+            values_converter = constructor()
+            for name in values:
+                if name in converters:
+                    values_converter[name] = converters[name]
+                elif default != 'drop':
+                    values_converter[name] = default \
+                        if default is not None \
+                        else fail(error = N_(u'Unexpected item'))
+            for name, value_converter in converters.iteritems():
+                if name not in values_converter:
+                    values_converter[name] = value_converter
+        elif default == 'drop':
             values_converter = converters
         else:
             values_converter = converters.copy()
             for name in values:
                 if name not in values_converter:
-                    values_converter[name] = default if default is not None else fail(N_(u'Unexpected item'))
-        errors = {}
-        converted_values = {}
+                    values_converter[name] = default if default is not None else fail(error = N_(u'Unexpected item'))
+        errors = constructor()
+        converted_values = constructor()
         for name, converter in values_converter.iteritems():
+            if skip_missing_items and name not in values:
+                continue
             value, error = converter(values.get(name), state = state)
-            if value is not None:
+            if value is not None or not drop_none_values or drop_none_values == 'missing' and name in values:
                 converted_values[name] = value
             if error is not None:
                 errors[name] = error
-        if keep_empty or converted_values:
-            converted_values = constructor(converted_values)
-        else:
-            converted_values = None
         return converted_values, errors or None
     return structured_mapping_converter
 
 
-def structured_sequence(converters, constructor = list, default = None, keep_empty = False):
+def structured_sequence(converters, constructor = None, default = None):
     """Return a converter that map a sequence of converters to a sequence of values.
 
     .. note:: This converter should not be used directly. Use :func:`struct` instead.
 
     >>> strict_converter = structured_sequence([
-    ...     pipe(cleanup_line, test_exists),
-    ...     str_to_int,
-    ...     str_to_email,
+    ...     pipe(cleanup_line, not_none),
+    ...     input_to_int,
+    ...     input_to_email,
     ...     ])
     ...
     >>> strict_converter([u'John Doe', u'72', u'john@doe.name'])
@@ -1229,9 +1762,9 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     ([u'John Doe', 72, u'john@doe.name', u'   +33 9 12 34 56 78   '], {3: u'Unexpected item'})
     >>> non_strict_converter = structured_sequence(
     ...     [
-    ...         pipe(cleanup_line, test_exists),
-    ...         str_to_int,
-    ...         str_to_email,
+    ...         pipe(cleanup_line, not_none),
+    ...         input_to_int,
+    ...         input_to_email,
     ...         ],
     ...     default = cleanup_line,
     ...     )
@@ -1244,44 +1777,204 @@ def structured_sequence(converters, constructor = list, default = None, keep_emp
     ([u'John Doe', None, u'john@doe.name'], None)
     >>> non_strict_converter([u'John Doe', u'72', u'john@doe.name', u'   +33 9 12 34 56 78   '])
     ([u'John Doe', 72, u'john@doe.name', u'+33 9 12 34 56 78'], None)
+    >>> import collections
+    >>> structured_sequence(
+    ...     [
+    ...         pipe(cleanup_line, not_none),
+    ...         input_to_int,
+    ...         input_to_email,
+    ...         ],
+    ...     constructor = tuple,
+    ...     )([u'John Doe', u'72', u'john@doe.name'])
+    ((u'John Doe', 72, u'john@doe.name'), None)
+    >>> structured_sequence(
+    ...     (
+    ...         pipe(cleanup_line, not_none),
+    ...         input_to_int,
+    ...         input_to_email,
+    ...         ),
+    ...     )([u'John Doe', u'72', u'john@doe.name'])
+    ((u'John Doe', 72, u'john@doe.name'), None)
+    >>> structured_sequence(
+    ...     [
+    ...         pipe(cleanup_line, not_none),
+    ...         input_to_int,
+    ...         input_to_email,
+    ...         ],
+    ...     )((u'John Doe', u'72', u'john@doe.name'))
+    ([u'John Doe', 72, u'john@doe.name'], None)
     """
+    if constructor is None:
+        constructor = type(converters)
     converters = [
         converter
         for converter in converters or []
         if converter is not None
         ]
-    def structured_sequence_converter(values, state = states.default_state):
+
+    def structured_sequence_converter(values, state = None):
         if values is None:
             return values, None
-        if default == 'ignore':
+        if state is None:
+            state = states.default_state
+        if default == 'drop':
             values_converter = converters
         else:
             values_converter = converters[:]
             while len(values) > len(values_converter):
-                values_converter.append(default if default is not None else fail(N_(u'Unexpected item')))
+                values_converter.append(default if default is not None else fail(error = N_(u'Unexpected item')))
         import itertools
         errors = {}
         converted_values = []
-        is_empty = True
         for i, (converter, value) in enumerate(itertools.izip_longest(
                 values_converter, itertools.islice(values, len(values_converter)))):
             value, error = converter(value, state = state)
-            if value is not None:
-                is_empty = False
             converted_values.append(value)
             if error is not None:
                 errors[i] = error
-        converted_values = constructor(converted_values) if not is_empty or keep_empty else None
-        return converted_values, errors or None
+        return constructor(converted_values), errors or None
     return structured_sequence_converter
 
 
-def test(function, error = N_(u'Test failed'), handle_missing_value = False, handle_state = False):
+def submapping(keys, converter, remaining_converter = None, constructor = None):
+    """Return a converter that splits a mapping into 2 mappings, converts them separately and merge both results.
+
+    >>> submapping(
+    ...     ['x', 'y'],
+    ...     function(lambda subdict: dict(a = subdict['x'], b = subdict['y'])),
+    ...     )(dict(x = 1, y = 2, z = 3, t = 4))
+    ({'a': 1, 'b': 2, 'z': 3, 't': 4}, None)
+    >>> submapping(
+    ...     ['x', 'y'],
+    ...     function(lambda subdict: dict(a = subdict['x'], b = subdict['y'])),
+    ...     uniform_mapping(noop, anything_to_str),
+    ...     )(dict(x = 1, y = 2, z = 3, t = 4))
+    ({'a': 1, 'b': 2, 'z': u'3', 't': u'4'}, None)
+    >>> submapping(
+    ...     ['x', 'y'],
+    ...     uniform_mapping(noop, test_equals(1)),
+    ...     uniform_mapping(noop, anything_to_str),
+    ...     )(dict(x = 1, y = 2, z = 3, t = 4))
+    ({'y': 2, 'x': 1, 'z': u'3', 't': u'4'}, {'y': u'Value must be equal to 1'})
+    >>> submapping(
+    ...     ['x', 'y'],
+    ...     uniform_mapping(noop, test_equals(1)),
+    ...     uniform_mapping(noop, test_equals(3)),
+    ...     )(dict(x = 1, y = 2, z = 3, t = 4))
+    ({'y': 2, 'x': 1, 'z': 3, 't': 4}, {'y': u'Value must be equal to 1', 't': u'Value must be equal to 3'})
+    >>> submapping(
+    ...     ['x', 'y'],
+    ...     test_equals(1),
+    ...     uniform_mapping(noop, test_equals(3)),
+    ...     )(dict(x = 1, y = 2, z = 3, t = 4))
+    ({'y': 2, 'x': 1, 'z': 3, 't': 4}, u'Value must be equal to 1')
+    >>> submapping(
+    ...     ['x', 'y'],
+    ...     uniform_mapping(noop, test_equals(1)),
+    ...     uniform_mapping(noop, test_equals(3)),
+    ...     )({})
+    ({}, None)
+    >>> submapping(
+    ...     ['x', 'y'],
+    ...     uniform_mapping(noop, test_equals(1)),
+    ...     uniform_mapping(noop, test_equals(3)),
+    ...     )(None)
+    (None, None)
+    """
+    def submapping_converter(value, state = None):
+        if value is None:
+            return value, None
+        if state is None:
+            state = states.default_state
+        mapping_constructor = type(value) if constructor is None else constructor
+        submapping = mapping_constructor()
+        remaining = mapping_constructor()
+        for item_key, item_value in value.iteritems():
+            if item_key in keys:
+                submapping[item_key] = item_value
+            else:
+                remaining[item_key] = item_value
+        submapping_value, submapping_error = converter(submapping, state = state)
+        remaining_value, remaining_error = (remaining_converter or noop)(remaining, state = state)
+        merged_value = mapping_constructor()
+        if submapping_value is not None:
+            merged_value.update(submapping_value)
+        if remaining_value is not None:
+            merged_value.update(remaining_value)
+        if submapping_error is None:
+            merged_error = remaining_error
+        elif remaining_error is None:
+            merged_error = submapping_error
+        elif isinstance(submapping_error, dict) and isinstance(remaining_error, dict):
+            merged_error = submapping_error.copy()
+            merged_error.update(remaining_error)
+        else:
+            # The errors are not compatible (at least one of them is not a dict) => Return only the first one.
+            merged_error = submapping_error
+        return merged_value, merged_error
+    return submapping_converter
+
+
+def switch(key_converter, converters, default = None, handle_none_value = False):
+    """Return a converter that extracts a key from value and then converts value using the converter matching the key.
+
+    >>> simple_type_switcher = switch(
+    ...     function(lambda value: type(value)),
+    ...     {
+    ...         bool: set_value(u'boolean'),
+    ...         int: anything_to_str,
+    ...         str: set_value(u'encoded string'),
+    ...         },
+    ...     handle_none_value = True,
+    ...     )
+    >>> simple_type_switcher(True)
+    (u'boolean', None)
+    >>> simple_type_switcher(42)
+    (u'42', None)
+    >>> simple_type_switcher('Hello world!')
+    (u'encoded string', None)
+    >>> simple_type_switcher(u'Hello world!')
+    (u'Hello world!', u'Expression "<type \\'unicode\\'>" doesn\\'t match any key')
+    >>> simple_type_switcher(None)
+    (None, u'Expression "None" doesn\\'t match any key')
+    >>> type_switcher = switch(
+    ...     function(lambda value: type(value)),
+    ...     {
+    ...         list: uniform_sequence(simple_type_switcher),
+    ...         },
+    ...     default = anything_to_str,
+    ...     )
+    >>> type_switcher([False, 42])
+    ([u'boolean', u'42'], None)
+    >>> type_switcher(u'Hello world!')
+    (u'Hello world!', None)
+    >>> type_switcher(None)
+    (None, None)
+    >>> type_switcher([None])
+    ([None], {0: u'Expression "None" doesn\\'t match any key'})
+    """
+    def switch_converter(value, state = None):
+        if value is None and not handle_none_value:
+            return None, None
+        if state is None:
+            state = states.default_state
+        key, error = key_converter(value, state = state)
+        if error is not None:
+            return value, error
+        if key not in converters:
+            if default is None:
+                return value, state._(u'''Expression "{0}" doesn't match any key''').format(key)
+            return default(value, state = state)
+        return converters[key](value, state = state)
+    return switch_converter
+
+
+def test(function, error = N_(u'Test failed'), handle_none_value = False, handle_state = False):
     """Return a converter that applies a test function to a value and returns an error when test fails.
 
     ``test`` always returns the initial value, even when test fails.
 
-     See :doc:`how-to-create-converter` for more informations.
+     See :doc:`how-to-create-converter` for more information.
 
     >>> test(lambda value: isinstance(value, basestring))('hello')
     ('hello', None)
@@ -1290,20 +1983,22 @@ def test(function, error = N_(u'Test failed'), handle_missing_value = False, han
     >>> test(lambda value: isinstance(value, basestring), error = u'Value is not a string')(1)
     (1, u'Value is not a string')
     """
-    def test_converter(value, state = states.default_state):
-        if value is None and not handle_missing_value or function is None:
+    def test_converter(value, state = None):
+        if value is None and not handle_none_value or function is None:
             return value, None
+        if state is None:
+            state = states.default_state
         ok = function(value, state = state) if handle_state else function(value)
         if ok:
             return value, None
-        return value, state._(error)
+        return value, state._(error) if isinstance(error, basestring) else error
     return test_converter
 
 
 def test_between(min_value, max_value, error = None):
     """Return a converter that accepts only values between the two given bounds (included).
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared.
+    .. warning:: Like most converters, a ``None`` value is not compared.
 
     >>> test_between(0, 9)(5)
     (5, None)
@@ -1322,10 +2017,28 @@ def test_between(min_value, max_value, error = None):
         error = error or N_(u'Value must be between {0} and {1}').format(min_value, max_value))
 
 
+def test_conv(converter):
+    """Return a converter that applies a converter to test a value without modifying it.
+
+    ``test_conv`` always returns the initial value, even when test fails.
+
+    >>> test_conv(input_to_int)(u'42')
+    (u'42', None)
+    >>> test_conv(input_to_int)(u'Hello world!')
+    (u'Hello world!', u'Value must be an integer')
+    """
+    def test_conv_converter(value, state = None):
+        if state is None:
+            state = states.default_state
+        converted_value, error = converter(value, state = state)
+        return value, error
+    return test_conv_converter
+
+
 def test_equals(constant, error = None):
     """Return a converter that accepts only values equals to given constant.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared. Furthermore, when *constant* is
+    .. warning:: Like most converters, a ``None`` value is not compared. Furthermore, when *constant* is
        ``None``, value is never compared.
 
     >>> test_equals(42)(42)
@@ -1345,26 +2058,10 @@ def test_equals(constant, error = None):
         error = error or N_(u'Value must be equal to {0}').format(constant))
 
 
-def test_exists(value, state = states.default_state):
-    """Return an error when value is missing (aka ``None``).
-
-    >>> test_exists(42)
-    (42, None)
-    >>> test_exists(u'')
-    (u'', None)
-    >>> test_exists(None)
-    (None, u'Missing value')
-    """
-    if value is None:
-        return value, state._(u'Missing value')
-    else:
-        return value, None
-
-
 def test_greater_or_equal(constant, error = None):
     """Return a converter that accepts only values greater than or equal to given constant.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared.
+    .. warning:: Like most converters, a ``None`` value is not compared.
 
     >>> test_greater_or_equal(0)(5)
     (5, None)
@@ -1384,7 +2081,7 @@ def test_greater_or_equal(constant, error = None):
 def test_in(values, error = None):
     """Return a converter that accepts only values belonging to a given set (or list or...).
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared. Furthermore, when *values* is
+    .. warning:: Like most converters, a ``None`` value is not compared. Furthermore, when *values* is
        ``None``, value is never compared.
 
     >>> test_in('abcd')('a')
@@ -1403,13 +2100,14 @@ def test_in(values, error = None):
     (None, None)
     """
     return test(lambda value: value in values if values is not None else True,
-        error = error or N_(u'Value must belong to {0}').format(values))
+        error = error or N_(u'Value must belong to {0}').format(values if values is None or len(values) <= 5
+            else sorted(values)[:5] + [N_(u'...')]))
 
 
 def test_is(constant, error = None):
     """Return a converter that accepts only values that are strictly equal to given constant.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared. Furthermore, when *constant* is
+    .. warning:: Like most converters, a ``None`` value is not compared. Furthermore, when *constant* is
        ``None``, value is never compared.
 
     >>> test_is(42)(42)
@@ -1445,10 +2143,37 @@ def test_isinstance(class_or_classes, error = None):
         error = error or N_(u'Value is not an instance of {0}').format(class_or_classes))
 
 
+def test_issubclass(class_or_classes, error = None):
+    """Return a converter that accepts only a class (or tuple of classes).
+
+    >>> test_issubclass(basestring)(int)
+    (<type 'int'>, u"Value is not a subclass of <type 'basestring'>")
+    >>> test_issubclass(basestring)('This is a string')
+    ('This is a string', u"Value is not a subclass of <type 'basestring'>")
+    >>> test_issubclass(basestring)(str)
+    (<type 'str'>, None)
+    >>> test_issubclass(basestring, error = u'Value is not a string')(int)
+    (<type 'int'>, u'Value is not a string')
+    >>> test_issubclass((float, int, basestring))(unicode)
+    (<type 'unicode'>, None)
+    """
+    def test_issubclass_converter(value, state = None):
+        if value is None:
+            return value, None
+        try:
+            result = issubclass(value, class_or_classes)
+        except TypeError:
+            result = False
+        if not result:
+            return value, error or N_(u'Value is not a subclass of {0}'.format(class_or_classes))
+        return value, None
+    return test_issubclass_converter
+
+
 def test_less_or_equal(constant, error = None):
     """Return a converter that accepts only values less than or equal to given constant.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not compared.
+    .. warning:: Like most converters, a ``None`` value is not compared.
 
     >>> test_less_or_equal(9)(5)
     (5, None)
@@ -1465,10 +2190,81 @@ def test_less_or_equal(constant, error = None):
         error = error or N_(u'Value must be less than or equal to {0}').format(constant))
 
 
+def test_none(error = N_(u'Unexpected value')):
+    """Return a converters that signals an error when value is not ``None``.
+
+    >>> test_none()(42)
+    (42, u'Unexpected value')
+    >>> test_none(error = u'No value allowed')(42)
+    (42, u'No value allowed')
+    >>> test_none()(u'')
+    (u'', u'Unexpected value')
+    >>> test_none()(None)
+    (None, None)
+    """
+    def none(value, state = None):
+        if value is None:
+            return value, None
+        if state is None:
+            state = states.default_state
+        return value, state._(error) if isinstance(error, basestring) else error
+    return none
+
+
+def test_not_in(values, error = None):
+    """Return a converter that rejects only values belonging to a given set (or list or...).
+
+    .. warning:: Like most converters, a ``None`` value is not compared. Furthermore, when *values* is
+       ``None``, value is never compared.
+
+    >>> test_not_in('abcd')('e')
+    ('e', None)
+    >>> test_not_in(['a', 'b', 'c', 'd'])('e')
+    ('e', None)
+    >>> test_not_in('abcd')('a')
+    ('a', u'Value must not belong to abcd')
+    >>> test_not_in(['a', 'b', 'c', 'd'])('a')
+    ('a', u"Value must not belong to ['a', 'b', 'c', 'd']")
+    >>> test_not_in(['a', 'b', 'c', 'd'], error = u'Value must not be a letter less than "e"')('a')
+    ('a', u'Value must not be a letter less than "e"')
+    >>> test_not_in([])('z')
+    ('z', None)
+    >>> test_not_in(None)('z')
+    ('z', None)
+    >>> test_not_in(['a', 'b', 'c', 'd'])(None)
+    (None, None)
+    """
+    return test(lambda value: value not in (values or []),
+        error = error or N_(u'Value must not belong to {0}').format(values))
+
+
+def test_not_none(error = N_(u'Missing value')):
+    """Return a converters that signals an error when value is ``None``.
+
+    .. note:: When error message "Missing value" can be kept, use :func:`exists` instead.
+
+    >>> test_not_none()(42)
+    (42, None)
+    >>> test_not_none()(u'')
+    (u'', None)
+    >>> test_not_none()(None)
+    (None, u'Missing value')
+    >>> test_not_none(error = u'Required value')(None)
+    (None, u'Required value')
+    """
+    def not_none(value, state = None):
+        if state is None:
+            state = states.default_state
+        if value is None:
+            return value, state._(error) if isinstance(error, basestring) else error
+        return value, None
+    return not_none
+
+
 def translate(conversions):
     """Return a converter that converts values found in given dictionary and keep others as is.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not handled => It is never translated.
+    .. warning:: Unlike most converters, a ``None`` value is handled => It can be translated.
 
     >>> translate({0: u'bad', 1: u'OK'})(0)
     (u'bad', None)
@@ -1478,83 +2274,96 @@ def translate(conversions):
     (2, None)
     >>> translate({0: u'bad', 1: u'OK'})(u'three')
     (u'three', None)
-    >>> translate({None: u'problem', 0: u'bad', 1: u'OK'})(None)
-    (None, None)
-    >>> pipe(translate({0: u'bad', 1: u'OK'}), default(u'no problem'))(None)
+    >>> translate({None: u'no problem', 0: u'bad', 1: u'OK'})(None)
     (u'no problem', None)
     """
-    return function(lambda value: value
-        if value is None or conversions is None or value not in conversions
-        else conversions[value])
+    return function(
+        lambda value: value
+            if conversions is None or value not in conversions
+            else conversions[value],
+        handle_none_value = True)
 
 
-#def uniform_mapping(key_converter, value_converter, constructor = dict, keep_empty = False, keep_missing_keys = False,
-#        keep_missing_values = False):
-#    """Return a converter that applies a unique converter to each key and another unique converter to each value of a mapping."""
-#    def uniform_mapping_converter(values, state = states.default_state):
-#        if values is None:
-#            return values, None
-#        errors = {}
-#        converted_values = {}
-#        for key, value in values.iteritems():
-#            key, error = key_converter(key, state = state)
-#            if error is not None:
-#                errors[key] = error
-#            if key is None and not keep_missing_keys:
-#                continue
-#            value, error = value_converter(value, state = state)
-#            if value is not None or keep_missing_values:
-#                converted_values[key] = value
-#            if error is not None:
-#                errors[key] = error
-#        if keep_empty or converted_values:
-#            converted_values = constructor(converted_values)
-#        else:
-#            converted_values = None
-#        return converted_values, errors or None
-#    return uniform_mapping_converter
+def uniform_mapping(key_converter, value_converter, constructor = None, drop_none_keys = False,
+        drop_none_values = False):
+    """Return a converter that applies a unique converter to each key and another unique converter to each value of a
+    mapping.
 
-
-def uniform_sequence(converter, constructor = list, keep_empty = False, keep_missing_items = False):
-    """Return a converter that applies the same converter to each value of a list.
-
-    >>> uniform_sequence(str_to_int)([u'42'])
-    ([42], None)
-    >>> uniform_sequence(str_to_int)([u'42', u'43'])
-    ([42, 43], None)
-    >>> uniform_sequence(str_to_int)([u'42', u'43', u'Hello world!'])
-    ([42, 43, u'Hello world!'], {2: u'Value must be an integer'})
-    >>> uniform_sequence(str_to_int)([u'42', None, u'43'])
-    ([42, 43], None)
-    >>> uniform_sequence(str_to_int)([None, None])
+    >>> uniform_mapping(cleanup_line, input_to_int)({u'a': u'1', u'b': u'2'})
+    ({u'a': 1, u'b': 2}, None)
+    >>> uniform_mapping(cleanup_line, input_to_int)({u'   answer   ': u'42'})
+    ({u'answer': 42}, None)
+    >>> uniform_mapping(cleanup_line, pipe(test_isinstance(basestring), input_to_int))({u'a': u'1', u'b': u'2', 'c': 3})
+    ({u'a': 1, 'c': 3, u'b': 2}, {'c': u"Value is not an instance of <type 'basestring'>"})
+    >>> uniform_mapping(cleanup_line, input_to_int)({})
+    ({}, None)
+    >>> uniform_mapping(cleanup_line, input_to_int)({None: u'42'})
+    ({None: 42}, None)
+    >>> uniform_mapping(cleanup_line, input_to_int, drop_none_keys = True)({None: u'42'})
+    ({}, None)
+    >>> uniform_mapping(cleanup_line, input_to_int)(None)
     (None, None)
-    >>> uniform_sequence(str_to_int, keep_empty = True)([None, None])
-    ([], None)
-    >>> uniform_sequence(str_to_int, keep_empty = True, keep_missing_items = True)([None, None])
-    ([None, None], None)
-    >>> uniform_sequence(str_to_int, keep_missing_items = True)([u'42', None, u'43'])
-    ([42, None, 43], None)
-    >>> uniform_sequence(str_to_int, keep_missing_items = True)([u'42', u'43', u'Hello world!'])
-    ([42, 43, u'Hello world!'], {2: u'Value must be an integer'})
-    >>> uniform_sequence(str_to_int, constructor = set)(set([u'42', u'43']))
-    (set([42, 43]), None)
     """
-    def uniform_sequence_converter(values, state = states.default_state):
+    def uniform_mapping_converter(values, state = None):
         if values is None:
             return values, None
+        if state is None:
+            state = states.default_state
+        custom_constructor = type(values) if constructor is None else constructor
+        errors = {}
+        converted_values = custom_constructor()
+        for key, value in values.iteritems():
+            key, error = key_converter(key, state = state)
+            if error is not None:
+                errors[key] = error
+            if key is None and drop_none_keys:
+                continue
+            value, error = value_converter(value, state = state)
+            if value is not None or not drop_none_values:
+                converted_values[key] = value
+            if error is not None:
+                errors[key] = error
+        return converted_values, errors or None
+    return uniform_mapping_converter
+
+
+def uniform_sequence(converter, constructor = list, drop_none_items = False):
+    """Return a converter that applies the same converter to each value of a list.
+
+    >>> uniform_sequence(input_to_int)([u'42'])
+    ([42], None)
+    >>> uniform_sequence(input_to_int)([u'42', u'43'])
+    ([42, 43], None)
+    >>> uniform_sequence(input_to_int)([u'42', u'43', u'Hello world!'])
+    ([42, 43, u'Hello world!'], {2: u'Value must be an integer'})
+    >>> uniform_sequence(input_to_int)([None, None])
+    ([None, None], None)
+    >>> uniform_sequence(input_to_int, drop_none_items = True)([None, None])
+    ([], None)
+    >>> uniform_sequence(input_to_int)([u'42', None, u'43'])
+    ([42, None, 43], None)
+    >>> uniform_sequence(input_to_int, drop_none_items = True)([u'42', None, u'43'])
+    ([42, 43], None)
+    >>> uniform_sequence(input_to_int)([u'42', u'43', u'Hello world!'])
+    ([42, 43, u'Hello world!'], {2: u'Value must be an integer'})
+    >>> uniform_sequence(input_to_int, constructor = set)(set([u'42', u'43']))
+    (set([42, 43]), None)
+    """
+    def uniform_sequence_converter(values, state = None):
+        if values is None:
+            return values, None
+        if state is None:
+            state = states.default_state
+        custom_constructor = type(values) if constructor is None else constructor
         errors = {}
         converted_values = []
         for i, value in enumerate(values):
             value, error = converter(value, state = state)
-            if keep_missing_items or value is not None:
+            if not drop_none_items or value is not None:
                 converted_values.append(value)
             if error is not None:
                 errors[i] = error
-        if keep_empty or converted_values:
-            converted_values = constructor(converted_values)
-        else:
-            converted_values = None
-        return converted_values, errors or None
+        return custom_constructor(converted_values), errors or None
     return uniform_sequence_converter
 
 
@@ -1563,7 +2372,7 @@ def uniform_sequence(converter, constructor = list, keep_empty = False, keep_mis
 
 cleanup_line = pipe(
     function(lambda value: value.strip()),
-    cleanup_empty,
+    empty_to_none,
     )
 """Strip spaces from a string and remove it when empty.
 
@@ -1607,161 +2416,175 @@ extract_when_singleton = condition(
     ([[42]], None)
 """
 
+not_none = test_not_none()
+"""Return an error when value is ``None``.
+
+    .. note:: To change error message "Missing value", use :func:`test_not_none` instead.
+
+    >>> not_none(42)
+    (42, None)
+    >>> not_none(u'')
+    (u'', None)
+    >>> not_none(None)
+    (None, u'Missing value')
+    """
+
 
 # Level-3 Converters
 
 
-python_data_to_bool = function(lambda value: bool(value))
+anything_to_bool = function(lambda value: bool(value))
 """Convert any Python data to a boolean.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+    .. warning:: Like most converters, a ``None`` value is not converted.
 
         When you want ``None`` to be converted to ``False``, use::
 
-            pipe(python_data_to_bool, default(False))
+            pipe(anything_to_bool, default(False))
 
-    >>> python_data_to_bool(0)
+    >>> anything_to_bool(0)
     (False, None)
-    >>> python_data_to_bool(-1)
+    >>> anything_to_bool(-1)
     (True, None)
-    >>> python_data_to_bool(u'0')
+    >>> anything_to_bool(u'0')
     (True, None)
-    >>> python_data_to_bool(u'1')
+    >>> anything_to_bool(u'1')
     (True, None)
-    >>> python_data_to_bool(u'true')
+    >>> anything_to_bool(u'true')
     (True, None)
-    >>> python_data_to_bool(u'false')
+    >>> anything_to_bool(u'false')
     (True, None)
-    >>> python_data_to_bool(u'  0  ')
+    >>> anything_to_bool(u'  0  ')
     (True, None)
-    >>> python_data_to_bool(u'    ')
+    >>> anything_to_bool(u'    ')
     (True, None)
-    >>> python_data_to_bool(None)
+    >>> anything_to_bool(None)
     (None, None)
     """
 
-str_to_bool = pipe(cleanup_line, clean_str_to_bool)
+input_to_bool = pipe(cleanup_line, str_to_bool)
 """Convert a string to a boolean.
 
-    .. warning:: Like most converters, a missing value (aka ``None``) is not converted.
+    .. warning:: Like most converters, a ``None`` value is not converted.
 
         When you want ``None`` to be converted to ``False``, use::
 
-            pipe(str_to_bool, default(False))
+            pipe(input_to_bool, default(False))
 
-    >>> str_to_bool(u'0')
+    >>> input_to_bool(u'0')
     (False, None)
-    >>> str_to_bool(u'   0   ')
+    >>> input_to_bool(u'   0   ')
     (False, None)
-    >>> str_to_bool(u'1')
+    >>> input_to_bool(u'1')
     (True, None)
-    >>> str_to_bool(u'   1   ')
+    >>> input_to_bool(u'   1   ')
     (True, None)
-    >>> str_to_bool(None)
+    >>> input_to_bool(None)
     (None, None)
-    >>> str_to_bool(u'vrai')
+    >>> input_to_bool(u'vrai')
     (u'vrai', u'Value must be a boolean')
-    >>> str_to_bool(u'on')
+    >>> input_to_bool(u'on')
     (u'on', u'Value must be a boolean')
 """
 
-str_to_email = pipe(cleanup_line, clean_str_to_email)
+input_to_email = pipe(cleanup_line, str_to_email)
 """Convert a string to an email address.
 
-    >>> str_to_email(u'john@doe.name')
+    >>> input_to_email(u'john@doe.name')
     (u'john@doe.name', None)
-    >>> str_to_email(u'mailto:john@doe.name')
+    >>> input_to_email(u'mailto:john@doe.name')
     (u'john@doe.name', None)
-    >>> str_to_email(u'root@localhost')
+    >>> input_to_email(u'root@localhost')
     (u'root@localhost', None)
-    >>> str_to_email('root@127.0.0.1')
+    >>> input_to_email('root@127.0.0.1')
     ('root@127.0.0.1', u'Invalid domain name')
-    >>> str_to_email(u'root')
+    >>> input_to_email(u'root')
     (u'root', u'An email must contain exactly one "@"')
-    >>> str_to_email(u'    john@doe.name  ')
+    >>> input_to_email(u'    john@doe.name  ')
     (u'john@doe.name', None)
-    >>> str_to_email(None)
+    >>> input_to_email(None)
     (None, None)
-    >>> str_to_email(u'    ')
+    >>> input_to_email(u'    ')
     (None, None)
     """
 
-str_to_float = pipe(cleanup_line, python_data_to_float)
+input_to_float = pipe(cleanup_line, anything_to_float)
 """Convert a string to float.
 
-    >>> str_to_float('42')
+    >>> input_to_float('42')
     (42.0, None)
-    >>> str_to_float(u'   42.25   ')
+    >>> input_to_float(u'   42.25   ')
     (42.25, None)
-    >>> str_to_float(u'hello world')
+    >>> input_to_float(u'hello world')
     (u'hello world', u'Value must be a float')
-    >>> str_to_float(None)
+    >>> input_to_float(None)
     (None, None)
     """
 
-
-str_to_int = pipe(cleanup_line, python_data_to_int)
+input_to_int = pipe(cleanup_line, anything_to_int)
 """Convert a string to an integer.
 
-    >>> str_to_int('42')
+    >>> input_to_int('42')
     (42, None)
-    >>> str_to_int(u'   42   ')
+    >>> input_to_int(u'   42   ')
     (42, None)
-    >>> str_to_int(u'42.75')
-    (u'42.75', u'Value must be an integer')
-    >>> str_to_int(None)
+    >>> input_to_int(u'42.75')
+    (42, None)
+    >>> input_to_int(u'42,75')
+    (u'42,75', u'Value must be an integer')
+    >>> input_to_int(None)
     (None, None)
     """
 
-str_to_json = pipe(cleanup_line, clean_str_to_json)
-"""Convert a string to a JSON value.
-
-    .. note:: This converter uses module ``simplejson``  when it is available, or module ``json`` otherwise.
-
-    >>> str_to_json(u'{"a": 1, "b": 2}')
-    ({u'a': 1, u'b': 2}, None)
-    >>> str_to_json(u'null')
-    (None, None)
-    >>> str_to_json(u'   {"a": 1, "b": 2}    ')
-    ({u'a': 1, u'b': 2}, None)
-    >>> str_to_json(None)
-    (None, None)
-    >>> str_to_json(u'    ')
-    (None, None)
-    """
-
-str_to_slug = pipe(cleanup_line, clean_str_to_slug)
+input_to_slug = make_input_to_slug()
 """Convert a string to a slug.
 
-    >>> str_to_slug(u'   Hello world!   ')
+    .. note:: For a configurable converter, see :func:`make_input_to_slug`.
+
+    .. note:: For a converter that doesn't use "-" as word separators or doesn't convert characters to lower case,
+        see :func:`input_to_normal_form`.
+
+    >>> input_to_slug(u'   Hello world!   ')
     (u'hello-world', None)
-    >>> clean_str_to_slug('   Hello world!   ')
+    >>> input_to_slug('   Hello world!   ')
     (u'hello-world', None)
-    >>> str_to_slug(u'')
+    >>> input_to_slug(u'')
+    (None, None)
+    >>> input_to_slug(u'   ')
     (None, None)
     """
 
-str_to_url_name = pipe(cleanup_line, clean_str_to_url_name)
-"""Convert a string to a normalized string that can be used in an URL path or a query parameter.
+input_to_url_name = make_input_to_url_name()
+"""Normalize a string to allow its use in an URL (or file system) path or a query parameter.
 
-    >>> str_to_url_name(u'   Hello world!   ')
+    .. note:: For a configurable converter, see :func:`make_input_to_url_name`.
+
+    .. note:: For a converter that keep only letters, digits and separator, see :func:`make_input_to_slug`
+        or :func:`input_to_slug`.
+
+    .. note:: For a converter that doesn't use "_" as word separators or doesn't convert characters to lower case,
+        see :func:`input_to_normal_form`.
+
+    >>> input_to_url_name(u'   Hello world!   ')
     (u'hello_world!', None)
-    >>> str_to_url_name(u'')
+    >>> input_to_url_name(u'   ')
+    (None, None)
+    >>> input_to_url_name(u'')
     (None, None)
     """
 
-str_to_url_path_and_query = pipe(cleanup_line, clean_str_to_url_path_and_query)
+input_to_url_path_and_query = pipe(cleanup_line, str_to_url_path_and_query)
 """Convert a string to the path and query of an URL.
 
-    >>> str_to_url_path_and_query(u'/Biryani/presentation.html#tutorial')
+    >>> input_to_url_path_and_query(u'/Biryani/presentation.html#tutorial')
     (u'/Biryani/presentation.html', None)
-    >>> str_to_url_path_and_query(u'/Biryani/search.html?q=pipe')
+    >>> input_to_url_path_and_query(u'/Biryani/search.html?q=pipe')
     (u'/Biryani/search.html?q=pipe', None)
-    >>> str_to_url_path_and_query(u'   /Biryani/search.html?q=pipe   ')
+    >>> input_to_url_path_and_query(u'   /Biryani/search.html?q=pipe   ')
     (u'/Biryani/search.html?q=pipe', None)
-    >>> str_to_url_path_and_query(u'http://packages.python.org/Biryani/search.html?q=pipe')
+    >>> input_to_url_path_and_query(u'http://packages.python.org/Biryani/search.html?q=pipe')
     (u'http://packages.python.org/Biryani/search.html?q=pipe', u'URL must not be complete')
-    >>> print str_to_url_path_and_query(None)
+    >>> print input_to_url_path_and_query(None)
     (None, None)
     """
 
@@ -1776,30 +2599,30 @@ def check(converter_or_value_and_error, clear_on_error = False):
 
     Usage with a converter:
 
-    >>> check(str_to_int)(u'42')
+    >>> check(input_to_int)(u'42')
     42
-    >>> check(str_to_int)(u'hello world')
+    >>> check(input_to_int)(u'hello world')
     Traceback (most recent call last):
-    ValueError: Value must be an integer
-    >>> check(pipe(python_data_to_str, test_isinstance(unicode), str_to_bool))(42)
+    ValueError:
+    >>> check(pipe(anything_to_str, test_isinstance(unicode), input_to_bool))(42)
     True
-    >>> check(str_to_int, clear_on_error = True)(u'42')
+    >>> check(input_to_int, clear_on_error = True)(u'42')
     42
-    >>> print check(str_to_int, clear_on_error = True)(u'hello world')
+    >>> print check(input_to_int, clear_on_error = True)(u'hello world')
     None
 
     Usage with a conversion result :
 
-    >>> check(str_to_int(u'42'))
+    >>> check(input_to_int(u'42'))
     42
-    >>> check(str_to_int(u'hello world'))
+    >>> check(input_to_int(u'hello world'))
     Traceback (most recent call last):
-    ValueError: Value must be an integer
-    >>> check(pipe(python_data_to_str, test_isinstance(unicode), str_to_bool)(42))
+    ValueError:
+    >>> check(pipe(anything_to_str, test_isinstance(unicode), input_to_bool)(42))
     True
-    >>> check(str_to_int(u'42'), clear_on_error = True)
+    >>> check(input_to_int(u'42'), clear_on_error = True)
     42
-    >>> print check(str_to_int(u'hello world'), clear_on_error = True)
+    >>> print check(input_to_int(u'hello world'), clear_on_error = True)
     None
     """
     import collections
@@ -1809,7 +2632,7 @@ def check(converter_or_value_and_error, clear_on_error = False):
         if error is not None:
             if clear_on_error:
                 return None
-            raise ValueError(error)
+            raise ValueError(u'{0} for: {1}'.format(error, value).encode('utf-8'))
         return value
     else:
         # converter_or_value_and_error is a converter.
@@ -1818,7 +2641,6 @@ def check(converter_or_value_and_error, clear_on_error = False):
             if error is not None:
                 if clear_on_error:
                     return None
-                raise ValueError(error)
+                raise ValueError(u'{0} for: {1}'.format(error, value).encode('utf-8'))
             return value
         return check_converter
-

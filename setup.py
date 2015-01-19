@@ -3,9 +3,9 @@
 
 
 # Biryani -- A conversion and validation toolbox
-# By: Emmanuel Raviart <eraviart@easter-eggs.com>
+# By: Emmanuel Raviart <emmanuel@raviart.com>
 #
-# Copyright (C) 2009, 2010, 2011 Easter-eggs
+# Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015 Emmanuel Raviart
 # http://packages.python.org/Biryani/
 #
 # This file is part of Biryani.
@@ -23,7 +23,8 @@
 # limitations under the License.
 
 
-"""Toolbox to convert and validate data (for web forms, CSV files, XML files, etc)"""
+"""Toolbox to convert and validate data (for web forms, CSV files, XML files,
+etc)"""
 
 
 try:
@@ -40,7 +41,7 @@ Intended Audience :: Developers
 License :: OSI Approved :: Apache Software License
 Operating System :: OS Independent
 Programming Language :: Python
-Topic :: Software Development :: Libraries :: Python Modules 
+Topic :: Software Development :: Libraries :: Python Modules
 Topic :: Text Processing
 """
 
@@ -48,30 +49,32 @@ doc_lines = __doc__.split('\n')
 
 
 setup(
-    name = 'Biryani',
-    version = '0.8',
+    name='Biryani',
+    version='0.10.4dev',
 
-    author = 'Emmanuel Raviart',
-    author_email = 'eraviart@easter-eggs.com',
-    classifiers = [classifier for classifier in classifiers.split('\n') if classifier],
-    description = doc_lines[0],
-    keywords = 'conversion form python validation web',
-    license = 'http://www.apache.org/licenses/LICENSE-2.0',
-    long_description = '\n'.join(doc_lines[2:]),
-    url = 'http://packages.python.org/Biryani/',
+    author='Emmanuel Raviart',
+    author_email='emmanuel@raviart.com',
+    classifiers=[classifier for classifier in classifiers.split('\n')
+                 if classifier],
+    description=doc_lines[0],
+    keywords='conversion form python validation web',
+    license='http://www.apache.org/licenses/LICENSE-2.0',
+    long_description='\n'.join(doc_lines[2:]),
+    url='http://biryani.readthedocs.org/',
 
-    data_files = [
-        ('share/locale/fr/LC_MESSAGES', ['biryani/i18n/fr/LC_MESSAGES/biryani.mo']),
-        ],
-    install_requires = [
-        "Babel >= 0.9.4",
-        ],
-    message_extractors = {
-        'biryani': [
-            ('**.py', 'python', None),
-            ],
+    extras_require=dict(
+        bsonconv=['pymongo'],
+        datetimeconv=['isodate >= 0.4', 'pytz'],
+        dev=['flake8', 'sphinx', 'Sphinx-PyPI-upload'],
+        jwtconv=['pycrypto'],
+        netconv=['pydns'],
+        webobconv=['webob'],
+        ),
+    include_package_data=True,
+    install_requires=['Babel >= 0.9.4'],
+    message_extractors={
+        'biryani': [('**.py', 'python', None)],
         },
-    package_data = {'biryani': ['i18n/*/LC_MESSAGES/*.mo']},
-    packages = find_packages(exclude = ['ez_setup']),
-    zip_safe = False,
+    packages=find_packages(),
+    zip_safe=False,
     )

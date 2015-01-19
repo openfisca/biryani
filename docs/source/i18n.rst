@@ -31,9 +31,12 @@ Using a localized state
 Here is an example of how to have french error messages with *Biryani*:
 
 >>> import gettext
+>>> import os
+>>> import pkg_resources
 >>> from biryani import states
 ...
->>> french_translation = gettext.translation('biryani', languages = ['fr'])
+>>> french_translation = gettext.translation('biryani',
+...     os.path.join(pkg_resources.get_distribution('biryani').location, 'biryani', 'i18n'),languages = ['fr'])
 ...
 >>> class FrenchState(states.State):
 ...     _ = staticmethod(french_translation.ugettext)
@@ -54,17 +57,17 @@ Once the state has been properly defined, you can use it for your conversions:
 
 >>> from biryani import baseconv as conv
 ...
->>> conv.test_exists(None)
+>>> conv.not_none(None)
 (None, u'Missing value')
->>> conv.test_exists(None, state = states.default_state)
+>>> conv.not_none(None, state = states.default_state)
 (None, u'Missing value')
->>> conv.test_exists(None, state = french_state)
+>>> conv.not_none(None, state = french_state)
 (None, u'Valeur manquante')
->>> conv.pipe(conv.str_to_int, conv.test_exists)(None, state = french_state)
+>>> conv.pipe(conv.input_to_int, conv.not_none)(None, state = french_state)
 (None, u'Valeur manquante')
->>> conv.pipe(conv.str_to_int, conv.test_exists)(u'Hello world!')
+>>> conv.pipe(conv.input_to_int, conv.not_none)(u'Hello world!')
 (u'Hello world!', u'Value must be an integer')
->>> conv.pipe(conv.str_to_int, conv.test_exists)(u'Hello world!', state = french_state)
+>>> conv.pipe(conv.input_to_int, conv.not_none)(u'Hello world!', state = french_state)
 (u'Hello world!', u'La valeur doit \xeatre un entier')
 
 
@@ -82,19 +85,20 @@ When using *Biryani* in web applications, for example, you will often need to di
 ...         languages = tuple(self.languages)
 ...         translation = self._translations_cache.get(languages)
 ...         if translation is None:
-...             self._translations_cache[languages] = translation = gettext.translation(
-...                 'biryani', fallback = gettext.NullTranslations(), languages = languages)
+...             self._translations_cache[languages] = translation = gettext.translation('biryani',
+...                 os.path.join(pkg_resources.get_distribution('biryani').location, 'biryani', 'i18n'),
+...                 fallback = True, languages = languages)
 ...         return translation.ugettext
 
 >>> user_state = UserState()
->>> conv.test_exists(None, state = user_state)
+>>> conv.not_none(None, state = user_state)
 (None, u'Missing value')
 
 >>> french_user_state = UserState()
 >>> french_user_state.languages = ['fr_FR', 'fr']
->>> conv.test_exists(None, state = french_user_state)
+>>> conv.not_none(None, state = french_user_state)
 (None, u'Valeur manquante')
->>> conv.pipe(conv.str_to_int, conv.test_exists)(u'Hello world!', state = french_user_state)
+>>> conv.pipe(conv.input_to_int, conv.not_none)(u'Hello world!', state = french_user_state)
 (u'Hello world!', u'La valeur doit \xeatre un entier')
 
 
@@ -108,6 +112,9 @@ One way to do this is to chain the translations using the fallback mechanism.
 For example, if the application using *Biryani* is named **myapp** and stores its localized messages in ``myapp/i18n`` you could chain its translations with those of *Biryani* using some code like::
 
     languages = ['fr']
-    byriani_translation = gettext.translation('biryani', fallback = gettext.NullTranslations(), languages = languages)
-    translation = gettext.translation('myapp', 'myapp/i18n', fallback = byriani_translation, languages = languages)
+    biryani_translation = gettext.translation('biryani',
+        os.path.join(pkg_resources.get_distribution('biryani').location, 'biryani', 'i18n'), fallback = True,
+        languages = languages)
+    translation = gettext.translation('myapp', 'myapp/i18n', fallback = True, languages = languages)
+    translation.add_fallback(biryani_translation)
 

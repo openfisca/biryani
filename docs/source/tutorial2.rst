@@ -2,35 +2,35 @@
 Tutorial 2
 **********
 
->>> from biryani import allconv as conv
+>>> from biryani import baseconv as conv
 >>> input_value = u'42'
->>> output_value, error = conv.str_to_float(input_value)
+>>> output_value, error = conv.input_to_float(input_value)
 >>> output_value, error
 (42.0, None)
->>> conv.str_to_float('forty two')
+>>> conv.input_to_float('forty two')
 ('forty two', u'Value must be a float')
 
 Converters usually don't test their input value:
 
->>> conv.str_to_float(42)
+>>> conv.input_to_float(42)
 Traceback (most recent call last):
-AttributeError: 'int' object has no attribute 'strip'
+AttributeError:
 
 So, to ensure that input value is an unicode string, we need to chain several converters:
 
 >>> conv.pipe(
 ...     conv.test_isinstance(unicode),
-...     conv.str_to_float,
+...     conv.input_to_float,
 ...     )(u'42')
 (42.0, None)
 >>> conv.pipe(
 ...     conv.test_isinstance(unicode),
-...     conv.str_to_float,
+...     conv.input_to_float,
 ...     )(42)
 (42, u"Value is not an instance of <type 'unicode'>")
 >>> conv.pipe(
 ...     conv.test_isinstance(unicode),
-...     conv.str_to_float,
+...     conv.input_to_float,
 ...     )('42')
 ('42', u"Value is not an instance of <type 'unicode'>")
 
@@ -38,22 +38,22 @@ Use :func:`conv.check <biryani.baseconv.check>` to extract value from conversion
 
 >>> conv.check(conv.pipe(
 ...     conv.test_isinstance(unicode),
-...     conv.str_to_float,
+...     conv.input_to_float,
 ...     ))(u'42')
 42.0
 >>> conv.check(conv.pipe(
 ...     conv.test_isinstance(unicode),
-...     conv.str_to_float,
+...     conv.input_to_float,
 ...     ))(42)
 Traceback (most recent call last):
-ValueError: Value is not an instance of <type 'unicode'>
+ValueError:
 
 Add a custom function to convert string to unicode when needed, and store resulting converter into a variable:
 
 >>> any_string_to_float = conv.pipe(
 ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else value),
 ...     conv.test_isinstance(unicode),
-...     conv.str_to_float,
+...     conv.input_to_float,
 ...     )
 ...
 >>> any_string_to_float('42')
@@ -69,7 +69,7 @@ Add a custom function to convert string to unicode when needed, and store result
     >>> anything_to_float = conv.pipe(
     ...     conv.decode_str(),
     ...     conv.test_isinstance(unicode),
-    ...     conv.str_to_float,
+    ...     conv.input_to_float,
     ...     )
     ...
     >>> any_string_to_float('42')
@@ -82,7 +82,7 @@ We can harden the custom function to convert anything to unicode:
 >>> anything_to_float = conv.pipe(
 ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
 ...     conv.test_isinstance(unicode),
-...     conv.str_to_float,
+...     conv.input_to_float,
 ...     )
 ...
 >>> anything_to_float(42)
@@ -94,7 +94,7 @@ Add :func:`conv.cleanup_line <biryani.baseconv.cleanup_line>` to strip spaces fr
 ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
 ...     conv.test_isinstance(unicode),
 ...     conv.cleanup_line,
-...     conv.str_to_float,
+...     conv.input_to_float,
 ...     )
 ...
 >>> anything_to_float('  42   ')
@@ -102,14 +102,14 @@ Add :func:`conv.cleanup_line <biryani.baseconv.cleanup_line>` to strip spaces fr
 >>> anything_to_float(u'     ')
 (None, None)
 
-Add :func:`conv.test_exists <biryani.baseconv.test_exists>` to generate an error when value is missing (ie is ``None``):
+Add :func:`conv.not_none <biryani.baseconv.not_none>` to generate an error when value is ``None``:
 
 >>> anything_to_float = conv.pipe(
 ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
 ...     conv.test_isinstance(unicode),
 ...     conv.cleanup_line,
-...     conv.str_to_float,
-...     conv.test_exists,
+...     conv.input_to_float,
+...     conv.not_none,
 ...     )
 ...
 >>> anything_to_float(u'     ')
@@ -121,9 +121,9 @@ Use a custom :func:`test <biryani.baseconv.test>` to ensure that float is a vali
 ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
 ...     conv.test_isinstance(unicode),
 ...     conv.cleanup_line,
-...     conv.str_to_float,
+...     conv.input_to_float,
 ...     conv.test(lambda value: -180 <= value <= 180),
-...     conv.test_exists,
+...     conv.not_none,
 ...     )
 ...
 >>> anything_to_latitude('50')
@@ -131,7 +131,7 @@ Use a custom :func:`test <biryani.baseconv.test>` to ensure that float is a vali
 >>> anything_to_latitude('')
 (None, u'Missing value')
 >>> anything_to_latitude(' -123.4 ')
-(-123.40000000000001, None)
+(-123.4, None)
 >>> anything_to_latitude(u'500')
 (500.0, u'Test failed')
 
@@ -141,9 +141,9 @@ Add an explicit error message when latitude is not between -180 and 180 degrees:
 ...     conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
 ...     conv.test_isinstance(unicode),
 ...     conv.cleanup_line,
-...     conv.str_to_float,
+...     conv.input_to_float,
 ...     conv.test(lambda value: -180 <= value <= 180, error = U'Latitude must be between -180 and 180'),
-...     conv.test_exists,
+...     conv.not_none,
 ...     )
 ...
 >>> anything_to_latitude(u'500')
@@ -156,10 +156,10 @@ Generalize the converter to a function that accepts any bound:
 ...         conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
 ...         conv.test_isinstance(unicode),
 ...         conv.cleanup_line,
-...         conv.str_to_float,
+...         conv.input_to_float,
 ...         conv.test(lambda value: min_bound <= value <= max_bound,
 ...             error = 'Value must be between {0} and {1}'.format(min_bound, max_bound)),
-...         conv.test_exists,
+...         conv.not_none,
 ...         )
 ...
 >>> anything_to_bounded_float(-180, 180)(90)
@@ -174,9 +174,9 @@ Generalize the converter to a function that accepts any bound:
     ...         conv.function(lambda value: value.decode('utf-8') if isinstance(value, str) else unicode(value)),
     ...         conv.test_isinstance(unicode),
     ...         conv.cleanup_line,
-    ...         conv.str_to_float,
+    ...         conv.input_to_float,
     ...         conv.test_between(min_bound, max_bound),
-    ...         conv.test_exists,
+    ...         conv.not_none,
     ...         )
     ...
     >>> anything_to_bounded_float(-180, 180)(90)
@@ -195,7 +195,7 @@ Use the generalized function to convert a dictionary containing both a latitude 
 >>> dict_to_lat_long(dict(latitude = '-12.34', longitude = u"45,6"))
 ({'latitude': -12.34, 'longitude': u'45,6'}, {'longitude': u'Value must be a float'})
 >>> dict_to_lat_long(dict(latitude = None, longitude = ''))
-(None, {'latitude': u'Missing value', 'longitude': u'Missing value'})
+({'latitude': None, 'longitude': None}, {'latitude': u'Missing value', 'longitude': u'Missing value'})
 >>> dict_to_lat_long(None)
 (None, None)
 
@@ -207,7 +207,7 @@ Converters working on complex structures can be chained too:
 ...         latitude = anything_to_bounded_float(-180, 180),
 ...         longitude = anything_to_bounded_float(-360, 360),
 ...         )),
-...     conv.test_exists,
+...     conv.not_none,
 ...     )
 ...
 >>> dict_to_lat_long(dict(latitude = '-12.34', longitude = u"45"))

@@ -2,9 +2,9 @@
 
 
 # Biryani -- A conversion and validation toolbox
-# By: Emmanuel Raviart <eraviart@easter-eggs.com>
+# By: Emmanuel Raviart <emmanuel@raviart.com>
 #
-# Copyright (C) 2009, 2010, 2011 Easter-eggs
+# Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015 Emmanuel Raviart
 # http://packages.python.org/Biryani/
 #
 # This file is part of Biryani.
@@ -28,8 +28,7 @@ See http://webob.org/
 """
 
 
-from . import baseconv as conv
-from . import states
+from .baseconv import function
 
 
 __all__ = [
@@ -66,9 +65,9 @@ def multidict_get(key, default = None):
     ...     a = multidict_get('a'),
     ...     b = multidict_get('b'),
     ...     ))(req.GET)
-    ({'a': u'1'}, None)
+    ({'a': u'1', 'b': None}, None)
     """
-    return conv.function(lambda multidict: multidict.get(key, default = default))
+    return function(lambda multidict: multidict.get(key, default = default))
 
 
 def multidict_getall(key):
@@ -88,9 +87,9 @@ def multidict_getall(key):
     ...     b = multidict_getall('b'),
     ...     tags = multidict_getall('tag'),
     ...     ))(req.GET)
-    ({'tags': [u'hello', u'World!']}, None)
+    ({'b': None, 'tags': [u'hello', u'World!']}, None)
     """
-    return conv.function(lambda multidict: multidict.getall(key) or None)
+    return function(lambda multidict: multidict.getall(key) or None)
 
 
 def multidict_getone(key):
@@ -105,13 +104,12 @@ def multidict_getone(key):
     (u'1', None)
     >>> multidict_getone('b')(req.GET)
     Traceback (most recent call last):
-    KeyError: "Key not found: 'b'"
+    KeyError:
     >>> multidict_getone('')(req.GET)
     Traceback (most recent call last):
-    KeyError: "Key not found: 'z'"
+    KeyError:
     >>> multidict_getone('tag')(req.GET)
     Traceback (most recent call last):
-    KeyError: "Multiple values match 'tag': ['hello', 'World!']"
+    KeyError:
     """
-    return conv.function(lambda multidict: multidict.getone(key))
-
+    return function(lambda multidict: multidict.getone(key))

@@ -28,11 +28,11 @@ Every converter returns the converted value and an optional error:
 
 >>> from biryani import baseconv as conv
 
->>> conv.str_to_email(u'John@DOE.name')
+>>> conv.input_to_email(u'John@DOE.name')
 (u'john@doe.name', None)
->>> conv.str_to_email(u'john.doe.name')
+>>> conv.input_to_email(u'john.doe.name')
 (u'john.doe.name', u'An email must contain exactly one "@"')
->>> conv.str_to_email(u'   ')
+>>> conv.input_to_email(u'   ')
 (None, None)
 
 
@@ -41,11 +41,11 @@ Example 2: Required email validator
 
 Converters can be combined together to form more complex converters:
 
->>> str_to_required_email = conv.pipe(conv.str_to_email, conv.test_exists)
+>>> input_to_required_email = conv.pipe(conv.input_to_email, conv.not_none)
 
->>> str_to_required_email(u'John@DOE.name')
+>>> input_to_required_email(u'John@DOE.name')
 (u'john@doe.name', None)
->>> str_to_required_email(u'   ')
+>>> input_to_required_email(u'   ')
 (None, u'Missing value')
 
 
@@ -59,13 +59,13 @@ A sample validator for a web form containing the following fields:
 * Email
 
 >>> validate_form = conv.struct(dict(
-...     username = conv.pipe(conv.cleanup_line, conv.test_exists),
+...     username = conv.pipe(conv.cleanup_line, conv.not_none),
 ...     password = conv.pipe(
 ...         conv.test(lambda passwords: len(passwords) == 2 and passwords[0] == passwords[1],
 ...             error = u'Password mismatch'),
 ...         conv.function(lambda passwords: passwords[0]),
 ...         ),
-...     email = conv.str_to_email,
+...     email = conv.input_to_email,
 ...     ))
 
 >>> validate_form({
@@ -80,7 +80,7 @@ A sample validator for a web form containing the following fields:
 ...     'email': u'John@DOE.name',
 ...     })
 >>> result
-{'password': [u'secret', u'other secret'], 'email': u'john@doe.name'}
+{'username': None, 'password': [u'secret', u'other secret'], 'email': u'john@doe.name'}
 >>> errors
 {'username': u'Missing value', 'password': u'Password mismatch'}
 
@@ -111,8 +111,8 @@ Copyright and license
 
 *Biryani* is a free software.
 
-* Author: Emmanuel Raviart <eraviart@easter-eggs.com>
-* Copyright (C) 2009, 2010, 2011 `Easter-eggs <http://www.easter-eggs.com/>`_
+* Author: Emmanuel Raviart <emmanuel@raviart.com>
+* Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2015 Emmanuel Raviart
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -132,4 +132,3 @@ Get *Biryani*
 *Biryani* is available as an easy-installable package on the `Python Package Index <http://pypi.python.org/pypi/Biryani>`_.
 
 The code can be found in a Git repository, at http://gitorious.org/biryani.
-
