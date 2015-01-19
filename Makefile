@@ -15,16 +15,16 @@ compile-catalog:
 ctags:
 	ctags --recurse=yes --exclude=build --exclude=docs --exclude=dist .
 
-distfile: compile-catalog
+dist: compile-catalog
 	python setup.py sdist bdist_wheel
 
 flake8: clean-pyc
-	python setup.py flake8
+	flake8
 
 publish: compile-catalog
 	python setup.py sdist bdist_wheel upload -r pypi
 
-test-publish: compile-catalog
+publish-to-test: compile-catalog
 	python setup.py sdist bdist_wheel upload -r testpypi
 
 test: compile-catalog
