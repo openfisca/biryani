@@ -58,6 +58,12 @@ Remove implicit actions from converters
   is now ``None`` by default, instead of ``"http://"``.
 
 
+Biryani 0.10.3
+==============
+
+* Add ``test_issubclass`` converter.
+
+
 Biryani 0.10.1
 ==============
 

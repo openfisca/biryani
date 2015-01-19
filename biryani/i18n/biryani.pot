@@ -6,7 +6,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Biryani 0.10.3dev\n"
+"Project-Id-Version: Biryani 0.10.3\n"
 "Report-Msgid-Bugs-To: emmanuel@raviart.com\n"
 "POT-Creation-Date: 2015-01-19 11:40+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -397,4 +397,3 @@ msgstr ""
 #: biryani/nonstandard/deprecatedbaseconv.py:124
 msgid "Invalid value format"
 msgstr ""
-
