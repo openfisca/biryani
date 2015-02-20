@@ -32,6 +32,7 @@
 """
 
 
+import __future__
 import re
 
 from . import states, strings
@@ -66,6 +67,8 @@ __all__ = [
     'input_to_url_name',
     'input_to_url_path_and_query',
     'item_or_sequence',
+    'make_anything_to_float',
+    'make_anything_to_int',
     'make_item_to_singleton',
     'make_input_to_normal_form',
     'make_input_to_slug',
@@ -113,69 +116,11 @@ domain_re = re.compile(r'''
     [a-z]{2,}$                      # TLD
     ''', re.I | re.VERBOSE)
 N_ = lambda message: message
+numerical_expression_re = re.compile(r'''[ \t\n\r\d.+\-*/()]+$''')
 username_re = re.compile(r"[^ \t\n\r@<>()]+$", re.I)
 
 
 # Level-1 Converters
-
-
-def anything_to_float(value, state = None):
-    """Convert any python data to a float.
-
-    .. warning:: Like most converters, a ``None`` value is not converted.
-
-    >>> anything_to_float(42)
-    (42.0, None)
-    >>> anything_to_float('42')
-    (42.0, None)
-    >>> anything_to_float(u'42')
-    (42.0, None)
-    >>> anything_to_float(42.75)
-    (42.75, None)
-    >>> anything_to_float(None)
-    (None, None)
-    """
-    if value is None:
-        return value, None
-    if state is None:
-        state = states.default_state
-    try:
-        return float(value), None
-    except ValueError:
-        return value, state._(u'Value must be a float')
-
-
-def anything_to_int(value, state = None):
-    """Convert any python data to an integer.
-
-    .. warning:: Like most converters, a ``None`` value is not converted.
-
-    >>> anything_to_int(42)
-    (42, None)
-    >>> anything_to_int('42')
-    (42, None)
-    >>> anything_to_int(u'42')
-    (42, None)
-    >>> anything_to_int(42.75)
-    (42, None)
-    >>> anything_to_int(u'42.75')
-    (42, None)
-    >>> anything_to_int(u'42,75')
-    (u'42,75', u'Value must be an integer')
-    >>> anything_to_int(None)
-    (None, None)
-    """
-    if value is None:
-        return value, None
-    if state is None:
-        state = states.default_state
-    try:
-        return int(value), None
-    except ValueError:
-        try:
-            return int(float(value)), None
-        except ValueError:
-            return value, state._(u'Value must be an integer')
 
 
 def anything_to_str(value, state = None):
@@ -612,6 +557,107 @@ def item_or_sequence(converter, constructor = list, drop_none_items = False):
             ),
         converter,
         )
+
+
+def make_anything_to_float(accept_expression = False):
+    """Return a converter that converts any python data to a float.
+
+    .. warning:: Like most converters, a ``None`` value is not converted.
+
+    >>> make_anything_to_float()(42)
+    (42.0, None)
+    >>> make_anything_to_float()('42')
+    (42.0, None)
+    >>> make_anything_to_float()(u'42')
+    (42.0, None)
+    >>> make_anything_to_float()(42.75)
+    (42.75, None)
+    >>> make_anything_to_float()('(42 / 42 + 1) * 42 - 42')
+    ('(42 / 42 + 1) * 42 - 42', u'Value must be a float')
+    >>> make_anything_to_float(accept_expression = True)('(42 / 42 + 1) * 42 - 42')
+    (42.0, None)
+    >>> make_anything_to_float(accept_expression = True)(u'(42 / 42 + 1) * 42 - 42')
+    (42.0, None)
+    >>> make_anything_to_float(accept_expression = True)('pi / 2')
+    ('pi / 2', u'Value must be a valid floating point expression')
+    >>> make_anything_to_float(accept_expression = True)(u'1 / 3')
+    (0.3333333333333333, None)
+    >>> make_anything_to_float()(None)
+    (None, None)
+    """
+    def anything_to_float(value, state = None):
+        if value is None:
+            return value, None
+        if state is None:
+            state = states.default_state
+        if accept_expression and isinstance(value, basestring):
+            value = value.strip()
+            if numerical_expression_re.match(value) is None:
+                return value, state._(u"Value must be a valid floating point expression")
+            try:
+                value = eval(compile(value, '<string>', 'eval', __future__.division.compiler_flag))
+            except:
+                return value, state._(u"Value must be a valid floating point expression")
+        try:
+            return float(value), None
+        except ValueError:
+            return value, state._(u'Value must be a float')
+
+    return anything_to_float
+
+
+def make_anything_to_int(accept_expression = False):
+    """Return a converter that converts any python data to an integer.
+
+    .. warning:: Like most converters, a ``None`` value is not converted.
+
+    >>> make_anything_to_int()(42)
+    (42, None)
+    >>> make_anything_to_int()('42')
+    (42, None)
+    >>> make_anything_to_int()(u'42')
+    (42, None)
+    >>> make_anything_to_int()(42.75)
+    (42, None)
+    >>> make_anything_to_int()(u'42.75')
+    (42, None)
+    >>> make_anything_to_int()(u'42,75')
+    (u'42,75', u'Value must be an integer')
+    >>> make_anything_to_int()('(42 / 42 + 1) * 42 - 42')
+    ('(42 / 42 + 1) * 42 - 42', u'Value must be an integer')
+    >>> make_anything_to_int(accept_expression = True)('(42 / 42 + 1) * 42 - 42')
+    (42, None)
+    >>> make_anything_to_int(accept_expression = True)(u'(42 / 42 + 1) * 42 - 42')
+    (42, None)
+    >>> make_anything_to_int(accept_expression = True)('pi / 2')
+    ('pi / 2', u'Value must be a valid integer expression')
+    >>> make_anything_to_int(accept_expression = True)(u'1 / 3')
+    (0, None)
+    >>> make_anything_to_int()(None)
+    (None, None)
+    """
+    def anything_to_int(value, state = None):
+        if value is None:
+            return value, None
+        if state is None:
+            state = states.default_state
+        if accept_expression and isinstance(value, basestring):
+            value = value.strip()
+            if numerical_expression_re.match(value) is None:
+                return value, state._(u"Value must be a valid integer expression")
+            try:
+                value = eval(compile(value, '<string>', 'eval', __future__.division.compiler_flag))
+            except:
+                return value, state._(u"Value must be a valid integer expression")
+        try:
+            return int(value), None
+        except ValueError:
+            try:
+                return int(float(value)), None
+            except ValueError:
+                return value, state._(u'Value must be an integer')
+
+    return anything_to_int
 
 
 def make_str_to_url(add_prefix = None, error_if_fragment = False, error_if_path = False,
@@ -1372,9 +1418,9 @@ def str_to_email(value, state = None):
         username, domain = value.split('@', 1)
     except ValueError:
         return value, state._(u'An email must contain exactly one "@"')
-    if not username_re.match(username):
+    if username_re.match(username) is None:
         return value, state._(u'Invalid username')
-    if not domain_re.match(domain) and domain != 'localhost':
+    if domain_re.match(domain) is None and domain != 'localhost':
         return value, state._(u'Invalid domain name')
     return value, None
 
@@ -1438,8 +1484,8 @@ def struct(converters, constructor = None, default = None, drop_none_values = Fa
     ({'age': None, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', age = None, email = u'john@doe.name'))
     ({'age': None, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
-    >>> strict_converter(dict(name = u'John Doe', age = u'72', phone = u'   +33 9 12 34 56 78   '))
-    ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'email': None, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
+    >>> strict_converter(dict(name = u'John Doe', age = u'72', phone = u'   +33 9 12 34 56 78  '))
+    ({'phone': u'   +33 9 12 34 56 78  ', 'age': 72, 'email': None, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
     >>> non_strict_converter = struct(
     ...     dict(
     ...         name = pipe(cleanup_line, not_none),
@@ -1611,8 +1657,8 @@ def structured_mapping(converters, constructor = None, default = None, drop_none
     ({'age': None, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     >>> strict_converter(dict(name = u'John Doe', age = None, email = u'john@doe.name'))
     ({'age': None, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
-    >>> strict_converter(dict(name = u'John Doe', age = u'72', phone = u'   +33 9 12 34 56 78   '))
-    ({'phone': u'   +33 9 12 34 56 78   ', 'age': 72, 'email': None, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
+    >>> strict_converter(dict(name = u'John Doe', age = u'72', phone = u'   +33 9 12 34 56 78  '))
+    ({'phone': u'   +33 9 12 34 56 78  ', 'age': 72, 'email': None, 'name': u'John Doe'}, {'phone': u'Unexpected item'})
     >>> non_strict_converter = structured_mapping(
     ...     dict(
     ...         name = pipe(cleanup_line, not_none),
@@ -2278,9 +2324,9 @@ def translate(conversions):
     (u'no problem', None)
     """
     return function(
-        lambda value: value
+        lambda value: (value
             if conversions is None or value not in conversions
-            else conversions[value],
+            else conversions[value]),
         handle_none_value = True)
 
 
@@ -2369,6 +2415,44 @@ def uniform_sequence(converter, constructor = list, drop_none_items = False):
 
 # Level-2 Converters
 
+
+anything_to_float = make_anything_to_float()
+"""Convert any python data to a float.
+
+    .. warning:: Like most converters, a ``None`` value is not converted.
+
+    >>> anything_to_float(42)
+    (42.0, None)
+    >>> anything_to_float('42')
+    (42.0, None)
+    >>> anything_to_float(u'42')
+    (42.0, None)
+    >>> anything_to_float(42.75)
+    (42.75, None)
+    >>> anything_to_float(None)
+    (None, None)
+    """
+
+anything_to_int = make_anything_to_int()
+"""Convert any python data to an integer.
+
+    .. warning:: Like most converters, a ``None`` value is not converted.
+
+    >>> anything_to_int(42)
+    (42, None)
+    >>> anything_to_int('42')
+    (42, None)
+    >>> anything_to_int(u'42')
+    (42, None)
+    >>> anything_to_int(42.75)
+    (42, None)
+    >>> anything_to_int(u'42.75')
+    (42, None)
+    >>> anything_to_int(u'42,75')
+    (u'42,75', u'Value must be an integer')
+    >>> anything_to_int(None)
+    (None, None)
+    """
 
 cleanup_line = pipe(
     function(lambda value: value.strip()),
