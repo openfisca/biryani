@@ -3,16 +3,17 @@
 *******************
 
 
-Next release: Biryani 0.10.4dev
-===============================
+Next release
+============
 
-TODO
+* Add :func:`biryani.baseconv.make_anything_to_float` & :func:`biryani.baseconv.make_anything_to_int` converters with
+  flag ``accept_expression`` to accept numerical expressions.
 
 
 Biryani 0.10.3
 ==============
 
-* Add ``test_issubclass`` converter.
+* Add :func:`biryani.baseconv.test_issubclass` converter.
 
 
 Biryani 0.10.1
@@ -28,10 +29,10 @@ Biryani 0.9
 
 * Mapping conversions now preserve order when used with OrderedDict.
 
-* Add parameter ``handle_none_value`` to func:`biryani.baseconv.new_mapping`, func:`biryani.baseconv.new_sequence` &
-   func:`biryani.baseconv.new_struct`.
+* Add parameter ``handle_none_value`` to :func:`biryani.baseconv.new_mapping`, :func:`biryani.baseconv.new_sequence` &
+  :func:`biryani.baseconv.new_struct`.
 
-* Rename parameter ``set_none_value`` to ``handle_none_value`` in func:`biryani.baseconv.set_value`.
+* Rename parameter ``set_none_value`` to ``handle_none_value`` in :func:`biryani.baseconv.set_value`.
 
 
 Remove implicit actions from converters
