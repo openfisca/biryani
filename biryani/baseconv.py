@@ -33,6 +33,8 @@
 
 
 import __future__
+import inspect
+import logging
 import re
 
 from . import states, strings
@@ -49,6 +51,8 @@ __all__ = [
     'cleanup_line',
     'cleanup_text',
     'condition',
+    'debug_converters',
+    'debug_value',
     'decode_str',
     'default',
     'empty_to_none',
@@ -111,11 +115,16 @@ __all__ = [
     'uniform_sequence',
     ]
 
+
+def N_(message):
+    return message
+
+
 domain_re = re.compile(r'''
     (?:[a-z0-9][a-z0-9\-]{0,62}\.)+ # (sub)domain - alpha followed by 62max chars (63 total)
     [a-z]{2,}$                      # TLD
     ''', re.I | re.VERBOSE)
-N_ = lambda message: message
+baseconv_log = logging.getLogger(__name__)
 numerical_expression_re = re.compile(r'''[ \t\n\r\d.+\-*/()]+$''')
 username_re = re.compile(r"[^ \t\n\r@<>()]+$", re.I)
 
@@ -226,6 +235,25 @@ def condition(test_converter, ok_converter, error_converter = None):
         else:
             return error_converter(value, state = state)
     return condition_converter
+
+
+def debug_converters(converters, logger):
+    """Return the same converters with debug_value after each one.
+
+    >>> debug_converters(input_to_int)
+    [input_to_int, debug_value]
+    """
+    converters_with_debug = []
+    for converter in converters:
+        converters_with_debug.extend([converter, debug_value(logger)])
+    return converters_with_debug
+
+
+def debug_value(logger):
+    def debug_value_converter(value, state = None):
+        logger.debug(u'value: {}'.format(value))
+        return value, None
+    return debug_value_converter
 
 
 def decode_str(encoding = 'utf-8'):
@@ -1304,12 +1332,24 @@ def pipe(*converters):
     >>> pipe()(42)
     (42, None)
     """
+    caller_frame = inspect.stack()[1]
+    pipe_log = baseconv_log.getChild('pipe')
+
     def pipe_converter(*args, **kwargs):
         if not converters:
+            pipe_log.debug(
+                u'No converters in pipe, check function {function_name} in {file_name}:{line}'.format(
+                    file_name = caller_frame[1],
+                    function_name = caller_frame[3],
+                    line = caller_frame[2],
+                    )
+                )
             return noop(*args, **kwargs)
         state = kwargs.get('state', UnboundLocalError)
+        value = None
         for converter in converters:
             if converter is None:
+                pipe_log.debug(u'Found None in pipe, skipping')
                 continue
             value, error = converter(*args, **kwargs)
             if error is not None:
