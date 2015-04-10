@@ -37,7 +37,7 @@ import inspect
 import logging
 import re
 
-from . import states, strings
+from . import states, strings, trace
 
 
 __all__ = [
@@ -1332,10 +1332,10 @@ def pipe(*converters):
     >>> pipe()(42)
     (42, None)
     """
-    caller_frame = inspect.stack()[1]
     pipe_log = baseconv_log.getChild('pipe')
 
     def pipe_converter(*args, **kwargs):
+        debug.log_call(pipe_log)
         if not converters:
             pipe_log.debug(
                 u'No converters in pipe, check function {function_name} in {file_name}:{line}'.format(
@@ -1789,7 +1789,17 @@ def structured_mapping(converters, constructor = None, default = None, drop_none
         if converter is not None
         )
 
+    caller_frame = inspect.stack()[1]
+    structured_mapping_log = baseconv_log.getChild('structured_mapping')
+
     def structured_mapping_converter(values, state = None):
+        structured_mapping_log.debug(
+            u'Called by {function_name}@{file_name}:{line}'.format(
+                file_name = caller_frame[1],
+                function_name = caller_frame[3],
+                line = caller_frame[2],
+                )
+            )
         if values is None:
             return values, None
         if state is None:
@@ -1817,6 +1827,7 @@ def structured_mapping(converters, constructor = None, default = None, drop_none
         converted_values = constructor()
         for name, converter in values_converter.iteritems():
             if skip_missing_items and name not in values:
+                structured_mapping_log.debug(u'{name} not in {values}, skipping'.format(name = name, values = values))
                 continue
             value, error = converter(values.get(name), state = state)
             if value is not None or not drop_none_values or drop_none_values == 'missing' and name in values:
