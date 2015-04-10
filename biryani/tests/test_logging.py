@@ -54,5 +54,13 @@ def test_pipe_contains_none():
 
 def test_pipe_debug_iteration():
     test_log = log.getChild('test_pipe_debug_iteration')
-    conv = pipe(*debug_converters([input_to_int, function(lambda value: value * 10)], test_log))
+    conv = pipe(
+        *debug_converters(
+            [
+                input_to_int,
+                function(lambda value: value * 10),
+                ],
+            test_log
+            )
+        )
     conv('1')
