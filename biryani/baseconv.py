@@ -35,7 +35,7 @@
 import __future__
 import re
 
-from . import states, strings
+from biryani import states, strings
 
 
 __all__ = [
