@@ -122,7 +122,7 @@ def deep_decode(value, encoding = 'utf-8'):
     >>> print deep_decode(None)
     None
     """
-    return value if isinstance(value, unicode) else value.decode(encoding) if isinstance(value, str) \
+    return value if is_unicode(value) else value.decode(encoding) if isinstance(value, str) \
         else dict(
             (deep_decode(name, encoding = encoding), deep_decode(item, encoding = encoding))
             for name, item in value.iteritems()
@@ -152,7 +152,7 @@ def deep_encode(value, encoding = 'utf-8'):
     >>> print deep_encode(None)
     None
     """
-    return value if isinstance(value, str) else value.encode(encoding) if isinstance(value, unicode) \
+    return value if isinstance(value, str) else value.encode(encoding) if is_unicode(value) \
         else dict(
             (deep_encode(name, encoding = encoding), deep_encode(item, encoding = encoding))
             for name, item in value.iteritems()
@@ -204,9 +204,9 @@ def normalize(s, encoding = 'utf-8', separator = u' ', transform = lower):
     """
     if s is None:
         return None
-    if isinstance(s, str):
+    if not is_unicode(s):
         s = s.decode(encoding)
-    assert isinstance(s, unicode), str((s,))
+    assert is_unicode(s), str((s,))
     normalized = u''.join(c for c in unicodedata.normalize('NFKD', s) if unicodedata.combining(c) == 0)
     normalized = separator.join(normalized.strip().split())
     if transform is not None:
@@ -230,9 +230,9 @@ def slugify(s, encoding = 'utf-8', separator = u'-', transform = lower):
     """
     if s is None:
         return None
-    if isinstance(s, str):
+    if not is_unicode(s):
         s = s.decode(encoding)
-    assert isinstance(s, unicode), str((s,))
+    assert is_unicode(s), str((s,))
     simplified = u''.join([slugify_char(unicode_char) for unicode_char in s])
     while u'  ' in simplified:
         simplified = simplified.replace(u'  ', u' ')
@@ -288,3 +288,25 @@ def upper(s):
     if s is None:
         return None
     return s.upper()
+
+def is_basestring(text):
+    """Check that an element is a str in python 3 or a basestring in python 2.
+        >>> is_basestring('Hello world!')
+        True
+        >>> is_basestring(u'Hello world!')
+        True
+        >>> is_basestring(42)
+        False
+        """
+    return isinstance(text, "".__class__) or isinstance(text, u"".__class__)
+
+def is_unicode(text):
+    """Check that an element is a str in python 3 or a basestring in python 2.
+        >>> is_basestring('Hello world!')
+        True
+        >>> is_basestring(u'Hello world!')
+        True
+        >>> is_basestring(42)
+        False
+        """
+    return isinstance(text, u"".__class__)
