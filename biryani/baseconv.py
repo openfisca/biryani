@@ -313,7 +313,7 @@ def fail(error = N_(u'An error occured')):
     def fail_converter(value, state = None):
         if state is None:
             state = states.default_state
-        return value, state._(error) if isinstance(error, basestring) else error
+        return value, state._(error) if strings.is_basestring(error) else error
     return fail_converter
 
 
@@ -426,7 +426,7 @@ def get(key, default = UnboundLocalError, error = None):
             if converted_value is UnboundLocalError:
                 return None, state._(u'Unknown key: {0}').format(key) \
                     if error is None \
-                    else state._(error) if isinstance(error, basestring) else error
+                    else state._(error) if strings.is_basestring(error) else error
             return converted_value, None
         assert isinstance(value, collections.Sequence), \
             'Value must be a mapping or a sequence. Got {0} instead.'.format(type(value))
@@ -435,7 +435,7 @@ def get(key, default = UnboundLocalError, error = None):
         if default is UnboundLocalError:
             return None, state._(u'Index out of range: {0}').format(key) \
                 if error is None \
-                else state._(error) if isinstance(error, basestring) else error
+                else state._(error) if strings.is_basestring(error) else error
         return default, None
     return get_converter
 
@@ -590,7 +590,7 @@ def make_anything_to_float(accept_expression = False):
             return value, None
         if state is None:
             state = states.default_state
-        if accept_expression and isinstance(value, basestring):
+        if accept_expression and strings.is_basestring(value):
             value = value.strip()
             if numerical_expression_re.match(value) is None:
                 return value, state._(u"Value must be a valid floating point expression")
@@ -641,7 +641,7 @@ def make_anything_to_int(accept_expression = False):
             return value, None
         if state is None:
             state = states.default_state
-        if accept_expression and isinstance(value, basestring):
+        if accept_expression and strings.is_basestring(value):
             value = value.strip()
             if numerical_expression_re.match(value) is None:
                 return value, state._(u"Value must be a valid integer expression")
@@ -2037,7 +2037,7 @@ def test(function, error = N_(u'Test failed'), handle_none_value = False, handle
         ok = function(value, state = state) if handle_state else function(value)
         if ok:
             return value, None
-        return value, state._(error) if isinstance(error, basestring) else error
+        return value, state._(error) if strings.is_basestring(error) else error
     return test_converter
 
 
@@ -2253,7 +2253,7 @@ def test_none(error = N_(u'Unexpected value')):
             return value, None
         if state is None:
             state = states.default_state
-        return value, state._(error) if isinstance(error, basestring) else error
+        return value, state._(error) if strings.is_basestring(error) else error
     return none
 
 
