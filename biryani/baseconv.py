@@ -1741,13 +1741,14 @@ def structured_mapping(converters, constructor = None, default = None, drop_none
     ...     )(collections.OrderedDict(name = u'John Doe', age = u'72', email = u'john@doe.name'))
     ({'age': 72, 'email': u'john@doe.name', 'name': u'John Doe'}, None)
     """
+
     if constructor is None:
         constructor = type(converters)
     converters = constructor(
         (name, converter)
-        for name, converter in (converters or {}).iteritems()
+        for name, converter in (converters or {}).items()
         if converter is not None
-        )
+    )
 
     def structured_mapping_converter(values, state = None):
         if values is None:
@@ -1775,7 +1776,7 @@ def structured_mapping(converters, constructor = None, default = None, drop_none
                     values_converter[name] = default if default is not None else fail(error = N_(u'Unexpected item'))
         errors = constructor()
         converted_values = constructor()
-        for name, converter in values_converter.iteritems():
+        for name, converter in values_converter.items():
             if skip_missing_items and name not in values:
                 continue
             value, error = converter(values.get(name), state = state)
