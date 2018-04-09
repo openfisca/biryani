@@ -111,15 +111,15 @@ ASCII_TRANSLATIONS = {
 def deep_decode(value, encoding = 'utf-8'):
     """Convert recursively bytes strings embedded in Python data to unicode strings.
 
-    >>> deep_decode('Hello world!')
-    u'Hello world!'
-    >>> deep_decode(dict(a = 'b', c = ['d', 'e']))
-    {u'a': u'b', u'c': [u'd', u'e']}
-    >>> deep_decode(u'Hello world!')
-    u'Hello world!'
+    >>> print(deep_decode('Hello world!'))
+    Hello world!
+    >>> is_unicode(deep_decode('Hello world!'))
+    True
+    >>> is_unicode(deep_decode(u'Hello world!'))
+    True
     >>> deep_decode(42)
     42
-    >>> print deep_decode(None)
+    >>> print(deep_decode(None))
     None
     """
     return value if is_unicode(value) else value.decode(encoding) if isinstance(value, str) \
@@ -143,13 +143,13 @@ def deep_encode(value, encoding = 'utf-8'):
 
     >>> deep_encode(u'Hello world!')
     'Hello world!'
-    >>> deep_encode({u'a': u'b', u'c': [u'd', u'e']})
-    {'a': 'b', 'c': ['d', 'e']}
+    >>> is_unicode(deep_decode(dict(a = 'b', c = ['d', 'e']))['a'])
+    True
     >>> deep_encode('Hello world!')
     'Hello world!'
     >>> deep_encode(42)
     42
-    >>> print deep_encode(None)
+    >>> print(deep_encode(None))
     None
     """
     return value if isinstance(value, str) else value.encode(encoding) if is_unicode(value) \
@@ -176,9 +176,11 @@ def lower(s):
 
     >>> lower('Hello world!')
     'hello world!'
-    >>> lower(u'Hello world!')
-    u'hello world!'
-    >>> print lower(None)
+    >>> lower('Hello world!').__class__.__name__
+    'str'
+    >>> is_unicode(lower(u'Hello world!'))
+    True
+    >>> print(lower(None))
     None
     """
     if s is None:
@@ -189,17 +191,15 @@ def lower(s):
 def normalize(s, encoding = 'utf-8', separator = u' ', transform = lower):
     """Convert a string to its normal form using compatibility decomposition and removing combining characters.
 
-    >>> normalize(u'Hello world!')
-    u'hello world!'
-    >>> normalize(u'   Hello   world!   ')
-    u'hello world!'
-    >>> normalize('œil, forêt, ça, où...')
-    u'\u0153il, foret, ca, ou...'
-    >>> normalize('Hello world!')
-    u'hello world!'
-    >>> normalize(u'   ')
-    u''
-    >>> print normalize(None)
+    >>> print(normalize('Hello world!'))
+    hello world!
+    >>> print(normalize('   Hello   world!   '))
+    hello world!
+    >>> print(normalize('forêt, ça, où...'))
+    foret, ca, ou...
+    >>> is_unicode(normalize('Hello world!'))
+    True
+    >>> print(normalize(None))
     None
     """
     if s is None:
@@ -217,15 +217,17 @@ def normalize(s, encoding = 'utf-8', separator = u' ', transform = lower):
 def slugify(s, encoding = 'utf-8', separator = u'-', transform = lower):
     """Simplify a string, converting it to a lowercase ASCII subset.
 
-    >>> slugify(u'Hello world!')
-    u'hello-world'
-    >>> slugify(u'   Hello   world!   ')
-    u'hello-world'
-    >>> slugify('œil, forêt, ça, où...')
-    u'oeil-foret-ca-ou'
-    >>> slugify('Hello world!')
-    u'hello-world'
-    >>> print slugify(None)
+    >>> print(slugify('Hello world!'))
+    hello-world
+    >>> print(slugify('   Hello   world!   '))
+    hello-world
+    >>> print(slugify('œil, forêt, ça, où...'))
+    oeil-foret-ca-ou
+    >>> is_unicode(slugify('œil, forêt, ça, où...'))
+    True
+    >>> is_unicode(slugify(str('Hello world!')))
+    True
+    >>> print(slugify(None))
     None
     """
     if s is None:
@@ -278,11 +280,13 @@ def upper(s):
     .. note:: This method is equivalent to the ``upper()`` method of strings, but can be used when a function is
        expected, for example by the :func:`normalize` & :func:`slugify` functions.
 
-    >>> upper('Hello world!')
-    'HELLO WORLD!'
-    >>> upper(u'Hello world!')
-    u'HELLO WORLD!'
-    >>> print upper(None)
+    >>> print(upper('Hello world!'))
+    HELLO WORLD!
+    >>> upper('Hello world!').__class__.__name__
+    'str'
+    >>> is_unicode(upper(u'Hello world!'))
+    True
+    >>> print(upper(None))
     None
     """
     if s is None:
@@ -310,3 +314,8 @@ def is_unicode(text):
         False
         """
     return isinstance(text, u"".__class__)
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
