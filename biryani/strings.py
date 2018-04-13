@@ -122,7 +122,7 @@ def deep_decode(value, encoding = 'utf-8'):
     >>> print(deep_decode(None))
     None
     """
-    return value if is_unicode(value) else value.decode(encoding) if isinstance(value, str) \
+    return value if is_unicode(value) else value.decode(encoding) if isinstance(value, "".__class__) \
         else dict(
             (deep_decode(name, encoding = encoding), deep_decode(item, encoding = encoding))
             for name, item in value.items()
@@ -152,7 +152,7 @@ def deep_encode(value, encoding = 'utf-8'):
     >>> print(deep_encode(None))
     None
     """
-    return value if isinstance(value, str) else value.encode(encoding) if is_unicode(value) \
+    return value if isinstance(value, "".__class__) else value.encode(encoding) if is_unicode(value) \
         else dict(
             (deep_encode(name, encoding = encoding), deep_encode(item, encoding = encoding))
             for name, item in value.items()
@@ -302,7 +302,7 @@ def is_basestring(text):
         >>> is_basestring(42)
         False
         """
-    return isinstance(text, "".__class__) or isinstance(text, u"".__class__)
+    return isinstance(text, ("".__class__, u"".__class__))
 
 def is_unicode(text):
     """Check that an element is a str in python 3 or a basestring in python 2.
