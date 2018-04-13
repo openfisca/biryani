@@ -125,7 +125,7 @@ def deep_decode(value, encoding = 'utf-8'):
     return value if is_unicode(value) else value.decode(encoding) if isinstance(value, str) \
         else dict(
             (deep_decode(name, encoding = encoding), deep_decode(item, encoding = encoding))
-            for name, item in value.iteritems()
+            for name, item in value.items()
             ) if isinstance(value, dict) \
         else [
             deep_decode(item, encoding = encoding)
@@ -155,7 +155,7 @@ def deep_encode(value, encoding = 'utf-8'):
     return value if isinstance(value, str) else value.encode(encoding) if is_unicode(value) \
         else dict(
             (deep_encode(name, encoding = encoding), deep_encode(item, encoding = encoding))
-            for name, item in value.iteritems()
+            for name, item in value.items()
             ) if isinstance(value, dict) \
         else [
             deep_encode(item, encoding = encoding)
