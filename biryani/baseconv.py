@@ -1044,7 +1044,7 @@ def new_mapping(converters, constructor = None, drop_none_values = False, handle
         constructor = type(converters)
     converters = dict(
         (name, converter)
-        for name, converter in (converters or {}).iteritems()
+        for name, converter in (converters or {}).items()
         if converter is not None
         )
 
@@ -1055,7 +1055,7 @@ def new_mapping(converters, constructor = None, drop_none_values = False, handle
             state = states.default_state
         errors = {}
         converted_values = constructor()
-        for name, converter in converters.iteritems():
+        for name, converter in converters.items():
             converted_value, error = converter(value, state = state)
             if converted_value is not None or not drop_none_values:
                 converted_values[name] = converted_value
@@ -1764,7 +1764,7 @@ def structured_mapping(converters, constructor = None, default = None, drop_none
                     values_converter[name] = default \
                         if default is not None \
                         else fail(error = N_(u'Unexpected item'))
-            for name, value_converter in converters.iteritems():
+            for name, value_converter in converters.items():
                 if name not in values_converter:
                     values_converter[name] = value_converter
         elif default == 'drop':
@@ -1936,7 +1936,7 @@ def submapping(keys, converter, remaining_converter = None, constructor = None):
         mapping_constructor = type(value) if constructor is None else constructor
         submapping = mapping_constructor()
         remaining = mapping_constructor()
-        for item_key, item_value in value.iteritems():
+        for item_key, item_value in value.items():
             if item_key in keys:
                 submapping[item_key] = item_value
             else:
@@ -2359,7 +2359,7 @@ def uniform_mapping(key_converter, value_converter, constructor = None, drop_non
         custom_constructor = type(values) if constructor is None else constructor
         errors = {}
         converted_values = custom_constructor()
-        for key, value in values.iteritems():
+        for key, value in values.items():
             key, error = key_converter(key, state = state)
             if error is not None:
                 errors[key] = error
