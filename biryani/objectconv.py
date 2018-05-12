@@ -67,7 +67,7 @@ def make_dict_to_object(cls):
 
 object_to_clean_dict = function(lambda instance: dict(
     (name, value)
-    for name, value in instance.__dict__.iteritems()
+    for name, value in instance.__dict__.items()
     if getattr(instance.__class__, name, UnboundLocalError) is not value
     ))
 """Convert an object's instance to a dictionary, by extracting the attributes whose value differs from the ones defined
