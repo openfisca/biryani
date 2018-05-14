@@ -69,7 +69,7 @@ def convert_bson_to_json(value):
                 item_key.replace('%2e', '.').replace('%25', '%'),
                 convert_bson_to_json(item_value),
                 )
-            for item_key, item_value in value.iteritems()
+            for item_key, item_value in value.items()
             )
     if isinstance(value, list):
         return [
@@ -93,7 +93,7 @@ def convert_json_to_bson(value):
                 item_key.replace('%', '%25').replace('.', '%2e'),
                 convert_json_to_bson(item_value),
                 )
-            for item_key, item_value in value.iteritems()
+            for item_key, item_value in value.items()
             )
     if isinstance(value, list):
         return [
