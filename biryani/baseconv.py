@@ -578,6 +578,8 @@ def make_anything_to_float(accept_expression = False):
     (42.0, None)
     >>> make_anything_to_float(accept_expression = True)(u'(42 / 42 + 1) * 42 - 42')
     (42.0, None)
+    >>> make_anything_to_float(accept_expression = True)(u'(42 / 42 + 1)\n* 42 - 42')
+    (42.0, None)
     >>> make_anything_to_float(accept_expression = True)('pi / 2')
     ('pi / 2', u'Value must be a valid floating point expression')
     >>> make_anything_to_float(accept_expression = True)(u'1 / 3')
@@ -591,7 +593,7 @@ def make_anything_to_float(accept_expression = False):
         if state is None:
             state = states.default_state
         if accept_expression and strings.is_basestring(value):
-            value = value.strip()
+            value = ' '.join(value.splitlines()).strip()
             if numerical_expression_re.match(value) is None:
                 return value, state._(u"Value must be a valid floating point expression")
             try:
@@ -629,6 +631,8 @@ def make_anything_to_int(accept_expression = False):
     (42, None)
     >>> make_anything_to_int(accept_expression = True)(u'(42 / 42 + 1) * 42 - 42')
     (42, None)
+    >>> make_anything_to_int(accept_expression = True)(u'(42 / 42 + 1)\n* 42 - 42')
+    (42, None)
     >>> make_anything_to_int(accept_expression = True)('pi / 2')
     ('pi / 2', u'Value must be a valid integer expression')
     >>> make_anything_to_int(accept_expression = True)(u'1 / 3')
@@ -642,7 +646,7 @@ def make_anything_to_int(accept_expression = False):
         if state is None:
             state = states.default_state
         if accept_expression and strings.is_basestring(value):
-            value = value.strip()
+            value = ' '.join(value.splitlines()).strip()
             if numerical_expression_re.match(value) is None:
                 return value, state._(u"Value must be a valid integer expression")
             try:
