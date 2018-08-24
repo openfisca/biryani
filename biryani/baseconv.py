@@ -430,7 +430,7 @@ def get(key, default = UnboundLocalError, error = None):
             return converted_value, None
         assert isinstance(value, collections.Sequence), \
             'Value must be a mapping or a sequence. Got {0} instead.'.format(type(value))
-        if 0 <= key < len(value):
+        if -len(value) <= key < len(value):
             return value[key], None
         if default is UnboundLocalError:
             return None, state._(u'Index out of range: {0}').format(key) \
