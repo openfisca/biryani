@@ -30,46 +30,60 @@ etc)"""
 from setuptools import setup, find_packages
 
 
-classifiers = """\
-Development Status :: 4 - Beta
-Intended Audience :: Developers
-License :: OSI Approved :: Apache Software License
-Operating System :: OS Independent
-Programming Language :: Python
-Topic :: Software Development :: Libraries :: Python Modules
-Topic :: Text Processing
-"""
-
 doc_lines = __doc__.split('\n')
 
 
 setup(
-    name='Biryani',
-    version='0.10.9',
+    name = 'Biryani',
+    version = '0.10.9',
+    author = 'Emmanuel Raviart',
+    author_email = 'emmanuel@raviart.com',
+    classifiers = [
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: Apache Software License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: Text Processing',
+        ],
+    description = doc_lines[0],
+    keywords = 'conversion form python validation web',
+    license = 'http://www.apache.org/licenses/LICENSE-2.0',
+    long_description = '\n'.join(doc_lines[2:]),
+    url = 'http://biryani.readthedocs.org/',
 
-    author='Emmanuel Raviart',
-    author_email='emmanuel@raviart.com',
-    classifiers=[classifier for classifier in classifiers.split('\n')
-                 if classifier],
-    description=doc_lines[0],
-    keywords='conversion form python validation web',
-    license='http://www.apache.org/licenses/LICENSE-2.0',
-    long_description='\n'.join(doc_lines[2:]),
-    url='http://biryani.readthedocs.org/',
-
-    extras_require=dict(
-        bsonconv=['pymongo'],
-        datetimeconv=['isodate >= 0.4', 'pytz'],
-        dev=['flake8', 'sphinx', 'Sphinx-PyPI-upload'],
-        jwtconv=['pycrypto'],
-        netconv=['pydns'],
-        webobconv=['webob'],
-        ),
-    include_package_data=True,
-    install_requires=['Babel >= 0.9.4'],
-    message_extractors={
+    extras_require = {
+        'bsonconv': [
+            'pymongo',
+            ],
+        'datetimeconv': [
+            'isodate >= 0.4',
+            'pytz',
+            ],
+        'jwtconv': [
+            'pycrypto',
+            ],
+        'netconv': [
+            "pydns ; python_version<'3'",
+            "py3dns ; python_version>='3'",
+            ],
+        'webobconv': [
+            'webob',
+            ],
+        'dev': [
+            'flake8',
+            'pytest',
+            'pytest-sugar',
+            'sphinx',
+            'Sphinx-PyPI-upload',
+            ],
+        },
+    include_package_data = True,
+    install_requires = ['Babel >= 0.9.4'],
+    message_extractors = {
         'biryani': [('**.py', 'python', None)],
         },
-    packages=find_packages(),
-    zip_safe=False,
+    packages = find_packages(),
+    zip_safe = False,
     )

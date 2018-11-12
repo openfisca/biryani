@@ -1,0 +1,24 @@
+version: 2
+
+jobs:
+  build_py27:
+    docker:
+      - image: themattrix/tox
+    steps:
+      - checkout
+      - run: tox -e py27
+
+  build_py37:
+    docker:
+      - image: themattrix/tox
+    steps:
+      - checkout
+      - run: tox -e py37
+
+workflows:
+  version: 2
+
+  biryani:
+    jobs:
+      - build_py27
+      - build_py37
